@@ -569,6 +569,9 @@ public class TaggingSession implements Closeable {
         public Analyzer getAnalyzer(){
             return corpusInfo.analyzer;
         }
+        public Analyzer getTaggingAnalyzer(){
+            return corpusInfo.taggingAnalyzer;
+        }
         
         public TaggerFstCorpus getFst(){
             return fst;

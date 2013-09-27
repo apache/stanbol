@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.solr.schema.FieldType;
 import org.opensextant.solrtexttagger.TaggerFstCorpus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +77,8 @@ public class CorpusInfo {
      */
     public final Analyzer analyzer;
     
+    public final Analyzer taggingAnalyzer;
+    
     protected Reference<TaggerFstCorpus> taggerCorpusRef;
     
     protected long enqueued = -1;
@@ -100,13 +103,14 @@ public class CorpusInfo {
      * @param fst
      * @param allowCreation
      */
-    protected CorpusInfo(String language, String indexField, String storeField, Analyzer analyzer, File fst, boolean allowCreation){
+    protected CorpusInfo(String language, String indexField, String storeField, FieldType fieldType, File fst, boolean allowCreation){
         this.language = language;
         this.indexedField = indexField;
         this.storedField = storeField;
         this.fst = fst;
         this.allowCreation = allowCreation;
-        this.analyzer = analyzer;
+        this.analyzer = fieldType.getAnalyzer();
+        this.taggingAnalyzer = fieldType.getQueryAnalyzer();
         this.fstDate = fst.isFile() ? new Date(fst.lastModified()) : null;
     }
     /**

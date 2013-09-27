@@ -381,12 +381,13 @@ public class IndexConfiguration {
         Map<String,String> defaultParams = fstConfig.getDefaultParameters();
         String fstName = defaultParams.get(IndexConfiguration.PARAM_FST);
         String indexField = defaultParams.get(IndexConfiguration.PARAM_FIELD);
+        String storeField = defaultParams.get(IndexConfiguration.PARAM_STORE_FIELD);
+        if(storeField == null){ 
+            //apply indexField as default if indexField is NOT NULL
+            storeField = indexField;
+        }
         if(indexField == null){ //apply the defaults if null
             indexField = IndexConfiguration.DEFAULT_FIELD;
-        }
-        String storeField = defaultParams.get(IndexConfiguration.PARAM_STORE_FIELD);
-        if(storeField == null){ //apply the defaults if null
-            storeField = indexField;
         }
         if(fstName == null){ //use default
             fstName = getDefaultFstFileName(indexField);
@@ -470,7 +471,7 @@ public class IndexConfiguration {
                                 if(storeFieldName != null){ // == valid configuration
                                     CorpusInfo fstInfo = new CorpusInfo(language, 
                                         fieldInfo.name, storeFieldName,  
-                                        fieldType.getAnalyzer(), fstFile, allowCreation);
+                                        fieldType, fstFile, allowCreation);
                                     log.debug(" ... init {} ", fstInfo);
                                     addCorpus(fstInfo);
                                     foundCorpus = true;
@@ -547,7 +548,7 @@ public class IndexConfiguration {
                         if(langFstFile.isFile() || langAllowCreation){
                             CorpusInfo langFstInfo = new CorpusInfo(language, 
                                 encodedLangIndexField,encodedLangStoreField,
-                                fieldType.getAnalyzer(), langFstFile, langAllowCreation);
+                                fieldType, langFstFile, langAllowCreation);
                             log.debug("   ... add {} for explicitly configured language", langFstInfo);
                             addCorpus(langFstInfo);
                             foundCorpus = true;

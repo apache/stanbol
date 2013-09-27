@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -29,6 +30,7 @@ import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
+import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.LanguageProcessingConfig;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig;
 import org.apache.stanbol.enhancer.engines.entitylinking.engine.EntityLinkingEngine;
@@ -40,18 +42,28 @@ import org.apache.stanbol.enhancer.nlp.model.Section;
 import org.apache.stanbol.enhancer.nlp.model.Sentence;
 import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.Token;
+import org.opensextant.solrtexttagger.TagClusterReducer;
+import org.opensextant.solrtexttagger.TagLL;
 import org.opensextant.solrtexttagger.TaggingAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Classifies Tokens in the Solr {@link TokenStream} with the {@link TaggingAttribute}
+ * Class the ensures that only {@link TokenData#isLinkable linkable} Tokens
+ * are processed.<p>
+ * This is ensured on two places:<ol>
+ * <li> Classifies Tokens in the Solr {@link TokenStream} with the {@link TaggingAttribute}
  * based on NLP processing results present in the {@link AnalysedText}. This
  * implementation Classifies Token similar to the {@link EntityLinkingEngine}.
  * It uses the {@link TextProcessingConfig} for its configuration.<p>
+ * <li> Implements {@link TagClusterReducer} to ensure that all {@link TagLL tags}
+ * that do not overlap with any {@link TokenData#isLinkable linkable} are
+ * removed from the Cluster.
+ * </ol>
  * <b> Implementation Details</b><p>
- * While this code does not directly use {@link ProcessingState} it serves a
- * similar purpose.<p>
+ * The {@link TokenStream} implementation of this class serves a similar
+ * purpose as the {@link ProcessingState} used by the EntityLinkingEngine.
+ * The main differences are:<p>
  * <ul>
  * <li>This code needs to deal with potential different tokenization present
  * in the {@link AnalysedText} and the {@link TokenStream}. The implemented 
@@ -65,12 +77,18 @@ import org.slf4j.LoggerFactory;
  * within the lookahead range. However the range is never extended over a
  * section border.
  * </ul>
+ * The {@link TagClusterReducer} implementation keeps track of linkable tokens
+ * while iterating over the {@link TokenStream} and adds them to the end of a
+ * List. When {@link TagClusterReducer#reduce(TagLL[])} is called tags of the
+ * cluster are checked if they do overlap with any linkable Token at the start
+ * of the list. Tokens with earlier ends as the start of the tags are removed
+ * from the list. 
  * @author Rupert Westenthaler
  *
  */
-public final class LinkableTokenFilterStream extends TokenFilter {
+public final class LinkableTokenFilter extends TokenFilter implements TagClusterReducer{
 
-    private final Logger log = LoggerFactory.getLogger(LinkableTokenFilterStream.class);
+    private final Logger log = LoggerFactory.getLogger(LinkableTokenFilter.class);
     
     /**
      * Required to use {@link SectionData}
@@ -108,9 +126,19 @@ public final class LinkableTokenFilterStream extends TokenFilter {
      */
     private Iterator<TokenData> tokenIt;
     /**
-     * The current Token
+     * The current Token(s). {@link #incrementToken()} will add tokens to the
+     * end of the list and {@link #nextToken(boolean)} with <code>true</code>
+     * will remove earlier tokens as {@link #offset} from the list.<p>
+     * We need to hold multiple tokens because the TokenStream might parse
+     * multiple tokens with 
+     * <code>{@link PositionIncrementAttribute#getClass() posInc} == 0</code>
+     * covering multiple {@link TokenData tokens}.
      */
-    private TokenData token;
+    private List<TokenData> tokens = new LinkedList<TokenData>();
+    /**
+     * The cursor within the {@link #tokens} list of the currently active Token
+     */
+    private int tokensCursor = -1; //the cursor within the tokens list
     
     private int lookupCount = 0;
     private int incrementCount = 0;
@@ -118,8 +146,14 @@ public final class LinkableTokenFilterStream extends TokenFilter {
     private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
     private final OffsetAttribute offset = addAttribute(OffsetAttribute.class);
     private final TaggingAttribute taggable = addAttribute(TaggingAttribute.class);
+    /**
+     * List with {@link TokenData#isLinkable linkable} {@link Token}s used by
+     * the {@link #reduce(TagLL[])} method to check if {@link TagLL tags} 
+     * do overlap with any linkable token.
+     */
+    private final List<Token> linkableTokens = new LinkedList<Token>();
     
-    protected LinkableTokenFilterStream(TokenStream input, AnalysedText at, 
+    protected LinkableTokenFilter(TokenStream input, AnalysedText at, 
             String lang, LanguageProcessingConfig lpc) {
         super(input);
         this.at = at;
@@ -149,7 +183,12 @@ public final class LinkableTokenFilterStream extends TokenFilter {
             boolean lookup = false;
             int lastMatchable = -1;
             int lastIndex = -1;
+            log.trace("> solr:[{},{}] {}",new Object[]{
+                            offset.startOffset(), offset.endOffset(), termAtt});
             while((token = nextToken(first)) != null){
+                log.trace("  < [{},{}]:{} (link {}, match; {})",new Object[]{
+                        token.token.getStart(), token.token.getEnd(),token.getTokenText(),
+                        token.isLinkable, token.isMatchable});
                 first = false;
                 if(token.isLinkable){
                     lookup = true;
@@ -176,8 +215,11 @@ public final class LinkableTokenFilterStream extends TokenFilter {
             this.taggable.setTaggable(lookup);
             if(lookup){
                 if(log.isTraceEnabled()){
-                    log.trace("Solr Token: [{},{}]: {}", new Object[]{
-                            offset.startOffset(), offset.endOffset(), termAtt});
+                    TokenData t = getToken();
+                    log.trace("lookup: token [{},{}]: {} | word [{},{}]:{}", new Object[]{
+                            offset.startOffset(), offset.endOffset(), termAtt,
+                            t.token.getStart(), t.token.getEnd(),
+                            t.getTokenText()});
                 }
                 lookupCount++;
             }
@@ -200,21 +242,31 @@ public final class LinkableTokenFilterStream extends TokenFilter {
      * the current {@link #offset}
      */
     private TokenData nextToken(boolean first){
-        final boolean isToken;
-        if(token == null || //on the first call 
-                !first || //not the first call within on #incrementToken()
-                //current Token is before the current offset
-                token.token.getEnd() <= offset.startOffset()){
-            if(incrementTokenData()){ //get the next token
-                //the next token still overlaps with the current offset
-                isToken = token.token.getStart() < offset.endOffset(); 
-            } else { //end of stream
-                isToken = false;
-            }
-        } else { //check the current #token
-            isToken = token.token.getStart() < offset.endOffset(); 
+        int startOffset = offset.startOffset();
+        int endOffset = offset.endOffset();
+        if(first){ //on the first call for a token
+            tokensCursor = -1; //reset cursor to zero
+            while(!tokens.isEmpty()){
+                //remove tokens earlier as the current offset
+                if(tokens.get(0).token.getEnd() <= startOffset){
+                    tokens.remove(0);
+                } else { //stop on the first overlapping token
+                    break;
+                }
+            } //else nothing to do
         }
-        return isToken ? token : null;
+        if(tokensCursor >= tokens.size()-1){
+            if(!incrementTokenData()){ //adds a new token to the list
+                return null; //EoF
+            }
+        }
+        TokenData cursorToken = tokens.get(tokensCursor+1);
+        if(cursorToken.token.getStart() < endOffset){
+            tokensCursor++; //set the next token as current
+            return cursorToken; //and return it
+        } else {
+            return null;
+        }
     }
     /**
      * Increments the {@link #token} and - if necessary also the {@link #sectionData
@@ -232,7 +284,7 @@ public final class LinkableTokenFilterStream extends TokenFilter {
                 tokenIt = sectionData.getTokens().iterator();
             }
             if(tokenIt != null && tokenIt.hasNext()){
-                token = tokenIt.next(); //first token of the next section
+                addToken(tokenIt.next());
                 return true;
             } else { //reached the end .. clean up
                 sectionData = null;
@@ -240,9 +292,51 @@ public final class LinkableTokenFilterStream extends TokenFilter {
                 return false;
             }
         } else { //more token in the same section
-            token = tokenIt.next();
+            addToken(tokenIt.next());
             return true;
         }
+    }
+    private void addToken(TokenData token){
+        tokens.add(token);
+        if(token.isLinkable){
+            //add to the list of linkable for #reduce(TagLL[])
+            linkableTokens.add(token.token);
+        }
+    }
+    /**
+     * Getter for the current Token
+     * @return
+     */
+    private TokenData getToken(){
+        return tokens.isEmpty() ? null : tokens.get(tokensCursor);
+    }
+
+    @Override
+    public void reduce(TagLL[] head) {
+        Token linkableToken;
+        for(TagLL tag = head[0]; tag != null; tag = tag.getNextTag()) {
+            int start = tag.getStartOffset();
+            int end = tag.getEndOffset();
+            linkableToken = linkableTokens.isEmpty() ? null : linkableTokens.get(0);
+            while(linkableToken != null && linkableToken.getEnd() <= start){
+                linkableTokens.remove(0);
+                linkableToken = linkableTokens.isEmpty() ? null : linkableTokens.get(0);
+            }
+            if(linkableToken == null || linkableToken.getStart() >= end){
+                //does not overlap any linkable token
+                tag.removeLL(); //remove the tag from the cluster
+                if(log.isTraceEnabled()){
+                    CharSequence tagSequence = at.getText().subSequence(start, end);
+                    log.trace(" > reduce tag {}", tagSequence);
+                }
+            } else {
+                if(log.isTraceEnabled()){
+                    CharSequence tagSequence = at.getText().subSequence(start, end);
+                    log.trace(" > keep tag {}", tagSequence);
+                }
+            }
+        }
+        
     }
     
 }

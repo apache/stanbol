@@ -2,7 +2,7 @@
   "spans" : [ {
     "type" : "Text",
     "start" : 0,
-    "end" : 279
+    "end" : 267
   }, {
     "type" : "Sentence",
     "start" : 0,
@@ -203,7 +203,7 @@
   }, {
     "type" : "Sentence",
     "start" : 81,
-    "end" : 194
+    "end" : 182
   }, {
     "type" : "Token",
     "start" : 81,
@@ -278,43 +278,7 @@
   }, {
     "type" : "Token",
     "start" : 117,
-    "end" : 120,
-    "stanbol.enhancer.nlp.pos" : {
-      "tag" : "CC",
-      "pos" : 31,
-      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
-    }
-  }, {
-    "type" : "Token",
-    "start" : 121,
-    "end" : 124,
-    "stanbol.enhancer.nlp.pos" : {
-      "tag" : "DT",
-      "pos" : 57,
-      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
-    }
-  }, {
-    "type" : "Chunk",
-    "start" : 125,
-    "end" : 128,
-    "stanbol.enhancer.nlp.ner" : {
-      "tag" : "ORGANIZATION",
-      "uri" : "http://dbpedia.org/ontology/Organisation",
-      "class" : "org.apache.stanbol.enhancer.nlp.ner.NerTag"
-    }
-  }, {
-    "type" : "Token",
-    "start" : 125,
-    "end" : 128,
-    "stanbol.enhancer.nlp.pos" : {
-      "tag" : "NNP",
-      "pos" : [ 53, 163 ],
-      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
-    }
-  }, {
-    "type" : "Token",
-    "start" : 129,
-    "end" : 134,
+    "end" : 122,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "VBZ",
       "pos" : 238,
@@ -330,8 +294,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 135,
-    "end" : 139,
+    "start" : 123,
+    "end" : 127,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "IN",
       "pos" : [ 12, 37 ],
@@ -339,8 +303,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 140,
-    "end" : 145,
+    "start" : 128,
+    "end" : 133,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "EX",
       "pos" : 190,
@@ -348,8 +312,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 146,
-    "end" : 150,
+    "start" : 134,
+    "end" : 138,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "MD",
       "pos" : 219,
@@ -357,8 +321,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 151,
-    "end" : 154,
+    "start" : 139,
+    "end" : 142,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "RB",
       "lc" : 4,
@@ -366,8 +330,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 155,
-    "end" : 157,
+    "start" : 143,
+    "end" : 145,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "VB",
       "pos" : 233,
@@ -375,8 +339,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 158,
-    "end" : 159,
+    "start" : 146,
+    "end" : 147,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "DT",
       "pos" : 57,
@@ -384,8 +348,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 160,
-    "end" : 167,
+    "start" : 148,
+    "end" : 155,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "JJ",
       "lc" : 2,
@@ -393,8 +357,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 168,
-    "end" : 174,
+    "start" : 156,
+    "end" : 162,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "NN",
       "pos" : [ 45, 163 ],
@@ -402,8 +366,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 175,
-    "end" : 177,
+    "start" : 163,
+    "end" : 165,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "IN",
       "pos" : [ 12, 37 ],
@@ -411,16 +375,16 @@
     }
   }, {
     "type" : "Chunk",
-    "start" : 178,
-    "end" : 186,
+    "start" : 166,
+    "end" : 174,
     "stanbol.enhancer.nlp.ner" : {
       "tag" : "MISC",
       "class" : "org.apache.stanbol.enhancer.nlp.ner.NerTag"
     }
   }, {
     "type" : "Token",
-    "start" : 178,
-    "end" : 186,
+    "start" : 166,
+    "end" : 174,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "JJ",
       "lc" : 2,
@@ -436,8 +400,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 187,
-    "end" : 193,
+    "start" : 175,
+    "end" : 181,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "NN",
       "pos" : [ 45, 163 ],
@@ -445,8 +409,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 193,
-    "end" : 194,
+    "start" : 181,
+    "end" : 182,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : ".",
       "pos" : 119,
@@ -454,20 +418,20 @@
     }
   }, {
     "type" : "Sentence",
-    "start" : 195,
-    "end" : 279
+    "start" : 183,
+    "end" : 267
   }, {
     "type" : "Chunk",
-    "start" : 195,
-    "end" : 201,
+    "start" : 183,
+    "end" : 189,
     "stanbol.enhancer.nlp.ner" : {
       "tag" : "MISC",
       "class" : "org.apache.stanbol.enhancer.nlp.ner.NerTag"
     }
   }, {
     "type" : "Token",
-    "start" : 195,
-    "end" : 201,
+    "start" : 183,
+    "end" : 189,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "NNPS",
       "pos" : [ 53, 157 ],
@@ -475,8 +439,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 202,
-    "end" : 207,
+    "start" : 190,
+    "end" : 195,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "MD",
       "pos" : 219,
@@ -484,8 +448,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 208,
-    "end" : 212,
+    "start" : 196,
+    "end" : 200,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "VB",
       "pos" : 233,
@@ -493,8 +457,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 213,
-    "end" : 222,
+    "start" : 201,
+    "end" : 210,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "VBN",
       "pos" : 237,
@@ -510,8 +474,8 @@
     }
   }, {
     "type" : "Chunk",
-    "start" : 223,
-    "end" : 226,
+    "start" : 211,
+    "end" : 214,
     "stanbol.enhancer.nlp.ner" : {
       "tag" : "ORGANIZATION",
       "uri" : "http://dbpedia.org/ontology/Organisation",
@@ -519,8 +483,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 223,
-    "end" : 226,
+    "start" : 211,
+    "end" : 214,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "NN",
       "pos" : [ 45, 163 ],
@@ -536,8 +500,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 227,
-    "end" : 236,
+    "start" : 215,
+    "end" : 224,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "NN",
       "pos" : [ 45, 163 ],
@@ -545,8 +509,8 @@
     }
   }, {
     "type" : "Chunk",
-    "start" : 237,
-    "end" : 253,
+    "start" : 225,
+    "end" : 241,
     "stanbol.enhancer.nlp.ner" : {
       "tag" : "PERSON",
       "uri" : "http://dbpedia.org/ontology/Person",
@@ -554,7 +518,16 @@
     }
   }, {
     "type" : "Token",
-    "start" : 237,
+    "start" : 225,
+    "end" : 229,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "NNP",
+      "pos" : [ 53, 163 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 230,
     "end" : 241,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "NNP",
@@ -563,17 +536,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 242,
-    "end" : 253,
-    "stanbol.enhancer.nlp.pos" : {
-      "tag" : "NNP",
-      "pos" : [ 53, 163 ],
-      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
-    }
-  }, {
-    "type" : "Token",
-    "start" : 253,
-    "end" : 254,
+    "start" : 241,
+    "end" : 242,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : ",",
       "pos" : 140,
@@ -581,8 +545,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 255,
-    "end" : 260,
+    "start" : 243,
+    "end" : 248,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "WP$",
       "pos" : [ 105, 109 ],
@@ -590,8 +554,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 261,
-    "end" : 266,
+    "start" : 249,
+    "end" : 254,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "NN",
       "pos" : [ 45, 163 ],
@@ -599,8 +563,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 267,
-    "end" : 271,
+    "start" : 255,
+    "end" : 259,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "VBD",
       "pos" : 237,
@@ -616,16 +580,16 @@
     }
   }, {
     "type" : "Chunk",
-    "start" : 272,
-    "end" : 278,
+    "start" : 260,
+    "end" : 266,
     "stanbol.enhancer.nlp.ner" : {
       "tag" : "DATE",
       "class" : "org.apache.stanbol.enhancer.nlp.ner.NerTag"
     }
   }, {
     "type" : "Token",
-    "start" : 272,
-    "end" : 278,
+    "start" : 260,
+    "end" : 266,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : "NNP",
       "pos" : [ 53, 163 ],
@@ -633,8 +597,8 @@
     }
   }, {
     "type" : "Token",
-    "start" : 278,
-    "end" : 279,
+    "start" : 266,
+    "end" : 267,
     "stanbol.enhancer.nlp.pos" : {
       "tag" : ".",
       "pos" : 119,

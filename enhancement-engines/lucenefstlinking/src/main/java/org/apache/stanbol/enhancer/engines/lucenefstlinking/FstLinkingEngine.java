@@ -350,19 +350,28 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
      * @return the time in milliseconds spent in the tag callback.
      * @throws IOException on any error while accessing the {@link SolrCore}
      */
-    private int tag(AnalysedText at, final TaggingSession session, 
+    private int tag(final AnalysedText at, final TaggingSession session, 
             final Corpus corpus, final Map<int[],Tag> tags) throws IOException {
         final OpenBitSet matchDocIdsBS = new OpenBitSet(session.getSearcher().maxDoc());
-        TokenStream baseTokenStream = corpus.getAnalyzer().tokenStream("", 
+        TokenStream baseTokenStream = corpus.getTaggingAnalyzer().tokenStream("", 
             new CharSequenceReader(at.getText()));
-        TokenStream linkableTokenStream = new LinkableTokenFilterStream(baseTokenStream, 
+        LinkableTokenFilter linkableTokenFilter = new LinkableTokenFilter(baseTokenStream, 
             at, session.getLanguage(), tpConfig.getConfiguration(session.getLanguage()));
+        //we use two TagClusterReducer implementations.
+        // (1) the linkableTokenFilter filters all tags that do not overlap any
+        //     linkable Token
+        // (2) the LONGEST_DOMINANT_RIGHT reducer (TODO: make configurable)
+        TagClusterReducer reducer = new ChainedTagClusterReducer(
+            linkableTokenFilter,TagClusterReducer.LONGEST_DOMINANT_RIGHT);
         final long[] time = new long[]{0};
-        new Tagger(corpus.getFst(), linkableTokenStream, TagClusterReducer.NO_SUB) {
+        new Tagger(corpus.getFst(), linkableTokenFilter, reducer) {
             
             @Override
             protected void tagCallback(int startOffset, int endOffset, long docIdsKey) {
                 long start = System.nanoTime();
+                if(log.isTraceEnabled()){
+                    log.trace(" > tagCallback for {}", at.getText().subSequence(startOffset, endOffset));
+                }
                 int[] span = new int[]{startOffset,endOffset};
                 Tag tag = tags.get(span);
                 if(tag == null){
@@ -370,7 +379,11 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                     tags.put(span, tag);
                 }
                 // below caches, and also flags matchDocIdsBS
-                tag.addIds(createMatches(docIdsKey));
+                Set<Match> matches = createMatches(docIdsKey);
+                if(log.isTraceEnabled()){
+                    log.trace("  - {} matches", matches.size());
+                }
+                tag.addIds(matches);
                 long dif = System.nanoTime()-start;
                 time[0] = time[0]+dif;
             }
