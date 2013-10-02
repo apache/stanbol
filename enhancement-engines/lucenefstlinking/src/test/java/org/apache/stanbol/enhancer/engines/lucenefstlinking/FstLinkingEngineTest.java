@@ -293,7 +293,7 @@ public class FstLinkingEngineTest {
                 DBPEDIA+"Social_Democratic_Party_of_Germany"));
     }
 
-    //@Test TODO
+    @Test
     public void testFstLinkingWithNouns() throws Exception {
         Dictionary<String,Object> dict = new Hashtable<String,Object>();
         dict.put(PROCESSED_LANGUAGES, Arrays.asList("en;lmmtip;uc=LINK;prob=0.75;pprob=0.75"));
@@ -307,12 +307,13 @@ public class FstLinkingEngineTest {
         processConentItem(engine);
         validateEnhancements(
             Arrays.asList(
-                "Angela Merkel", "Greece", "Germany", "CDU", "SPD"),
+                "Chancellor", "Angela Merkel", "Greece", "Greeks", "Germany", "SPD",
+                "change","election", "party", "policy"),
             Arrays.asList(
                 DBPEDIA+"Christian_Democratic_Union_(Germany)", 
                 DBPEDIA+"Angela_Merkel", DBPEDIA+"Greece", DBPEDIA+"Germany", 
-                DBPEDIA+"Social_Democratic_Party_of_Germany"));
-        
+                DBPEDIA+"Social_Democratic_Party_of_Germany", DBPEDIA+"Chancellor",
+                DBPEDIA+"Election", DBPEDIA+"Party", DBPEDIA+"Policy"));
     }
 
     /**

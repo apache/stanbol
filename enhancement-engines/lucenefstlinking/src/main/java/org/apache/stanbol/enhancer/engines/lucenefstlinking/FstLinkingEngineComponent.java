@@ -181,7 +181,7 @@ public class FstLinkingEngineComponent {
      * The {@link SolrCore} is required to access the document ids for the Entities
      * as well as the analyzer chains of the fields used for the linking
      */
-    public static final String SOLR_CORE = "enhancer.engines.linking.solrfst.solrcore";
+    public static final String SOLR_CORE = "enhancer.engines.linking.lucenefst.solrcore";
     
     /**
      * The size of the thread pool used to create FST models (default=1). Creating
@@ -195,7 +195,7 @@ public class FstLinkingEngineComponent {
      * '<code>{@link IndexConfiguration#PARAM_RUNTIME_GENERATION generate}=true</code>' parameter 
      * for some languages in the {@link IndexConfiguration#FST_CONFIG}.
      */
-    public static final String FST_THREAD_POOL_SIZE = "enhancer.engines.linking.solrfst.fstThreadPoolSize";
+    public static final String FST_THREAD_POOL_SIZE = "enhancer.engines.linking.lucenefst.fstThreadPoolSize";
     /**
      * The default number of threads used to create FST models (default=1)
      */
@@ -207,7 +207,7 @@ public class FstLinkingEngineComponent {
      * for matched entities from the disc. The EntityCache is a LRU cache for such
      * information.
      */
-    public static final String ENTITY_CACHE_SIZE = "enhancer.engines.linking.solrfst.entityCacheSize";
+    public static final String ENTITY_CACHE_SIZE = "enhancer.engines.linking.lucenefst.entityCacheSize";
     /**
      * The default size of the Entity Cache is set to 65k entities.
      */
@@ -320,6 +320,8 @@ public class FstLinkingEngineComponent {
     private EntityCacheManager documentCacheFactory;
 
     private IndexConfiguration indexConfig;
+
+    private Boolean skipAltTokensConfig;
     
     /**
      * Default constructor as used by OSGI. This expects that 
@@ -370,6 +372,12 @@ public class FstLinkingEngineComponent {
                         + Arrays.toString(FieldEncodingEnum.values()), e);
             }
         }
+        value = properties.get(IndexConfiguration.SKIP_ALT_TOKENS);
+        if(value instanceof Boolean){
+            skipAltTokensConfig = ((Boolean)value);
+        } else if(value != null){
+            skipAltTokensConfig = new Boolean(value.toString());
+        } // else no config -> will use the default
         
         //(4) init the FST configuration
         //We can create the default configuration only here, as it depends on the
@@ -567,6 +575,9 @@ public class FstLinkingEngineComponent {
                 indexConfig.setFstDirectory(getFstDirectory(core, fstFolder));
                 //set the DocumentCacheFactory
                 indexConfig.setEntityCacheManager(documentCacheFactory);
+                if(skipAltTokensConfig != null){
+                    indexConfig.setSkipAltTokens(skipAltTokensConfig);
+                }
                 //create a new searcher for creating FSTs
                 boolean foundCorpus;
                 try {
@@ -743,6 +754,7 @@ public class FstLinkingEngineComponent {
         textProcessingConfig = null;
         entityLinkerConfig = null;
         bundleContext = null;
+        skipAltTokensConfig = null;
     }
     
     /**

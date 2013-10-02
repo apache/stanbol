@@ -52,6 +52,7 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.opensextant.solrtexttagger.TaggerFstCorpus;
+import org.opensextant.solrtexttagger.UnsupportedTokenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -584,6 +585,10 @@ public class TaggingSession implements Closeable {
         public String getStoredField(){
             return corpusInfo.storedField;
         }
+    }
+
+    public boolean isSkipAltTokens() {
+        return config.isSkipAltTokens();
     }
     
 }
