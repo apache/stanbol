@@ -16,12 +16,7 @@
  */
 package org.apache.stanbol.entityhub.it;
 
-import static junit.framework.Assert.assertNotSame;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
-import static org.apache.stanbol.entityhub.it.DbpediaDefaultdataConstants.DBPEDIA_DEFAULTDATA_OPTIONAL_FIELDS;
-import static org.apache.stanbol.entityhub.it.DbpediaDefaultdataConstants.DBPEDIA_DEFAULTDATA_REQUIRED_FIELDS;
-import static org.apache.stanbol.entityhub.it.DbpediaDefaultdataConstants.DBPEDIA_SITE_ID;
-import static org.apache.stanbol.entityhub.it.DbpediaDefaultdataConstants.DBPEDIA_SITE_PATH;
 import static org.apache.stanbol.entityhub.test.it.AssertEntityhubJson.assertEntity;
 import static org.apache.stanbol.entityhub.test.it.AssertEntityhubJson.assertQueryResults;
 import static org.apache.stanbol.entityhub.test.it.AssertEntityhubJson.assertRepresentation;
@@ -29,7 +24,6 @@ import static org.apache.stanbol.entityhub.test.it.AssertEntityhubJson.assertRep
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -37,30 +31,23 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.stanbol.commons.testing.http.Request;
 import org.apache.stanbol.commons.testing.http.RequestExecutor;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
-import org.apache.stanbol.entityhub.test.it.AssertEntityhubJson;
-import org.apache.stanbol.entityhub.test.it.EntityhubTestBase;
 import org.apache.stanbol.entityhub.test.query.FieldQueryTestCase;
 import org.apache.stanbol.entityhub.test.query.FindQueryTestCase;
 import org.apache.stanbol.entityhub.test.query.QueryTestBase;
-import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.Assert;
