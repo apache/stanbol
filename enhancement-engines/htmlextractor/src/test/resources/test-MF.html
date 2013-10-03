@@ -1,0 +1,761 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"  lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	
+	<meta name="generator" content="MediaWiki 1.13.2" />
+		<meta name="keywords" content="hreview,hreview,ISO-8601,advocacy,aggregate-review-brainstorming,aggregate-review-examples,aggregate-review-formats,currency,hCard,hatom,hcalendar" />
+		<link rel="shortcut icon" href="/favicon.ico" />
+		<link rel="search" type="application/opensearchdescription+xml" href="/wiki/opensearch_desc.php" title="Microformats Wiki (en)" />
+		<link rel="alternate" type="application/rss+xml" title="Microformats Wiki RSS Feed" href="http://microformats.org/wiki/index.php?title=Special:RecentChanges&amp;feed=rss" />
+		<link rel="alternate" type="application/atom+xml" title="Microformats Wiki Atom Feed" href="http://microformats.org/wiki/index.php?title=Special:RecentChanges&amp;feed=atom" />
+	<link rel="stylesheet" type="text/css" href="/wiki/skins/common/shared.css" />		
+	<link rel="stylesheet" type="text/css" href="/wiki/skins/Microformats/microformats.css"/>
+
+	<style type="text/css">/*<![CDATA[*/
+@import "/wiki/index.php?title=MediaWiki:Common.css&usemsgcache=yes&action=raw&ctype=text/css&smaxage=18000";
+@import "/wiki/index.php?title=MediaWiki:Microformats_Wiki.css&usemsgcache=yes&action=raw&ctype=text/css&smaxage=18000";
+@import "/wiki/index.php?title=-&action=raw&gen=css&maxage=18000&useskin=Microformats+Wiki";
+/*]]>*/</style>
+<script type= "text/javascript">/*<![CDATA[*/
+var skin = "Microformats Wiki";
+var stylepath = "/wiki/skins";
+var wgArticlePath = "/wiki/$1";
+var wgScriptPath = "/wiki";
+var wgScript = "/wiki/index.php";
+var wgVariantArticlePath = false;
+var wgActionPaths = [];
+var wgServer = "http://microformats.org";
+var wgCanonicalNamespace = "";
+var wgCanonicalSpecialPageName = false;
+var wgNamespaceNumber = 0;
+var wgPageName = "hreview";
+var wgTitle = "hreview";
+var wgAction = "view";
+var wgArticleId = "941";
+var wgIsArticle = true;
+var wgUserName = null;
+var wgUserGroups = null;
+var wgUserLanguage = "en";
+var wgContentLanguage = "en";
+var wgBreakFrames = false;
+var wgCurRevisionId = "41402";
+var wgVersion = "1.13.2";
+var wgEnableAPI = true;
+var wgEnableWriteAPI = false;
+var wgRestrictionEdit = [];
+var wgRestrictionMove = [];
+/*]]>*/</script>
+
+    <script type="text/javascript" src="/wiki/skins/common/wikibits.js?164"></script>
+    		<script type="text/javascript" src="/wiki/skins/common/ajax.js?164"></script>
+        <script type="text/javascript" src="/wiki/index.php?title=-&amp;action=raw&amp;gen=js&amp;useskin=Microformats+Wiki"><!-- site js --></script>
+        	
+	<title>hReview 0.3 &middot; Microformats Wiki</title>
+	
+</head>
+	<!-- TODO: Template-dervied body class: spec and draft -->
+<body class="page-hreview specification draft">
+    
+    <div class="header">
+            <a class="logo" href="/wiki/Main_Page">
+                <img src="/wiki/skins/Microformats/images/logo.gif" alt="Microformats Wiki"/>
+            </a>
+        
+        <ul class="nav">
+            <li><a href="/" title="Microformats.org Home">Blog</a></li>
+            <li class="active"><span>Wiki</span></li>
+            <li><a href="/discuss" title="Microformats discussion lists">Discuss</a></li>
+        </ul>
+        
+        <form action="/wiki/Special:Search" id="search">
+            <fieldset>
+            <label for="search-text">Search</label>
+    	    <input id="search-text" name="search" type="text" title="Search Microformats Wiki [f]" accesskey="f" value="" />
+	        <input type="submit" name="go" class="searchButton" id="searchGoButton"	value="Go" title="Go to a page with this exact name if exists" /> 
+	        <input type="submit" name="fulltext" class="searchButton" id="mw-searchButton" value="Search" title="Search the pages for this text" />
+	        </fieldset>
+		</form>
+    </div>
+
+    <div class="content hentry">
+    
+	
+
+	    <h1 class="entry-title">hReview 0.3</h1>
+
+		<p class="sub-title"></p>
+
+								    <!-- TODO: Jump nav -->
+		    <div id="jump-to-nav">Jump to:		        <a href="#sidebar">navigation</a>, 
+		        <a href="#search">search</a>
+		    </div>
+		        
+        <div class="entry-content">
+		<p><i>This document represents a <strong>draft</strong> microformat specification. Although drafts are somewhat mature in the development process, the stability of this document cannot be guaranteed, and implementers should be prepared to keep abreast of future developments and changes. Watch this wiki page, or follow discussions on the <a href="http://microformats.org/discuss/" class="external text" title="http://microformats.org/discuss/" rel="nofollow">microformats-new mailing list</a> to stay up-to-date.</i>
+</p><p><strong class="selflink">hReview</strong> is a simple, open, distributed format, suitable for embedding reviews (of products, services, businesses, events, etc.) in HTML, XHTML, Atom, RSS, and arbitrary XML. hReview is one of several <a href="/wiki/microformats" title="microformats">microformats</a> open standards.
+</p><p>Want to get started with writing an <strong class="selflink">hReview</strong>?  Use the <a href="http://microformats.org/code/hreview/creator" class="external text" title="http://microformats.org/code/hreview/creator" rel="nofollow">hReview creator</a> to write a review and publish it.
+</p>
+<table id="toc" class="toc" summary="Contents"><tr><td><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1"><a href="#Microformats_Draft_Specification_2006-02-22"><span class="tocnumber">1</span> <span class="toctext">Microformats Draft Specification 2006-02-22</span></a></li>
+<li class="toclevel-1"><a href="#Status"><span class="tocnumber">2</span> <span class="toctext">Status</span></a>
+<ul>
+<li class="toclevel-2"><a href="#Available_languages"><span class="tocnumber">2.1</span> <span class="toctext">Available languages</span></a></li>
+<li class="toclevel-2"><a href="#Errata_and_Updates"><span class="tocnumber">2.2</span> <span class="toctext">Errata and Updates</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1"><a href="#Introduction"><span class="tocnumber">3</span> <span class="toctext">Introduction</span></a>
+<ul>
+<li class="toclevel-2"><a href="#Scope"><span class="tocnumber">3.1</span> <span class="toctext">Scope</span></a>
+<ul>
+<li class="toclevel-3"><a href="#Out_of_scope"><span class="tocnumber">3.1.1</span> <span class="toctext">Out of scope</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1"><a href="#Format"><span class="tocnumber">4</span> <span class="toctext">Format</span></a>
+<ul>
+<li class="toclevel-2"><a href="#In_General"><span class="tocnumber">4.1</span> <span class="toctext">In General</span></a></li>
+<li class="toclevel-2"><a href="#Schema"><span class="tocnumber">4.2</span> <span class="toctext">Schema</span></a></li>
+<li class="toclevel-2"><a href="#Property_details"><span class="tocnumber">4.3</span> <span class="toctext">Property details</span></a></li>
+<li class="toclevel-2"><a href="#More_Semantic_Equivalents"><span class="tocnumber">4.4</span> <span class="toctext">More Semantic Equivalents</span></a>
+<ul>
+<li class="toclevel-3"><a href="#Language"><span class="tocnumber">4.4.1</span> <span class="toctext">Language</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2"><a href="#Human_vs._Machine_Readable"><span class="tocnumber">4.5</span> <span class="toctext">Human vs. Machine Readable</span></a></li>
+<li class="toclevel-2"><a href="#Object_Includes"><span class="tocnumber">4.6</span> <span class="toctext">Object Includes</span></a></li>
+<li class="toclevel-2"><a href="#Notes"><span class="tocnumber">4.7</span> <span class="toctext">Notes</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1"><a href="#Examples"><span class="tocnumber">5</span> <span class="toctext">Examples</span></a>
+<ul>
+<li class="toclevel-2"><a href="#Restaurant_reviews"><span class="tocnumber">5.1</span> <span class="toctext">Restaurant reviews</span></a>
+<ul>
+<li class="toclevel-3"><a href="#Multidimensional_Restaurant_Review"><span class="tocnumber">5.1.1</span> <span class="toctext">Multidimensional Restaurant Review</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2"><a href="#Product_review"><span class="tocnumber">5.2</span> <span class="toctext">Product review</span></a></li>
+<li class="toclevel-2"><a href="#Movie_Review"><span class="tocnumber">5.3</span> <span class="toctext">Movie Review</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1"><a href="#Examples_in_the_wild"><span class="tocnumber">6</span> <span class="toctext">Examples in the wild</span></a></li>
+<li class="toclevel-1"><a href="#Implementations"><span class="tocnumber">7</span> <span class="toctext">Implementations</span></a></li>
+<li class="toclevel-1"><a href="#Design_Principles"><span class="tocnumber">8</span> <span class="toctext">Design Principles</span></a></li>
+<li class="toclevel-1"><a href="#Inspiration_and_Acknowledgments"><span class="tocnumber">9</span> <span class="toctext">Inspiration and Acknowledgments</span></a></li>
+<li class="toclevel-1"><a href="#References"><span class="tocnumber">10</span> <span class="toctext">References</span></a>
+<ul>
+<li class="toclevel-2"><a href="#Normative_References"><span class="tocnumber">10.1</span> <span class="toctext">Normative References</span></a></li>
+<li class="toclevel-2"><a href="#Informative_References"><span class="tocnumber">10.2</span> <span class="toctext">Informative References</span></a>
+<ul>
+<li class="toclevel-3"><a href="#Similar_Work"><span class="tocnumber">10.2.1</span> <span class="toctext">Similar Work</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1"><a href="#Copyright"><span class="tocnumber">11</span> <span class="toctext">Copyright</span></a></li>
+<li class="toclevel-1"><a href="#Patents"><span class="tocnumber">12</span> <span class="toctext">Patents</span></a></li>
+<li class="toclevel-1"><a href="#Work_in_progress"><span class="tocnumber">13</span> <span class="toctext">Work in progress</span></a>
+<ul>
+<li class="toclevel-2"><a href="#Changes_from_v0.2"><span class="tocnumber">13.1</span> <span class="toctext">Changes from v0.2</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1"><a href="#Further_Reading"><span class="tocnumber">14</span> <span class="toctext">Further Reading</span></a></li>
+<li class="toclevel-1"><a href="#Related_Pages"><span class="tocnumber">15</span> <span class="toctext">Related Pages</span></a></li>
+<li class="toclevel-1"><a href="#Translations"><span class="tocnumber">16</span> <span class="toctext">Translations</span></a></li>
+</ul>
+</td></tr></table><script type="text/javascript"> if (window.showTocToggle) { var tocShowText = "show"; var tocHideText = "hide"; showTocToggle(); } </script>
+<a name="Microformats_Draft_Specification_2006-02-22"></a><h2> <span class="mw-headline"> Microformats Draft Specification 2006-02-22 </span></h2>
+<div class="vcard">
+<dl><dt><span class="role">Editor</span>
+</dt><dd><span class="fn"><a href="/wiki/User:Tantek" title="User:Tantek">Tantek Çelik</a></span> (<span class="url"><a href="http://tantek.com/" class="external free" title="http://tantek.com/" rel="nofollow">http://tantek.com/</a></span>, and before at <a href="http://technorati.com" class="external text" title="http://technorati.com" rel="nofollow">Technorati, Inc.</a>)
+</dd></dl>
+</div>
+<dl><dt> Authors
+</dt><dd> <a href="/wiki/User:Tantek" title="User:Tantek">Tantek Çelik</a> (affiliations above)
+</dd><dd> <span class="vcard"><span class="fn"><a href="http://360.yahoo.com/alidiabali" class="external text" title="http://360.yahoo.com/alidiabali" rel="nofollow">Ali Diab</a></span></span> (<a href="http://yahoo.com" class="external text" title="http://yahoo.com" rel="nofollow">Yahoo! Inc.</a>)
+</dd><dd> <span class="vcard"><span class="fn"><a href="http://ianmcall.blogspot.com/" class="external text" title="http://ianmcall.blogspot.com/" rel="nofollow">Ian McAllister</a></span></span> (<a href="http://amazon.com/" class="external text" title="http://amazon.com/" rel="nofollow">Amazon.com</a>)
+</dd><dd> <span class="vcard"><span class="fn"><a href="http://journals.aol.com/panzerjohn/abstractioneer" class="external text" title="http://journals.aol.com/panzerjohn/abstractioneer" rel="nofollow">John Panzer</a></span></span> (<a href="http://www.aol.com" class="external text" title="http://www.aol.com" rel="nofollow">America Online, Inc.</a>)
+</dd><dd> <span class="vcard"><span class="fn"><a href="http://ifindkarma.com/blog" class="external text" title="http://ifindkarma.com/blog" rel="nofollow">Adam Rifkin</a></span></span> (<a href="http://labs.commerce.net/" class="external text" title="http://labs.commerce.net/" rel="nofollow">CommerceNet Labs</a>)
+</dd><dd> <span class="vcard"><span class="fn"><a href="http://sippey.typepad.com/" class="external text" title="http://sippey.typepad.com/" rel="nofollow">Michael Sippey</a></span></span> (<a href="http://sixapart.com" class="external text" title="http://sixapart.com" rel="nofollow">Six Apart, Ltd</a>)
+</dd></dl>
+<p><a href="/wiki/hreview#Copyright" title="hreview">copyright</a> and <a href="/wiki/hreview#Patents" title="hreview">patents</a> statements apply.
+</p>
+<a name="Status"></a><h2> <span class="mw-headline"> Status </span></h2>
+<p>hReview 0.3 is a microformats.org draft specification. Public discussion on hReview takes place on <a href="/wiki/hreview-feedback" title="hreview-feedback">hreview-feedback</a>, the #microformats <a href="/wiki/irc" title="irc">irc</a> channel on irc.freenode.net, and <a href="http://microformats.org/discuss/mail/microformats-discuss/" class="external text" title="http://microformats.org/discuss/mail/microformats-discuss/" rel="nofollow">microformats-discuss mailing list</a>.
+</p>
+<a name="Available_languages"></a><h3> <span class="mw-headline"> Available languages </span></h3>
+<p>The English version of this specification is the only normative version. For translations of this document see the <a href="#translations" title="">#translations</a> section.
+</p>
+<a name="Errata_and_Updates"></a><h3> <span class="mw-headline"> Errata and Updates </span></h3>
+<p>Known errors and issues in this specification are corrected in <a href="/wiki/hreview-issues-resolved" class="mw-redirect" title="hreview-issues-resolved">resolved</a> and <a href="/wiki/hreview-issues-closed" class="mw-redirect" title="hreview-issues-closed">closed</a> issues. Please check there before reporting <a href="/wiki/hreview-issues" title="hreview-issues">issues</a>.
+</p><p>The hReview 0.4 update is currently under development and incorporates known errata corrections as well as the <a href="/wiki/value-class-pattern" title="value-class-pattern">value-class-pattern</a>.
+</p>
+<a name="Introduction"></a><h2> <span class="mw-headline"> Introduction </span></h2>
+<p>Numerous web sites publish reviews using a broad variety of schema for all sorts of things from products (movies, music, books), to businesses (restaurants, hotels, stores), to events (concerts, theatre), to people (artists, leaders, celebrities), to places (landmarks, parks), to online resources (web pages, files), to reviews of reviews themselves.
+</p><p>In order to enable and encourage the sharing, distribution, syndication, and aggregation, of reviews, the authors propose the hReview microformat, an open standard for distributed reviews.  The authors have researched both numerous <a href="/wiki/review-examples" title="review-examples">review-examples</a> in the wild and earlier attempts at <a href="/wiki/review-formats" title="review-formats">review-formats</a>, and have designed hReview around a simple minimal schema for reviews.  Feedback is encouraged on the <a href="/wiki/hreview-feedback" title="hreview-feedback">hReview feedback</a> page.
+</p><p>The key words "<em title="MUST in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MUST</em>", "<em title="MUST NOT in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MUST NOT</em>", "<em title="REQUIRED in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">REQUIRED</em>", "<em title="SHALL in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">SHALL</em>", "<em title="SHALL NOT in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">SHALL NOT</em>", "<em title="SHOULD in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">SHOULD</em>", "<em title="SHOULD NOT in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">SHOULD NOT</em>", "<em title="RECOMMENDED in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">RECOMMENDED</em>", "<em title="MAY in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MAY</em>", and "<em title="OPTIONAL in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">OPTIONAL</em>" in this document are to be interpreted as described in <a href="/wiki/rfc-2119" title="rfc-2119">RFC 2119</a>.
+</p>
+<a name="Scope"></a><h3> <span class="mw-headline"> Scope </span></h3>
+<p>Reviews consistently share several common aspects.  Where possible hReview has been based on this minimal common subset.
+</p>
+<a name="Out_of_scope"></a><h4> <span class="mw-headline"> Out of scope </span></h4>
+<p>Portions of reviews that are specific to particular kinds of items have been omitted from hReview.  It is important that hReview be kept simple and minimal from the start.  Additional features can be added as deemed necessary by practical implementation experience.
+</p><p>The concept of a "universal object identifier", that is, how to identify the same object/item/product across different shopping sites, though something very useful to have, is outside the scope of this format.
+</p>
+<a name="Format"></a><h2> <span class="mw-headline"> Format </span></h2>
+<a name="In_General"></a><h3> <span class="mw-headline"> In General </span></h3>
+<p>The hReview format is based on a set of properties common to numerous review sites and formats in use today on the web.  Where possible property names have been chosen based on those defined by the related <a href="/wiki/hcard" title="hcard">hCard</a> and <a href="/wiki/hcalendar" title="hcalendar">hCalendar</a> standards.
+</p>
+<a name="Schema"></a><h3> <span class="mw-headline"> Schema </span></h3>
+<p>The hReview schema consists of the following:
+</p>
+<ul><li> hReview (<b><code>hreview</code></b>)
+<ul><li> <b><code>version</code></b>. optional. text.
+</li><li> <b><code>summary</code></b>. optional. text.
+</li><li> item <b><code>type</code></b>. optional. product | business | event | person | place | website | url.
+</li><li> <b><code>item</code></b> info. required. <b><code>fn</code></b> (<b><code>url</code></b> || <b><code>photo</code></b> ) | <b><a href="/wiki/hcard" title="hcard">hCard</a></b> (for person or business) | <b><a href="/wiki/hcalendar" title="hcalendar">hCalendar</a></b> (for event)
+</li><li> <b><code>reviewer</code></b>. optional. <b><a href="/wiki/hcard" title="hcard">hCard</a></b>.
+</li><li> <b><code>dtreviewed</code></b>. optional. ISO8601 absolute date time.
+</li><li> <b><code>rating</code></b>. optional. fixed point integer [1.0-5.0], with optional alternate <b><code>worst</code></b> (default:1.0) and/or <b><code>best</code></b> (default:5.0), also fixed point integers, and explicit <b><code>value</code></b>.
+</li><li> <b><code>description</code></b>. optional. text with optional valid HTML markup.
+</li><li> tags. optional. keywords or phrases, using <b><a href="/wiki/rel-tag" title="rel-tag">rel-tag</a></b>, each with optional rating.
+</li><li> permalink. optional, using <b><a href="/wiki/rel-bookmark" class="mw-redirect" title="rel-bookmark">rel-bookmark</a></b> and <b><a href="/wiki/index.php?title=rel-self&amp;action=edit&amp;redlink=1" class="new" title="rel-self (not yet written)">rel-self</a></b>.
+</li><li> license. optional, using <b><a href="/wiki/rel-license" title="rel-license">rel-license</a></b>.
+</li></ul>
+</li></ul>
+<a name="Property_details"></a><h3> <span class="mw-headline"> Property details </span></h3>
+<p>Details of the hReview properties:
+</p><p><b>version</b>:: This optional property permits hReview publishers to specify a particular version of hReview that their content uses.  By omitting this property, the publisher is stating that implementations may interpret the hReviews according to any version of the hReview specification v0.2 or later.  In practice the authors of this specification are comitted to maintaining backward compatibility with content produced using earlier versions of the specification.  This property is syntax compatible with, and thus reuses the semantics of "VERSION" as defined in vCard RFC2426 section "3.6.9 VERSION Type Definition".  The value of this property for this specification is "0.3".
+</p><p><b>summary</b>:: This optional property serves as a title for the review itself.
+</p><p><b>type</b>:: The optional property "type" provides the type of the item being reviewed, one of the following: product, business, event, person, place, website, url.  If omitted, then in some cases the item type may be inferred.  If the item is also an <a href="/wiki/hcard" title="hcard">hCard</a>, then the item type is a "business" or a "person" based upon which of those the hCard represents.  If the item is also an <a href="/wiki/hcalendar" title="hcalendar">hCalendar</a> event, then the item type is an "event".
+</p><p><b>item</b>:: This required property <em title="MUST in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MUST</em> have at a minimum the name (using the subproperty "fn" - the formatted text corresponding to the name, except for an event item which <em title="MUST in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MUST</em> have the "summary" subproperty inside the respective hCalendar "vevent") of <i>the</i> item (an hReview describes only one item), <em title="SHOULD in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">SHOULD</em> provide at least one URI ("url") for the item, and <em title="MAY in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MAY</em> provide at least one URL to a photo or depiction ("photo") of the item.  For items of type person or business, the item info (fn, url, photo) <em title="MUST in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MUST</em> be encapsulated in an <a href="/wiki/hcard" title="hcard">hCard</a>.  For items of type event, the item info <em title="SHOULD in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">SHOULD</em> be encapsulated in an <a href="/wiki/hcalendar" title="hcalendar">hCalendar</a> "vevent".  Non-URL unique item IDs (e.g. ISBNs, UPCs) <em title="MAY in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MAY</em> be represented as a URN ("url") for the item.  Encapsulated microformats (e.g. <a href="/wiki/hcard" title="hcard">hCard</a> and <a href="/wiki/hcalendar" title="hcalendar">hCalendar</a> events for now) may be set on the item itself (e.g. class="item vcard").  However, when using item info subproperties ("fn", "url", "photo"), they <em title="MUST in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MUST</em> be nested <em>inside</em> the item element.
+</p><p><b>reviewer</b>:: The optional property specifies the person who authored the review.  If the reviewer is specified, an hCard representing the reviewer <em title="MUST in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MUST</em> be provided.  For anonymous reviews, use "anonymous" (without quotes) for the full name of the reviewer.  If no "reviewer" is found inside the hReview, parsers <em title="SHOULD in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">SHOULD</em> look outside the hReview, in the context of the page, for the "reviewer". If there is no "reviewer" outside either, then parsers <em title="SHOULD in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">SHOULD</em> use the author defined by the containing document language, e.g. for HTML documents, the <code>&lt;address&gt;</code> contact info for the page (which is ideally marked up as an <a href="/wiki/hcard" title="hcard">hCard</a> as well), for Atom 1.0 the <code>&lt;entry&gt;</code> <code>&lt;author&gt;</code> if present and if not the <code>&lt;feed&gt;</code> <code>&lt;author&gt;</code>, for RSS the <code>&lt;author&gt;</code> inside the containing <code>&lt;item&gt;</code> element.
+</p><p><b>dtreviewed</b>:: This optional property when present <em title="MUST in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MUST</em> provide an <a href="/wiki/ISO-8601" class="mw-redirect" title="ISO-8601">ISO8601</a> absolute date time of when the review was written or otherwise authored.  This property <em title="SHOULD in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">SHOULD</em> use UTC, but <em title="MAY in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MAY</em> use the time zone offset syntax.  If dtreviewed is absent from the hReview, then look outside the hReview, in the surrounding context.  If the context is an <a href="/wiki/hatom" title="hatom">hAtom</a> entry, use its "published" (or "updated" if that is missing) datetime as the dtreviewed, if not present on the entry, use the "published" (or "updated" if that is missing) of the feed.  Otherwise use the creation date (or modified date if that is missing) information according to the containing document language (e.g. "published"/"updated" similarly for Atom feeds), then protocol (e.g. HTTP Last-Modified, or file system last modified datetime) as the dtreviewed.
+</p><p><b>rating</b>:: The rating is a fixed point integer (one decimal point of precision) from 1.0 to 5.0 inclusive indicating a rating for the item, higher indicating a better rating by default. Optionally a different integral "worst" value and/or "best" value <em title="MAY in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MAY</em> be specified to indicate a different range (e.g. 6 from 0-10).  The "best" value may be numerically smaller than the "worst" value.
+</p><p><b>description</b>:: This optional property contains the full text representing the written opinion of the reviewer.  The property <em title="MAY in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MAY</em>  include valid HTML markup (e.g. paragraphs).  User agents <em title="SHOULD in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">SHOULD</em> preserve any markup.  Multiple descriptions or section descriptions (e.g. pros and cons, plusses and minusses) <em title="SHOULD in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">SHOULD</em> be included in the description property.
+</p><p><b>tags</b>:: Tags are represented using a list of keywords or phrases (using the <a href="/wiki/rel-tag" title="rel-tag">rel-tag</a> microformat for each individual keyword or phrase tag) that the reviewer associates with the item.  The reviewer <em title="MAY in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MAY</em> optionally provide a tag-specific rating inside each <a href="/wiki/rel-tag" title="rel-tag">rel-tag</a>, e.g. ambience:5. Tag-specific ratings by default use the same range as an overall rating for the item if present, and <em title="MAY in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MAY</em> also have a custom worst...best range specified.  Authors <em title="MAY in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MAY</em> also invert this structure for the same semantic if it is more convenient for their markup, that is, place the <a href="/wiki/rel-tag" title="rel-tag">rel-tag</a> inside a rating to indicate a rated tag.  Note: rated tags <em title="SHOULD in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">SHOULD</em> ideally use a tag space that explains what the ratings for that tag mean. E.g. Food:18/30 <em title="SHOULD in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">SHOULD</em> link to a tags space for Food that explains what an 18 out of 30 means for the Food tag.
+</p><p><b>permalink</b>:: This optional property is a URL for the hReview.  In addition to using the <code>&lt;a href&gt;</code> tag for this property, the attribute <code>rel="self bookmark"</code> <em title="MUST in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MUST</em> be used to indicate that the hyperlink is a permalink for the review itself.  If the hyperlink already contains a <code>rel</code> attribute, then the values <code>self</code> and <code>bookmark</code> <em title="MUST in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MUST</em> be included among the space-separated set of values in the attribute.  Indexers <em title="MAY in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MAY</em> treat the permalink of a review as a unique ID in order to identify and collate the same review from multiple sources (such as indexing a page multiple times).  The permalink <em title="MAY in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MAY</em> also be used to indicate or imply the origin of the review. Authors <em title="MAY in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MAY</em> use the classname of "permalink" on the element representing the permalink.
+</p><p><b>license</b>:: an hReview indicates the license for its contents using the <b><a href="/wiki/rel-license" title="rel-license">rel-license</a></b> microformat.
+</p><p>The following property names have been reused from the <a href="/wiki/hcard" title="hcard">hCard</a> and <a href="/wiki/hcalendar" title="hcalendar">hCalendar</a> microformats: <code>version, summary, fn, url, photo, description</code>.  In addition, items and reviewers described by hCards <em title="MAY in &#82;FC 2119 context" style="text-transform: lowercase; font-style: italic;" class="&#82;FC2119">MAY</em> contain any hCard property.  The rel value "self" has been reused from the <a href="http://atompub.org/2005/07/11/draft-ietf-atompub-format-10.html" class="external text" title="http://atompub.org/2005/07/11/draft-ietf-atompub-format-10.html" rel="nofollow">Atom 1.0 specification</a>.
+</p>
+<a name="More_Semantic_Equivalents"></a><h3> <span class="mw-headline"> More Semantic Equivalents </span></h3>
+<p>For some properties there is a more semantic equivalent, and therefore they get special treatment, e.g.: 
+</p>
+<ul><li> For any "url", use <code>&lt;a class="url" href="..."&gt;...&lt;/a&gt;</code> inside the element with the class name 'hreview' in hReview.
+</li><li> And for "photo", use <code>&lt;img class="photo" src="..." alt="Photo of ..." /&gt;</code> 
+</li></ul>
+<ul><li> Ratings are often presented either as a set of images or characters, e.g. "***".  For these, the <code>&lt;abbr&gt;</code> element is particularly useful, as such characters are an abbreviation for the precise rating, e.g. <code>&lt;abbr class="rating" title="3.0"&gt;***&lt;/abbr&gt;</code>.  This is further explored in the next section.
+</li></ul>
+<a name="Language"></a><h4> <span class="mw-headline"> Language </span></h4>
+<ul><li> To explicitly convey the natural language that an hReview is written in, use the standard HTML 'lang' attribute on the element with class="hreview", e.g. <code>&lt;div class="hreview" lang="en"&gt; ... &lt;/div&gt;</code> If portions of an hReview (e.g. the item name) are in a different language, use the 'lang' attribute on those portions.
+</li><li> hReview processors which need to handle the language of reviews MUST process the standard HTML 'lang' attribute as specified.
+</li></ul>
+<a name="Human_vs._Machine_Readable"></a><h3> <span class="mw-headline"> Human vs. Machine Readable </span></h3>
+<p>If an <code>&lt;abbr&gt;</code> element is used for a property, then its '<code>title</code>' attribute is used for the value of the property, instead of the contents of the element, which can then be used to provide a user-friendly alternate presentation of the value. 
+</p><p>Similarly, if an <code>&lt;img /&gt;</code> element is used for one or more properties, it MUST be treated as follows: 
+</p>
+<ol><li> For the "photo" property and any other property that takes a URL as its value, the <code>src="..."</code> attribute provides the property value. 
+</li><li> For other properties, the <code>&lt;img /&gt;</code> element's '<code>alt</code>' attribute is the value of the property.
+</li></ol>
+<a name="Object_Includes"></a><h3> <span class="mw-headline"> Object Includes </span></h3>
+<p>hReview 0.3 includes support for the object <a href="/wiki/include-pattern" title="include-pattern">include-pattern</a>.
+</p><p>Often a single page lists an item, and then several reviews for that item.  In order to avoid having to repeat the item info for each review of the item, the first review should be marked up as an hReview, with a unique "id" attribute on the item info, and then following reviews should use the object <a href="/wiki/include-pattern" title="include-pattern">include-pattern</a> to include the item info from the first review.
+</p><p><br />
+</p>
+<a name="Notes"></a><h3> <span class="mw-headline"> Notes </span></h3>
+<p>This section is informative.
+</p>
+<ul><li> By marking up a review with the hReview microformat, the expectation is communicated that the review MAY be indexed.  This has no impact on the copyright of the review itself which the publisher may explicitly specify using <a href="/wiki/rel-license" title="rel-license">rel-license</a> as specified above.
+</li><li> The enumerated list of item types is under development and may be extended.
+</li><li> Additional details about a particular item should be specified with the rest of the item's info at the URL provided for the item.
+</li><li> Most rating systems use the range 1.0 to 5.0, and most of those represent the rating as a number (and possibly half) of stars.  Sites may use whatever graphic they wish to represent the rating.
+</li></ul>
+<a name="Examples"></a><h2> <span class="mw-headline"> Examples </span></h2>
+<p>Here are a few examples of reviews from current web sites, and how they could be easily enhanced to support the hReview structured review microformat.  
+</p><p>Want to get started with writing an <strong class="selflink">hReview</strong>?  Use the <a href="http://microformats.org/code/hreview/creator" class="external text" title="http://microformats.org/code/hreview/creator" rel="nofollow">hReview creator</a> to write a review and publish it on your blog.
+</p>
+<a name="Restaurant_reviews"></a><h3> <span class="mw-headline"> Restaurant reviews </span></h3>
+<p>Here is an example of a simple online restaurant review:
+</p>
+<pre>
+&lt;div&gt;
+ &lt;span&gt;5 stars out of 5 stars&lt;/span&gt;
+ &lt;h4&gt;Crepes on Cole is awesome&lt;/h4&gt;
+ &lt;span&gt;Reviewer: &lt;span&gt;Tantek&lt;/span&gt; - April 18, 2005&lt;/span&gt;
+ &lt;blockquote&gt;&lt;p&gt;
+  Crepes on Cole is one of the best little creperies in San Francisco. 
+  Excellent food and service. Plenty of tables in a variety of sizes 
+  for parties large and small.  Window seating makes for excellent 
+  people watching to/from the N-Judah which stops right outside.  
+  I've had many fun social gatherings here, as well as gotten 
+  plenty of work done thanks to neighborhood WiFi.
+ &lt;/p&gt;&lt;/blockquote&gt;
+ &lt;p&gt;Visit date: &lt;span&gt;April 2005&lt;/span&gt;&lt;/p&gt;
+ &lt;p&gt;Food eaten: &lt;span&gt;Florentine crepe&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+</pre>
+<p>Adding hReview to this review is quite simple:
+</p>
+<div class="mf">
+<div class="hreview">
+ <span><span class="rating">5</span> out of 5 stars</span>
+ <h4 class="summary">Crepes on Cole is awesome</h4>
+ <span class="reviewer vcard">Reviewer: <span class="fn">Tantek</span> - 
+ <abbr class="dtreviewed" title="20050418T2300-0700">April 18, 2005</abbr></span>
+ <div class="description item vcard"><p>
+  <span class="fn org">Crepes on Cole</span> is one of the best little 
+  creperies in <span class="adr"><span class="locality">San Francisco</span></span>.
+  Excellent food and service. Plenty of tables in a variety of sizes 
+  for parties large and small.  Window seating makes for excellent 
+  people watching to/from the N-Judah which stops right outside.  
+  I've had many fun social gatherings here, as well as gotten 
+  plenty of work done thanks to neighborhood WiFi.
+ </p></div>
+ <p>Visit date: <span>April 2005</span></p>
+ <p>Food eaten: <span>Florentine crepe</span></p>
+</div>
+</div>
+<p>Note that some of the properties of this sample review are not captured by hReview (visit date, food eaten).  This is deliberate per the scope of keeping hReview minimal and simple.
+</p><p>This sample hReview could be rendered like this:
+</p><p>5 stars out of 5 stars<br />
+<b>Crepes on Cole is awesome</b><br />
+Reviewer: Tantek - April 18, 2005<br />
+</p><p>Crepes on Cole is one of the best little creperies in San Francisco. Excellent food and service. Plenty of tables in a variety of sizes for parties large and small.  Window seating makes for excellent people watching to/from the N-Judah which stops right outside. I've had many fun social gatherings here, as well as gotten plenty of work done thanks to neighborhood wifi.
+</p><p>Visit date: April 2005<br />
+Food eaten: Florentine crepe<br />
+</p>
+<a name="Multidimensional_Restaurant_Review"></a><h4> <span class="mw-headline"> Multidimensional Restaurant Review </span></h4>
+<p>Some restaurant reviews indicate ratings for different aspects of the restaurant.  Such details are represented in hReview using tagged ratings.  In addition, note the inline tags inside the description of this review.
+</p><p>Here is one such review in text format:
+</p>
+<pre>Cafe Borrone
+
+1010 El Camino Real, Menlo Park, CA 94025, +1-650-327-0830;
+cafeborrone.com
+
+Food: 18/30; Ambience: 19/30; Service: 15/30; Price: $$...
+
+This cafe is a welcoming oasis on the Peninsula.  It even has a fountain
+outside which cloaks the nearby sounds of El Camino traffic.  Next door to a  
+superb indy bookstore, Cafe Borrone is an ideal spot to grab a coffee or a 
+snack to accompany a newly purchased book or imported periodical.  Soups and 
+sandwich specials rotate daily.  The corn chowder with croutons and big 
+chunks of cheese goes especially well with a freshly toasted mini-baguette.  
+Evenings are often crowded and may require sharing a table with a perfect 
+stranger.  Espresso afficionados will appreciate the Illy coffee.  Noise 
+levels can vary from peaceful in the late mornings to nearly overwhelming on 
+jazz band nights.
+</pre>
+<p>As an hReview:
+</p>
+<div class="MF">
+<div class="hreview">
+ <div class="item vcard">
+  <div class="fn org summary">Cafe Borrone</div>
+  <span class="adr">
+   <span class="street-address">1010 El Camino Real</span>,
+   <span class="locality">Menlo Park</span>,
+   <span class="region">CA</span>
+   <span class="postal-code">94025</span>,
+  </span>
+  <span class="tel">+1-650-327-0830</span>;
+  <a class="url" href="http://cafeborrone.com">cafeborrone.com</a>
+ </div>
+ <ul>
+  <li class="rating"><a href="http://en.wikipedia.org/wiki/Food" rel="tag">
+   Food: <span class="value">18</span>/<span class="best">30</span></a>;</li>
+  <li class="rating"><a href="http://flickr.com/photos/tags/Ambience" rel="tag">
+   Ambience: <span class="value">19</span>/<span class="best">30</span></a>;</li>
+  <li class="rating"><a href="http://en.wikipedia.org/wiki/Service" rel="tag">
+   Service: <span class="value">15</span>/<span class="best">30</span></a>;</li>
+  <li class="rating"><a href="http://en.wikipedia.org/wiki/Price" rel="tag">
+   Price: <abbr class="value" title="2">$$</abbr>...</a></li>
+ </ul>
+ <div class="description"><p>
+  This <abbr class="type" title="business">
+  <a href="http://en.wikipedia.org/wiki/cafe" rel="tag">cafe</a></abbr> 
+  is a welcoming oasis on the Peninsula.  
+  It even has a fountain outside which nearly eliminates 
+  the sounds of El Camino traffic.  Next door to a superb indy bookstore, 
+  Cafe Borrone is an ideal spot to grab a 
+  <a href="http://en.wikipedia.org/wiki/coffee" rel="tag">coffee</a> 
+  or a meal to accompany a newly purchased book or imported periodical.  
+  <a href="http://technorati.com/tag/soup" rel="tag">Soups</a> and 
+  <a href="http://technorati.com/tag/sandwich" rel="tag">sandwich</a> 
+  specials rotate daily.  The corn chowder with croutons and big chunks of cheese 
+  goes especially well with a freshly toasted mini-baguette.  Evenings are 
+  often crowded and may require sharing a table with a perfect stranger. 
+  <a href="http://flickr.com/photos/tags/espresso" rel="tag">Espresso</a> 
+  afficionados will appreciate the 
+  <a href="http://en.wikipedia.org/wiki/Illy" rel="tag">Illy</a> coffee.  
+  Noise levels can vary from peaceful in the late mornings to nearly overwhelming on 
+  <a href="http://en.wikipedia.org/wiki/jazz" rel="tag">jazz</a> band nights.
+ </p></div>
+ Review (<a href="http://microformats.org/wiki/hreview"> 
+  hReview v<span class="version">0.3</span></a>)
+ by <span class="reviewer vcard"><span class="fn">anonymous</span></span>, 
+ <abbr class="dtreviewed" title="20050428T2130-0700">April 28th, 2005</abbr>.
+</div>
+</div>
+<p>With an accompanying CSS style sheet like:
+</p>
+<pre>
+a.url { display:block }
+ul { margin:1em 0; padding:0 }
+ul li { display:inline }
+</pre>
+<p>This hReview could be presented similar to the original text:
+</p><p>Cafe Borrone<br />
+1010 El Camino Real, Menlo Park, CA 94025, +1-650-327-0830;<br />
+<a href="http://cafeborrone.com/" class="external text" title="http://cafeborrone.com/" rel="nofollow">cafeborrone.com</a><br />
+<br />
+<a href="http://en.wikipedia.org/wiki/Food" class="external text" title="http://en.wikipedia.org/wiki/Food" rel="nofollow">Food: 18/30</a>;
+<a href="http://flickr.com/photos/tags/Ambience" class="external text" title="http://flickr.com/photos/tags/Ambience" rel="nofollow">Ambience: 19/30</a>;
+<a href="http://en.wikipedia.org/wiki/Service" class="external text" title="http://en.wikipedia.org/wiki/Service" rel="nofollow">Service: 15/30</a>;
+<a href="http://en.wikipedia.org/wiki/Price" class="external text" title="http://en.wikipedia.org/wiki/Price" rel="nofollow">Price: $$...</a><br />
+</p><p>This <a href="http://en.wikipedia.org/wiki/cafe" class="external text" title="http://en.wikipedia.org/wiki/cafe" rel="nofollow">cafe</a> is a welcoming oasis on the Peninsula.  It even has a fountain outside which cloaks the nearby sounds of El Camino traffic.  Next door to a superb indy bookstore, Cafe Borrone is an ideal spot to grab a <a href="http://en.wikipedia.org/wiki/coffee" class="external text" title="http://en.wikipedia.org/wiki/coffee" rel="nofollow">coffee</a> or a snack to accompany a newly purchased book or imported periodical.  <a href="http://technorati.com/tag/soup" class="external text" title="http://technorati.com/tag/soup" rel="nofollow">Soups</a> and <a href="http://technorati.com/tag/sandwich" class="external text" title="http://technorati.com/tag/sandwich" rel="nofollow">sandwich</a> specials rotate daily.  The corn chowder with croutons and big chunks of cheese goes especially well with a freshly toasted mini-baguette.  Evenings are often crowded and may require sharing a table with a perfect stranger.  <a href="http://flickr.com/photos/tags/espresso" class="external text" title="http://flickr.com/photos/tags/espresso" rel="nofollow">Espresso</a> afficionados will appreciate the <a href="http://en.wikipedia.org/wiki/Illy" class="external text" title="http://en.wikipedia.org/wiki/Illy" rel="nofollow">Illy</a> coffee.  Noise levels can vary from peaceful in the late mornings to nearly overwhelming on <a href="http://en.wikipedia.org/wiki/jazz" class="external text" title="http://en.wikipedia.org/wiki/jazz" rel="nofollow">jazz</a> band nights.
+</p><p>Review (<a href="http://microformats.org/wiki/hreview" class="external text" title="http://microformats.org/wiki/hreview" rel="nofollow">hReview v0.3</a>) by anonymous, April 28th, 2005.
+</p>
+<a name="Product_review"></a><h3> <span class="mw-headline"> Product review </span></h3>
+<p>Here is an example of a product review:
+</p>
+<pre>
+&lt;div&gt;
+ &lt;a href=&quot;http://www.amazon.com/exec/obidos/ASIN/B000089CJI/&quot;&gt;
+  &lt;img src=&quot;http://images.amazon.com/images/P/B000089CJI.01._SCTHUMBZZZ_.jpg&quot; 
+              alt=&quot;Album cover photo: The Postal Service: Give Up.&quot; /&gt;
+ The Postal Service: Give Up&lt;/a&gt;
+ &lt;blockquote&gt;&lt;p&gt;
+   &quot;The people thought they were just being rewarded for treating others 
+    as they like to be treated, for obeying stop signs and curing diseases, 
+    for mailing letters with the address of the sender... Don't wake me, 
+    I plan on sleeping in...&quot;
+   &lt;/p&gt;&lt;p&gt;
+   &quot;Nothing Better&quot; is a great track on this album, too... 
+ &lt;/p&gt;&lt;/blockquote&gt;
+ (*****)
+&lt;/div&gt;
+</pre>
+<p>Adding hReview to this review is also quite simple, but in this case requires a few more elements for the rating and reviewer which are required by hReview:
+</p>
+<pre>
+&lt;div class=&quot;hreview&quot;&gt;&lt;span class=&quot;item&quot;&gt;
+ &lt;a class=&quot;url fn&quot; href=&quot;http://www.amazon.com/exec/obidos/ASIN/B000089CJI/&quot;&gt;
+  &lt;img src=&quot;http://images.amazon.com/images/P/B000089CJI.01._SCTHUMBZZZ_.jpg&quot; 
+       alt=&quot;Album cover photo: The Postal Service: Give Up. &quot; 
+       class=&quot;photo&quot; /&gt;
+  The Postal Service: Give Up&lt;/a&gt;&lt;/span&gt;
+ &lt;div class=&quot;description&quot;&gt;&lt;p&gt;
+    &quot;The people thought they were just being rewarded for treating others 
+     as they like to be treated, for obeying stop signs and curing diseases, 
+     for mailing letters with the address of the sender... Don't wake me, 
+     I plan on sleeping in...&quot;
+   &lt;/p&gt;&lt;p&gt;
+   &quot;Nothing Better&quot; is a great track on this album, too... 
+ &lt;/p&gt;&lt;/div&gt;
+ (&lt;abbr class=&quot;rating&quot; title=&quot;5&quot;&gt;*****&lt;/abbr&gt;)
+ &lt;p class=&quot;reviewer vcard&quot;&gt;Review by 
+  &lt;a class=&quot;url fn&quot; href=&quot;http://ifindkarma.com/blog/&quot;&gt;Adam Rifkin&lt;/a&gt;, 
+  &lt;abbr class=&quot;dtreviewed&quot; title=&quot;200502&quot;&gt;February 2005&lt;/abbr&gt;
+ &lt;/p&gt;
+&lt;/div&gt;
+</pre>
+<p>And this hReview might be presented like this:
+</p><p><br />
+[Album cover photo: ]
+[The Postal Service:]
+[      Give Up      ]
+</p><p>The Postal Service: Give Up
+</p><p>"The people thought they were just being rewarded for treating others as they like to be treated, for obeying stop signs and curing diseases, for mailing letters with the address of the sender... Don't wake me, I plan on sleeping in..."
+</p><p>"Nothing Better" is a great track on this album, too...
+</p><p>(*****)
+</p><p>Review by Adam Rifkin, February 2005.
+</p>
+<a name="Movie_Review"></a><h3> <span class="mw-headline"> Movie Review </span></h3>
+<p>Finally, here is an example of a movie review.
+</p>
+<pre>
+&lt;div&gt;
+ &lt;span&gt;anonymous, April 18th, 2005&lt;/span&gt;
+ &lt;div&gt;
+  &lt;a lang=&quot;zh&quot; href=&quot;http://www.imdb.com/title/tt0299977/&quot;&gt;
+  Ying Xiong (&lt;span lang=&quot;en&quot;&gt;HERO&lt;/span&gt;)
+  &lt;/a&gt;
+ &lt;/div&gt;
+ &lt;div&gt;Rating: 4 out of 5&lt;/div&gt;
+ &lt;blockquote&gt;&lt;p&gt;
+  This movie has great visuals and music.
+ &lt;/p&gt;&lt;/blockquote&gt;
+&lt;/div&gt;
+</pre>
+<p>With hReview:
+</p>
+<pre>
+&lt;div class=&quot;hreview&quot;&gt;
+ &lt;span class=&quot;reviewer vcard&quot;&gt;
+  &lt;span class=&quot;fn&quot;&gt;anonymous&lt;/span&gt;, 
+  &lt;abbr class=&quot;dtreviewed&quot; title=&quot;20050418&quot;&gt;April 18th, 2005&lt;/abbr&gt;
+ &lt;/span&gt;
+ &lt;div class=&quot;item&quot;&gt;
+  &lt;a lang=&quot;zh&quot; class=&quot;url fn&quot; href=&quot;http://www.imdb.com/title/tt0299977/&quot;&gt;
+  Ying Xiong (&lt;span lang=&quot;en&quot;&gt;HERO&lt;/span&gt;)
+  &lt;/a&gt;
+ &lt;/div&gt;
+ &lt;div&gt;Rating: &lt;span class=&quot;rating&quot;&gt;4&lt;/span&gt; out of 5&lt;/div&gt;
+ &lt;div class=&quot;description&quot;&gt;&lt;p&gt;
+  This movie has great music and visuals.
+ &lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+<p>Which could be presented like this:
+</p><p>anonymous, April 18th, 2005<br />
+Ying Xiong (HERO)<br />
+Rating: 4 out of 5<br />
+</p><p>This movie has great music and visuals.
+</p>
+<a name="Examples_in_the_wild"></a><h2> <span class="mw-headline"> Examples in the wild </span></h2>
+<p>This section is <b>informative</b>. The number of hReview examples in the wild has expanded far beyond the capacity of being kept inline in this specification. They have been moved to a <a href="/wiki/hreview-examples-in-wild" title="hreview-examples-in-wild">separate page</a>.
+</p><p>See <a href="/wiki/hreview-examples-in-wild" title="hreview-examples-in-wild">hReview Examples in the wild</a>.
+</p>
+<a name="Implementations"></a><h2> <span class="mw-headline"> Implementations </span></h2>
+<p>This section is <b>informative</b>. The number of hReview implementations has also expanded beyond the capacity of keeping them inline. They have been moved to a <a href="/wiki/hreview-implementations" title="hreview-implementations">separate page</a>.
+</p><p>See <a href="/wiki/hreview-implementations" title="hreview-implementations">hReview Implementations</a>.
+</p>
+<a name="Design_Principles"></a><h2> <span class="mw-headline"> Design Principles </span></h2>
+<p>This section is <b>informative</b>.  hReview was designed using design <a href="/wiki/principles" title="principles">principles</a> similar to those that went into <a href="/wiki/hCard" class="mw-redirect" title="hCard">hCard</a> and thus this overview is included for informational purposes.
+</p><p><b>Note: the Semantic XHTML Design Principles were written primarily within the context of developing <a href="/wiki/hcard" title="hcard">hCard</a> and <a href="/wiki/hcalendar" title="hcalendar">hCalendar</a>, thus it may be easier to understand these principles in the context of the <a href="/wiki/hcard-design-methodology" title="hcard-design-methodology">hCard design methodology</a> (i.e. read that first). <a href="/wiki/User:Tantek" title="User:Tantek">Tantek</a></b>
+</p><p>XHTML is built on XML, and thus XHTML based formats can be used not only for convenient display presentation, but also for general purpose data exchange.  In many ways, XHTML based formats exemplify the best of both HTML and XML worlds.  However, when building XHTML based formats, it helps to have a guiding set of principles.
+</p>
+<ol><li> Reuse the schema (names, objects, properties, values, types, hierarchies, constraints) as much as possible from pre-existing, established, well-supported standards by reference.  Avoid restating constraints expressed in the source standard.  Informative mentions are ok.
+<ol><li> For types with multiple components, use nested elements with class names equivalent to the names of the components.
+</li><li> Plural components are made singular, and thus multiple nested elements are used to represent multiple text values that are comma-delimited.
+</li></ol>
+</li><li> Use the most accurately precise <a href="/wiki/semantic-xhtml" title="semantic-xhtml">semantic XHTML</a> building block for each object etc.
+</li><li> Otherwise use a generic structural element (e.g. <code>&lt;span&gt;</code> or <code>&lt;div&gt;</code>), or the appropriate contextual element (e.g. an <code>&lt;li&gt;</code> inside a <code>&lt;ul&gt;</code> or <code>&lt;ol&gt;</code>).
+</li><li> Use class names based on names from the original schema, unless the semantic XHTML building block precisely represents that part of the original schema.  If names in the source schema are case-insensitive, then use an all lowercase equivalent.  Components names implicit in prose (rather than explicit in the defined schema) should also use lowercase equivalents for ease of use. Spaces in component names become dash '-' characters.
+</li><li> Finally, if the format of the data according to the original schema is too long and/or not human-friendly, use <code>&lt;abbr&gt;</code> instead of a generic structural element, and place the literal data into the 'title' attribute (where abbr expansions go), and the more brief and human readable equivalent into the element itself.  Further informative explanation of this use of <code>&lt;abbr&gt;</code>: <a href="http://tantek.com/log/2005/01.html#d26t0100" class="external text" title="http://tantek.com/log/2005/01.html#d26t0100" rel="nofollow">Human vs. ISO8601 dates problem solved</a>
+</li></ol>
+<a name="Inspiration_and_Acknowledgments"></a><h2> <span class="mw-headline"> Inspiration and Acknowledgments </span></h2>
+<p>Thanks to everyone who responded to the open call for implementor participation for hReview.  The authors in particular wish to thank the following individuals for their constructive input and feedback: <a href="/wiki/User:Richardault" title="User:Richardault">Richard Ault</a>, <a href="http://dannyayers.com" class="external text" title="http://dannyayers.com" rel="nofollow">Danny Ayers</a>, <a href="http://www.vertexdev.com/~jeff/" class="external text" title="http://www.vertexdev.com/~jeff/" rel="nofollow">Jeffrey Barr</a>,<a href="http://adriancuthbert.blogspot.com/" class="external text" title="http://adriancuthbert.blogspot.com/" rel="nofollow">Adrian Cuthbert</a>,<a href="http://jason.defillippo.com/" class="external text" title="http://jason.defillippo.com/" rel="nofollow">Jason DeFillippo</a>, <a href="http://www.hybernaut.com/bdv" class="external text" title="http://www.hybernaut.com/bdv" rel="nofollow">Brian Del Vecchio</a>, Scott Derringer, <a href="http://budgibson.com/home/" class="external text" title="http://budgibson.com/home/" rel="nofollow">Bud Gibson</a>, <a href="http://joi.ito.com/" class="external text" title="http://joi.ito.com/" rel="nofollow">Joi Ito</a>, <a href="http://www.kanai.net/weblog/" class="external text" title="http://www.kanai.net/weblog/" rel="nofollow">Gen Kanai</a>,<a href="http://niallkennedy.com/" class="external text" title="http://niallkennedy.com/" rel="nofollow">Niall Kennedy</a>, <a href="http://labs.commerce.net/wiki/index.php/Rohit_Khare" class="external text" title="http://labs.commerce.net/wiki/index.php/Rohit_Khare" rel="nofollow">Rohit Khare</a>, <a href="http://theryanking.com/" class="external text" title="http://theryanking.com/" rel="nofollow">Ryan King</a>, <a href="http://www.jluster.org/" class="external text" title="http://www.jluster.org/" rel="nofollow">Jonas Luster</a>, <a href="http://epeus.blogspot.com/" class="external text" title="http://epeus.blogspot.com/" rel="nofollow">Kevin Marks</a>, Mark Nottingham, <a href="http://www.powazek.com/" class="external text" title="http://www.powazek.com/" rel="nofollow">Derek Powazek</a>, <a href="http://www.judysbook.com/" class="external text" title="http://www.judysbook.com/" rel="nofollow">Jeff Rodenburg</a>, <a href="http://sifry.com/alerts/" class="external text" title="http://sifry.com/alerts/" rel="nofollow">David Sifry</a>, <a href="http://jystewart.net/" class="external text" title="http://jystewart.net/" rel="nofollow">James Stewart</a>, <a href="http://kung-foo.tv/" class="external text" title="http://kung-foo.tv/" rel="nofollow">Adriaan Tijsseling</a>, <a href="http://www.flashenabled.com/" class="external text" title="http://www.flashenabled.com/" rel="nofollow">Phillip Torrone</a>, Thai Tran, <a href="http://w6daily.winn.com/" class="external text" title="http://w6daily.winn.com/" rel="nofollow">Phillip Winn</a>, <a href="http://yohei-y.blogspot.com" class="external text" title="http://yohei-y.blogspot.com" rel="nofollow">YAMAMOTO Yohei</a>.
+</p>
+<a name="References"></a><h2> <span class="mw-headline"> References </span></h2>
+<a name="Normative_References"></a><h3> <span class="mw-headline"> Normative References </span></h3>
+<ul><li> <a href="http://www.w3.org/TR/2002/REC-xhtml1-20020801/" class="external text" title="http://www.w3.org/TR/2002/REC-xhtml1-20020801/" rel="nofollow">XHTML 1.0 SE</a>
+</li><li> <a href="http://gmpg.org/xmdp/" class="external text" title="http://gmpg.org/xmdp/" rel="nofollow">XMDP</a>
+</li><li> <a href="/wiki/hcard" title="hcard">hCard</a>
+</li><li> <a href="/wiki/hcalendar" title="hcalendar">hCalendar</a>
+</li><li> <a href="/wiki/rel-tag" title="rel-tag">rel-tag</a>
+</li><li> <a href="http://www.ietf.org/rfc/rfc2119.txt" class="external text" title="http://www.ietf.org/rfc/rfc2119.txt" rel="nofollow">RFC2119</a>
+</li><li> <a href="http://www.ietf.org/rfc/rfc3986.txt" class="external text" title="http://www.ietf.org/rfc/rfc3986.txt" rel="nofollow">RFC3986</a>
+</li><li> <a href="http://www.ietf.org/rfc/rfc4287.txt" class="external text" title="http://www.ietf.org/rfc/rfc4287.txt" rel="nofollow">RFC4287</a> (Atom 1.0)
+</li></ul>
+<a name="Informative_References"></a><h3> <span class="mw-headline"> Informative References </span></h3>
+<ul><li> <a href="http://www.w3.org/TR/REC-CSS1" class="external text" title="http://www.w3.org/TR/REC-CSS1" rel="nofollow">CSS1</a>
+</li><li> ISO.8601.1988
+<ul><li> International Organization for Standardization, "Data elements and interchange formats - Information interchange - Representation of dates and times", ISO Standard 8601, June 1988.
+</li></ul>
+</li><li> <a href="http://www.w3.org/TR/1998/NOTE-datetime-19980827" class="external text" title="http://www.w3.org/TR/1998/NOTE-datetime-19980827" rel="nofollow">W3C NOTE-datetime-19980827</a>
+</li><li> <a href="http://www.ietf.org/rfc/rfc3667.txt" class="external text" title="http://www.ietf.org/rfc/rfc3667.txt" rel="nofollow">RFC3667</a>
+</li><li> <a href="http://www.ietf.org/rfc/rfc3668.txt" class="external text" title="http://www.ietf.org/rfc/rfc3668.txt" rel="nofollow">RFC3668</a>
+</li><li> <a href="http://www.w3.org/Consortium/Patent-Policy-20040205/" class="external text" title="http://www.w3.org/Consortium/Patent-Policy-20040205/" rel="nofollow">W3C Patent Policy</a>
+</li><li> <a href="http://local.yahoo.com/details?id=21359628" class="external text" title="http://local.yahoo.com/details?id=21359628" rel="nofollow">Crepes on Cole reviews on Yahoo! Local</a>
+</li><li> Other reviews efforts. See <a href="/wiki/reviews-formats" title="reviews-formats">reviews-formats</a>.
+</li><li> Contributed from <a href="http://developers.technorati.com/wiki/hReview" class="external free" title="http://developers.technorati.com/wiki/hReview" rel="nofollow">http://developers.technorati.com/wiki/hReview</a>.
+</li></ul>
+<a name="Similar_Work"></a><h4> <span class="mw-headline"> Similar Work </span></h4>
+<ul><li> <a href="/wiki/hlisting-proposal" class="mw-redirect" title="hlisting-proposal">hListing</a>
+</li><li> <a href="/wiki/xoxo" title="xoxo">XOXO</a>
+</li></ul>
+<a name="Copyright"></a><h2> <span class="mw-headline"> Copyright </span></h2>
+<p>This specification is (C) 2005 by the authors. However, the authors intend to submit this specification to a standards body with a liberal copyright/licensing policy such as the <a href="http://gmpg.org/" class="external text" title="http://gmpg.org/" rel="nofollow">GMPG</a>, <a href="http://ietf.org/" class="external text" title="http://ietf.org/" rel="nofollow">IETF</a>, and/or <a href="http://w3.org" class="external text" title="http://w3.org" rel="nofollow">W3C</a>. Anyone wishing to contribute should read their copyright principles, policies and licenses (e.g. the <a href="http://gmpg.org/principles" class="external text" title="http://gmpg.org/principles" rel="nofollow">GMPG Principles</a>) and agree to them, including licensing of all contributions under all required licenses (e.g. <a href="http://creativecommons.org/licenses/by/1.0/" class="external text" title="http://creativecommons.org/licenses/by/1.0/" rel="nofollow">CC-by 1.0</a> and later), before contributing.
+</p>
+<ul><li> <a href="/wiki/User:Tantek" title="User:Tantek">Tantek</a>: I release all my contributions to this specification into the public domain and I encourage the other authors to do so as well.
+<ul><li> When all authors/editors have done so, we can remove the MicroFormatCopyrightStatement template reference and replace it with the MicroFormatPublicDomainContributionStatement.
+</li></ul>
+</li></ul>
+<a name="Patents"></a><h2> <span class="mw-headline"> Patents </span></h2>
+<p>This specification is subject to a royalty free patent policy, e.g. per the <a href="http://www.w3.org/Consortium/Patent-Policy-20040205/" class="external text" title="http://www.w3.org/Consortium/Patent-Policy-20040205/" rel="nofollow">W3C Patent Policy</a>, and  IETF <a href="http://www.ietf.org/rfc/rfc3667.txt" class="external text" title="http://www.ietf.org/rfc/rfc3667.txt" rel="nofollow">RFC3667</a> &amp; <a href="http://www.ietf.org/rfc/rfc3668.txt" class="external text" title="http://www.ietf.org/rfc/rfc3668.txt" rel="nofollow">RFC3668</a>.
+</p>
+<a name="Work_in_progress"></a><h2> <span class="mw-headline"> Work in progress </span></h2>
+<p>This specification is a work in progress. As additional aspects are discussed, understood, and written, they will be added. 
+</p>
+<a name="Changes_from_v0.2"></a><h3> <span class="mw-headline"> Changes from v0.2 </span></h3>
+<p>The following changes have been made in hReview v0.3 over <a href="/wiki/hreview-v0.2" title="hreview-v0.2">hReview v0.2</a>:
+</p><p>Normative changes:
+</p>
+<ol><li> MUST (instead of SHOULD) use <a href="/wiki/hcard" title="hcard">hCard</a> for the item description of a business or person
+</li><li> "reviewer" changes
+<ol><li> Made reviewer *optional* per feedback from Ryan King and Mark Nottingham
+</li><li> If reviewer is absent from the hReview, then look outside the hReview, in the context of the page, for the reviewer.  If there is no "reviewer" outside either, then use the author information according to the containing document language (e.g. <code>&lt;address&gt;</code> for HTML pages) as the reviewer.
+</li><li> MUST (instead of SHOULD) use <a href="/wiki/hcard" title="hcard">hCard</a> to represent reviewer information
+</li></ol>
+</li><li> "dtreviewed" changes
+<ol><li> Made dtreviewed *optional* per feedback from Ryan King and Mark Nottingham
+</li><li> If dtreviewed is absent from the hReview, then look outside the hReview, in the surrounding context.  If the context is an <a href="/wiki/hatom" title="hatom">hAtom</a> entry, use its "published" (or "updated" if that is missing) datetime as the dtreviewed, if not present on the entry, use the "published" (or "updated" if that is missing) of the feed.  Otherwise use the information according to the containing document language (e.g. "published"/"updated" similarly for Atom feeds), then protocol (e.g. HTTP Last-Modified, or file system last modified datetime).
+</li></ol>
+</li><li> SHOULD use <a href="/wiki/hcalendar" title="hcalendar">hCalendar</a> to represent an item of 'type' 'event'
+</li><li> Added one decimal digit of precision to ratings' numerical values based on publisher experience.
+</li><li> Use <a href="http://microformats.org/wiki/hcard#Value_excerpting" class="external text" title="http://microformats.org/wiki/hcard#Value_excerpting" rel="nofollow">the "value" construct from hCard</a> (as it is used in "tel" properties for example) to more explicitly markup the rating value when also providing (marking up) the best/worst of a rating.
+</li><li> Added <a href="/wiki/rel-license" title="rel-license">rel-license</a> to indicate the license of the hReview as a whole.
+</li><li> Permit tags inside ratings to denote rated tags, the same as ratings inside tags per suggestion from Eran Globen.
+</li><li> Add <a href="/wiki/include-pattern" title="include-pattern">include-pattern</a> support to allow multiple reviews for the same item to not repeat the item info.
+</li></ol>
+<p>Informative changes (several, but in particular):
+</p>
+<ol><li> Note that scalar/rated tags would ideally use a tag space that explain the ratings for that tag.  E.g. to explain what Food:18/30 means.
+</li><li> Updated examples accordingly.
+</li></ol>
+<a name="Further_Reading"></a><h2> <span class="mw-headline"> Further Reading </span></h2>
+<ul><li> See also <a href="http://www.technorati.com/cosmos/referer.html" class="external text" title="http://www.technorati.com/cosmos/referer.html" rel="nofollow">blogs discussing this page</a>.
+</li></ul>
+<a name="Related_Pages"></a><h2> <span class="mw-headline"> Related Pages </span></h2>
+<ul><li> <strong class="selflink">hreview</strong>
+</li><li> <a href="/wiki/hreview-aggregate" title="hreview-aggregate">hReview-aggregate</a> - microformat for specifying summary information from a collection of reviews about a product or service
+</li><li> <a href="http://microformats.org/code/hreview/creator" class="external text" title="http://microformats.org/code/hreview/creator" rel="nofollow">hReview creator</a> (<a href="/wiki/hreview-creator-feedback" class="mw-redirect" title="hreview-creator-feedback">feedback</a>) - create your own hReview.
+</li><li> <a href="/wiki/index.php?title=hreview-authoring&amp;action=edit&amp;redlink=1" class="new" title="hreview-authoring (not yet written)">hReview authoring</a> - learn how to add hReview mark-up to your existing contact info.
+</li><li> <a href="/wiki/hreview-brainstorming" title="hreview-brainstorming">hReview brainstorming</a> - thoughts for improving hReview.
+</li><li> <a href="/wiki/hreview-cheatsheet" title="hreview-cheatsheet">hReview cheatsheet</a> - hCard properties.
+</li><li> <a href="/wiki/hreview-examples-in-wild" title="hreview-examples-in-wild">hReview examples in the wild</a> - an on-going list of websites which use hReview.
+</li><li> <a href="/wiki/hreview-faq" title="hreview-faq">hReview FAQ</a> - If you have any questions about hReview, check here, and if you don't find answers, add your questions!
+</li><li> <a href="/wiki/hreview-feedback" title="hreview-feedback">hReview feedback</a> - Feedback is encouraged!
+</li><li> <a href="/wiki/hreview-implementations" title="hreview-implementations">hReview implementations</a> - websites or tools which either generate or parse hReviews.
+</li><li> <a href="/wiki/hreview-issues" title="hreview-issues">hReview issues</a> - Please add any issues with the specification to the issues page.
+</li><li> <a href="/wiki/hreview-parsing" title="hreview-parsing">hReview parsing</a> - Normatively details of how to parse hReviews.
+</li><li> <a href="/wiki/hreview-profile" title="hreview-profile">hReview profile</a> - The XMDP profile for hReview.
+</li><li> <a href="/wiki/index.php?title=hreview-tests&amp;action=edit&amp;redlink=1" class="new" title="hreview-tests (not yet written)">hReview tests</a> - a wiki page with actual embedded hReviews to try parsing.
+</li><li> <a href="/wiki/advocacy#hReview" title="advocacy">hReview advocacy</a> - encourage others to use hReview.
+</li><li> <a href="/wiki/review-examples" title="review-examples">review-examples</a>
+<ul><li> <a href="/wiki/hreview-examples" title="hreview-examples">hreview-examples</a>
+</li></ul>
+</li><li> <a href="/wiki/review-formats" title="review-formats">review-formats</a>
+</li><li> <a href="/wiki/review-brainstorming" title="review-brainstorming">review-brainstorming</a> - where we brainstormed about review formats before coming up with hReview.
+</li><li> <a href="/wiki/currency" title="currency">currency</a> - proposal for marking up amounts of money (e.g. prices of reviewed items).
+</li><li> Aggregate reviews - <a href="/wiki/aggregate-review-examples" title="aggregate-review-examples">examples</a> - <a href="/wiki/aggregate-review-formats" title="aggregate-review-formats">formats</a> - <a href="/wiki/aggregate-review-brainstorming" title="aggregate-review-brainstorming">brainstorming</a>
+</li></ul>
+<a name="Translations"></a><h2> <span class="mw-headline"> Translations </span></h2>
+<p>Read the hReview draft specification in additional <span id="languages">languages</span>:
+</p>
+<ul><li> <a href="/wiki/hreview-fr" title="hreview-fr">français</a>
+</li><li> <a href="/wiki/hreview-ja" title="hreview-ja">日本語</a>
+</li></ul>
+
+<!-- 
+NewPP limit report
+Preprocessor node count: 267/1000000
+Post-expand include size: 12894/2097152 bytes
+Template argument size: 0/2097152 bytes
+Expensive parser function count: 0/100
+-->
+<div class="printfooter">
+Retrieved from "<a href="http://microformats.org/wiki/hreview">http://microformats.org/wiki/hreview</a>"</div>
+		</div>	
+		
+			        <h2>Categories</h2>
+		    <div id="category-links">
+		        <ul>
+		        		            <li><a rel="tag" href="/wiki/Category:Draft_Specifications">
+		                Draft Specifications		            </a></li>
+		        		            <li><a rel="tag" href="/wiki/Category:hReview">
+		                hReview		            </a></li>
+		        		        </ul>
+		    </div>		        
+				
+                    <div class="last-modified">
+                <a rel="bookmark" class="url uid" href="/wiki/index.php?title=hreview&amp;oldid=41402">hReview 0.3</a>
+                was last modified:
+                                <span class="updated">
+                    <span class="value-title" title="2009-11-17T02:42:00-0800"> </span>
+                    Tuesday, November 17th, 2009                </span>
+            </div>
+        
+        <div id="content-controls">
+    		<h2>Views</h2>
+    		<ul>
+                		    <li id="ca-viewsource"><a href="/wiki/index.php?title=hreview&amp;action=edit" title="This page is protected.&#10;You can view its source. [e]" accesskey="e">View source</a></li>
+                		    <li id="ca-history"><a href="/wiki/index.php?title=hreview&amp;action=history" title="Past versions of this page. [h]" accesskey="h">History</a></li>
+                		</ul>
+    	</div>
+
+	</div>
+	
+<div id="sidebar">
+
+
+	<div class="box" id="p-Microformats_Wiki">
+		<h3>Microformats Wiki</h3>
+		<ul class="box-inner">
+			<li id="n-Front-Page"><a href="/wiki/Main_Page">Front Page</a></li>
+			<li id="n-recentchanges"><a href="/wiki/Special:RecentChanges" title="The list of recent changes in the wiki. [r]" accesskey="r">Recent changes</a></li>
+			<li id="n-Events"><a href="/wiki/Microformats_Wiki:Current_events">Events</a></li>
+			<li id="n-help"><a href="/wiki/Help:Contents" title="The place to find out.">Help</a></li>
+		</ul>
+	</div>
+	
+	
+	<div class="box" id="p-tb">
+		<h3>Toolbox</h3>
+		<ul class="box-inner">
+				<li id="t-whatlinkshere"><a href="/wiki/Special:WhatLinksHere/hreview" title="List of all wiki pages that link here [j]" accesskey="j">What links here</a></li>
+				<li id="t-recentchangeslinked"><a href="/wiki/Special:RecentChangesLinked/hreview" title="Recent changes in pages linked from this page [k]" accesskey="k">Related changes</a></li>
+<li id="t-specialpages"><a href="/wiki/Special:SpecialPages" title="List of all special pages [q]" accesskey="q">Special pages</a></li>
+				<li id="t-print"><a href="/wiki/index.php?title=hreview&amp;printable=yes" title="Printable version of this page [p]" accesskey="p">Printable version</a></li>				<li id="t-permalink"><a href="/wiki/index.php?title=hreview&amp;oldid=41402" title="Permanent link to this version of the page">Permanent link</a></li>		</ul>
+	</div>
+
+
+
+	<div class="box" id="user-box">
+	    	    <h3>Hey! You're not logged in</h3>
+		<ul class="box-inner">
+        		    <li id="pt-login"><a href="/wiki/index.php?title=Special:UserLogin&amp;returnto=hreview" title="You are encouraged to log in, it is not mandatory however. [o]" accesskey="o">Log in / create account</a></li>
+                
+        
+        
+		</ul>
+	</div>
+
+</div><!-- end of the sidebar -->
+
+<div id="footer">
+
+
+    <address class="vcard">
+        The content of this wiki is the combined effort of the
+        <a class="fn org url" href="http://microformats.org">
+            microformats community
+        </a>.
+    </address>
+
+	<ul>
+    				<li id="about"><a href="/wiki/Microformats_Wiki:About" title="Microformats Wiki:About">About Microformats Wiki</a></li>
+				<li id="disclaimer"><a href="/wiki/Microformats_Wiki:General_disclaimer" title="Microformats Wiki:General disclaimer">Disclaimers</a></li>
+        <li>Powered by <a href="http://mediawiki.org">MediaWiki</a></li>
+	</ul>
+</div>
+
+		<script type="text/javascript">if (window.runOnloadHook) runOnloadHook();</script>
+<!-- Served in 1.215 secs. --><script src="http://www.google-analytics.com/urchin.js" type="text/javascript"></script>
+<script type="text/javascript">
+_uacct = "UA-1889385-1";
+urchinTracker();
+</script>
+
+
+</body></html>

@@ -1,0 +1,91 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<html>
+<head>
+	<title>$title</title>
+	<link rel="stylesheet" href="$cssPath"/>
+    <script type="text/javascript" src="$contextPath/static/enhancer/scripts/jquery-1.4.2.js"></script>
+</head>
+<body>
+	<div class="home">
+		<a href="http://incubator.apache.org/stanbol">
+			<img src="/static/home/images/apache_stanbol_logo_cropped.png" alt="Apache Stanbol" />
+		</a>
+	</div>
+	 
+ 	<div class="header">
+	 	<h1>$title</h1>
+	 	<div style="clear: both"></div> 
+ 	</div>
+ 	 
+ 	<div class="content">
+		<div class="results">
+		#set($index = 0)
+		#foreach($benchmark in $benchmarks)
+			<div class="benchmark">
+			    #set($index = $index + 1)
+			     
+				<div class="input"><span class="label">Benchmark $index input: </span>$benchmark.getInputText()</div>
+				
+                <div class="outputGraph">
+                    <div class="collapsed">
+                        <p class="collapseheader">
+                            Results:
+                        </p>                                                      
+                        <div class="collapsable">
+                            <pre>$esc.html($graphFormatter.format($benchmark.getGraph($jobManager,$contentItemFactory), "text/turtle"))</pre>
+                        </div>
+                    </div>                          
+                </div>
+                
+				#foreach($result in $benchmark.execute($jobManager,$contentItemFactory))
+					<div class="result">
+						<div class="description">
+						$result.getTripleMatcherGroup().getDescription()
+						</div>
+						
+						#if($result.successful())
+						<div class="success">SUCCESSFUL</div> 
+						#{else}
+						<div class="failure">**FAILED**: $result.getInfo()</div> 
+						#end
+						
+						<div class="matchers">
+						#foreach($matcher in $result.getTripleMatcherGroup().getMatchers())
+							<div class="matcher">
+								#if($result.getTripleMatcherGroup().isExpectGroup())
+									(E) 
+								#{else}
+									(C) 
+								#end
+								$esc.html($matcher.getExpression())
+							</div>
+						#end
+						</div>
+					</div>
+				#end
+			</div>			
+		#end
+		</div>
+	</div>
+    <script>
+    $(".outputGraph p").click(function () {
+      $(this).parents("div").toggleClass("collapsed");
+    });    
+    </script>
+</body>
+</html>

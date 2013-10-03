@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://stanbol.apache.org/ontology/enhancer/enhancer#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://stanbol.apache.org/ontology/enhancer/enhancer">
+  <owl:Ontology rdf:about="">
+    <rdfs:comment xml:lang="en">Ontology definig base concepts of the Stanbol Enhancer</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="ContentItem">
+    <rdfs:label xml:lang="en">Content Item</rdfs:label>
+    <rdfs:comment xml:lang="en">The Content Item represents the content parsed to the Stanbol Enhancer.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="EnhancementChain">
+    <rdfs:label xml:lang="en">Enhancement Chain</rdfs:label>
+    <rdfs:comment xml:lang="en">A EnhancementChain is a specific configuration on how parsed Content is enhanced by the Stanbol Enhancer</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="Enhancer">
+    <rdfs:label xml:lang="en">Enhancer</rdfs:label>
+    <rdfs:comment xml:lang="en">A Stanbol Enhancer instance. The Resource represents the RESTful Service URL.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="EnhancementEngine">
+    <rdfs:label xml:lang="en">Enhancement Engine</rdfs:label>
+    <rdfs:comment xml:lang="en">EnhancementEngines are responsible for extracting knowledge from Content parsed to the Stanbol Enhancer</rdfs:comment>
+  </owl:Class>
+  <owl:FunctionalProperty rdf:ID="hasDefautChain">
+    <rdfs:subPropertyOf>
+      <owl:InverseFunctionalProperty rdf:ID="hasChain"/>
+    </rdfs:subPropertyOf>
+    <rdfs:label xml:lang="en">has default chain</rdfs:label>
+    <rdfs:comment xml:lang="en">The default chain is the EnhancementChain used to enhance Content parsed to the main /enhancer RESTful service.</rdfs:comment>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#InverseFunctionalProperty"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:FunctionalProperty>
+  <owl:InverseFunctionalProperty rdf:ID="hasEngine">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="#EnhancementEngine"/>
+    <rdfs:domain rdf:resource="#Enhancer"/>
+    <rdfs:label xml:lang="en">has engine</rdfs:label>
+    <rdfs:comment xml:lang="en">links to an EnhancementEngine</rdfs:comment>
+  </owl:InverseFunctionalProperty>
+  <owl:InverseFunctionalProperty rdf:about="#hasChain">
+    <rdfs:label xml:lang="en">has chain</rdfs:label>
+    <rdfs:comment xml:lang="en">links to a configured EnhancementChain</rdfs:comment>
+    <rdfs:domain rdf:resource="#Enhancer"/>
+    <rdfs:range rdf:resource="#EnhancementChain"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:InverseFunctionalProperty>
+</rdf:RDF>

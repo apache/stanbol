@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>apache-stanbol-enhancer</artifactId>
+    <version>0.11.0-SNAPSHOT</version>
+    <relativePath>..</relativePath>
+  </parent>
+
+  <artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
+  <packaging>bundle</packaging>
+
+  <name>Apache Stanbol Enhancer Web (Jersey)</name>
+  <description>HTTP endpoints of the Apache Stanbol Enhancer.</description>
+
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/jersey/
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/jersey/
+    </developerConnection>
+    <url>http://stanbol.apache.org/</url>
+  </scm>
+
+  <build>
+    <!-- make it an OSGi bundle -->
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <!-- Export-Package>
+              org.apache.stanbol.enhancer.jersey.*
+            </Export-Package -->
+            <!-- Embed-Dependency>
+              *;scope=compile|runtime;inline=false;artifactId=jersey-json|jettison|jackson-core-asl|httpmime
+            </Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive -->
+            <Import-Package>
+              javax.servlet.*; version="[2.5.0,4.0.0)",
+              javax.ws.rs.*; version="[0,2)",
+              org.apache.stanbol.commons.web.base; provide:=true,
+              *
+            </Import-Package>
+            <Private-Package>
+              org.apache.stanbol.enhancer.jersey.fragment; version=${project.version},
+              org.apache.stanbol.enhancer.jersey.reader; version=${project.version},
+              org.apache.stanbol.enhancer.jersey.resource; version=${project.version},
+              org.apache.stanbol.enhancer.jersey.util; version=${project.version},
+              org.apache.stanbol.enhancer.jersey.writers; version=${project.version}
+            </Private-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- AL20 License  -->
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+
+            <!-- OpenLayers License provided in src/main/resources/META-INF/resources/static/enhancer/openlayers-2.9/license.txt  -->
+            <exclude>src/main/resources/META-INF/resources/static/enhancer/openlayers-2.9/**</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <!-- dependencies on other Stanbol modules -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+      <version>0.11.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.jsonld</artifactId>
+      <version>0.11.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+      <version>0.12.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
+      <version>0.11.0</version>
+    </dependency>
+
+    <!-- Clerezza dependencies -->
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>jaxrs.rdf.providers</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.rdfjson</artifactId>
+    </dependency>
+
+    <!-- Jersey -->
+    <dependency>
+    	<groupId>org.apache.stanbol</groupId>
+  		<artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
+      <version>0.11.0</version>      
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-server</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-core</artifactId>
+    </dependency>
+    <!--  <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-json</artifactId>
+    </dependency>  -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+    </dependency>
+
+    <!-- generic tax -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+    </dependency>
+    <!-- dependencies to read/write ContentItems as multipart mime -->    
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore-osgi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpmime</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+    </dependency>
+    <!-- OSGi tax -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+    </dependency>
+
+    <!-- Jetty -->
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- for tests -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.core</artifactId>
+      <version>0.10.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.jena.serializer</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.jena.parser</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+</project>

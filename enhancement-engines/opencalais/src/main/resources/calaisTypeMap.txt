@@ -1,0 +1,9 @@
+http://s.opencalais.com/1/type/em/e/Person=http://dbpedia.org/ontology/Person
+http://s.opencalais.com/1/type/em/e/City=http://dbpedia.org/ontology/Place
+http://s.opencalais.com/1/type/em/e/Continent=http://dbpedia.org/ontology/Place
+http://s.opencalais.com/1/type/em/e/Country=http://dbpedia.org/ontology/Place
+http://s.opencalais.com/1/type/em/e/ProvinceOrState=http://dbpedia.org/ontology/Place
+http://s.opencalais.com/1/type/em/e/Region=http://dbpedia.org/ontology/Place
+http://s.opencalais.com/1/type/em/e/Company=http://dbpedia.org/ontology/Organisation
+http://s.opencalais.com/1/type/em/e/Facility=http://dbpedia.org/ontology/Organisation
+http://s.opencalais.com/1/type/em/e/Organization=http://dbpedia.org/ontology/Organisation

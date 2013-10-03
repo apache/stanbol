@@ -1,0 +1,53 @@
+# Stanbol enhancer benchmark example
+
+= INPUT =
+Bob Marley was born in Kingston, Jamaica. 
+
+= EXPECT = 
+# Comments such as this one are ignored 
+# EXPECT defines groups of predicate/object matchers that we expect to find in the output 
+# Each group applies to one given enhancement: for the expectation to succeed, at least 
+# one enhancement must match all lines in the group
+Description: Kingston must be found 
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Kingston%2C_Jamaica 
+http://purl.org/dc/terms/creator REGEXP org.apache..*ReferencedSiteEntityTaggingEnhancementEngine 
+
+# The description: line starts a new group 
+Description: Bob Marley must be found as a musical artist 
+http://fise.iks-project.eu/ontology/entity-type URI http://dbpedia.org/ontology/MusicalArtist 
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Bob_Marley 
+http://purl.org/dc/terms/creator REGEXP org.apache.*EntityMentionEnhancementEngine 
+
+= COMPLAIN = 
+
+# COMPLAIN statements are similar to EXPECT but we expect them *not* to be fulfilled by 
+# the enhancer output.
+# There are none in this example 
+
+
+# INPUT starts a new benchmark
+= INPUT =
+Paris Hilton might live in Paris, but
+she prefers New York. 
+
+= EXPECT = 
+Description: Second benchmark group 1 
+http://fise.iks-project.eu/ontology/entity-reference URI http://example.com/foo 
+
+Description: Second benchmark group 2 
+http://fise.iks-project.eu/ontology/entity-type URI http://dbpedia.org/ontology/MusicalArtist 
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Miles_Davis 
+
+Description: Second benchmark group 3 
+http://fise.iks-project.eu/ontology/entity-type URI http://dbpedia.org/ontology/MusicalArtist 
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Miles_Davis 
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/FOO 
+
+= COMPLAIN = 
+Description: Second benchmark group 4 
+http://fise.iks-project.eu/ontology/entity-type URI http://dbpedia.org/ontology/MusicalArtist 
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Miles_Davis 
+
+Description: Second benchmark group 5 
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Miles_Davis 
+

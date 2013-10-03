@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Licensed to the Apache Software Foundation (ASF) under one or more contributor 
+  license agreements. See the NOTICE file distributed with this work for additional 
+  information regarding copyright ownership. The ASF licenses this file to 
+  You under the Apache License, Version 2.0 (the "License"); you may not use 
+  this file except in compliance with the License. You may obtain a copy of 
+  the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required 
+  by applicable law or agreed to in writing, software distributed under the 
+  License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
+  OF ANY KIND, either express or implied. See the License for the specific 
+  language governing permissions and limitations under the License. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>apache-stanbol-enhancer</artifactId>
+    <version>0.11.0-SNAPSHOT</version>
+    <relativePath>../..</relativePath>
+  </parent>
+
+  <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+  <packaging>bundle</packaging>
+
+  <name>Apache Stanbol Enhancer Services API</name>
+  <description>The Enhancer Services API</description>
+
+  <inceptionYear>2010</inceptionYear>
+
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/generic/servicesapi/
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/generic/servicesapi/
+    </developerConnection>
+    <url>http://stanbol.apache.org/</url>
+  </scm>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <!-- NOTE: define servicesapi package as provide:=true, because of the
+                 included abstract implementations of some of those interfaces -->
+            <Export-Package>
+              org.apache.stanbol.enhancer.servicesapi.*;version=${project.version}
+            </Export-Package>
+            <Import-Package>
+              org.apache.commons.io;version="[1.4.0,3)",
+              org.apache.stanbol.enhancer.servicesapi; provide:=true,
+              org.apache.stanbol.enhancer.servicesapi.helper,
+              org.apache.stanbol.enhancer.servicesapi.helper.execution,
+              org.apache.stanbol.enhancer.servicesapi.impl,
+              org.apache.stanbol.enhancer.servicesapi.rdf,
+              *
+            </Import-Package>
+            <Private-Package>
+            </Private-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- NOTE: needed to add this here, becuase for some unknown reason 
+              the RAT tool was not able to apply the **/*.txt wildcard to the "contentreferecetest.txt" 
+              also an explicit exclude for this file in the Stanbol reactor had not worked. 
+              (rwesten 2012-04-09) -->
+            <!-- license mentioned in the README in the same directory -->
+            <exclude>src/test/resources/contentreferecetest.txt</exclude>
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
+      <version>0.11.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.core</artifactId>
+    </dependency>
+    <!-- dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+    </dependency  -->
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+
+    <!-- for tests -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+    </dependency>
+  </dependencies>
+
+</project>

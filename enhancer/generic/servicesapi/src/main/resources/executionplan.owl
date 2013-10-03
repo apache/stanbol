@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://stanbol.apache.org/ontology/enhancer/executionplan#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://stanbol.apache.org/ontology/enhancer/executionplan">
+  <owl:Ontology rdf:about="">
+    <rdfs:comment xml:lang="en">The Stanbol Execution Plan</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="ExecutionPlan">
+    <rdfs:comment xml:lang="en">Defines how an EnhancementChain executes EnhancementEngines to enhance content parsed to the Stanbol Enhancer.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:ID="ExecutionNode">
+    <rdfs:comment xml:lang="en">An Enhancement Engine execution</rdfs:comment>
+  </owl:Class>
+  <owl:TransitiveProperty rdf:ID="dependsOn">
+    <rdfs:comment xml:lang="en">defines that an ExecutionNode depends on the execution of an other (transitive)</rdfs:comment>
+    <rdfs:range rdf:resource="#ExecutionNode"/>
+    <rdfs:domain rdf:resource="#ExecutionNode"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:TransitiveProperty>
+  <owl:FunctionalProperty rdf:ID="chain">
+    <rdfs:comment xml:lang="en">the name of the chain</rdfs:comment>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:domain rdf:resource="#ExecutionPlan"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:ID="engine">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:comment xml:lang="en">the name of the engine</rdfs:comment>
+    <rdfs:domain rdf:resource="#ExecutionNode"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:ID="optional">
+    <rdfs:comment xml:lang="en">if the execution of this node is optional or not.</rdfs:comment>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    <rdfs:domain rdf:resource="#ExecutionNode"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:InverseFunctionalProperty rdf:ID="hasExecutionNode">
+    <rdfs:range rdf:resource="#ExecutionNode"/>
+    <rdfs:domain rdf:resource="#ExecutionPlan"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:comment xml:lang="en">links to an ExecutionNode</rdfs:comment>
+  </owl:InverseFunctionalProperty>
+</rdf:RDF>

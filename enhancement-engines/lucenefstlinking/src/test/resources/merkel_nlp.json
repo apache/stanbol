@@ -1,0 +1,608 @@
+{
+  "spans" : [ {
+    "type" : "Text",
+    "start" : 0,
+    "end" : 267
+  }, {
+    "type" : "Sentence",
+    "start" : 0,
+    "end" : 80
+  }, {
+    "type" : "Token",
+    "start" : 0,
+    "end" : 5,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "EX",
+      "pos" : 190,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    },
+    "stanbol.enhancer.nlp.morpho" : {
+      "lemma" : "there",
+      "pos" : [ {
+        "tag" : "EX",
+        "pos" : 190
+      } ],
+      "class" : "org.apache.stanbol.enhancer.nlp.morpho.MorphoFeatures"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 6,
+    "end" : 9,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "VBZ",
+      "pos" : 238,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    },
+    "stanbol.enhancer.nlp.morpho" : {
+      "lemma" : "have",
+      "pos" : [ {
+        "tag" : "VBZ",
+        "pos" : 238
+      } ],
+      "class" : "org.apache.stanbol.enhancer.nlp.morpho.MorphoFeatures"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 10,
+    "end" : 14,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "VBN",
+      "pos" : 237,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    },
+    "stanbol.enhancer.nlp.morpho" : {
+      "lemma" : "be",
+      "pos" : [ {
+        "tag" : "VBN",
+        "pos" : 237
+      } ],
+      "class" : "org.apache.stanbol.enhancer.nlp.morpho.MorphoFeatures"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 15,
+    "end" : 16,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "DT",
+      "pos" : 57,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 17,
+    "end" : 24,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "JJ",
+      "lc" : 2,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 25,
+    "end" : 33,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "NN",
+      "pos" : [ 45, 163 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 34,
+    "end" : 36,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "IN",
+      "pos" : [ 12, 37 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Chunk",
+    "start" : 37,
+    "end" : 43,
+    "stanbol.enhancer.nlp.ner" : {
+      "tag" : "LOCATION",
+      "uri" : "http://dbpedia.org/ontology/Place",
+      "class" : "org.apache.stanbol.enhancer.nlp.ner.NerTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 37,
+    "end" : 43,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "NNP",
+      "pos" : [ 53, 163 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 44,
+    "end" : 46,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "TO",
+      "lc" : 3,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 47,
+    "end" : 50,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "DT",
+      "pos" : 57,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Chunk",
+    "start" : 51,
+    "end" : 57,
+    "stanbol.enhancer.nlp.ner" : {
+      "tag" : "DATE",
+      "class" : "org.apache.stanbol.enhancer.nlp.ner.NerTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 51,
+    "end" : 57,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "NNP",
+      "pos" : [ 53, 163 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 57,
+    "end" : 59,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "POS",
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 60,
+    "end" : 68,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "NN",
+      "pos" : [ 45, 163 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 69,
+    "end" : 71,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "IN",
+      "pos" : [ 12, 37 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Chunk",
+    "start" : 72,
+    "end" : 79,
+    "stanbol.enhancer.nlp.ner" : {
+      "tag" : "LOCATION",
+      "uri" : "http://dbpedia.org/ontology/Place",
+      "class" : "org.apache.stanbol.enhancer.nlp.ner.NerTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 72,
+    "end" : 79,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "NNP",
+      "pos" : [ 53, 163 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 79,
+    "end" : 80,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : ".",
+      "pos" : 119,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Sentence",
+    "start" : 81,
+    "end" : 182
+  }, {
+    "type" : "Token",
+    "start" : 81,
+    "end" : 84,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "DT",
+      "pos" : 57,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    },
+    "stanbol.enhancer.nlp.morpho" : {
+      "lemma" : "the",
+      "pos" : [ {
+        "tag" : "DT",
+        "pos" : 57
+      } ],
+      "class" : "org.apache.stanbol.enhancer.nlp.morpho.MorphoFeatures"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 85,
+    "end" : 88,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "VB",
+      "pos" : 233,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 89,
+    "end" : 91,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "IN",
+      "pos" : [ 12, 37 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 92,
+    "end" : 102,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "NNP",
+      "pos" : [ 53, 163 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Chunk",
+    "start" : 103,
+    "end" : 116,
+    "stanbol.enhancer.nlp.ner" : {
+      "tag" : "PERSON",
+      "uri" : "http://dbpedia.org/ontology/Person",
+      "class" : "org.apache.stanbol.enhancer.nlp.ner.NerTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 103,
+    "end" : 109,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "NNP",
+      "pos" : [ 53, 163 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 110,
+    "end" : 116,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "NNP",
+      "pos" : [ 53, 163 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 117,
+    "end" : 122,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "VBZ",
+      "pos" : 238,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    },
+    "stanbol.enhancer.nlp.morpho" : {
+      "lemma" : "mean",
+      "pos" : [ {
+        "tag" : "VBZ",
+        "pos" : 238
+      } ],
+      "class" : "org.apache.stanbol.enhancer.nlp.morpho.MorphoFeatures"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 123,
+    "end" : 127,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "IN",
+      "pos" : [ 12, 37 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 128,
+    "end" : 133,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "EX",
+      "pos" : 190,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 134,
+    "end" : 138,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "MD",
+      "pos" : 219,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 139,
+    "end" : 142,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "RB",
+      "lc" : 4,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 143,
+    "end" : 145,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "VB",
+      "pos" : 233,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 146,
+    "end" : 147,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "DT",
+      "pos" : 57,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 148,
+    "end" : 155,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "JJ",
+      "lc" : 2,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 156,
+    "end" : 162,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "NN",
+      "pos" : [ 45, 163 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 163,
+    "end" : 165,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "IN",
+      "pos" : [ 12, 37 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Chunk",
+    "start" : 166,
+    "end" : 174,
+    "stanbol.enhancer.nlp.ner" : {
+      "tag" : "MISC",
+      "class" : "org.apache.stanbol.enhancer.nlp.ner.NerTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 166,
+    "end" : 174,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "JJ",
+      "lc" : 2,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    },
+    "stanbol.enhancer.nlp.morpho" : {
+      "lemma" : "european",
+      "pos" : [ {
+        "tag" : "JJ",
+        "lc" : 2
+      } ],
+      "class" : "org.apache.stanbol.enhancer.nlp.morpho.MorphoFeatures"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 175,
+    "end" : 181,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "NN",
+      "pos" : [ 45, 163 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 181,
+    "end" : 182,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : ".",
+      "pos" : 119,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Sentence",
+    "start" : 183,
+    "end" : 267
+  }, {
+    "type" : "Chunk",
+    "start" : 183,
+    "end" : 189,
+    "stanbol.enhancer.nlp.ner" : {
+      "tag" : "MISC",
+      "class" : "org.apache.stanbol.enhancer.nlp.ner.NerTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 183,
+    "end" : 189,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "NNPS",
+      "pos" : [ 53, 157 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 190,
+    "end" : 195,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "MD",
+      "pos" : 219,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 196,
+    "end" : 200,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "VB",
+      "pos" : 233,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 201,
+    "end" : 210,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "VBN",
+      "pos" : 237,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    },
+    "stanbol.enhancer.nlp.morpho" : {
+      "lemma" : "prefer",
+      "pos" : [ {
+        "tag" : "VBN",
+        "pos" : 237
+      } ],
+      "class" : "org.apache.stanbol.enhancer.nlp.morpho.MorphoFeatures"
+    }
+  }, {
+    "type" : "Chunk",
+    "start" : 211,
+    "end" : 214,
+    "stanbol.enhancer.nlp.ner" : {
+      "tag" : "ORGANIZATION",
+      "uri" : "http://dbpedia.org/ontology/Organisation",
+      "class" : "org.apache.stanbol.enhancer.nlp.ner.NerTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 211,
+    "end" : 214,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "NN",
+      "pos" : [ 45, 163 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    },
+    "stanbol.enhancer.nlp.morpho" : {
+      "lemma" : "spd",
+      "pos" : [ {
+        "tag" : "NN",
+        "pos" : [ 45, 163 ]
+      } ],
+      "class" : "org.apache.stanbol.enhancer.nlp.morpho.MorphoFeatures"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 215,
+    "end" : 224,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "NN",
+      "pos" : [ 45, 163 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Chunk",
+    "start" : 225,
+    "end" : 241,
+    "stanbol.enhancer.nlp.ner" : {
+      "tag" : "PERSON",
+      "uri" : "http://dbpedia.org/ontology/Person",
+      "class" : "org.apache.stanbol.enhancer.nlp.ner.NerTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 225,
+    "end" : 229,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "NNP",
+      "pos" : [ 53, 163 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 230,
+    "end" : 241,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "NNP",
+      "pos" : [ 53, 163 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 241,
+    "end" : 242,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : ",",
+      "pos" : 140,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 243,
+    "end" : 248,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "WP$",
+      "pos" : [ 105, 109 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 249,
+    "end" : 254,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "NN",
+      "pos" : [ 45, 163 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 255,
+    "end" : 259,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "VBD",
+      "pos" : 237,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    },
+    "stanbol.enhancer.nlp.morpho" : {
+      "lemma" : "lose",
+      "pos" : [ {
+        "tag" : "VBD",
+        "pos" : 237
+      } ],
+      "class" : "org.apache.stanbol.enhancer.nlp.morpho.MorphoFeatures"
+    }
+  }, {
+    "type" : "Chunk",
+    "start" : 260,
+    "end" : 266,
+    "stanbol.enhancer.nlp.ner" : {
+      "tag" : "DATE",
+      "class" : "org.apache.stanbol.enhancer.nlp.ner.NerTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 260,
+    "end" : 266,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : "NNP",
+      "pos" : [ 53, 163 ],
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  }, {
+    "type" : "Token",
+    "start" : 266,
+    "end" : 267,
+    "stanbol.enhancer.nlp.pos" : {
+      "tag" : ".",
+      "pos" : 119,
+      "class" : "org.apache.stanbol.enhancer.nlp.pos.PosTag"
+    }
+  } ]
+}

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>apache-stanbol-enhancement-engines</artifactId>
+    <version>0.10.1-SNAPSHOT</version>
+    <relativePath>..</relativePath>
+  </parent>
+
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.enhancer.engines.entitycomention</artifactId>
+  <version>0.10.1-SNAPSHOT</version>
+  <packaging>bundle</packaging>
+
+  <name>Apache Stanbol Enhancement Engine : Entity Co-Mention</name>
+  <description>
+    An engine that find co-mentions of Entities earlier mentioned on the Text.
+    NOTE: This Engine does NOT use NLP level co-reference detection. Therefore 
+    it will not link Pronouns with the correct Entity.
+  </description>
+
+  <inceptionYear>2013</inceptionYear>
+
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entitycomention/
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entitycomention/
+    </developerConnection>
+    <url>http://stanbol.apache.org/</url>
+  </scm>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>
+              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
+              org.apache.stanbol.enhancer.engines.entitylinking;version=${project.version}; provide:=true,
+              *
+            </Import-Package>
+            <Private-Package>
+              org.apache.stanbol.enhancer.engines.entitycomention.*;version=${project.version}
+            </Private-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.service</artifactId>
+      <version>0.11.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.entitylinking.engine</artifactId>
+      <version>0.10.1-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    
+    <!-- Test dependencies -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>      
+    </dependency>
+    <dependency>  <!-- used for debug level logging during tests -->
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+</project>

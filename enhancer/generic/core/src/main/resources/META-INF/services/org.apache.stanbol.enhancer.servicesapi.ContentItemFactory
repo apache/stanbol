@@ -1,0 +1,2 @@
+org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory
+org.apache.stanbol.enhancer.contentitem.file.FileContentItemFactory
