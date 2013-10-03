@@ -77,10 +77,10 @@
     <module>entityhublinking</module>
     <module>entitytagging</module>
     <!-- fast EntityLinking using Lucene FST -->
-    <!-- TODO: not yet included in the default build -->
-    <!-- <module>lucenefstlinking</module> -->
+    <module>lucenefstlinking</module> <!-- see STANBOL-1128 -->
     <!-- deprecated -->
     <module>keywordextraction</module>
+    
 
 	  <!-- Categorization -->
     <module>topic/api</module>
