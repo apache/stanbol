@@ -1,0 +1,114 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.apache.stanbol</groupId>
+		<artifactId>apache-stanbol-enhancement-engines</artifactId>
+		<version>0.10.1-SNAPSHOT</version>
+		<!--change the relative path to point to enhancement-engine root pom-->
+		<relativePath>../../apache/stanbol/trunk/enhancement-engines/</relativePath>
+	</parent>
+
+	<groupId>org.apache.stanbol</groupId>
+	<artifactId>org.apache.stanbol.enhancer.engines.disambiguation.foaf</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<packaging>bundle</packaging>
+
+	<name>foaf-disambiguation</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-DocURL>http://stanbol.apache.org</Bundle-DocURL>
+						<Bundle-Vendor>gsoc-dileepa</Bundle-Vendor>
+						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+						<Bundle-Version>${project.version}</Bundle-Version>
+						<Export-Package>
+							org.apache.stanbol.enhancer.engine.disambiguation.foaf.*;version=${project.version}
+						</Export-Package>
+						<Import-Package>
+							org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
+							*;resolution:="optional"
+            			</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-scr-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<!--dependency> <groupId>junit</groupId> <artifactId>junit</artifactId> 
+			<version>3.8.1</version> <scope>test</scope> </dependency -->
+
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.namespaceprefix.service</artifactId>
+			<version>0.11.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.engines.entitylinking.engine</artifactId>
+			<version>0.10.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
+			<version>0.11.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+			<version>0.10.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.enhancer.nlp</artifactId>
+			<version>0.10.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
+			<version>0.11.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.scr.annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+		</dependency>
+		<!-- Test dependencies -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>  <!-- used for debug level logging during tests -->
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>
