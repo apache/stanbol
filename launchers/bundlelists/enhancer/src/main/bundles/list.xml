@@ -255,8 +255,12 @@
       <artifactId>org.apache.stanbol.enhancer.engines.entityhublinking</artifactId>
       <version>0.10.1-SNAPSHOT</version>
     </bundle>
-
-
+ 
+    <bundle><!-- FST Linking Engine (STANBOL-1128) -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.lucenefstlinking</artifactId>
+      <version>0.10.1-SNAPSHOT</version>
+    </bundle>
 	  <!-- Post-Processing engine -->
     
     <bundle> <!-- Disambigutation using Solr MLT queries -->
