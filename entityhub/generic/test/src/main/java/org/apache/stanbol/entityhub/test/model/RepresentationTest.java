@@ -16,11 +16,11 @@
  */
 package org.apache.stanbol.entityhub.test.model;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.apache.stanbol.entityhub.test.Utils.asCollection;
 
 import java.net.MalformedURLException;
@@ -840,7 +840,8 @@ public abstract class RepresentationTest {
         Set<String> textSet = new HashSet<String>(Arrays.asList(NL_TEST_de, NL_TEST_de_AT));
         while (allDeTexts.hasNext()) {
             Text text = allDeTexts.next();
-            assertTrue(text.getLanguage().equals("de") || text.getLanguage().equals("de-AT"));
+            assertTrue(text.getLanguage().equalsIgnoreCase("de") || 
+                text.getLanguage().equalsIgnoreCase("de-AT"));
             assertTrue(textSet.remove(text.getText())); // remove the found
         }
         assertTrue(textSet.isEmpty()); // all texts found
