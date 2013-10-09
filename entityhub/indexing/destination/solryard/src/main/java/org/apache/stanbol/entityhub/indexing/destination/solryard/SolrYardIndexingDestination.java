@@ -24,25 +24,44 @@ import static org.apache.stanbol.entityhub.yard.solr.impl.SolrYardConfig.SOLR_SE
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.IndexSearcher;
 import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.core.SolrCore;
+import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.util.RefCounted;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.core.site.CacheUtils;
 import org.apache.stanbol.entityhub.indexing.core.IndexingDestination;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
 import org.apache.stanbol.entityhub.indexing.core.destination.OsgiConfigurationUtil;
+import org.apache.stanbol.entityhub.indexing.destination.solryard.fst.CorpusCreationInfo;
+import org.apache.stanbol.entityhub.indexing.destination.solryard.fst.CorpusCreationTask;
+import org.apache.stanbol.entityhub.indexing.destination.solryard.fst.FstConfig;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
@@ -140,6 +159,18 @@ public class SolrYardIndexingDestination implements IndexingDestination {
     public static final boolean DEFAULT_SYNCHRONIZED_STATE = true;
     
     /**
+     * The name of the properties file containing the FST configuration.<p>
+     * If not present no FST models will be created in the {@link #finalise()}
+     * state.
+     */
+    public static final String FST_CONF = "fstConf";
+    /**
+     * The number of Threads used to concurrently build FST models
+     */
+    public static final String FST_THREADS = "fstThreads";
+    
+    private static final int DEFAULT_FST_THREADS = 4;
+    /**
      * The location of the SolrIndex. This MUST BE an absolute Path in case it 
      * refers to a directory of the local file system and <code>null</code> in
      * case an external SolrServer is used.
@@ -179,6 +210,25 @@ public class SolrYardIndexingDestination implements IndexingDestination {
     private Collection<FieldMapping> indexFieldConfiguration;
 
     private IndexingConfig indexingConfig;
+
+    /*
+     * Fields required for the FST model creation 
+     */
+    /**
+     * The SolrCore used by the {@link #solrYard}
+     */
+    private SolrCore core;
+    /**
+     * The FST configurations. Parsed in the {@link #setConfiguration(Map)}
+     * and initialised during {@link #initialise()}. <code>null</code> if no
+     * {@link #FST_CONF} is set.
+     */
+    private List<FstConfig> fstConfigs;
+    /**
+     * The number of threads used to build FST models. 
+     * Set in {@link #setConfiguration(Map)}
+     */
+    private int fstThreads;
     
     /**
      * This Constructor relays on a subsequent call to 
@@ -427,12 +477,69 @@ public class SolrYardIndexingDestination implements IndexingDestination {
                 } catch (Exception e) {
                     //throw exception for any invalid entry!
                     throw new IllegalArgumentException(String.format(
-                        "Unable to parse Field Boost entry from field {} and boost {}",
+                        "Unable to parse Field Boost entry from field %s and boost %s",
                         entry.getKey(),entry.getValue()),e);
                 }
             }
             solrYardConfig.setFieldBoosts(fieldBoosts);
         }
+        //read the FST config
+        value = config.get(FST_CONF);
+        if(value != null && !StringUtils.isBlank(value.toString())){
+            File fstConfigFile = indexingConfig.getConfigFile(value.toString());
+            if(!fstConfigFile.isFile()){
+                throw new IllegalArgumentException(String.format(
+                    "Unable to find configured FST configuration file %s",
+                    fstConfigFile));
+            }
+            Collection<String> lines;
+            try {
+                lines = FileUtils.readLines(fstConfigFile, "UTF-8");
+            } catch (IOException e) {
+                throw new IllegalArgumentException(String.format(
+                    "Unable to read FST configuration file %s",
+                    fstConfigFile),e);
+            }
+            fstConfigs = new ArrayList<FstConfig>();
+            for(String line : lines){
+                line = line.trim();
+                if(!line.isEmpty() && line.charAt(0) != '#'){
+                    String[] fields = new String[] {null,null};
+                    int index = -1;
+                    for(String part : line.split("=|;")){
+                        if(index >= 0){
+                            fields[index] = part;
+                            index = -1;
+                        } else if("index".equalsIgnoreCase(part)){
+                            index = 0;
+                        } else if("store".equalsIgnoreCase(part)){
+                            index = 1;
+                        }
+                    }
+                    if(fields[0] == null){
+                        throw new IllegalArgumentException("Invalid FST configuration "
+                            + "line: "+line +". Param 'index={field}' is required "
+                            + "(syntax: 'index={field};store={field}', 'store is optional'')!");
+                    }
+                    fstConfigs.add(new FstConfig(fields[0], fields[1]));
+                }
+            }
+        }
+        value = config.get(FST_THREADS);
+        if(value instanceof Number){
+            fstThreads = ((Number)value).intValue();
+        } else if(value != null){
+            try {
+                fstThreads = Integer.parseInt(value.toString());
+            }catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Unable to parse the FST thread number from "
+                    +value.toString(), e);
+            }
+        }
+        if(fstThreads <= 0){
+            fstThreads = DEFAULT_FST_THREADS;
+        }
+        
     }
     /**
      * Creates a {@link SolrYardConfig} and initialised it to used single Yard
@@ -461,7 +568,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         //parameters and initialise the member variables. This method performs 
         //the the actual initialisation of the SolrYard!
         //copy a custom configuration (if present)
-        SolrServer server;
+        EmbeddedSolrServer server;
         IndexReference solrServerRef = IndexReference.parse(solrYardConfig.getSolrServerLocation());
         if(solrIndexConfig != null){ //can only be != null if also solrIndexLocation
             //copy the configuration
@@ -485,6 +592,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         }
         log.info("   ... create SolrYard");
         this.solrYard = new SolrYard(server,solrYardConfig,indexingConfig.getNamespacePrefixService());
+        this.core = server.getCoreContainer().getCore(solrServerRef.getIndex());
     }
 
     @Override
@@ -505,13 +613,81 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         } catch (YardException e) {
             log.error("Unable to store FieldMapperConfiguration to the Store!",e);
         }
+        log.info(" ... optimize SolrCore");
         try {
             solrYard.optimize();
         } catch (YardException e) {
             log.error("Unable to optimize SolrIndex after indexing! IndexArchive will not be optimized ...",e);
         }
+        //build the FST models
+        if(fstConfigs != null){
+            //(1) FST config initialisation
+            log.info(" ... init FST configuration(s)");
+            IndexSchema schema = core.getLatestSchema();
+            File fstDir = new File(new File(core.getDataDir()),"fst");
+            if(!fstDir.isDirectory()){
+                try {
+                    FileUtils.forceMkdir(fstDir);
+                } catch (IOException e) {
+                    throw new IllegalStateException("Unable to create Directory "
+                        + fstDir.getAbsolutePath() + "for storing the FST models "
+                        + "of SolrCore "+core.getName());
+                }
+            }
+            RefCounted<SolrIndexSearcher> searcherRef = core.getSearcher();
+            try {
+                for(FstConfig fstConfig : fstConfigs){
+                    fstConfig.setFstDirectory(fstDir); //set the FST directory
+                    log.info("> FST config {}", fstConfig);
+                    fstConfig.buildConfig(schema, searcherRef.get().getAtomicReader());
+                    for(CorpusCreationInfo corpus : fstConfig.getCorpusCreationInfos()){
+                        log.info("  - {}",corpus);
+                    }
+                }
+            } finally {
+                searcherRef.decref();
+            }
+
+            List<Future<?>> fstCreationTasks = new ArrayList<Future<?>>();
+            ExecutorService es = Executors.newFixedThreadPool(fstThreads);
+            log.info(" ... build FST models ");
+            for(FstConfig config : fstConfigs){
+                for(final CorpusCreationInfo corpus : config.getCorpusCreationInfos()){
+                    fstCreationTasks.add(es.submit(new CorpusCreationTask(core, corpus)));
+                }
+            }
+            //now wait for the completion of the tasks
+            Iterator<Future<?>> taskIt = fstCreationTasks.iterator();
+            while(taskIt.hasNext()){
+                Future<?> task = taskIt.next();
+                try {
+                    task.get(); //wait until ready
+                    taskIt.remove();
+                } catch (ExecutionException e) {
+                    log.error("Exception while building FST models for SolrCore "
+                            + core.getName(),e);
+                } catch (InterruptedException e) {
+                    log.error("Interupped while building FST models for SolrCore "
+                            + core.getName(),e);
+                    Thread.currentThread().interrupt();
+                    
+                }
+            }
+            if(!fstCreationTasks.isEmpty()){
+                log.warn("Unable to build {} FST models for SolrCore {}",
+                    fstCreationTasks.size(), core.getName());
+            } else {
+                log.info("All FST modles for SolrCore {} build successfully!",
+                    core.getName());
+            }
+        } //no FST modles to build
+        
+        //all Solr specific stuff is now ready
+        log.info(" ... close SolrCore");
         solrYard.close();
+        
         //zip the index and copy it over to distribution
+        log.info(" ... build Solr index archive");
         if(solrArchive != null){
             try {
                 writeSolrIndexArchive();
