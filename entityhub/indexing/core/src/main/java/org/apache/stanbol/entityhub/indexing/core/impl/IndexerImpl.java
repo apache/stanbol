@@ -309,10 +309,12 @@ public class IndexerImpl implements Indexer {
         //now wait until all IndexingSources are initialised!
         while(!toInitialise.isEmpty()){
             synchronized (toInitialise) {
-                try {
-                    toInitialise.wait();
-                } catch (InterruptedException e) {
-                    //year looks like all IndexingSources are initialised!
+                if(!toInitialise.isEmpty()){
+                    try {
+                        toInitialise.wait();
+                    } catch (InterruptedException e) {
+                        //year looks like all IndexingSources are initialised!
+                    }
                 }
             }
         }
