@@ -408,10 +408,6 @@ public class SolrServerAdapter {
         if(coreDir == null){
             coreDir = new File(serverProperties.getServerDir(),coreName);
         }
-        if(!coreDir.isDirectory()){
-            throw new IllegalArgumentException("The Core Directory '"+
-                coreDir+" for the Core '"+coreName+"' does not exist or is not an directory");
-        }
         SolrCore old = null;
         ClassLoader classLoader = updateContextClassLoader();
         SolrCore core;
@@ -420,7 +416,7 @@ public class SolrServerAdapter {
             //      CoreContainer is overridden by the SolrServerAdapter
             //      to use the OSGI specific SolrResourceLoader!
             core = server.create(new CoreDescriptor(server, 
-                coreName, coreDir.getAbsolutePath()));
+                coreName, coreDir.getPath()));
             //CloseHook is now appied by the overridden registerCore(..) method
             //of the wrapped CoreContainer!
             //core.addCloseHook(closeHook);
@@ -1078,11 +1074,8 @@ public class SolrServerAdapter {
         public void setCoreDir(File directory){
             if(directory == null){
                 coreProperties.remove(PROPERTY_CORE_DIR);
-            } else if(directory.isDirectory()){
-                coreProperties.put(PROPERTY_CORE_DIR, directory);
             } else {
-                throw new IllegalArgumentException("The parsed File '"+
-                    directory+"' MUST represent a Directory!");
+                coreProperties.put(PROPERTY_CORE_DIR, directory);
             }
         }
         public String getCoreName(){
