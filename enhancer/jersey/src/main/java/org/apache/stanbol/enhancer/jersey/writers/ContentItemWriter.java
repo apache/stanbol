@@ -63,6 +63,7 @@ import javax.ws.rs.ext.Provider;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
+import org.apache.clerezza.rdf.core.serializedform.UnsupportedSerializationFormatException;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.entity.mime.FormBodyPart;
 import org.apache.http.entity.mime.HttpMultipart;
@@ -158,21 +159,29 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
                 if (mediaType.isWildcardType() || 
                         TEXT_PLAIN_TYPE.isCompatible(mediaType) || 
                         APPLICATION_OCTET_STREAM_TYPE.isCompatible(mediaType)) {
-                    mediaType = new MediaType(APPLICATION_JSON_TYPE.getType(), 
-                        APPLICATION_JSON_TYPE.getSubtype(),
-                        //Clerezza serialisers are hard coded to use UTF-8
-                        Collections.singletonMap("charset", UTF8.toString()));
-                    httpHeaders.putSingle("Content-Type", mediaType.toString());
+                    		mediaType = new MediaType(APPLICATION_JSON_TYPE.getType(), 
+                    		APPLICATION_JSON_TYPE.getSubtype(),
+                    		//Clerezza serialisers are hard coded to use UTF-8
+                    		Collections.singletonMap("charset", UTF8.toString()));
+                    		httpHeaders.putSingle("Content-Type", mediaType.toString());
                 }
-                getSerializer().serialize(entityStream, ci.getMetadata(), mediaType.toString());
+                try {
+                	getSerializer().serialize(entityStream, ci.getMetadata(), mediaType.toString());
+                } catch (UnsupportedSerializationFormatException e) {
+                    throw new WebApplicationException(
+                            Response.status(Response.Status.NOT_ACCEPTABLE)
+                            .entity("The enhancement results cannot be serialized in " +
+                            		"the requested media type: "+ mediaType.toString())
+                            .build());
+                }
             } else { //  (2) return a single content part
                 Entry<UriRef,Blob> contentPart = getBlob(ci, Collections.singleton(mediaType.toString()));
                 if(contentPart == null){ //no alternate content with the requeste media type
                     throw new WebApplicationException(
                         Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                         .entity("The requested enhancement chain has not created an " +
-                        		"version of the parsed content in the reuqest media " +
-                        		"type "+mediaType.toString())
+                        		"version of the parsed content in the request media " +
+                        		"type "+ mediaType.toString())
                         .build());
                 } else { //found -> stream the content to the client
                     //NOTE: This assumes that the presence of a charset
