@@ -30,9 +30,6 @@ import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static javax.ws.rs.core.Response.Status.UNSUPPORTED_MEDIA_TYPE;
-//import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
-//import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.N3;
@@ -43,9 +40,8 @@ import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -80,6 +76,8 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.clerezza.jaxrs.utils.form.FormFile;
+import org.apache.clerezza.jaxrs.utils.form.MultiPartBody;
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.access.TcProvider;
@@ -92,7 +90,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.commons.owl.util.URIUtils;
 import org.apache.stanbol.commons.web.viewable.Viewable;
-//import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
@@ -122,10 +119,9 @@ import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.sun.jersey.multipart.BodyPart;
-import com.sun.jersey.multipart.FormDataBodyPart;
-import com.sun.jersey.multipart.FormDataMultiPart;
+//import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+//import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+//import org.apache.stanbol.commons.web.base.ContextHelper;
 
 /**
  * The REST resource of an OntoNet {@link OntologyScope} whose identifier is known.
@@ -135,7 +131,7 @@ import com.sun.jersey.multipart.FormDataMultiPart;
  */
 @Component
 @Service(Object.class)
-@Property(name="javax.ws.rs", boolValue=true)
+@Property(name = "javax.ws.rs", boolValue = true)
 @Path("/ontonet/ontology/{scopeid}")
 public class ScopeResource extends AbstractOntologyAccessResource {
 
@@ -157,23 +153,22 @@ public class ScopeResource extends AbstractOntologyAccessResource {
 
     protected Scope scope;
 
-    
     public ScopeResource() {
         super();
-//        log.info("<init> with scope {}", scopeId);
-//
-//        this.servletContext = servletContext;
-//        this.onm = (ScopeManager) ContextHelper.getServiceFromContext(ScopeManager.class, servletContext);
-//        this.regMgr = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
-//            servletContext);
-//        this.ontologyProvider = (OntologyProvider<TcProvider>) ContextHelper.getServiceFromContext(
-//            OntologyProvider.class, servletContext);
+        // log.info("<init> with scope {}", scopeId);
+        //
+        // this.servletContext = servletContext;
+        // this.onm = (ScopeManager) ContextHelper.getServiceFromContext(ScopeManager.class, servletContext);
+        // this.regMgr = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
+        // servletContext);
+        // this.ontologyProvider = (OntologyProvider<TcProvider>) ContextHelper.getServiceFromContext(
+        // OntologyProvider.class, servletContext);
 
-//        if (scopeId == null || scopeId.isEmpty()) {
-//            log.error("Missing path parameter scopeid={}", scopeId);
-//            throw new WebApplicationException(NOT_FOUND);
-//        }
-//        scope = onm.getScope(scopeId);
+        // if (scopeId == null || scopeId.isEmpty()) {
+        // log.error("Missing path parameter scopeid={}", scopeId);
+        // throw new WebApplicationException(NOT_FOUND);
+        // }
+        // scope = onm.getScope(scopeId);
 
         // // Skip null checks: the scope might be created with a PUT
         // if (scope == null) {
@@ -189,12 +184,12 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                                     @Context HttpHeaders headers) {
 
         scope = onm.getScope(scopeid);
-        
+
         if (scope == null) return Response.status(NOT_FOUND).build();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         // Export to Clerezza Graph, which can be rendered as JSON-LD.
         ResponseBuilder rb = Response.ok(scope.export(Graph.class, merge, prefix));
-//        addCORSOrigin(servletContext, rb, headers);
+        // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -204,14 +199,14 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                                     @DefaultValue("false") @QueryParam("merge") boolean merge,
                                     @Context HttpHeaders headers) {
         scope = onm.getScope(scopeid);
-        
+
         if (scope == null) return Response.status(NOT_FOUND).build();
         // Export smaller graphs to OWLOntology due to the more human-readable rendering.
         ResponseBuilder rb;
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         if (merge) rb = Response.ok(scope.export(Graph.class, merge, prefix));
         else rb = Response.ok(scope.export(OWLOntology.class, merge, prefix));
-//        addCORSOrigin(servletContext, rb, headers);
+        // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -221,12 +216,12 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                                   @DefaultValue("false") @QueryParam("merge") boolean merge,
                                   @Context HttpHeaders headers) {
         scope = onm.getScope(scopeid);
-        
+
         if (scope == null) return Response.status(NOT_FOUND).build();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         // Export to OWLOntology due to the more human-readable rendering.
         ResponseBuilder rb = Response.ok(scope.export(OWLOntology.class, merge, prefix));
-//        addCORSOrigin(servletContext, rb, headers);
+        // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -236,11 +231,11 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                                     @Context HttpHeaders headers,
                                     @Context ServletContext servletContext) {
         scope = onm.getScope(scopeid);
-        
+
         onm.deregisterScope(scope);
         scope = null;
         ResponseBuilder rb = Response.ok();
-//        addCORSOrigin(servletContext, rb, headers);
+        // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -259,12 +254,12 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                                       @Context UriInfo uriInfo,
                                       @Context HttpHeaders headers) {
         scope = onm.getScope(scopeid);
-        
+
         OntologySpace space = scope.getCoreSpace();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         Graph o = space.export(Graph.class, merge, prefix);
         ResponseBuilder rb = Response.ok(o);
-//        addCORSOrigin(servletContext, rb, headers);
+        // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -276,12 +271,12 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                                     @Context UriInfo uriInfo,
                                     @Context HttpHeaders headers) {
         scope = onm.getScope(scopeid);
-        
+
         OntologySpace space = scope.getCoreSpace();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         OWLOntology o = space.export(OWLOntology.class, merge, prefix);
         ResponseBuilder rb = Response.ok(o);
-//        addCORSOrigin(servletContext, rb, headers);
+        // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -304,12 +299,12 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                                         @Context UriInfo uriInfo,
                                         @Context HttpHeaders headers) {
         scope = onm.getScope(scopeid);
-        
+
         OntologySpace space = scope.getCustomSpace();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         Graph o = space.export(Graph.class, merge, prefix);
         ResponseBuilder rb = Response.ok(o);
-//        addCORSOrigin(servletContext, rb, headers);
+        // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -321,12 +316,12 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                                       @Context UriInfo uriInfo,
                                       @Context HttpHeaders headers) {
         scope = onm.getScope(scopeid);
-        
+
         OntologySpace space = scope.getCustomSpace();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
         OWLOntology o = space.export(OWLOntology.class, merge, prefix);
         ResponseBuilder rb = Response.ok(o);
-//        addCORSOrigin(servletContext, rb, headers);
+        // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -335,11 +330,11 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     public Response getHtmlInfo(@PathParam("scopeid") String scopeid, @Context HttpHeaders headers) {
         ResponseBuilder rb;
         scope = onm.getScope(scopeid);
-        
+
         if (scope == null) rb = Response.status(NOT_FOUND);
         else rb = Response.ok(new Viewable("index", this)); // TODO move to a dedicated class
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-//        addCORSOrigin(servletContext, rb, headers);
+        // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -372,7 +367,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-//        enableCORS(servletContext, rb, headers, GET, POST, PUT, DELETE, OPTIONS);
+        // enableCORS(servletContext, rb, headers, GET, POST, PUT, DELETE, OPTIONS);
         return rb.build();
     }
 
@@ -380,7 +375,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     @Path("/core")
     public Response handleCorsPreflightCore(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-//        enableCORS(servletContext, rb, headers, GET, OPTIONS);
+        // enableCORS(servletContext, rb, headers, GET, OPTIONS);
         return rb.build();
     }
 
@@ -388,7 +383,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     @Path("/custom")
     public Response handleCorsPreflightCustom(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-//        enableCORS(servletContext, rb, headers, GET, OPTIONS);
+        // enableCORS(servletContext, rb, headers, GET, OPTIONS);
         return rb.build();
     }
 
@@ -396,7 +391,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     @Path("/{ontologyId:.+}")
     public Response handleCorsPreflightOntology(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-//        enableCORS(servletContext, rb, headers, GET, DELETE, OPTIONS);
+        // enableCORS(servletContext, rb, headers, GET, DELETE, OPTIONS);
         return rb.build();
     }
 
@@ -424,7 +419,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         log.debug("Ontology ID {}", ontologyId);
         ResponseBuilder rb;
         scope = onm.getScope(scopeid);
-        
+
         if (scope == null) rb = Response.status(NOT_FOUND);
         else {
             IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
@@ -441,7 +436,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
             else rb = Response.ok(o);
         }
 
-//        addCORSOrigin(servletContext, rb, headers);
+        // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -460,8 +455,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     @GET
     @Path("/{ontologyId:.+}")
     @Produces(value = {RDF_XML, TURTLE, X_TURTLE, MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, TEXT_PLAIN})
-    public Response managedOntologyGetOWL(
-                                          @PathParam("scopeid") String scopeid,
+    public Response managedOntologyGetOWL(@PathParam("scopeid") String scopeid,
                                           @PathParam("ontologyId") String ontologyId,
                                           @DefaultValue("false") @QueryParam("merge") boolean merge,
                                           @Context UriInfo uriInfo,
@@ -470,7 +464,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         log.debug("Ontology ID {}", ontologyId);
         ResponseBuilder rb;
         scope = onm.getScope(scopeid);
-        
+
         if (scope == null) rb = Response.status(NOT_FOUND);
         else {
             IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
@@ -487,7 +481,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
             if (o == null) rb = Response.status(NOT_FOUND);
             else rb = Response.ok(o);
         }
-//        addCORSOrigin(servletContext, rb, headers);
+        // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -514,14 +508,14 @@ public class ScopeResource extends AbstractOntologyAccessResource {
             else try {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 o.getOWLOntologyManager().saveOntology(o, new ManchesterOWLSyntaxOntologyFormat(), out);
-                rb = Response.ok(new Viewable("ontology", new OntologyPrettyPrintResource(
-                        uriInfo, out, scope)));
+                rb = Response.ok(new Viewable("ontology",
+                        new OntologyPrettyPrintResource(uriInfo, out, scope)));
             } catch (OWLOntologyStorageException e) {
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             }
         }
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-//        addCORSOrigin(servletContext, rb, headers);
+        // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -560,7 +554,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                 onm.setScopeActive(scopeId, true);
             }
         } else rb = Response.status(BAD_REQUEST); // null/blank ontology ID
-//        addCORSOrigin(servletContext, rb, headers);
+        // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -579,7 +573,9 @@ public class ScopeResource extends AbstractOntologyAccessResource {
     @POST
     @Consumes(value = {RDF_XML, OWL_XML, N_TRIPLE, N3, TURTLE, X_TURTLE, FUNCTIONAL_OWL, MANCHESTER_OWL,
                        RDF_JSON})
-    public Response manageOntology(InputStream content,@PathParam("scopeid") String scopeid, @Context HttpHeaders headers) {
+    public Response manageOntology(InputStream content,
+                                   @PathParam("scopeid") String scopeid,
+                                   @Context HttpHeaders headers) {
         long before = System.currentTimeMillis();
         ResponseBuilder rb;
         scope = onm.getScope(scopeid);
@@ -615,7 +611,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         } catch (UnmodifiableOntologyCollectorException e) {
             throw new WebApplicationException(e, FORBIDDEN);
         }
-//        addCORSOrigin(servletContext, rb, headers);
+        // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -633,7 +629,9 @@ public class ScopeResource extends AbstractOntologyAccessResource {
      */
     @POST
     @Consumes(value = MediaType.TEXT_PLAIN)
-    public Response manageOntology(String iri,@PathParam("scopeid") String scopeid, @Context HttpHeaders headers) {
+    public Response manageOntology(String iri,
+                                   @PathParam("scopeid") String scopeid,
+                                   @Context HttpHeaders headers) {
         ResponseBuilder rb;
         scope = onm.getScope(scopeid);
         if (scope == null) rb = Response.status(NOT_FOUND);
@@ -646,15 +644,17 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         } catch (OWLOntologyCreationException e) {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
-//        addCORSOrigin(servletContext, rb, headers);
+        // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
     @POST
     @Consumes({MULTIPART_FORM_DATA})
     @Produces({TEXT_HTML, TEXT_PLAIN, RDF_XML, TURTLE, X_TURTLE, N3})
-    public Response postOntology(FormDataMultiPart data, @PathParam("scopeid") String scopeid, @Context HttpHeaders headers) {
-        log.debug(" post(FormDataMultiPart data)");
+    public Response postOntology(MultiPartBody data,
+                                 @PathParam("scopeid") String scopeid,
+                                 @Context HttpHeaders headers) {
+        log.info(" post(MultiPartBody data) scope: {}", scopeid);
         ResponseBuilder rb;
         scope = onm.getScope(scopeid);
 
@@ -662,41 +662,88 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         rb = Response.status(BAD_REQUEST);
 
         IRI location = null, library = null;
-        File file = null; // If found, it takes precedence over location.
+        FormFile file = null; // If found, it takes precedence over location.
         String format = null;
         Set<String> keys = new HashSet<String>();
-        for (BodyPart bpart : data.getBodyParts()) {
-            log.debug("is a {}", bpart.getClass());
-            if (bpart instanceof FormDataBodyPart) {
-                FormDataBodyPart dbp = (FormDataBodyPart) bpart;
-                String name = dbp.getName();
-                if (name.equals("file")) file = bpart.getEntityAs(File.class);
-                else {
-                    String value = dbp.getValue();
-                    if (name.equals("format") && !value.equals("auto")) format = value;
-                    else if (name.equals("url")) try {
-                        URI.create(value); // To throw 400 if malformed.
-                        location = IRI.create(value);
-                    } catch (Exception ex) {
-                        log.error("Malformed IRI for " + value, ex);
-                        throw new WebApplicationException(ex, BAD_REQUEST);
-                    }
-                    else if (name.equals("library") && !"null".equals(value)) try {
-                        URI.create(value); // To throw 400 if malformed.
-                        library = IRI.create(value);
-                    } catch (Exception ex) {
-                        log.error("Malformed IRI for " + value, ex);
-                        throw new WebApplicationException(ex, BAD_REQUEST);
-                    }
-                    else if (name.equals("stored") && !"null".equals(value)) {
-                        log.info("Request to manage ontology with key {}", value);
-                        keys.add(value);
-                    }
-                }
 
+        // for (BodyPart bpart : data.getBodyParts()) {
+        // log.debug("is a {}", bpart.getClass());
+        // if (bpart instanceof FormDataBodyPart) {
+        // FormDataBodyPart dbp = (FormDataBodyPart) bpart;
+        // String name = dbp.getName();
+        // if (name.equals("file")) file = bpart.getEntityAs(File.class);
+        // else {
+        // String value = dbp.getValue();
+        // if (name.equals("format") && !value.equals("auto")) format = value;
+        // else if (name.equals("url")) try {
+        // URI.create(value); // To throw 400 if malformed.
+        // location = IRI.create(value);
+        // } catch (Exception ex) {
+        // log.error("Malformed IRI for " + value, ex);
+        // throw new WebApplicationException(ex, BAD_REQUEST);
+        // }
+        // else if (name.equals("library") && !"null".equals(value)) try {
+        // URI.create(value); // To throw 400 if malformed.
+        // library = IRI.create(value);
+        // } catch (Exception ex) {
+        // log.error("Malformed IRI for " + value, ex);
+        // throw new WebApplicationException(ex, BAD_REQUEST);
+        // }
+        // else if (name.equals("stored") && !"null".equals(value)) {
+        // log.info("Request to manage ontology with key {}", value);
+        // keys.add(value);
+        // }
+        // }
+        //
+        // }
+        // }
+
+        if (data.getFormFileParameterValues("file").length > 0) {
+            file = data.getFormFileParameterValues("file")[0];
+        }
+        // else {
+        if (data.getTextParameterValues("format").length > 0) {
+            String value = data.getTextParameterValues("format")[0];
+            if (!value.equals("auto")) {
+                format = value;
             }
         }
-        boolean fileOk = file != null && file.canRead() && file.exists();
+        if (data.getTextParameterValues("url").length > 0) {
+            String value = data.getTextParameterValues("url")[0];
+            try {
+                URI.create(value); // To throw 400 if malformed.
+                location = IRI.create(value);
+            } catch (Exception ex) {
+                log.error("Malformed IRI for param url " + value, ex);
+                throw new WebApplicationException(ex, BAD_REQUEST);
+            }
+        }
+        if (data.getTextParameterValues("library").length > 0) {
+            String value = data.getTextParameterValues("library")[0];
+            try {
+                URI.create(value); // To throw 400 if malformed.
+                library = IRI.create(value);
+            } catch (Exception ex) {
+                log.error("Malformed IRI for param library " + value, ex);
+                throw new WebApplicationException(ex, BAD_REQUEST);
+            }
+        }
+        if (data.getTextParameterValues("stored").length > 0) {
+            String value = data.getTextParameterValues("stored")[0];
+            keys.add(value);
+        }
+
+        log.debug("Parameters:");
+        log.debug("file: {}", file);
+        log.debug("url: {}", location);
+        log.debug("format: {}", format);
+        log.debug("keys: {}", keys);
+
+        boolean fileOk = file != null;
+        // if(fileOk && !(file.canRead() && file.exists())){
+        // log.error("File is not accessible: {}", file);
+        // throw new WebApplicationException(INTERNAL_SERVER_ERROR);
+        // }
         if (fileOk || location != null || library != null) { // File and location take precedence
 
             // src = new GraphContentInputSource(content, format, ontologyProvider.getStore());
@@ -704,6 +751,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
             // Then add the file
             OntologyInputSource<?> src = null;
             if (fileOk) {
+
                 /*
                  * Because the ontology provider's load method could fail after only one attempt without
                  * resetting the stream, we might have to do that ourselves.
@@ -720,21 +768,22 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                     String f = itf.next();
                     try {
                         // Re-instantiate the stream on every attempt
-                        InputStream content = new FileInputStream(file);
+                        InputStream content = new ByteArrayInputStream(file.getContent());
                         // ClerezzaOWLUtils.guessOntologyID(new FileInputStream(file), Parser.getInstance(),
                         // f);
                         OWLOntologyID guessed = OWLUtils.guessOntologyID(content, Parser.getInstance(), f);
+                        log.debug("guessed ontology id: {}", guessed);
                         if (guessed != null && !guessed.isAnonymous()
                             && ontologyProvider.hasOntology(guessed)) {
-                            rb = Response.status(Status.CONFLICT);
+                            // rb = Response.status(Status.CONFLICT);
                             this.submitted = guessed;
                             if (headers.getAcceptableMediaTypes().contains(MediaType.TEXT_HTML_TYPE)) {
-                                rb.entity(new Viewable("/imports/409", this));
+                                rb.entity(new Viewable("conflict.ftl", new ScopeResultData())); 
                                 rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML + "; charset=utf-8");
                             }
                             break;
                         } else {
-                            content = new FileInputStream(file);
+                            content = new ByteArrayInputStream(file.getContent());
                             log.debug("Recreated input stream for format {}", f);
                             src = new GraphContentInputSource(content, f, ontologyProvider.getStore());
                         }
@@ -752,10 +801,6 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                         failed++;
                     }
                 } while (src == null && itf.hasNext());
-//                if (src == null) {
-//                    if (failed > 0) throw new WebApplicationException(BAD_REQUEST);
-//                    else if (unsupported > 0) throw new WebApplicationException(UNSUPPORTED_MEDIA_TYPE);
-//                }
             }
 
             if (src != null) {
@@ -770,6 +815,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                 } else rb = Response.ok();
             } else if (rb == null) rb = Response.status(INTERNAL_SERVER_ERROR);
         }
+
         if (!keys.isEmpty()) {
             for (String key : keys)
                 scope.getCustomSpace().addOntology(new StoredOntologySource(OntologyUtils.decode(key)));
@@ -778,7 +824,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         // else throw new WebApplicationException(BAD_REQUEST);
         // rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
         // FIXME return an appropriate response e.g. 201
-//        addCORSOrigin(servletContext, rb, headers);
+        // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -857,8 +903,20 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         }
 
         ResponseBuilder rb = Response.created(uriInfo.getAbsolutePath());
-//        addCORSOrigin(servletContext, rb, headers);
+        // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
+    }
+
+    public class ScopeResultData extends ResultData {
+
+        public OWLOntologyID getRepresentedOntologyKey() {
+            log.info("getRepresentedOntologyKey {}",ScopeResource.this.getRepresentedOntologyKey());
+            return ScopeResource.this.getRepresentedOntologyKey();
+        }
+
+        public String stringForm(OWLOntologyID ontologyID) {
+            return OntologyUtils.encode(ontologyID);
+        }
     }
 
 }

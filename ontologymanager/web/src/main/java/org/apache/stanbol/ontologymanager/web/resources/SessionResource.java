@@ -42,6 +42,7 @@ import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -76,6 +77,8 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.clerezza.jaxrs.utils.form.FormFile;
+import org.apache.clerezza.jaxrs.utils.form.MultiPartBody;
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
@@ -114,10 +117,10 @@ import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.sun.jersey.multipart.BodyPart;
-import com.sun.jersey.multipart.FormDataBodyPart;
-import com.sun.jersey.multipart.FormDataMultiPart;
+//
+//import com.sun.jersey.multipart.BodyPart;
+//import com.sun.jersey.multipart.FormDataBodyPart;
+//import com.sun.jersey.multipart.FormDataMultiPart;
 //import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 //import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 //import org.apache.stanbol.commons.web.base.ContextHelper;
@@ -627,7 +630,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
     @POST
     @Consumes({MULTIPART_FORM_DATA})
     @Produces({WILDCARD})
-    public Response postOntology(FormDataMultiPart data, @Context HttpHeaders headers) {
+    public Response postOntology(MultiPartBody data, @Context HttpHeaders headers) {
         log.debug(" post(FormDataMultiPart data)");
         long before = System.currentTimeMillis();
         ResponseBuilder rb;
@@ -636,53 +639,96 @@ public class SessionResource extends AbstractOntologyAccessResource {
         rb = Response.status(BAD_REQUEST);
 
         IRI location = null, library = null;
-        File file = null; // If found, it takes precedence over location.
+        FormFile file = null; // If found, it takes precedence over location.
         String format = null;
         Set<String> toAppend = null;
         Set<String> keys = new HashSet<String>();
 
-        for (BodyPart bpart : data.getBodyParts()) {
-            log.debug("Found body part of type {}", bpart.getClass());
-            if (bpart instanceof FormDataBodyPart) {
-                FormDataBodyPart dbp = (FormDataBodyPart) bpart;
-                String name = dbp.getName();
-                log.debug("Detected form parameter \"{}\".", name);
-                if (name.equals("file")) {
-                    file = bpart.getEntityAs(File.class);
-                } else {
-                    String value = dbp.getValue();
-                    if (name.equals("format") && !value.equals("auto")) {
-                        log.debug(" -- Expected format : {}", value);
-                        format = value;
-                    } else if (name.equals("url")) try {
-                        URI.create(value); // To throw 400 if malformed.
-                        location = IRI.create(value);
-                        log.debug(" -- Will load ontology from URL : {}", location);
-                    } catch (Exception ex) {
-                        log.error("Malformed IRI for " + value, ex);
-                        throw new WebApplicationException(ex, BAD_REQUEST);
-                    }
-                    else if (name.equals("library") && !"null".equals(value)) try {
-                        log.debug(" -- Library ID : {}", value);
-                        URI.create(value); // To throw 400 if malformed.
-                        library = IRI.create(value);
-                        log.debug(" ---- (is well-formed URI)");
-                    } catch (Exception ex) {
-                        log.error("Malformed IRI for " + value, ex);
-                        throw new WebApplicationException(ex, BAD_REQUEST);
-                    }
-                    else if (name.equals("stored") && !"null".equals(value)) {
-                        log.info("Request to manage ontology with key {}", value);
-                        keys.add(value);
-                    } else if (name.equals("scope")) {
-                        log.info("Request to append scope \"{}\".", value);
-                        if (toAppend == null) toAppend = new HashSet<String>();
-                        toAppend.add(value);
-                    }
-                }
+//        for (BodyPart bpart : data.getBodyParts()) {
+//            log.debug("Found body part of type {}", bpart.getClass());
+//            if (bpart instanceof FormDataBodyPart) {
+//                FormDataBodyPart dbp = (FormDataBodyPart) bpart;
+//                String name = dbp.getName();
+//                log.debug("Detected form parameter \"{}\".", name);
+//                if (name.equals("file")) {
+//                    file = bpart.getEntityAs(File.class);
+//                } else {
+//                    String value = dbp.getValue();
+//                    if (name.equals("format") && !value.equals("auto")) {
+//                        log.debug(" -- Expected format : {}", value);
+//                        format = value;
+//                    } else if (name.equals("url")) try {
+//                        URI.create(value); // To throw 400 if malformed.
+//                        location = IRI.create(value);
+//                        log.debug(" -- Will load ontology from URL : {}", location);
+//                    } catch (Exception ex) {
+//                        log.error("Malformed IRI for " + value, ex);
+//                        throw new WebApplicationException(ex, BAD_REQUEST);
+//                    }
+//                    else if (name.equals("library") && !"null".equals(value)) try {
+//                        log.debug(" -- Library ID : {}", value);
+//                        URI.create(value); // To throw 400 if malformed.
+//                        library = IRI.create(value);
+//                        log.debug(" ---- (is well-formed URI)");
+//                    } catch (Exception ex) {
+//                        log.error("Malformed IRI for " + value, ex);
+//                        throw new WebApplicationException(ex, BAD_REQUEST);
+//                    }
+//                    else if (name.equals("stored") && !"null".equals(value)) {
+//                        log.info("Request to manage ontology with key {}", value);
+//                        keys.add(value);
+//                    } else if (name.equals("scope")) {
+//                        log.info("Request to append scope \"{}\".", value);
+//                        if (toAppend == null) toAppend = new HashSet<String>();
+//                        toAppend.add(value);
+//                    }
+//                }
+//            }
+//        }
+        if (data.getFormFileParameterValues("file").length > 0) {
+            file = data.getFormFileParameterValues("file")[0];
+        }
+        // else {
+        if (data.getTextParameterValues("format").length > 0) {
+            String value = data.getTextParameterValues("format")[0];
+            if (!value.equals("auto")) {
+                format = value;
             }
         }
-        boolean fileOk = file != null && file.canRead() && file.exists();
+        if (data.getTextParameterValues("url").length > 0) {
+            String value = data.getTextParameterValues("url")[0];
+            try {
+                URI.create(value); // To throw 400 if malformed.
+                location = IRI.create(value);
+            } catch (Exception ex) {
+                log.error("Malformed IRI for param url " + value, ex);
+                throw new WebApplicationException(ex, BAD_REQUEST);
+            }
+        }
+        if (data.getTextParameterValues("library").length > 0) {
+            String value = data.getTextParameterValues("library")[0];
+            try {
+                URI.create(value); // To throw 400 if malformed.
+                library = IRI.create(value);
+            } catch (Exception ex) {
+                log.error("Malformed IRI for param library " + value, ex);
+                throw new WebApplicationException(ex, BAD_REQUEST);
+            }
+        }
+        if (data.getTextParameterValues("stored").length > 0) {
+            String value = data.getTextParameterValues("stored")[0];
+            keys.add(value);
+        }
+        if (data.getTextParameterValues("scope").length > 0) {
+            String value = data.getTextParameterValues("scope")[0];
+            log.info("Request to append scope \"{}\".", value);
+            if (toAppend == null) {
+                toAppend = new HashSet<String>();
+            }
+            toAppend.add(value);
+        }
+        
+        boolean fileOk = file != null;
         if (fileOk || location != null || library != null) { // File and location take precedence
             // Then add the file
             OntologyInputSource<?> src = null;
@@ -695,7 +741,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
                         log.debug("Trying format {}.", f);
                         long b4buf = System.currentTimeMillis();
                         // Recreate the stream on each attempt
-                        InputStream content = new BufferedInputStream(new FileInputStream(file));
+                        InputStream content = new BufferedInputStream(new ByteArrayInputStream(file.getContent()));
                         log.debug("Streams created in {} ms", System.currentTimeMillis() - b4buf);
                         log.debug("Creating ontology input source...");
                         b4buf = System.currentTimeMillis();
@@ -709,7 +755,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
                                 rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML + "; charset=utf-8");
                             }
                         } else {
-                            content = new BufferedInputStream(new FileInputStream(file));
+                            content = new BufferedInputStream(new ByteArrayInputStream(file.getContent()));
                             src = new GraphContentInputSource(content, f, ontologyProvider.getStore());
                         }
                         log.debug("Done in {} ms", System.currentTimeMillis() - b4buf);

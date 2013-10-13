@@ -80,6 +80,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.clerezza.jaxrs.utils.form.MultiPartBody;
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Triple;
@@ -111,8 +112,10 @@ import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyHandleExc
 import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyLoadingException;
 import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.servicesapi.ontology.OrphanOntologyKeyException;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpace;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.Scope;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
+import org.apache.stanbol.ontologymanager.servicesapi.session.Session;
 import org.apache.stanbol.ontologymanager.servicesapi.session.SessionManager;
 import org.apache.stanbol.ontologymanager.servicesapi.util.OntologyUtils;
 import org.apache.stanbol.ontologymanager.sources.owlapi.OntologyContentInputSource;
@@ -130,10 +133,10 @@ import org.semanticweb.owlapi.model.SetOntologyID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.view.ImplicitProduces;
-import com.sun.jersey.multipart.BodyPart;
-import com.sun.jersey.multipart.FormDataBodyPart;
-import com.sun.jersey.multipart.FormDataMultiPart;
+//import com.sun.jersey.api.view.ImplicitProduces;
+//import com.sun.jersey.multipart.BodyPart;
+//import com.sun.jersey.multipart.FormDataBodyPart;
+//import com.sun.jersey.multipart.FormDataMultiPart;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
@@ -148,7 +151,7 @@ import java.security.PrivilegedAction;
 @Service(Object.class)
 @Property(name="javax.ws.rs", boolValue=true)
 @Path("/ontonet")
-@ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
+//@ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
 public class OntoNetRootResource extends AbstractOntologyAccessResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
@@ -597,7 +600,7 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
     @Consumes({MULTIPART_FORM_DATA})
     @Produces({TEXT_HTML, TEXT_PLAIN, RDF_XML, TURTLE, X_TURTLE, N3})
     public Response loadOntologyContent(@PathParam("ontologyId") String ontologyId,
-            FormDataMultiPart data,
+                                        MultiPartBody data,
             @Context HttpHeaders headers) {
         ResponseBuilder rb = performLoadOntology(data, headers,
                 Origin.create(OntologyUtils.decode(ontologyId)));
@@ -606,46 +609,56 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
         return rb.build();
     }
 
-    protected ResponseBuilder performLoadOntology(FormDataMultiPart data,
+    protected ResponseBuilder performLoadOntology(MultiPartBody data,
             HttpHeaders headers,
             Origin<?>... keys) {
-        log.debug(" post(FormDataMultiPart data)");
+        log.debug(" post(MultiPartBody data)");
         ResponseBuilder rb = null;
 
         IRI location = null;
         File file = null; // If found, it takes precedence over location.
         String format = null;
         List<OWLOntologyID> aliases = new ArrayList<OWLOntologyID>();
-        for (BodyPart bpart : data.getBodyParts()) {
-            log.debug("is a {}", bpart.getClass());
-            if (bpart instanceof FormDataBodyPart) {
-                FormDataBodyPart dbp = (FormDataBodyPart) bpart;
-                String name = dbp.getName();
-                if (name.equals("file")) {
-                    file = bpart.getEntityAs(File.class);
-                } else {
-                    String value = dbp.getValue();
-                    if (name.equals("format") && !value.equals("auto")) {
-                        format = value;
-                    } else if (name.equals("url")) {
-                        try {
-                            URI.create(value); // To throw 400 if malformed.
-                            location = IRI.create(value);
-                        } catch (Exception ex) {
-                            log.error("Malformed IRI for " + value, ex);
-                            throw new WebApplicationException(ex, BAD_REQUEST);
-                        }
-                    } else if (name.equals("alias") && !"null".equals(value)) {
-                        try {
-                            aliases.add(OntologyUtils.decode(value));
-                        } catch (Exception ex) {
-                            log.error("Malformed public key for " + value, ex);
-                            throw new WebApplicationException(ex, BAD_REQUEST);
-                        }
+        
+        if (data.getFormFileParameterValues("file").length > 0) {
+            file = new File(data.getFormFileParameterValues("file")[0].getFileName());
+        }
+        // else {
+        if (data.getTextParameterValues("format").length > 0) {
+            String value = data.getTextParameterValues("format")[0];
+            if (!value.equals("auto")) {
+                format = value;
+            }
+        }
+        if (data.getTextParameterValues("url").length > 0) {
+            String value = data.getTextParameterValues("url")[0];
+            try {
+                URI.create(value); // To throw 400 if malformed.
+                location = IRI.create(value);
+            } catch (Exception ex) {
+                log.error("Malformed IRI for " + value, ex);
+                throw new WebApplicationException(ex, BAD_REQUEST);
+            }
+        }
+        if (data.getTextParameterValues("alias").length > 0) {
+            for(String value : data.getTextParameterValues("alias")){
+                if (!"null".equals(value)) {
+                    try {
+                        aliases.add(OntologyUtils.decode(value));
+                    } catch (Exception ex) {
+                        log.error("Malformed public key for " + value, ex);
+                        throw new WebApplicationException(ex, BAD_REQUEST);
                     }
                 }
             }
         }
+
+        log.debug("Parameters:");
+        log.debug("file: {}", file);
+        log.debug("url: {}", location);
+        log.debug("format: {}", format);
+        log.debug("alias: {}", aliases);
+
         // Then add the file
         OWLOntologyID key = null;
         if (file != null && file.canRead() && file.exists()) {
@@ -814,7 +827,7 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
     @POST
     @Consumes({MULTIPART_FORM_DATA})
     @Produces({TEXT_HTML, TEXT_PLAIN, RDF_XML, TURTLE, X_TURTLE, N3})
-    public Response postOntology(FormDataMultiPart data, @Context HttpHeaders headers) {
+    public Response postOntology(MultiPartBody data, @Context HttpHeaders headers) {
         ResponseBuilder rb = performLoadOntology(data, headers);
         // rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
         //addCORSOrigin(servletContext, rb, headers);
@@ -884,5 +897,65 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
         log.debug("POST request for ontology addition completed in {} ms with status {}.",
                 (System.currentTimeMillis() - before), r.getStatus());
         return r;
+    }
+    
+    public class OntologyStatsResource extends ResultData {
+
+        private Set<OntologyCollector> handles;
+
+        private Set<OWLOntologyID> identifiers;
+
+        private OWLOntology o;
+
+        private UriInfo uriInfo;
+
+        private OWLOntologyID submitted;
+
+        public OntologyStatsResource(
+                                     UriInfo uriInfo,
+                                     OWLOntologyID key,
+                                     OWLOntology o,
+                                     Set<OWLOntologyID> identifiers,
+                                     Set<OntologyCollector> handles) {
+//            this.servletContext = context;
+            this.uriInfo = uriInfo;
+            this.submitted = key;
+            this.o = o;
+            this.identifiers = identifiers;
+            this.handles = handles;
+        }
+
+        public Set<String> getAliases() {
+            Set<String> aliases = new HashSet<String>();
+            for (OWLOntologyID alias : identifiers)
+                // if (!o.getOntologyID().equals(alias))
+                aliases.add(OntologyUtils.encode(alias));
+            return Collections.unmodifiableSet(aliases);
+        }
+
+        public Set<String> getScopeHandles() {
+            Set<String> handles = new HashSet<String>();
+            for (OntologyCollector handle : this.handles)
+                if (handle instanceof OntologySpace) handles.add(handle.getID());
+            return handles;
+        }
+
+        public Set<String> getSessionHandles() {
+            Set<String> handles = new HashSet<String>();
+            for (OntologyCollector handle : this.handles)
+                if (handle instanceof Session) handles.add(handle.getID());
+            return handles;
+        }
+
+        public int getTotalAxioms() {
+            return o.getAxiomCount();
+        }
+        public OWLOntologyID getRepresentedOntologyKey() {
+            return submitted;
+        }
+
+        public String stringForm(OWLOntologyID ontologyID) {
+            return OntologyUtils.encode(ontologyID);
+        }
     }
 }

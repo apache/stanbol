@@ -59,6 +59,7 @@
             <Import-Package>
               javax.ws.rs.*; version="[2.0,3]",
               org.apache.stanbol.commons.web.base; provide:=true; version="[1.0.0,2)",
+              org.apache.clerezza.jaxrs.utils.*,
               com.sun.jersey.*; version="[1.15.0,2)",
               com.sun.net.httpserver.*,
               *
@@ -129,33 +130,37 @@
       <version>0.11.0-SNAPSHOT</version>
     </dependency>
 
-
     <!-- specific deps for this project -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
   	  <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
       <version>1.0.0-SNAPSHOT</version>      
     </dependency>
+    
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>jaxrs.utils</artifactId>
+    </dependency>
 
     <!-- Jersey specific JAX-RS annotations -->
-    <dependency> <!-- because of ImplicitProduces -->
+    <!--<dependency>  because of ImplicitProduces 
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
       <version>1.15</version>
       <scope>compile</scope>
-    </dependency>
-    <dependency> <!-- because of multipart -->
+    </dependency>-->
+    <!-- dependency>  because of multipart
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-multipart</artifactId>
       <version>1.15</version>
       <scope>compile</scope>
     </dependency>
-    <dependency> <!-- because of jersey (temporary) -->
+    <dependency>  because of jersey (temporary) 
       <groupId>com.sun.net.httpserver</groupId>
       <artifactId>http</artifactId>
       <version>20070405</version>
       <scope>compile</scope>
-    </dependency>
+    </dependency>-->
 
 
 
