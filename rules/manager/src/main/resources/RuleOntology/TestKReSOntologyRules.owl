@@ -1,0 +1,334 @@
+<?xml version="1.0"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+
+<!DOCTYPE Ontology [
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY xml "http://www.w3.org/XML/1998/namespace" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="http://kres.iks-project.eu/ontology/meta/rmi.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     ontologyIRI="http://kres.iks-project.eu/ontology/meta/rmi.owl">
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <!--
+    <Import>http://www.ontologydesignpatterns.org/cp/owl/sequence.owl</Import>
+    -->
+    <Declaration>
+        <Class IRI="#KReSRule"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Recipe"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#endWith"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#hasRule"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#isRuleOf"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#startWith"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasBodyAndHead"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasDescription"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasSequence"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="#KReSRule"/>
+        <Class abbreviatedIRI=":Thing"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#KReSRule"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#isRuleOf"/>
+            <Class IRI="#Recipe"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Recipe"/>
+        <Class abbreviatedIRI=":Thing"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Recipe"/>
+        <ObjectMinCardinality cardinality="1">
+            <ObjectProperty IRI="#hasRule"/>
+            <Class IRI="#KReSRule"/>
+        </ObjectMinCardinality>
+    </SubClassOf>
+    <DisjointClasses>
+        <Class IRI="#KReSRule"/>
+        <Class IRI="#Recipe"/>
+    </DisjointClasses>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#endWith"/>
+        <ObjectProperty abbreviatedIRI=":topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#hasRule"/>
+        <ObjectProperty abbreviatedIRI=":topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#isRuleOf"/>
+        <ObjectProperty abbreviatedIRI=":topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#startWith"/>
+        <ObjectProperty abbreviatedIRI=":topObjectProperty"/>
+    </SubObjectPropertyOf>
+    <InverseObjectProperties>
+        <ObjectProperty IRI="#hasRule"/>
+        <ObjectProperty IRI="#isRuleOf"/>
+    </InverseObjectProperties>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#endWith"/>
+        <Class IRI="#Recipe"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#hasRule"/>
+        <Class IRI="#Recipe"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#isRuleOf"/>
+        <Class IRI="#KReSRule"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#startWith"/>
+        <Class IRI="#Recipe"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#endWith"/>
+        <Class IRI="#KReSRule"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#hasRule"/>
+        <Class IRI="#KReSRule"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#isRuleOf"/>
+        <Class IRI="#Recipe"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#startWith"/>
+        <Class IRI="#KReSRule"/>
+    </ObjectPropertyRange>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasBodyAndHead"/>
+        <DataProperty abbreviatedIRI=":topDataProperty"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasDescription"/>
+        <DataProperty abbreviatedIRI=":topDataProperty"/>
+    </SubDataPropertyOf>
+    <SubDataPropertyOf>
+        <DataProperty IRI="#hasSequence"/>
+        <DataProperty abbreviatedIRI=":topDataProperty"/>
+    </SubDataPropertyOf>
+    <DataPropertyDomain>
+        <DataProperty IRI="#hasBodyAndHead"/>
+        <Class IRI="#KReSRule"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#hasDescription"/>
+        <Class abbreviatedIRI=":Thing"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#hasSequence"/>
+        <Class IRI="#Recipe"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty IRI="#hasBodyAndHead"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#hasDescription"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#hasSequence"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#KReSRule</IRI>
+        <Literal xml:lang="it">Questa classe contiene gli IRI che identificano le regole (i nomi) su una o pi&#249; ontologie. </Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#KReSRule</IRI>
+        <Literal xml:lang="en">This class contains the IRI (the name) that identifies the rule. </Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#KReSRule</IRI>
+        <Literal xml:lang="en">SWRL rules</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#KReSRule</IRI>
+        <Literal xml:lang="it">regole SWRL</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#Recipe</IRI>
+        <Literal xml:lang="it">Questa classe contiene l&#39;IRI che identifica una sequenza di regole che eseguirano una particolare azione sul dataset. L&#39;istanza di questa classe deve contenere almeno una regola KReS</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#Recipe</IRI>
+        <Literal xml:lang="en">This class contains the IRI that identifies a sequence of rules to perform particular action on the dataset. It must have at least one KReS rule</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#Recipe</IRI>
+        <Literal xml:lang="en">Receipt</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#Recipe</IRI>
+        <Literal xml:lang="it">Ricevere</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#endWith</IRI>
+        <Literal xml:lang="en">This property indentifies the last rule of the recipe.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#endWith</IRI>
+        <Literal xml:lang="en">end with</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#endWith</IRI>
+        <Literal xml:lang="it">finisce con</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#hasBodyAndHead</IRI>
+        <Literal xml:lang="en">Physical Storage of a rule. Here there is the kres rule string.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#hasBodyAndHead</IRI>
+        <Literal xml:lang="it">ha corpo e testa</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#hasBodyAndHead</IRI>
+        <Literal xml:lang="en">has body and head</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#hasDescription</IRI>
+        <Literal xml:lang="en">Any kind of description about rules or recipes.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#hasDescription</IRI>
+        <Literal xml:lang="it">ha descrizione</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#hasDescription</IRI>
+        <Literal xml:lang="en">has description</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#hasRule</IRI>
+        <Literal xml:lang="en">This property links a Recipe istance to a KReS rule.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#hasRule</IRI>
+        <Literal xml:lang="it">ha regola</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#hasRule</IRI>
+        <Literal xml:lang="en">has rule</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#hasSequence</IRI>
+        <Literal xml:lang="en">Define the rule sequence of a recipe.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#hasSequence</IRI>
+        <Literal xml:lang="it">ha sequenza</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#hasSequence</IRI>
+        <Literal xml:lang="en">has sequence</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#isRuleOf</IRI>
+        <Literal xml:lang="en">This property links a KReS rule to a Recipe</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#isRuleOf</IRI>
+        <Literal xml:lang="en">is rule of</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#isRuleOf</IRI>
+        <Literal xml:lang="it">&#232; regola di</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#startWith</IRI>
+        <Literal xml:lang="en">This property identifies the starting rule of the recipe.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#startWith</IRI>
+        <Literal xml:lang="it">inizia con</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://www.semanticweb.org/ontologies/ontologyrules.owl#startWith</IRI>
+        <Literal xml:lang="en">start with</Literal>
+    </AnnotationAssertion>
+</Ontology>
+
+
+
+<!-- Generated by the OWL API (version 3.0.0.1451) http://owlapi.sourceforge.net -->
+

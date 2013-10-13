@@ -1,0 +1,2 @@
+food = <http://www.semanticweb.org/Food.owl#> . 
+pr[ is(food:Pizza, ?x) -> is(food:Food, ?x) ] 
