@@ -18,15 +18,12 @@ import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.UnsupportedTypeException;
 import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
-import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.datatypes.XMLDatatypeUtil;
 import org.openrdf.model.vocabulary.XMLSchema;
-import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,61 +52,6 @@ public class RdfRepresentation implements Representation, RdfWrapper {
     };
     
     /**
-     * Emits {@link Value#stringValue()}
-     */
-    protected Transformer stringTransformer = new Transformer() {
-        
-        @Override
-        public String transform(Object input) {
-            return ((Value)input).stringValue();
-        }
-    };
-    
-    /**
-     * A {@link Value} to {@link Object} transformer intended to be used for
-     * {@link IteratorUtils#transformedIterator(Iterator, Transformer)} to
-     * convert 
-     */
-    protected Transformer sesameTransformer = new Transformer() {
-        
-        @Override
-        public Object transform(Object input) {
-            if(input instanceof Value){
-                Value sesameValue = (Value) input;
-                if(sesameValue instanceof URI){
-                    return new RdfReference((URI)sesameValue);
-                } else if(sesameValue instanceof Literal){
-                    Literal literal = (Literal)sesameValue;
-                    if(literal.getDatatype() == null){ //TODO: adapt to RDF1.1
-                        return new RdfText(literal);
-                    } else {
-                        return transformTypedLiteral(literal);
-                    }
-                } else {
-                    return new RdfBNode((BNode)sesameValue);
-                }
-            } else { //do not transform objects of other types (incl. null)
-                return input;
-            }
-        }    
-    };
-    /**
-     * Transforms typed literals with datatype {@link XMLSchema#STRING} to
-     * {@link Text} instances as required by some {@link Representation}
-     * methods. This transformer is usually used in front of the
-     * {@link #sesameTransformer}.
-     */
-    protected Transformer stringLiteral2TextTransformer = new Transformer() {
-        
-        @Override
-        public Object transform(Object input) {
-            if(input instanceof Literal && XMLSchema.STRING.equals(((Literal)input).getDatatype())){
-                return new RdfText((Literal)input);
-            }
-            return input;
-        }
-    };
-    /**
      * Creates a {@link Representation} for the parsed subject. Data will be
      * added to the model.
      * @param subject the subject
@@ -122,58 +64,7 @@ public class RdfRepresentation implements Representation, RdfWrapper {
         this.factory = factory;
         this.sesameFactory = factory.getSesameFactory();
     }
-    /**
-     * Transforms a typed literal to the according java type.
-     * @param literal
-     * @return
-     */
-    protected Object transformTypedLiteral(Literal literal){
-        URI dataType = literal.getDatatype();
-        if(XMLSchema.INT.equals(dataType)){
-            return literal.intValue();
-        } else if(XMLSchema.LONG.equals(dataType)){
-            return literal.longValue();
-        } else if(XMLSchema.FLOAT.equals(dataType)){
-            return literal.floatValue();
-        } else if(XMLSchema.DOUBLE.equals(dataType)){
-            return literal.doubleValue();
-        } else if(XMLSchema.BOOLEAN.equals(dataType)){ 
-            return literal.booleanValue();
-        }else if(XMLSchema.INTEGER.equals(dataType)){
-            return literal.integerValue();
-        } else if(XMLSchema.DECIMAL.equals(dataType)){
-            return literal.decimalValue();
-        } else if(XMLSchema.STRING.equals(dataType)){ //explicit handle string
-            //to avoid going to a lot of equals checks
-            return literal.stringValue();
-        } else if(XMLDatatypeUtil.isCalendarDatatype(dataType)){
-            return literal.calendarValue().toGregorianCalendar().getTime();
-        } else if(XMLSchema.BYTE.equals(dataType)){
-            return literal.byteValue();
-        } else if(XMLSchema.SHORT.equals(dataType)){
-            return literal.shortValue();
-        //Start with the more exotic types at the end (for performance reasons)
-        } else if(XMLSchema.NON_NEGATIVE_INTEGER.equals(dataType) ||
-                XMLSchema.NON_POSITIVE_INTEGER.equals(dataType) ||
-                XMLSchema.NEGATIVE_INTEGER.equals(dataType) ||
-                XMLSchema.POSITIVE_INTEGER.equals(dataType)){
-            return literal.longValue();
-        } else if(XMLSchema.GDAY.equals(dataType) ||
-                XMLSchema.GMONTH.equals(dataType) ||
-                XMLSchema.GMONTHDAY.equals(dataType) ||
-                XMLSchema.GYEAR.equals(dataType) ||
-                XMLSchema.GYEARMONTH.equals(dataType)){
-            return literal.calendarValue().toGregorianCalendar().getTime();
-        } else if(XMLSchema.UNSIGNED_BYTE.equals(dataType)){
-            return literal.shortValue();
-        } else if(XMLSchema.UNSIGNED_SHORT.equals(dataType)){
-            return literal.intValue();
-        } else if(XMLSchema.UNSIGNED_INT.equals(dataType)){
-            return literal.longValue();
-        } else{
-            return literal.stringValue();
-        }
-    }
+    
     @Override
     public void add(String field, Object value) throws IllegalArgumentException {
         if(field == null){
@@ -321,7 +212,7 @@ public class RdfRepresentation implements Representation, RdfWrapper {
             IteratorUtils.transformedIterator(
                 model.filter(subject, property, null).iterator(), 
                 objectTransFormer), // get the object from the statement
-            sesameTransformer); // transform the values
+            org.apache.stanbol.entityhub.model.sesame.ModelUtils.VALUE_TRANSFORMER); // transform the values
     }
 
     @Override
@@ -344,7 +235,7 @@ public class RdfRepresentation implements Representation, RdfWrapper {
             //transform results
             iterator = IteratorUtils.transformedIterator(
                 iterator, // the already filtered values
-                sesameTransformer); // need to be transformed
+                org.apache.stanbol.entityhub.model.sesame.ModelUtils.VALUE_TRANSFORMER); // need to be transformed
         }
         return (Iterator<T>)iterator; 
     }
@@ -365,15 +256,15 @@ public class RdfRepresentation implements Representation, RdfWrapper {
                         model.filter(subject, property, null).iterator(), 
                         objectTransFormer), // get the object from the statement
                     new ValueTypeFilter<Text>(languages)), //filter languages
-                stringLiteral2TextTransformer), //transform strings to Text
-            sesameTransformer); //transform to Text instances
+                org.apache.stanbol.entityhub.model.sesame.ModelUtils.STRING_LITERAL_TO_TEXT_TRANSFORMER), //transform strings to Text
+            org.apache.stanbol.entityhub.model.sesame.ModelUtils.VALUE_TRANSFORMER); //transform to Text instances
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Iterator<String> getFieldNames() {
         return (Iterator<String>)IteratorUtils.transformedIterator(
-            model.predicates().iterator(), stringTransformer);
+            model.predicates().iterator(), org.apache.stanbol.entityhub.model.sesame.ModelUtils.VALUR_TO_STRING_TRANSFORMER);
     }
 
     @Override
@@ -457,7 +348,7 @@ public class RdfRepresentation implements Representation, RdfWrapper {
                     model.filter(subject, property, null).iterator(), 
                     objectTransFormer), // get the object from the statement
                 new ValueTypeFilter<Reference>(Reference.class)), //filter references
-            sesameTransformer); //transform to Text instances
+            org.apache.stanbol.entityhub.model.sesame.ModelUtils.VALUE_TRANSFORMER); //transform to Text instances
     }
 
     @Override
@@ -476,8 +367,8 @@ public class RdfRepresentation implements Representation, RdfWrapper {
                         model.filter(subject, property, null).iterator(), 
                         objectTransFormer), // get the object from the statement
                     new ValueTypeFilter<Text>(Text.class)), //filter plain literals
-                stringLiteral2TextTransformer),
-            sesameTransformer); //transform to Text instances
+                org.apache.stanbol.entityhub.model.sesame.ModelUtils.STRING_LITERAL_TO_TEXT_TRANSFORMER),
+            org.apache.stanbol.entityhub.model.sesame.ModelUtils.VALUE_TRANSFORMER); //transform to Text instances
     }
 
     @Override
@@ -612,6 +503,15 @@ public class RdfRepresentation implements Representation, RdfWrapper {
         if(reference != null){
             addReference(field, reference);
         }
+    }
+    /**
+     * Getter for the Model used by this Representation <p>
+     * Note that this model might also contain triples with other subjects as
+     * the one used by this representation.
+     * @return the model used by this representation.
+     */
+    public Model getModel() {
+        return model;
     }
     
     public URI getURI() {

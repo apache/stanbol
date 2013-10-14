@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -133,10 +134,17 @@ public class RdfValueFactory implements ValueFactory{
              throw new IllegalArgumentException("The parsed id MUST NOT be empty!");
          } else {
              //use the set model if present
-             Model model = this.model == null ? new TreeModel() : this.model;
-             URI subject = sesameFactory.createURI(id);
-             return new RdfRepresentation(subject, model, this);
+             return createRdfRepresentation(sesameFactory.createURI(id));
         }
+    }
+    /**
+     * Creates a {@link RdfRepresentation} for the parsed {@link URI}
+     * @param subject the URI
+     * @return the {@link RdfRepresentation}
+     */
+    public RdfRepresentation createRdfRepresentation(URI subject) {
+        Model model = this.model == null ? new TreeModel() : this.model;
+        return new RdfRepresentation(subject, model, this);
     }
 
     @Override
@@ -170,5 +178,30 @@ public class RdfValueFactory implements ValueFactory{
      */
     public org.openrdf.model.ValueFactory getSesameFactory(){
         return sesameFactory;
+    }
+    /**
+     * Converts any {@link Representation} implementation to a {@link RdfRepresentation}
+     * backed by a Sesame {@link Model}.
+     * @param representation the representation
+     * @return the {@link RdfRepresentation}
+     */
+    public RdfRepresentation toRdfRepresentation(Representation representation) {
+        if(representation instanceof RdfRepresentation){
+            return (RdfRepresentation) representation;
+        } else if(representation != null){
+            //create the Clerezza Represenation
+            RdfRepresentation rdfRep = createRdfRepresentation(
+                sesameFactory.createURI(representation.getId()));
+            //Copy all values field by field
+            for (Iterator<String> fields = representation.getFieldNames(); fields.hasNext();) {
+                String field = fields.next();
+                for (Iterator<Object> fieldValues = representation.get(field); fieldValues.hasNext();) {
+                    rdfRep.add(field, fieldValues.next());
+                }
+            }
+            return rdfRep;
+        } else {
+            return null;
+        }
     }
 }

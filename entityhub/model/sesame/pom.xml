@@ -88,8 +88,7 @@
     </dependency>
     <dependency> <!-- the sesame repository API -->
       <groupId>org.openrdf.sesame</groupId>
-      <artifactId>sesame-repository-api</artifactId>
-      <version>2.7.7</version>
+      <artifactId>sesame-model</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-collections</groupId>
