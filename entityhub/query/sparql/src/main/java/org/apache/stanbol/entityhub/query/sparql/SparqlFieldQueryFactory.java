@@ -14,25 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.entityhub.query.clerezza;
+package org.apache.stanbol.entityhub.query.sparql;
 
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-/**
- * This class moved to {@link org.apache.stanbol.entityhub.query.sparql.SparqlFieldQueryFactory}.
- * This forwards to the new implementation.
- * @author Rupert Westenthaler
- * @see org.apache.stanbol.entityhub.query.sparql.SparqlFieldQueryFactory
- */
-@Deprecated
-public final class SparqlFieldQueryFactory extends org.apache.stanbol.entityhub.query.sparql.SparqlFieldQuery {
-    protected static final Logger logger = LoggerFactory.getLogger(SparqlFieldQueryFactory.class);
+
+public final class SparqlFieldQueryFactory implements FieldQueryFactory {
 
     private static SparqlFieldQueryFactory instance;
 
-    @Deprecated
     public static SparqlFieldQueryFactory getInstance() {
         if (instance == null) {
             instance = new SparqlFieldQueryFactory();
@@ -44,7 +36,6 @@ public final class SparqlFieldQueryFactory extends org.apache.stanbol.entityhub.
         super();
     }
 
-    @Deprecated
     @Override
     public SparqlFieldQuery createFieldQuery() {
         return new SparqlFieldQuery();
@@ -55,10 +46,9 @@ public final class SparqlFieldQueryFactory extends org.apache.stanbol.entityhub.
      * 
      * @param parsedQuery
      *            the parsed Query
-     * @see org.apache.stanbol.entityhub.query.sparql.SparqlFieldQueryFactory#getSparqlFieldQuery(FieldQuery)
      */
-    @Deprecated
     public static SparqlFieldQuery getSparqlFieldQuery(FieldQuery parsedQuery) {
+        Logger logger = LoggerFactory.getLogger(SparqlFieldQueryFactory.class);
 
         if (parsedQuery == null) {
             logger.trace("Parsed query is null.");

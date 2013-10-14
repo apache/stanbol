@@ -26,14 +26,14 @@
     <relativePath>../..</relativePath>
   </parent>
 
-  <artifactId>org.apache.stanbol.entityhub.query.clerezza</artifactId>
+  <artifactId>org.apache.stanbol.entityhub.query.sparql</artifactId>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Entityhub Query SPARQL</name>
-  <description>This bundle provides implementation of the Entityhub Query interface(s) 
-  based on SPARQL by using the Clerezza framework.</description>
+  <description>This bundle provides mappings from the Entityhub Query
+    interface(s) to SPARQL</description>
 
-  <inceptionYear>2010</inceptionYear>
+  <inceptionYear>2013</inceptionYear>
   <licenses>
     <license>
       <name>Apache Software License, Version 2.0</name>
@@ -45,10 +45,10 @@
   
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/query/clerezza
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/query/sparql
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/query/clerezza
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/query/sparql
     </developerConnection>
     <url>http://stanbol.apache.org</url>
   </scm>
@@ -63,11 +63,11 @@
           <instructions>
             <Import-Package>
               org.apache.stanbol.entityhub.servicesapi.query; provide:=true; version="[0.11,0.13)",
-              org.apache.stanbol.entityhub.query.clerezza,
+              org.apache.stanbol.entityhub.query.sparql,
               *
             </Import-Package>
             <Export-Package>
-              org.apache.stanbol.entityhub.query.clerezza;version=${project.version},
+              org.apache.stanbol.entityhub.query.sparql;version=${project.version},
             </Export-Package>
            </instructions>
         </configuration>
@@ -85,30 +85,6 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
       <version>0.11.0</version>
-    </dependency>
-    <dependency> <!-- generic SPARQL classes are now in this module-->
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.query.sparql</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-      <version>0.11.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
-      <version>0.11.0</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.clerezza</groupId>
-      <artifactId>rdf.utils</artifactId>
     </dependency>
     
     <!-- for tests -->
