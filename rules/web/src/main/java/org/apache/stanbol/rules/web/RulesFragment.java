@@ -30,6 +30,7 @@ import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
 import org.apache.stanbol.rules.base.api.RuleStore;
 import org.apache.stanbol.rules.refactor.api.Refactorer;
+
 import org.apache.stanbol.rules.web.resources.RefactorResource;
 import org.apache.stanbol.rules.web.resources.RulesResource;
 import org.apache.stanbol.rules.web.writers.RecipeListWriter;

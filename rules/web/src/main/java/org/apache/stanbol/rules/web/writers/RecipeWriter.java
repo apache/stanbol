@@ -21,10 +21,10 @@ import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
-import javax.servlet.ServletContext;
+//import javax.servlet.ServletContext;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
+//import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
@@ -35,6 +35,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.rdfjson.serializer.RdfJsonSerializingProvider;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.stanbol.commons.owl.transformation.OWLAPIToClerezzaConverter;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.rules.base.api.Recipe;
@@ -72,28 +73,29 @@ import org.slf4j.LoggerFactory;
            KRFormat.TURTLE, KRFormat.RDF_JSON, MediaType.TEXT_PLAIN})
 public class RecipeWriter implements MessageBodyWriter<Recipe> {
 
+    @Reference
     protected Serializer serializer;
-
-    protected ServletContext servletContext;
-
+    
+//    protected ServletContext servletContext;
+    @Reference
     protected RuleStore ruleStore;
 
-    public RecipeWriter(@Context ServletContext servletContext) {
-        Logger log = LoggerFactory.getLogger(getClass());
-        this.servletContext = servletContext;
-        log.info("Setting context to " + servletContext);
-        serializer = (Serializer) this.servletContext.getAttribute(Serializer.class.getName());
-        if (serializer == null) {
-            log.error("Serializer not found in Servlet context.");
-            serializer = new Serializer();
-        }
-
-        ruleStore = (RuleStore) this.servletContext.getAttribute(RuleStore.class.getName());
-
-        if (serializer == null) {
-            log.error("RuleStore not found in Servlet context.");
-        }
-    }
+//    public RecipeWriter(@Context ServletContext servletContext) {
+//        Logger log = LoggerFactory.getLogger(getClass());
+//        this.servletContext = servletContext;
+//        log.info("Setting context to " + servletContext);
+//        serializer = (Serializer) this.servletContext.getAttribute(Serializer.class.getName());
+//        if (serializer == null) {
+//            log.error("Serializer not found in Servlet context.");
+//            serializer = new Serializer();
+//        }
+//
+//        ruleStore = (RuleStore) this.servletContext.getAttribute(RuleStore.class.getName());
+//
+//        if (serializer == null) {
+//            log.error("RuleStore not found in Servlet context.");
+//        }
+//    }
 
     @Override
     public long getSize(Recipe arg0, Class<?> arg1, Type arg2, Annotation[] arg3, MediaType arg4) {

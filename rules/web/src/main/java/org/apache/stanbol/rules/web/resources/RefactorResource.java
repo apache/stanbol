@@ -22,8 +22,8 @@ import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.Status.PRECONDITION_FAILED;
 import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
-import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+//import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+//import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.OWL_XML;
@@ -36,7 +36,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import javax.servlet.ServletContext;
+//import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
@@ -50,12 +50,13 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
+//import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.stanbol.commons.owl.transformation.OWLAPIToClerezzaConverter;
-import org.apache.stanbol.commons.web.base.ContextHelper;
+//import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
@@ -90,15 +91,17 @@ public class RefactorResource extends BaseStanbolResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
+    @Reference
     protected Refactorer refactorer;
+    @Reference
     protected RuleStore ruleStore;
 
-    public RefactorResource(@Context ServletContext servletContext) {
-        refactorer = (Refactorer) ContextHelper.getServiceFromContext(Refactorer.class, servletContext);
-        if (refactorer == null) throw new IllegalStateException("Refactorer missing in ServletContext");
-        ruleStore = (RuleStore) ContextHelper.getServiceFromContext(RuleStore.class, servletContext);
-        if (ruleStore == null) throw new IllegalStateException("RuleStore missing in ServletContext");
-    }
+//    public RefactorResource(@Context ServletContext servletContext) {
+//        refactorer = (Refactorer) ContextHelper.getServiceFromContext(Refactorer.class, servletContext);
+//        if (refactorer == null) throw new IllegalStateException("Refactorer missing in ServletContext");
+//        ruleStore = (RuleStore) ContextHelper.getServiceFromContext(RuleStore.class, servletContext);
+//        if (ruleStore == null) throw new IllegalStateException("RuleStore missing in ServletContext");
+//    }
 
     /**
      * The apply mode allows the client to compose a recipe, by mean of string containg the rules, and apply
@@ -132,7 +135,7 @@ public class RefactorResource extends BaseStanbolResource {
             MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
             if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
         } else rb = Response.status(NOT_FOUND);
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -168,7 +171,7 @@ public class RefactorResource extends BaseStanbolResource {
             MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
             if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
         } else rb = Response.status(NOT_FOUND);
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
 
     }
@@ -202,7 +205,7 @@ public class RefactorResource extends BaseStanbolResource {
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-        enableCORS(servletContext, rb, headers);
+//        enableCORS(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -210,7 +213,7 @@ public class RefactorResource extends BaseStanbolResource {
     @Path("/apply")
     public Response handleCorsPreflightApply(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-        enableCORS(servletContext, rb, headers);
+//        enableCORS(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -218,7 +221,7 @@ public class RefactorResource extends BaseStanbolResource {
     @Path("/applyfile")
     public Response handleCorsPreflightApplyFile(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-        enableCORS(servletContext, rb, headers);
+//        enableCORS(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -271,7 +274,7 @@ public class RefactorResource extends BaseStanbolResource {
         	rb = Response.status(NOT_ACCEPTABLE);
         	log.error(e.getMessage(), e);
 		}
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -306,7 +309,7 @@ public class RefactorResource extends BaseStanbolResource {
 
         MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
         if (mediaType != null) responseBuilder.header(HttpHeaders.CONTENT_TYPE, mediaType);
-        addCORSOrigin(servletContext, responseBuilder, headers);
+//        addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
     }
 

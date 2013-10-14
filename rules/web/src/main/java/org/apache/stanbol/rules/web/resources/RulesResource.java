@@ -22,15 +22,15 @@
 package org.apache.stanbol.rules.web.resources;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
-import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+//import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+//import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import javax.servlet.ServletContext;
+//import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -49,8 +49,9 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.commons.viewable.Viewable;
-import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.stanbol.commons.web.viewable.Viewable;
+//import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.rules.base.api.AlreadyExistingRecipeException;
@@ -89,8 +90,10 @@ public class RulesResource extends BaseStanbolResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
+    @Reference
     private RuleStore ruleStore;
 
+    @Reference
     private RuleAdapterManager adapterManager;
 
     /**
@@ -99,17 +102,17 @@ public class RulesResource extends BaseStanbolResource {
      * @param servletContext
      *            {To get the context where the REST service is running.}
      */
-    public RulesResource(@Context ServletContext servletContext) {
-        this.ruleStore = (RuleStore) ContextHelper.getServiceFromContext(RuleStore.class, servletContext);
-        this.adapterManager = (RuleAdapterManager) ContextHelper.getServiceFromContext(
-            RuleAdapterManager.class, servletContext);
-    }
+//    public RulesResource(@Context ServletContext servletContext) {
+//        this.ruleStore = (RuleStore) ContextHelper.getServiceFromContext(RuleStore.class, servletContext);
+//        this.adapterManager = (RuleAdapterManager) ContextHelper.getServiceFromContext(
+//            RuleAdapterManager.class, servletContext);
+//    }
 
     @GET
     @Produces(TEXT_HTML)
     public Response get(@Context HttpHeaders headers) {
         ResponseBuilder responseBuilder = Response.ok(new Viewable("index", this), TEXT_HTML);
-        addCORSOrigin(servletContext, responseBuilder, headers);
+//        addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
     }
 
@@ -242,7 +245,7 @@ public class RulesResource extends BaseStanbolResource {
             responseBuilder = Response.status(Status.NOT_ACCEPTABLE);
 		}
 
-        addCORSOrigin(servletContext, responseBuilder, headers);
+//        addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
     }
 
@@ -275,7 +278,7 @@ public class RulesResource extends BaseStanbolResource {
                 recipe = new RecipeImpl(recipe.getRecipeID(), recipe.getRecipeDescription(), ruleList);
             }
 
-            responseBuilder = Response.ok(new Viewable("rules", new RulesPrettyPrintResource(servletContext,
+            responseBuilder = Response.ok(new Viewable("rules", new RulesPrettyPrintResource(
                     uriInfo, recipe)));
 
         } catch (NoSuchRecipeException e) {
@@ -292,7 +295,7 @@ public class RulesResource extends BaseStanbolResource {
             responseBuilder = Response.status(Status.NOT_ACCEPTABLE);
 		}
 
-        addCORSOrigin(servletContext, responseBuilder, headers);
+//        addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
     }
 
@@ -338,7 +341,7 @@ public class RulesResource extends BaseStanbolResource {
             responseBuilder = Response.status(Status.NOT_ACCEPTABLE);
 		}
 
-        addCORSOrigin(servletContext, responseBuilder, headers);
+//        addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
 
     }
@@ -360,7 +363,7 @@ public class RulesResource extends BaseStanbolResource {
             responseBuilder = Response.status(Status.INTERNAL_SERVER_ERROR);
         }
 
-        addCORSOrigin(servletContext, responseBuilder, headers);
+//        addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
     }
 
@@ -445,7 +448,7 @@ public class RulesResource extends BaseStanbolResource {
 
         responseBuilder = Response.ok();
 
-        addCORSOrigin(servletContext, responseBuilder, headers);
+//        addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
 
     }
@@ -501,7 +504,7 @@ public class RulesResource extends BaseStanbolResource {
             responseBuilder = Response.status(Status.NOT_ACCEPTABLE);
 		}
 
-        addCORSOrigin(servletContext, responseBuilder, headers);
+//        addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
     }
 
@@ -586,7 +589,7 @@ public class RulesResource extends BaseStanbolResource {
             log.error(e.getMessage(), e);
 		}
 
-        addCORSOrigin(servletContext, responseBuilder, headers);
+//        addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
 
     }
@@ -643,7 +646,7 @@ public class RulesResource extends BaseStanbolResource {
             responseBuilder = Response.status(Status.NOT_FOUND);
         }
 
-        addCORSOrigin(servletContext, responseBuilder, headers);
+//        addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
 
     }
@@ -657,7 +660,7 @@ public class RulesResource extends BaseStanbolResource {
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-        enableCORS(servletContext, rb, headers);
+//        enableCORS(servletContext, rb, headers);
         return rb.build();
     }
 
