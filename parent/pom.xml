@@ -62,6 +62,7 @@
     <owlapi-version>3.3</owlapi-version>
     <solr-version>4.4.0</solr-version>
     <pax-exam-version>2.3.0.M1</pax-exam-version>
+    <sesame-version>2.7.7</sesame-version>
     <sourceReleaseAssemblyDescriptor>stanbol-source-release-zip-tar</sourceReleaseAssemblyDescriptor>    
   </properties>
 
@@ -672,6 +673,27 @@
       </dependency>
 
 
+      <!-- Sesame (openrdf) -->
+      <dependency> <!-- the sesame repository API -->
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-model</artifactId>
+        <version>${sesame-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-repository-api</artifactId>
+        <version>${sesame-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-sail-memory</artifactId>
+        <version>${sesame-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-repository-sail</artifactId>
+        <version>${sesame-version}</version>
+      </dependency>
       <!-- Commons -->
       <dependency>
         <groupId>commons-io</groupId>
@@ -1239,13 +1261,18 @@
     <dependency>
       <groupId>org.apache.tika</groupId>
       <artifactId>tika-core</artifactId>
-      <version>1.2</version>
+      <version>1.4</version>
     </dependency>
     <dependency>
       <groupId>org.apache.tika</groupId>
       <artifactId>tika-parsers</artifactId>
-      <version>1.2</version>
-    </dependency>    
+      <version>1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-xmp</artifactId>
+      <version>1.4</version>
+    </dependency>
     <!-- Aperture -->
     <dependency>
       <groupId>org.semanticdesktop.aperture</groupId>
