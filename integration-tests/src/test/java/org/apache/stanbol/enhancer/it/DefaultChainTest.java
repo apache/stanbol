@@ -141,6 +141,6 @@ public class DefaultChainTest extends EnhancerTestBase {
             .withHeader("Accept", "INVALID_FORMAT")
             .withContent("Nothing")
         )
-        .assertStatus(500);
+        .assertStatus(406);
     }
 }
