@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.entityhub.yard.sesame;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,6 +73,14 @@ import org.slf4j.LoggerFactory;
  * Components that do allow users to configure a Repository implementation.
  * Such components will than create a SesameYard instance and register it as
  * a OSGI service.
+ * <p>
+ * <b>NOTE</b> This Yard does not {@link Repository#initialize() initialize} 
+ * nor {@link Repository#shutDown() shutdown} the Sesame repository. Callers
+ * are responsible for that. This is because this Yard implementation does
+ * NOT assume exclusive access to the repository. The same repository can be
+ * used by multiple Yards (e.g. configured for different 
+ * {@link SesameYardConfig#setContexts(String[]) contexts}) or even other
+ * components.
  *
  * @author Rupert Westenthaler
  *
@@ -130,23 +139,60 @@ public class SesameYard extends AbstractYard implements Yard {
     public static final String CONTEXT_URI = "org.apache.stanbol.entityhub.yard.sesame.contextUri";
 
     /**
-     * The context used by this yard
+     * The context used by this yard. Parsed from {@link SesameYardConfig#getContexts()}
+     * if <code>{@link SesameYardConfig#isContextEnabled()} == true</code>
      */
-    private final URI[] contexts; 
+    private final URI[] contexts;
+    /**
+     * The {@link Dataset} similar to {@link #contexts}. Dataset is used for
+     * SPARQL queries to enforce results to be restricted to the {@link #contexts}
+     */
     private final Dataset dataset;
+    /**
+     * If inferred triples should be included or not. Configured via
+     * {@link SesameYardConfig#isIncludeInferred()}
+     */
     private boolean includeInferred;
+    /**
+     * The {@link Repository} as parsed in the constructor
+     */
     private final Repository repository;
+    /**
+     * The Entityhub ValueFactory used to create Sesame specific Representations,
+     * References and Text instances
+     */
     private final RdfValueFactory valueFactory;
+    /**
+     * The Sesame ValueFactory. Shortcut for {@link Repository#getValueFactory()}.
+     */
     private final ValueFactory sesameFactory;
-    private final SesameYardConfig config;
     
+    /**
+     * The {@link URI} for {@link RdfResourceEnum#QueryResultSet}
+     */
     private final URI queryRoot;
+    /**
+     * The {@link URI} for {@link RdfResourceEnum#queryResult}
+     */
     private final URI queryResult;
-        
+    /**
+     * Constructs a SesameYard for the parsed Repository and configuration.
+     * @param repo The Repository used by this Yard. The parsed Repository is
+     * expected to be initialised.
+     * @param config the configuration for the Yard. 
+     */
     public SesameYard(Repository repo, SesameYardConfig config) {
         super();
+        if(repo == null){
+            throw new IllegalArgumentException("The parsed repository MUST NOT be NULL!");
+        }
+        if(!repo.isInitialized()){
+            throw new IllegalArgumentException("The parsed repository MUST BE initialised!");
+        }
         this.repository = repo;
-        this.config = config;
+        if(config == null){
+            throw new IllegalArgumentException("The parsed configuration MUST NOT be NULL!");
+        }
         this.sesameFactory = repo.getValueFactory();
         this.valueFactory = new RdfValueFactory(null, sesameFactory);
         this.managedRepresentation = sesameFactory.createURI(MANAGED_REPRESENTATION_URI);
@@ -534,8 +580,8 @@ public class SesameYard extends AbstractYard implements Yard {
             con = repository.getConnection();
             con.begin();
             //execute the query
-            int limit = QueryUtils.getLimit(query, config.getDefaultQueryResultNumber(),
-                config.getMaxQueryResultNumber());
+            int limit = QueryUtils.getLimit(query, getConfig().getDefaultQueryResultNumber(),
+                getConfig().getMaxQueryResultNumber());
             results = executeSparqlFieldQuery(con, query, limit, false);
             //parse the results
             List<String> ids = new ArrayList<String>(limit);
@@ -616,8 +662,8 @@ public class SesameYard extends AbstractYard implements Yard {
             con = repository.getConnection();
             con.begin();
             //execute the query
-            int limit = QueryUtils.getLimit(query, config.getDefaultQueryResultNumber(),
-                config.getMaxQueryResultNumber());
+            int limit = QueryUtils.getLimit(query, getConfig().getDefaultQueryResultNumber(),
+                getConfig().getMaxQueryResultNumber());
             results = executeSparqlFieldQuery(con,query, limit, false);
             //parse the results and generate the Representations
             //create an own valueFactors so that all the data of the query results
@@ -665,8 +711,8 @@ public class SesameYard extends AbstractYard implements Yard {
             con = repository.getConnection();
             con.begin();
             //execute the query
-            int limit = QueryUtils.getLimit(query, config.getDefaultQueryResultNumber(),
-                config.getMaxQueryResultNumber());
+            int limit = QueryUtils.getLimit(query, getConfig().getDefaultQueryResultNumber(),
+                getConfig().getMaxQueryResultNumber());
             results = executeSparqlFieldQuery(con,query, limit, true);
             //parse the results and generate the Representations
             //create an own valueFactors so that all the data of the query results
