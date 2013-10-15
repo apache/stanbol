@@ -29,6 +29,7 @@ import org.apache.stanbol.enhancer.nlp.json.valuetype.ValueTypeParser;
 import org.apache.stanbol.enhancer.nlp.json.valuetype.ValueTypeParserRegistry;
 import org.apache.stanbol.enhancer.nlp.json.valuetype.ValueTypeSerializer;
 import org.apache.stanbol.enhancer.nlp.json.valuetype.ValueTypeSerializerRegistry;
+import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.morpho.Case;
 import org.apache.stanbol.enhancer.nlp.morpho.CaseTag;
 import org.apache.stanbol.enhancer.nlp.morpho.Definitness;
@@ -190,7 +191,7 @@ public class MorphoFeaturesSupport implements ValueTypeParser<MorphoFeatures>, V
 
 
     @Override
-    public MorphoFeatures parse(ObjectNode jMorpho) {
+    public MorphoFeatures parse(ObjectNode jMorpho, AnalysedText at) {
         JsonNode jLemma = jMorpho.path("lemma");
         if(!jLemma.isTextual()){
             throw new IllegalStateException("Field 'lemma' MUST provide a String value (parsed JSON: "
@@ -298,7 +299,7 @@ public class MorphoFeaturesSupport implements ValueTypeParser<MorphoFeatures>, V
                 JsonNode member = jPosTags.get(i);
                 if(member.isObject()){
                     ObjectNode jPosTag = (ObjectNode)member;
-                    morpho.addPos(getPosTagParser().parse(jPosTag));
+                    morpho.addPos(getPosTagParser().parse(jPosTag, at));
                 } else {
                     log.warn("Unable to parse PosTag from "+member.toString());
                 }

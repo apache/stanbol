@@ -68,6 +68,8 @@
               org.apache.stanbol.enhancer.nlp.phrase;version=${project.version},
               org.apache.stanbol.enhancer.nlp.morpho;version=${project.version},
               org.apache.stanbol.enhancer.nlp.sentiment;version=${project.version},
+			  org.apache.stanbol.enhancer.nlp.coref;version=${project.version},
+			  org.apache.stanbol.enhancer.nlp.dependency;version=${project.version},
               org.apache.stanbol.enhancer.nlp.utils;version=${project.version}
             </Export-Package>
             <Import-Package>
@@ -83,6 +85,8 @@
               org.apache.stanbol.enhancer.nlp.phrase,
               org.apache.stanbol.enhancer.nlp.morpho,
               org.apache.stanbol.enhancer.nlp.sentiment,
+			  org.apache.stanbol.enhancer.nlp.coref,
+			  org.apache.stanbol.enhancer.nlp.dependency,
               org.apache.stanbol.enhancer.nlp.utils,
               *
             </Import-Package>
