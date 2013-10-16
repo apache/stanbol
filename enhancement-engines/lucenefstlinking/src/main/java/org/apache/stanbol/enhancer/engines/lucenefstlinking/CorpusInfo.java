@@ -189,7 +189,13 @@ public class CorpusInfo {
                         if(fst.exists() && //if the file exists AND the file was not yet failing to load 
                                 //OR the file is newer as the last version failing to load
                                 (!fstFileError || FileUtils.isFileNewer(fst, fstDate))){
-                            return TaggerFstCorpus.load(fst);
+                            TaggerFstCorpus corpus = TaggerFstCorpus.load(fst);
+                            if(corpus != null){
+                                //I need to set fstDate here, because I can not
+                                //access lastModified() outside doPrivileged
+                                fstDate = new Date(fst.lastModified());
+                            }
+                            return corpus;
                         } else {
                             return null;
                         }
@@ -209,7 +215,6 @@ public class CorpusInfo {
             }
             if(corpus != null){
                 fstFileError = false;
-                fstDate = new Date(fst.lastModified());
                 taggerCorpusRef = new SoftReference<TaggerFstCorpus>(corpus);
             } //else not loaded from file
         }
