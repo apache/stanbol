@@ -21,10 +21,10 @@ import java.io.IOException;
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Date;
-import java.util.concurrent.Future;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ObjectUtils;
@@ -182,23 +182,36 @@ public class CorpusInfo {
         } else if(taggerCorpusRef != null){
             taggerCorpusRef = null; //reset to null as the reference was taken
         }
-        //if we do not have a corpus try to load from file
-        if(corpus == null && fst.exists() && //if the file exists
-                //AND the file was not yet failing to load OR the file is newer
-                //as the last version failing to load
-                (!fstFileError || FileUtils.isFileNewer(fst, fstDate))){
-            try {
-                corpus = TaggerFstCorpus.load(fst);
+        if(corpus == null) {
+            try { //STANBOL-1177: load FST models in AccessController.doPrivileged(..)
+                corpus = AccessController.doPrivileged(new PrivilegedExceptionAction<TaggerFstCorpus>() {
+                    public TaggerFstCorpus run() throws IOException {
+                        if(fst.exists() && //if the file exists AND the file was not yet failing to load 
+                                //OR the file is newer as the last version failing to load
+                                (!fstFileError || FileUtils.isFileNewer(fst, fstDate))){
+                            return TaggerFstCorpus.load(fst);
+                        } else {
+                            return null;
+                        }
+                    }
+                });
+            } catch (PrivilegedActionException pae) {
+                Exception e = pae.getException();
+                if(e instanceof IOException){ //IO Exception while loading the file
+                    this.errorMessage = new StringBuilder("Unable to load FST corpus from "
+                            + "FST file: '").append(fst.getAbsolutePath())
+                            .append("' (Message: ").append(e.getMessage()).append(")!").toString();
+                        log.warn(errorMessage,e);
+                        fstFileError = true;
+                } else { //Runtime exception
+                    throw RuntimeException.class.cast(e);
+                }
+            }
+            if(corpus != null){
                 fstFileError = false;
                 fstDate = new Date(fst.lastModified());
                 taggerCorpusRef = new SoftReference<TaggerFstCorpus>(corpus);
-            } catch (IOException e) {
-                this.errorMessage = new StringBuilder("Unable to load FST corpus from "
-                    + "FST file: '").append(fst.getAbsolutePath())
-                    .append("' (Message: ").append(e.getMessage()).append(")!").toString();
-                log.warn(errorMessage,e);
-                fstFileError = true;
-            }
+            } //else not loaded from file
         }
         return corpus;
     }

@@ -17,6 +17,9 @@
 package org.apache.stanbol.enhancer.engines.lucenefstlinking;
 
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
@@ -67,37 +70,56 @@ public class CorpusCreationTask implements Runnable{
             log.warn("Unable to build {} becuase SolrCore {} is closed!",fstInfo,core.getName());
             return;
         }
-        TaggerFstCorpus corpus = null;
+        final TaggerFstCorpus corpus;
         RefCounted<SolrIndexSearcher> searcherRef = core.getSearcher();
-        try {
-            SolrIndexSearcher searcher = searcherRef.get();
+        try { //STANBOL-1177: create FST models in AccessController.doPrivileged(..)
+            final SolrIndexSearcher searcher = searcherRef.get();
             //we do get the AtomicReader, because TaggerFstCorpus will need it
             //anyways. This prevents to create another SlowCompositeReaderWrapper.
-            IndexReader reader = searcher.getAtomicReader();
+            final IndexReader reader = searcher.getAtomicReader();
             log.info(" ... build FST corpus for {}",fstInfo);
-            corpus = new TaggerFstCorpus(reader, searcher.getIndexReader().getVersion(),
-                null, fstInfo.indexedField, fstInfo.storedField, fstInfo.analyzer,
-                fstInfo.partialMatches,1,100);
-        } catch (IOException e) {
-            throw new IllegalStateException("Unable to read Information to build "
-                    + fstInfo + " from SolrIndex '" + core.getName() + "'!", e);
+            corpus = AccessController.doPrivileged(new PrivilegedExceptionAction<TaggerFstCorpus>() {
+                public TaggerFstCorpus run() throws IOException {
+                    return new TaggerFstCorpus(reader, searcher.getIndexReader().getVersion(),
+                        null, fstInfo.indexedField, fstInfo.storedField, fstInfo.analyzer,
+                        fstInfo.partialMatches,1,100);
+                }
+            });
+        } catch (PrivilegedActionException pae) {
+            Exception e = pae.getException();
+            if(e instanceof IOException){ //IO Exception while loading the file
+                throw new IllegalStateException("Unable to read Information to build "
+                        + fstInfo + " from SolrIndex '" + core.getName() + "'!", e);
+            } else { //Runtime exception
+                throw RuntimeException.class.cast(e);
+            }
         } finally {
             searcherRef.decref(); //ensure that we dereference the searcher
         }
         if(indexConfig.isActive()){
-            if(fstInfo.fst.exists()){
-                if(!FileUtils.deleteQuietly(fstInfo.fst)){
-                    log.warn("Unable to delete existing FST fiel for {}",fstInfo);
-                }
-            }
-            try {
-                corpus.save(fstInfo.fst);
-            } catch (IOException e) {
-                log.warn("Unable to store FST corpus " + fstInfo + " to "
-                        + fstInfo.fst.getAbsolutePath() + "!", e);
-            }
             //set the created corpus to the FST Info
             fstInfo.setCorpus(enqueued, corpus);
+            try { //STANBOL-1177: save FST models in AccessController.doPrivileged(..)
+                AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+                    public Object run() throws IOException {
+                        if(fstInfo.fst.exists()){
+                            if(!FileUtils.deleteQuietly(fstInfo.fst)){
+                                log.warn("Unable to delete existing FST file for {}", fstInfo);
+                            }
+                        }
+                        corpus.save(fstInfo.fst);
+                        return null; //not used
+                    }
+                });
+            } catch (PrivilegedActionException pae) {
+                Exception e = pae.getException();
+                if(e instanceof IOException){ //IO Exception while loading the file
+                    log.warn("Unable to store FST corpus " + fstInfo + " to "
+                            + fstInfo.fst.getAbsolutePath() + "!", e);
+                } else { //Runtime exception
+                    throw RuntimeException.class.cast(e);
+                }
+            }
         } //else index configuration no longer active ... ignore the built FST
     }
     
