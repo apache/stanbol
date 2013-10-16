@@ -51,6 +51,7 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.SolrCore;
+import org.apache.solr.handler.dataimport.SolrWriter;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.util.RefCounted;
@@ -81,6 +82,15 @@ public class SolrYardIndexingDestination implements IndexingDestination {
     
     private static final Logger log = LoggerFactory.getLogger(SolrYardIndexingDestination.class);
 
+    /**
+     * The relative path to the Solr 'write.lock' file (relative to the Solr
+     * instance dir). This file is excluded from the
+     * Solr Index archive built by {@link #writeSolrIndexArchive()} (see
+     * <a href="https://issues.apache.org/jira/browse/STANBOL-1176">STANBOL-1176</a>
+     * for more details).
+     */
+    private static final String SOLR_WRITE_LOCK = FilenameUtils.separatorsToSystem("data/index/write.lock");
+    
     /**
      * Parameter used to refer to the name of the properties file containing the
      * field names as key and the {@link Float} boost factors as values. As
@@ -767,8 +777,8 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         File solrArchiveFile = new File(indexingConfig.getDistributionFolder(),solrArchive.getName());
         ZipOutputStream out = new ZipOutputStream(new FileOutputStream(solrArchiveFile));
         for(File file : (Collection<File>)FileUtils.listFiles(solrIndexLocation, null, true)){
-            if(!file.isHidden()){
-                String name = file.getAbsolutePath().substring(parentPathLength);
+            String name = file.getAbsolutePath().substring(parentPathLength);
+            if(!file.isHidden() && !name.endsWith(SOLR_WRITE_LOCK)){
                 log.info("add "+name);
                 out.putNextEntry(new ZipEntry(name));
                 if(!file.isDirectory()){
@@ -777,6 +787,8 @@ public class SolrYardIndexingDestination implements IndexingDestination {
                     out.closeEntry();
                     IOUtils.closeQuietly(fileIn);
                 }
+            } else {
+                log.info("exclude "+name);
             }
         }
         out.finish();
