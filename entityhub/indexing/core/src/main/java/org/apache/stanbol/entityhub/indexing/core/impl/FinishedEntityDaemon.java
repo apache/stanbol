@@ -21,9 +21,7 @@ import static org.apache.stanbol.entityhub.indexing.core.impl.IndexerConstants.S
 import static org.apache.stanbol.entityhub.indexing.core.impl.IndexerConstants.SOURCE_STARTED;
 import static org.apache.stanbol.entityhub.indexing.core.impl.IndexerConstants.STORE_DURATION;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;

@@ -16,6 +16,9 @@
 */
 package org.apache.stanbol.entityhub.indexing;
 
+import static java.lang.System.exit;
+import static java.lang.System.out;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -77,12 +80,14 @@ public class Urify implements Runnable{
     private static Logger log = LoggerFactory.getLogger(Urify.class);
     
     private static final Options options;
+    
     static {
         options = new Options();
         options.addOption("h", "help", false, "display this help and exit");
         options.addOption("p","prefix",true, 
             "The URI prefix used for wrapping the bNode Id");
         options.addOption("e","encoding",true, "the char encodinf (default: UTF-8)");
+        options.addOption("o","outputFilePrefix",true, "The prefix to add to output files, defaults to \"uf_\"");
     }
     /**
      * @param args
@@ -92,39 +97,53 @@ public class Urify implements Runnable{
         CommandLineParser parser = new PosixParser();
         CommandLine line = parser.parse(options, args);
         args = line.getArgs();
+        if (line.hasOption('h')) {
+        		out.println("Processes RDF files to translate blank nodes into prefixed URI nodes.");
+        		out.println("-h/--help: Print this help and exit.");
+        		out.println("-p/--prefix: Required: The prefix to add to blank nodes to make them URIs.");
+        		out.println("-e/--encoding: The text encoding to expect in the RDF, defaults to UTF-8.");
+        		out.println("-o/--outputFilePrefix: The prefix to add to output files, defaults to \"uf_\".");
+        		exit(0);
+        }
         if(!line.hasOption('p')){
             log.error("Missing parameter 'prefix' ('p)!");
-            System.exit(1);
+            exit(1);
         }
         String prefix = "<"+line.getOptionValue('p');
-        log.info("prfix: {} ",line.getOptionValue('p'));
+        log.info("Using prefix: {} ",line.getOptionValue('p'));
         Charset charset;
         if(line.hasOption('e')){
             charset = Charset.forName(line.getOptionValue('e'));
             if(charset == null){
                 log.error("Unsupported encoding '{}'!",line.getOptionValue('e'));
-                System.exit(1);
+                exit(1);
             }
         } else {
             charset = Charset.forName("UTF-8");
         }
+
         log.info("charset: {} ",charset.name());
-        Urify urify = new Urify(Arrays.asList(args), charset, prefix);
-        urify.run(); //TODO: this could support processing multiple files in parallel
+		Urify urify = new Urify(Arrays.asList(args), charset, prefix,
+				line.hasOption('o') ? line.getOptionValue('o') : "uf_");
+		urify.run(); //TODO: this could support processing multiple files in parallel
     }
 
     private final Charset charset;
     private final String prefix;
+    private final String outputFilePrefix;
     protected long start = System.currentTimeMillis();
     protected long uf_count = 0;
 
     private List<String> resources;
 
-    public Urify(List<String> resources, Charset charset, String prefix) throws IOException {
-        this.charset = charset;
-        this.prefix = prefix;
-        this.resources = Collections.synchronizedList(new ArrayList<String>(resources));
-    }
+	public Urify(List<String> resources, Charset charset, String prefix,
+			final String outputFilePrefix) throws IOException {
+		this.charset = charset;
+		this.prefix = prefix;
+		this.outputFilePrefix = outputFilePrefix;
+		this.resources = Collections.synchronizedList(new ArrayList<String>(
+				resources));
+	}
     
     public void run() {
         String source;
@@ -148,7 +167,7 @@ public class Urify implements Runnable{
         if(source.isFile()){
             String path = FilenameUtils.getFullPathNoEndSeparator(resource);
             String name = FilenameUtils.getName(resource);
-            File target = new File(path,"uf_"+name);
+            File target = new File(path, outputFilePrefix + name);
             int i=0;
             while(target.exists()){
                 i++;

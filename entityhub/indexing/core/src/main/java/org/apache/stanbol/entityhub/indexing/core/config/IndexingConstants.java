@@ -16,7 +16,6 @@
 */
 package org.apache.stanbol.entityhub.indexing.core.config;
 
-import java.io.File;
 
 /**
  * Constants defines/used for Indexing.

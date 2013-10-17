@@ -124,7 +124,8 @@ public class FieldValueFilter implements EntityProcessor{
     /**
      * @param value
      */
-    private void parseFilterConfig(Object value) {
+    @SuppressWarnings("unchecked")
+	private void parseFilterConfig(Object value) {
         Collection<String> values; 
         if(value instanceof String){
             values = Arrays.asList(value.toString().split(";"));

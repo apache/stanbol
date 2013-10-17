@@ -22,7 +22,6 @@ import org.apache.stanbol.entityhub.indexing.core.EntityProcessor;
 import org.apache.stanbol.entityhub.indexing.core.IndexingDestination;
 import org.apache.stanbol.entityhub.ldpath.EntityhubLDPath;
 import org.apache.stanbol.entityhub.ldpath.backend.YardBackend;
-import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 
 import at.newmedialab.ldpath.api.backend.RDFBackend;

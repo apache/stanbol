@@ -117,7 +117,7 @@ public class FstConfig {
                             CorpusCreationInfo fstInfo = new CorpusCreationInfo(language, 
                                 fieldInfo.name, storeFieldName,  
                                 fieldType, fstFile);
-                            log.debug(" ... init {} ", fstInfo);
+                            log.info(" ... init {} ", fstInfo);
                             addCorpus(fstInfo);
                         }
                     } else {

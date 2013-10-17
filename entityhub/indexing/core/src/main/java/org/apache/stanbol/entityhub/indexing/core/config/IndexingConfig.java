@@ -77,9 +77,7 @@ public class IndexingConfig {
     private static final String SOURCE_FOLDER = "resources";
     private static final String SOURCE_PATH = DEFAULT_ROOT_PATH+File.separatorChar+SOURCE_FOLDER;
     private static final String DESTINATION_FOLDER = "destination";
-    private static final String DESTINATION_PATH = DEFAULT_ROOT_PATH+File.separatorChar+DESTINATION_FOLDER;
     private static final String DISTRIBUTION_FOLDER = "dist";
-    private static final String DISTRIBUTION_PATH = DEFAULT_ROOT_PATH+File.separatorChar+DISTRIBUTION_FOLDER;
     private static final String INDEXING_PROPERTIES = "indexing.properties";
     private static final String CONFIG_PARAM = "config";
     public static final String KEY_INDEXING_CONFIG = "indexingConfig";
