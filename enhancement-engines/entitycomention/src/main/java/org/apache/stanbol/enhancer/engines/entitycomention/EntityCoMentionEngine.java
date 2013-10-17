@@ -39,6 +39,7 @@ import static org.apache.stanbol.enhancer.engines.entitylinking.config.TextProce
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getAnalysedText;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getLanguage;
 import static org.apache.stanbol.enhancer.servicesapi.EnhancementEngine.PROPERTY_NAME;
+import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.getReferences;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_CONTRIBUTOR;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_RELATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
@@ -54,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -131,7 +133,6 @@ import org.slf4j.LoggerFactory;
 @org.apache.felix.scr.annotations.Properties(value={
     @Property(name=PROPERTY_NAME),
     @Property(name=CASE_SENSITIVE,boolValue=DEFAULT_CASE_SENSITIVE_MATCHING_STATE),
-    @Property(name=MIN_SEARCH_TOKEN_LENGTH, intValue=DEFAULT_MIN_SEARCH_TOKEN_LENGTH),
     @Property(name=PROCESS_ONLY_PROPER_NOUNS_STATE, boolValue=DEFAULT_PROCESS_ONLY_PROPER_NOUNS_STATE),
     @Property(name=PROCESSED_LANGUAGES,
         cardinality=Integer.MAX_VALUE,
@@ -139,15 +140,7 @@ import org.slf4j.LoggerFactory;
                "de;uc=MATCH", //in German all Nouns are upper case
                "es;lc=Noun", //the OpenNLP POS tagger for Spanish does not support ProperNouns
                "nl;lc=Noun"}), //same for Dutch 
-    @Property(name=DEFAULT_MATCHING_LANGUAGE,value=""),
-    @Property(name=TYPE_MAPPINGS,cardinality=Integer.MAX_VALUE, value={
-        "dbp-ont:Organisation; dbp-ont:Newspaper; schema:Organization > dbp-ont:Organisation",
-        "dbp-ont:Person; foaf:Person; schema:Person > dbp-ont:Person",
-        "dbp-ont:Place; schema:Place > dbp-ont:Place",
-        "dbp-ont:Work; schema:CreativeWork > dbp-ont:Work",
-        "dbp-ont:Event; schema:Event > dbp-ont:Event",
-        "schema:Product > schema:Product",
-        "skos:Concept > skos:Concept"}),
+    //@Property(name=DEFAULT_MATCHING_LANGUAGE,value=""), //will only be used when adding alt label support
     @Property(name=SERVICE_RANKING,intValue=0)
 })
 @Service(value=EnhancementEngine.class)
@@ -206,6 +199,12 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
         linkerConfig.setMinMatchScore( //labelScore * token match factor
             linkerConfig.getMinLabelScore()*linkerConfig.getMinTokenMatchFactor());
         linkerConfig.setRedirectProcessingMode(RedirectProcessingMode.IGNORE);
+        //remove all type mappings
+        linkerConfig.setDefaultDcType(null);
+        Set<UriRef> mappedUris = new HashSet<UriRef>(linkerConfig.getTypeMappings().keySet());
+        for(UriRef mappedUri : mappedUris){
+            linkerConfig.setTypeMapping(mappedUri.getUnicodeString(), null);
+        }
         //get the metadata later set to the enhancement engine
     }
     /**
@@ -267,10 +266,6 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
         } finally {
             ci.getLock().writeLock().unlock();
         }
-        log.info("Found co-mentions:");
-        for(LinkedEntity linkedEntity : entityLinker.getLinkedEntities().values()){
-            log.info(" > {}",linkedEntity);
-        }
     }
 
     private void writeComentions(ContentItem ci,Collection<LinkedEntity> comentions, String language) {
@@ -280,8 +275,10 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
         }
         
         MGraph metadata = ci.getMetadata();
-                
+        
+        log.debug("Write Co-Mentions:");
         for(LinkedEntity comention : comentions){
+            log.debug(" > {}",comention);
             //URIs of TextAnnotations for the initial mention of this co-mention
             Collection<UriRef> initialMentions = new ArrayList<UriRef>(comention.getOccurrences().size());
             for(Suggestion suggestion : comention.getSuggestions()){
@@ -352,7 +349,13 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                             ENHANCER_CONFIDENCE, Double.class, literalFactory);
                     }
                     //now process initial mention(s) for the co-mention
+                    Set<UriRef> dcTypes = new HashSet<UriRef>();
                     for(UriRef initialMention : initialMentions){
+                        //get the dc:type(s) of the initial mentions
+                        Iterator<UriRef> dcTypesIt = getReferences(metadata, initialMention, DC_TYPE);
+                        while(dcTypesIt.hasNext()){
+                            dcTypes.add(dcTypesIt.next());
+                        }
                         //check confidence of the initial one
                         Double confidnece = EnhancementEngineHelper.get(metadata, initialMention, 
                             ENHANCER_CONFIDENCE, Double.class, literalFactory);
@@ -363,16 +366,8 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                                 maxConfidence = confidnece;
                             }
                         }
-                        //add suggestions of the initial mention
-                        Set<Resource> values = new HashSet<Resource>();
-                        for(Iterator<Triple> suggestions = metadata.filter(initialMention, DC_TYPE, null); suggestions.hasNext();){
-                            values.add(suggestions.next().getObject());
-                        }
-                        for(Resource dcType : values){
-                            metadata.add(new TripleImpl(textAnnotation, DC_TYPE, dcType));
-                        }
-                        values.clear();
                         //add the suggestions of the initial mention to this one
+                        Set<Resource> values = new HashSet<Resource>();
                         for(Iterator<Triple> suggestions = metadata.filter(null, DC_RELATION, initialMention); suggestions.hasNext();){
                             values.add(suggestions.next().getSubject());
                         }
@@ -383,6 +378,14 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                         //finally link the co-mentation with the initial one
                         metadata.add(new TripleImpl(textAnnotation, DC_RELATION, initialMention));
                         //metadata.add(new TripleImpl(initialMention, DC_RELATION, textAnnotation));
+                    }
+                    //finally add the collected dc:types of initial mentions to the textAnnotation
+                    Iterator<UriRef> existingDcTypesIt = getReferences(metadata, textAnnotation, DC_TYPE);
+                    while(existingDcTypesIt.hasNext()){ //do not add existing
+                        dcTypes.remove(existingDcTypesIt.next());
+                    }
+                    for(UriRef dcType : dcTypes){ //add missing
+                        metadata.add(new TripleImpl(textAnnotation, DC_TYPE, dcType));
                     }
                     //TODO: support also Entities
                     if(maxConfidence != null){ //set the confidence value (if known)
