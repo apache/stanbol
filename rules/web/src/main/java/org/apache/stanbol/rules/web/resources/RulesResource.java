@@ -22,9 +22,11 @@
 package org.apache.stanbol.rules.web.resources;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 //import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 //import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -41,6 +43,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -48,6 +51,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.clerezza.jaxrs.utils.form.MultiPartBody;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.stanbol.commons.web.viewable.Viewable;
@@ -76,8 +80,8 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.view.ImplicitProduces;
-import com.sun.jersey.multipart.FormDataParam;
+//import com.sun.jersey.api.view.ImplicitProduces;
+//import com.sun.jersey.multipart.FormDataParam;
 
 /**
  * 
@@ -85,7 +89,7 @@ import com.sun.jersey.multipart.FormDataParam;
  * 
  */
 @Path("/rules")
-@ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
+//@ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
 public class RulesResource extends BaseStanbolResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
@@ -474,10 +478,23 @@ public class RulesResource extends BaseStanbolResource {
     @Produces(value = {KRFormat.TEXT_PLAIN, KRFormat.RDF_JSON})
     @Path("/recipe/{recipe:.+}")
     public Response addRulesToRecipe(@PathParam(value = "recipe") String recipe,
-                                     @FormDataParam(value = "rules") InputStream rules,
-                                     @FormDataParam(value = "description") String description,
+                                     MultiPartBody data,
                                      @Context HttpHeaders headers) {
 
+        String description = null;
+        InputStream rules = null;
+
+        if(data.getTextParameterValues("description") != null){
+            description = data.getTextParameterValues("description") [0];
+        }
+        if(data.getFormFileParameterValues("rules") != null){
+            rules = new ByteArrayInputStream(data.getFormFileParameterValues("rules") [0].getContent());
+        }
+        
+        if(recipe == null || rules == null  || description == null){
+            throw new WebApplicationException(BAD_REQUEST);
+        }
+        
         ResponseBuilder responseBuilder;
 
         Recipe rcp;

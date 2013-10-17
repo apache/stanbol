@@ -141,7 +141,7 @@
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
     </dependency>
-    
+    <!--
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
@@ -160,7 +160,7 @@
       <version>1.15</version>
       <scope>compile</scope>
     </dependency>
-   
+   -->
 
     <!-- OSGi tax -->
     <dependency>
@@ -181,7 +181,12 @@
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.core</artifactId>
     </dependency>
-    	
+       
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>jaxrs.utils</artifactId>
+    </dependency>
+   
     	<!-- Tests -->
     <dependency>
         <groupId>junit</groupId>

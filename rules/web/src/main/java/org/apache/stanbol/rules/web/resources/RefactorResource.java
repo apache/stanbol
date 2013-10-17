@@ -32,6 +32,7 @@ import static org.apache.stanbol.commons.web.base.format.KRFormat.RDF_XML;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -52,6 +53,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 //import javax.ws.rs.core.Response.Status;
 
+import org.apache.clerezza.jaxrs.utils.form.MultiPartBody;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.felix.scr.annotations.Reference;
@@ -76,8 +78,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.view.ImplicitProduces;
-import com.sun.jersey.multipart.FormDataParam;
+//import com.sun.jersey.api.view.ImplicitProduces;
+//import com.sun.jersey.multipart.FormDataParam;
 
 /**
  * 
@@ -86,7 +88,7 @@ import com.sun.jersey.multipart.FormDataParam;
  */
 
 @Path("/refactor")
-@ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
+//@ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
 public class RefactorResource extends BaseStanbolResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
@@ -117,9 +119,23 @@ public class RefactorResource extends BaseStanbolResource {
     @Path("/apply")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(value = {TURTLE, RDF_XML, MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, RDF_JSON, X_TURTLE})
-    public Response applyRefactoring(@FormDataParam("recipe") String recipe,
-                                     @FormDataParam("input") InputStream input,
+    public Response applyRefactoring(MultiPartBody data,
                                      @Context HttpHeaders headers) {
+        
+        String recipe = null;
+        InputStream input = null;
+        
+        if(data.getTextParameterValues(recipe) != null){
+            recipe = data.getTextParameterValues(recipe) [0];
+        }
+        if(data.getFormFileParameterValues("input") != null){
+            input = new ByteArrayInputStream(data.getFormFileParameterValues("input") [0].getContent());
+        }
+        
+        if(recipe == null || input == null){
+            throw new WebApplicationException(BAD_REQUEST);
+        }
+        
         ResponseBuilder rb;
         OWLOntology output = null;
         try {
@@ -153,9 +169,22 @@ public class RefactorResource extends BaseStanbolResource {
     @Path("/applyfile")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(value = {TURTLE, RDF_XML, MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, RDF_JSON, X_TURTLE})
-    public Response applyRefactoringFromRuleFile(@FormDataParam("recipe") InputStream recipeStream,
-                                                 @FormDataParam("input") InputStream input,
+    public Response applyRefactoringFromRuleFile(MultiPartBody data,
                                                  @Context HttpHeaders headers) {
+        InputStream recipeStream = null;
+        InputStream input = null;
+        
+        if(data.getFormFileParameterValues("recipe") != null){
+            recipeStream = new ByteArrayInputStream(data.getFormFileParameterValues("recipe") [0].getContent());
+        }
+        if(data.getFormFileParameterValues("input") != null){
+            input = new ByteArrayInputStream(data.getFormFileParameterValues("input") [0].getContent());
+        }
+        
+        if(recipeStream == null || input == null){
+            throw new WebApplicationException(BAD_REQUEST);
+        }
+        
         ResponseBuilder rb;
         OWLOntology output = null;
         try {
@@ -228,10 +257,22 @@ public class RefactorResource extends BaseStanbolResource {
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(value = {TURTLE, RDF_XML, MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, RDF_JSON, X_TURTLE})
-    public Response performRefactoring(@FormDataParam("recipe") String recipe,
-                                       @FormDataParam("input") InputStream input,
+    public Response performRefactoring(MultiPartBody data,
                                        @Context HttpHeaders headers) {
 
+        String recipe = null;
+        InputStream input = null;
+        
+        if(data.getTextParameterValues("recipe") != null){
+            recipe = data.getTextParameterValues("recipe") [0];
+        }
+        if(data.getFormFileParameterValues("input") != null){
+            input = new ByteArrayInputStream(data.getFormFileParameterValues("input") [0].getContent());
+        }
+        
+        if(recipe == null || input == null){
+            throw new WebApplicationException(BAD_REQUEST);
+        }
         // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
         ResponseBuilder rb;
         Recipe rcp;
