@@ -21,6 +21,7 @@ import static org.apache.stanbol.enhancer.engines.dbpspotlight.utils.XMLParser.g
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.apache.clerezza.rdf.core.UriRef;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -36,7 +37,7 @@ import org.w3c.dom.NodeList;
 public class CandidateResource {
 
 	public String label;
-	public String uri;
+	public String localName;
 	public double contextualScore;
 	public double percentageOfSecondRank;
 	public double support;
@@ -47,8 +48,13 @@ public class CandidateResource {
 		return String
 				.format("[label=%s, uri=%s, contextualScore=%d, percentageOfSecondRank=%d, contextualScore=%d, "
 						+ "percentageOfSecondRank=%d, contextualScore=%d]",
-						label, uri, contextualScore, percentageOfSecondRank,
+						label, localName, contextualScore, percentageOfSecondRank,
 						support, priorScore, finalScore);
+	}
+	
+	public UriRef getUri(){
+	    return new UriRef(new StringBuilder("http://dbpedia.org/resource/")
+	    .append(localName).toString());
 	}
 	
 	/**
@@ -77,7 +83,7 @@ public class CandidateResource {
 					Element r = (Element) n;
 					CandidateResource resource = new CandidateResource();
 					resource.label = r.getAttribute("label");
-					resource.uri = r.getAttribute("uri");
+					resource.localName = r.getAttribute("uri");
 					resource.contextualScore = (new Double(
 							r.getAttribute("contextualScore"))).doubleValue();
 					resource.percentageOfSecondRank = (new Double(

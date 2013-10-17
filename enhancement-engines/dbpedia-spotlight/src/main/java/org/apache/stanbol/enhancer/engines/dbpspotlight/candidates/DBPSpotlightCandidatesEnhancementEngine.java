@@ -247,7 +247,7 @@ public class DBPSpotlightCandidatesEnhancementEngine extends
 				CandidateResource resource = resources.next();
 				UriRef entityAnnotation = SpotlightEngineUtils.createEntityAnnotation(
 						resource, this, ci, textAnnotation);
-				entityAnnotationMap.put(resource.uri, entityAnnotation);
+				entityAnnotationMap.put(resource.localName, entityAnnotation);
 			}
 			if (entityAnnotationMap.containsKey(occ.name)) {
 				model.add(new TripleImpl(entityAnnotationMap.get(occ.name),

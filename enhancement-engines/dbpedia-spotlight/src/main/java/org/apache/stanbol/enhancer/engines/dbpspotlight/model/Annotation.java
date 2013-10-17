@@ -144,10 +144,9 @@ public class Annotation {
 			dbpslann.support = (new Integer(node.getAttribute("support")))
 					.intValue();
 			dbpslann.types = node.getAttribute("types");
-			dbpslann.surfaceForm = new SurfaceForm();
-			dbpslann.surfaceForm.name = node.getAttribute("surfaceForm");
-			dbpslann.surfaceForm.offset = (new Integer(node.getAttribute("offset")))
-					.intValue();
+			dbpslann.surfaceForm = new SurfaceForm(
+			    new Integer(node.getAttribute("offset")),
+			    node.getAttribute("surfaceForm"));
 			//set the type of the surface form
 			List<String> dbpediaTypes = dbpslann.getDbpediaTypeNames();
 			if(!dbpediaTypes.isEmpty()){

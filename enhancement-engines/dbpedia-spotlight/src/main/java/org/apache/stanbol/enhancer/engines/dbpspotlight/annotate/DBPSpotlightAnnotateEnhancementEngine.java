@@ -39,6 +39,7 @@ import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.clerezza.rdf.core.Language;
@@ -53,6 +54,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.commons.stanboltools.offline.OnlineMode;
 import org.apache.stanbol.enhancer.engines.dbpspotlight.model.Annotation;
+import org.apache.stanbol.enhancer.engines.dbpspotlight.model.SurfaceForm;
 import org.apache.stanbol.enhancer.engines.dbpspotlight.utils.SpotlightEngineUtils;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -193,12 +195,13 @@ public class DBPSpotlightAnnotateEnhancementEngine extends
 		String text = SpotlightEngineUtils.getPlainContent(ci);
 
 		Collection<Annotation> dbpslGraph = doPostRequest(text,ci.getUri());
+		Map<SurfaceForm,UriRef> surfaceForm2TextAnnotation = new HashMap<SurfaceForm,UriRef>();
 		if (dbpslGraph != null) {
 			// Acquire a write lock on the ContentItem when adding the
 			// enhancements
 			ci.getLock().writeLock().lock();
 			try {
-				createEnhancements(dbpslGraph, ci, text, language);
+				createEnhancements(dbpslGraph, ci, text, language, surfaceForm2TextAnnotation);
 				if (log.isDebugEnabled()) {
 					Serializer serializer = Serializer.getInstance();
 					ByteArrayOutputStream debugStream = new ByteArrayOutputStream();
@@ -231,22 +234,18 @@ public class DBPSpotlightAnnotateEnhancementEngine extends
 	 *            the content item
 	 */
 	protected void createEnhancements(Collection<Annotation> occs,
-			ContentItem ci, String text, Language language) {
-		//we need to create multiple EntityAnnotations even for the same
-		//suggested Entity, as the scores will be different
-		//HashMap<Resource, UriRef> entityAnnotationMap = new HashMap<Resource, UriRef>();
+			ContentItem ci, String text, Language language,
+			Map<SurfaceForm,UriRef> surfaceForm2TextAnnotation) {
 		for (Annotation occ : occs) {
-			UriRef textAnnotation = SpotlightEngineUtils.createTextEnhancement(
-					occ.surfaceForm, this, ci, text, language);
-
-//			if (entityAnnotationMap.containsKey(occ.uri)) {
-//				model.add(new TripleImpl(entityAnnotationMap.get(occ.uri),
-//						DC_RELATION, textAnnotation));
-//			} else {
-			SpotlightEngineUtils.createEntityAnnotation(occ, this, ci, textAnnotation, language);
-//				entityAnnotationMap.put(occ.uri, entityAnnotation);
+			UriRef textAnnotation = surfaceForm2TextAnnotation.get(occ.surfaceForm);
+			if(textAnnotation == null){ //not yet written ... create a new
+    			textAnnotation = SpotlightEngineUtils.createTextEnhancement(
+    					occ.surfaceForm, this, ci, text, language);
+    			surfaceForm2TextAnnotation.put(occ.surfaceForm,textAnnotation);
 			}
+			SpotlightEngineUtils.createEntityAnnotation(occ, this, ci, textAnnotation, language);
 		}
+	}
 
 
 	/**
