@@ -19,6 +19,8 @@ package org.apache.stanbol.enhancer.engines.lucenefstlinking;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig.UNICASE_SCRIPT_LANUAGES;
 
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
@@ -143,9 +145,9 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
     private int lookupCount = 0;
     private int incrementCount = 0;
     
-    private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
-    private final OffsetAttribute offset = addAttribute(OffsetAttribute.class);
-    private final TaggingAttribute taggable = addAttribute(TaggingAttribute.class);
+    protected final CharTermAttribute termAtt;
+    protected final OffsetAttribute offset;
+    protected final TaggingAttribute taggable;
     /**
      * List with {@link TokenData#isLinkable linkable} {@link Token}s used by
      * the {@link #reduce(TagLL[])} method to check if {@link TagLL tags} 
@@ -156,6 +158,20 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
     protected LinkableTokenFilter(TokenStream input, AnalysedText at, 
             String lang, LanguageProcessingConfig lpc) {
         super(input);
+        //STANBOL-1177: add attributes in doPrivileged to avoid 
+        //AccessControlException: access denied ("java.lang.RuntimePermission" "getClassLoader")
+        termAtt = AccessController.doPrivileged(new PrivilegedAction<CharTermAttribute>() {
+            @Override public CharTermAttribute run() {
+                return addAttribute(CharTermAttribute.class);
+            }});
+        offset = AccessController.doPrivileged(new PrivilegedAction<OffsetAttribute>() {
+            @Override public OffsetAttribute run() {
+                return addAttribute(OffsetAttribute.class);
+            }});
+        taggable = AccessController.doPrivileged(new PrivilegedAction<TaggingAttribute>() {
+            @Override public TaggingAttribute run() {
+                return addAttribute(TaggingAttribute.class);
+            }});
         this.at = at;
         //this.lang = lang;
         this.lpc = lpc;
