@@ -25,7 +25,8 @@ import org.apache.stanbol.enhancer.nlp.model.Sentence;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 
 /**
- * Used to collect {@link Sentiment}s that refer the same 
+ * Represents phrases in a sentence that do hold a Sentiment value.
+ * Phrases are defined by collecting {@link Sentiment}s that refer the same 
  * {@link Sentiment#getAboutness()}
  * @author Rupert Westenthaler
  */
@@ -48,7 +49,10 @@ public class SentimentPhrase {
     public SentimentPhrase(Sentiment sentiment) {
         addSentiment(sentiment);
     }
-
+    /**
+     * Adds a Sentiment to the Phrase
+     * @param sentiment the sentiment to add
+     */
     public void addSentiment(Sentiment sentiment){
         sentiments.add(sentiment);
         nouns.addAll(sentiment.getAboutness());
@@ -89,9 +93,13 @@ public class SentimentPhrase {
         }
         return __sentiment[2];
     }
-    
+    /**
+     * The Sentence containing this phrase or <code>null</code> if no
+     * {@link Sentiment} was yet added
+     * @return the sentence
+     */
     public Sentence getSentence(){
-        return sentiments.get(0).getSentence();
+        return sentiments.isEmpty() ? null : sentiments.get(0).getSentence();
     }
     
     private void summarizeSentimentValues(){

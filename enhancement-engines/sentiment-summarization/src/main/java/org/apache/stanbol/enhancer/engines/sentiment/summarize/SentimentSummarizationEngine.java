@@ -16,8 +16,6 @@
  */
 package org.apache.stanbol.enhancer.engines.sentiment.summarize;
 
-import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.PHRASE_ANNOTATION;
-import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.POS_ANNOTATION;
 import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.SENTIMENT_ANNOTATION;
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.createTextEnhancement;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
@@ -35,10 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
-import java.util.SortedMap;
 import java.util.TreeMap;
-
-import javax.swing.DebugGraphics;
 
 import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.LiteralFactory;
@@ -61,7 +56,6 @@ import org.apache.stanbol.enhancer.nlp.model.Span;
 import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
-import org.apache.stanbol.enhancer.nlp.phrase.PhraseTag;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.Pos;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
@@ -379,7 +373,7 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
                 //for negation use the negation context
                 Integer[] context = getNegationContext(index, conjunctions, searchSpan);
                 for(Token negationToken : negations.subMap(context[0] , true, context[1], true).values()){
-                    sentiment.negate(negationToken);
+                    sentiment.addNegate(negationToken);
                 }
                 //for nouns use the sentiment context
                 context = getSentimentContext(index, sentiment, verbs, conjunctions, nounsAndPronouns, searchSpan);
