@@ -29,6 +29,7 @@ import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.CoreDescriptor;
 import org.apache.solr.core.SolrCore;
+import org.apache.solr.core.SolrResourceLoader;
 import org.xml.sax.SAXException;
 
 /**
@@ -78,10 +79,19 @@ public class EmbeddedSolrHelper {
         IOUtils.copy(is, new FileOutputStream(solrConfigFile));
 
         // create the embedded server
-        CoreContainer coreContainer = new CoreContainer(solrFolder.getAbsolutePath(), solrFile);
+        SolrResourceLoader loader = new SolrResourceLoader(solrFolder.getAbsolutePath());
+        CoreContainer coreContainer = new CoreContainer(loader);
+        //NOTE: with Solr 4.4 we need to call coreContainer.load() otherwise we
+        //would be affected by the issue stated at 
+        //http://mail-archives.apache.org/mod_mbox/lucene-solr-user/201301.mbox/%3CB7B8B36F1A0BE24F842758C318E56E925EB334%40EXCHDB2.na1.ad.group%3E
+        //while this was introduced with 4.1 this only affects this code with 4.4
+        //as with an API change the methods implicitly calling load() where
+        //removed.
+        coreContainer.load();
         CoreDescriptor coreDescriptor = new CoreDescriptor(coreContainer, coreId,
                 solrCoreFolder.getAbsolutePath());
         SolrCore core = coreContainer.create(coreDescriptor);
+//        coreContainer.createAndLoad(solrHome, configFile)load();
         coreContainer.register(coreId, core, true);
         return new EmbeddedSolrServer(coreContainer, coreId);
     }

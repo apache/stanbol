@@ -62,6 +62,7 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -243,7 +244,7 @@ public class SpotlightEngineUtils {
 		model.add(new TripleImpl(entityAnnotation,
 				ENHANCER_ENTITY_LABEL, label));
 		model.add(new TripleImpl(entityAnnotation,
-				ENHANCER_ENTITY_REFERENCE, new UriRef(resource.uri)));
+				ENHANCER_ENTITY_REFERENCE, resource.getUri()));
 		model.add(new TripleImpl(entityAnnotation, PROPERTY_CONTEXTUAL_SCORE,
 				literalFactory.createTypedLiteral(resource.contextualScore)));
 		model.add(new TripleImpl(entityAnnotation,PROPERTY_PERCENTAGE_OF_SECOND_RANK,

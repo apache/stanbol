@@ -37,11 +37,34 @@ import org.w3c.dom.NodeList;
  */
 public class SurfaceForm {
 
-	public String name;
+	public final String name;
 	public String type;
-	public Integer offset;
-	public List<CandidateResource> resources = new ArrayList<CandidateResource>();
+	public final Integer offset;
+	public final List<CandidateResource> resources = new ArrayList<CandidateResource>();
 
+	public SurfaceForm(Integer offset, String name){
+	    if(name == null || offset == null){
+	        throw new IllegalArgumentException("Offset and name MUST NOT be NULL");
+	    }
+	    this.name = name;
+	    this.offset = offset;
+	}
+	
+	@Override
+	public int hashCode() {
+	    return name.hashCode()+offset.hashCode();
+	}
+	@Override
+	public boolean equals(Object o) {
+	    if(o instanceof SurfaceForm && name.equals(((SurfaceForm)o).name) &&
+	            offset.equals(((SurfaceForm)o).offset)){
+	        return (type == null && ((SurfaceForm)o).type == null) ||
+	                (type != null && type.equals(((SurfaceForm)o).type));
+	    } else {
+	        return false;
+	    }
+	}
+	
 	public String toString() {
 		return String.format("[name=%s, offset=%i, type=%s]", name, offset,
 				type);
@@ -69,10 +92,9 @@ public class SurfaceForm {
 	}
 
 	protected static SurfaceForm parseSerfaceForm(Element node) {
-		SurfaceForm dbpslann = new SurfaceForm();
-		dbpslann.name = node.getAttribute("name");
-		dbpslann.offset = (new Integer(node.getAttribute("offset")))
-				.intValue();
+		SurfaceForm dbpslann = new SurfaceForm(
+		    new Integer(node.getAttribute("offset")),
+		    node.getAttribute("name"));
 		dbpslann.type = node.getAttribute("type");
 		return dbpslann;
 	}

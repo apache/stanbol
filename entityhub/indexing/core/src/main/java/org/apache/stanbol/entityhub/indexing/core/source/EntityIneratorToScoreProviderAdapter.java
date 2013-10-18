@@ -20,8 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.stanbol.entityhub.indexing.core.EntityIterator;
-import org.apache.stanbol.entityhub.indexing.core.EntityScoreProvider;
 import org.apache.stanbol.entityhub.indexing.core.EntityIterator.EntityScore;
+import org.apache.stanbol.entityhub.indexing.core.EntityScoreProvider;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 

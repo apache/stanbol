@@ -16,8 +16,6 @@
  */
 package org.apache.stanbol.enhancer.engines.sentiment.summarize;
 
-import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.PHRASE_ANNOTATION;
-import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.POS_ANNOTATION;
 import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.SENTIMENT_ANNOTATION;
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.createTextEnhancement;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
@@ -35,10 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
-import java.util.SortedMap;
 import java.util.TreeMap;
-
-import javax.swing.DebugGraphics;
 
 import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.LiteralFactory;
@@ -61,7 +56,6 @@ import org.apache.stanbol.enhancer.nlp.model.Span;
 import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
-import org.apache.stanbol.enhancer.nlp.phrase.PhraseTag;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.Pos;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
@@ -142,6 +136,10 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
      * The dc:type value used for fise:TextAnnotations indicating a Sentiment
      */
     public static final UriRef SENTIMENT_TYPE = new UriRef(NamespaceEnum.fise+"Sentiment");
+    /**
+     * The dc:Type value sued for the sentiment annotation of the whole document
+     */
+    public static final UriRef DOCUMENT_SENTIMENT_TYPE = new UriRef(NamespaceEnum.fise+"DocumentSentiment");
 
 
     private static final int DEFAULT_NEGATION_CONTEXT = 2;
@@ -194,12 +192,12 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
                 Boolean.parseBoolean(value.toString());
         //should we write sentiment values for sentences
         value = ctx.getProperties().get(PROPERTY_SENTENCE_SENTIMENT_STATE);
-        this.writeDocumentSentiment = value == null ? DEFAULT_SENTENCE_SENTIMENT_STATE :
+        this.writeSentencesSentimet = value == null ? DEFAULT_SENTENCE_SENTIMENT_STATE :
             value instanceof Boolean ? ((Boolean)value).booleanValue() : 
                 Boolean.parseBoolean(value.toString());
         //should we write sentiment values for phrases
         value = ctx.getProperties().get(PROPERTY_PHRASE_SENTIMENT_STATE);
-        this.writeDocumentSentiment = value == null ? DEFAULT_PHRASE_SENTIMENT_STATE :
+        this.writeSentimentPhrases = value == null ? DEFAULT_PHRASE_SENTIMENT_STATE :
             value instanceof Boolean ? ((Boolean)value).booleanValue() : 
                 Boolean.parseBoolean(value.toString());
     }
@@ -375,7 +373,7 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
                 //for negation use the negation context
                 Integer[] context = getNegationContext(index, conjunctions, searchSpan);
                 for(Token negationToken : negations.subMap(context[0] , true, context[1], true).values()){
-                    sentiment.negate(negationToken);
+                    sentiment.addNegate(negationToken);
                 }
                 //for nouns use the sentiment context
                 context = getSentimentContext(index, sentiment, verbs, conjunctions, nounsAndPronouns, searchSpan);
@@ -416,9 +414,9 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
         Integer[] context;
         PosTag pos = sentiment.getPosTag();
         boolean isPredicative;
-        if(pos.getPosHierarchy().contains(Pos.PredicativeAdjective)){
+        if(pos != null && pos.getPosHierarchy().contains(Pos.PredicativeAdjective)){
             isPredicative = true;
-        } else if(pos.hasCategory(LexicalCategory.Adjective) && 
+        } else if(pos != null && pos.hasCategory(LexicalCategory.Adjective) && 
                 //Adjective that are not directly in front of a Noun
                 nouns.get(Integer.valueOf(index+1)) == null){ 
           isPredicative = true;
@@ -492,14 +490,14 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
                 context = new Integer[]{Integer.valueOf(index-nounContext),
                         Integer.valueOf(index+nounContext)};
             }
-        } else if(pos.hasCategory(LexicalCategory.Adjective)){
+        } else if(pos != null && pos.hasCategory(LexicalCategory.Adjective)){
             //for all other adjective the affected noun is expected directly
             //after the noun
             context = new Integer[]{index,Integer.valueOf(index+1)};
-        } else if(pos.hasCategory(LexicalCategory.Noun)){
+        } else if(pos != null && pos.hasCategory(LexicalCategory.Noun)){
             //a noun with an sentiment
             context = new Integer[]{index,index};
-        } else { //else return default
+        } else { //else (includes pos == null) return default
             context = new Integer[]{Integer.valueOf(index-nounContext),
                     Integer.valueOf(index+nounContext)};
         }
@@ -515,17 +513,17 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
 
     private boolean isPronoun(Token token, String language) {
         Value<PosTag> posAnnotation = token.getAnnotation(NlpAnnotations.POS_ANNOTATION);
-        return posAnnotation.value().getPosHierarchy().contains(Pos.Pronoun);
+        return posAnnotation == null ? false : posAnnotation.value().getPosHierarchy().contains(Pos.Pronoun);
     }
 
     private boolean isVerb(Token token, String language) {
         Value<PosTag> posAnnotation = token.getAnnotation(NlpAnnotations.POS_ANNOTATION);
-        return posAnnotation.value().hasCategory(LexicalCategory.Verb);
+        return posAnnotation == null ? false : posAnnotation.value().hasCategory(LexicalCategory.Verb);
     }
     
     private boolean isCoordinatingConjuction(Token token, String language) {
         Value<PosTag> posAnnotation = token.getAnnotation(NlpAnnotations.POS_ANNOTATION);
-        return posAnnotation.value().getPosHierarchy().contains(Pos.CoordinatingConjunction);
+        return posAnnotation == null ? false : posAnnotation.value().getPosHierarchy().contains(Pos.CoordinatingConjunction);
     }
 
     private boolean isSectionBorder(Token token, String language) {
@@ -714,6 +712,10 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
         if(ssoType != null){
             metadata.add(new TripleImpl(enh, DC_TYPE, ssoType));
         }
+        if(section.getType() == SpanTypeEnum.Text){
+            metadata.add(new TripleImpl(enh, DC_TYPE, DOCUMENT_SENTIMENT_TYPE));
+        }
+        
     }
     /**
      * The maximum size of the preix/suffix for the selection context

@@ -16,8 +16,6 @@
 */
 package org.apache.stanbol.entityhub.indexing.source.jenatdb;
 
-import static org.apache.stanbol.entityhub.indexing.source.jenatdb.Constants.DEFAULT_MODEL_DIRECTORY;
-import static org.apache.stanbol.entityhub.indexing.source.jenatdb.Constants.PARAM_MODEL_DIRECTORY;
 import static org.apache.stanbol.entityhub.indexing.source.jenatdb.Utils.initTDBDataset;
 
 import java.io.File;
@@ -44,7 +42,6 @@ import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
-import org.joda.time.field.ImpreciseDateTimeField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,8 +65,6 @@ import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
-import com.hp.hpl.jena.tdb.TDBFactory;
-import com.hp.hpl.jena.tdb.base.file.Location;
 import com.hp.hpl.jena.tdb.store.DatasetGraphTDB;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 /**
@@ -126,7 +121,7 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
      */
     public static final String DEFAULT_SOURCE_FOLDER_NAME = "rdfdata";
     
-    public static final String DEFAULT_IMPORTED_FOLDER_NAME = "imported";
+    public static final String DEFAULT_IMPORTED_FOLDER_NAME = "imported";    
     //protected to allow internal classes direct access (without hidden getter/
     //setter added by the compiler that decrease performance)
     protected final static Logger log = LoggerFactory.getLogger(RdfIndexingSource.class);
@@ -237,8 +232,10 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
                     new RdfImportFilter[filters.size()]));
             }
         }
+        
+        boolean failOnError = indexingConfig.isFailOnError();
         //create the ResourceLoader
-        this.loader =  new ResourceLoader(new RdfResourceImporter(indexingDataset, importFilter), true);
+        this.loader =  new ResourceLoader(new RdfResourceImporter(indexingDataset, importFilter), failOnError);
         
         value = config.get(PARAM_IMPORTED_FOLDER);
         String importedFolderName;

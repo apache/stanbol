@@ -28,9 +28,9 @@ import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
@@ -293,16 +293,20 @@ public class ResourceLoader {
                 } else { //this does not use an imported folder or the state is not LOADED
                     files.put(file, state);
                 }
-                //if failOnError is activated we stop the loading on the first
-                //error!
-                if(failOnError && ResourceState.ERROR == state){
-                    String msg = "Error while loading Resource "+file;
-                    if(e != null){
-                        throw new IllegalStateException(msg,e);
-                    } else {
-                        throw new IllegalStateException(msg);
-                    }
-                }
+                if(ResourceState.ERROR == state){
+                	//if failOnError is activated we stop the loading on the first error!                   
+                    if (failOnError){
+                    	 String msg = "Error while loading Resource "+file;
+                    	if(e != null){
+                            throw new IllegalStateException(msg,e);
+                        } else {
+                            throw new IllegalStateException(msg);
+                        }
+                    }else {
+                    	//if failOnError is de-activated ignore the resource loading error and continue..                   
+                    	log.info("Ignore Error for File {} and continue", file);
+                    }                    
+                } 
             } else {
                 log.info("Ignore Error for File {} because it is no longer registered with this RdfLoader",
                     file);

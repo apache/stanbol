@@ -20,11 +20,19 @@ import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-public final class SparqlFieldQueryFactory implements FieldQueryFactory {
+/**
+ * This class moved to {@link org.apache.stanbol.entityhub.query.sparql.SparqlFieldQueryFactory}.
+ * This forwards to the new implementation.
+ * @author Rupert Westenthaler
+ * @see org.apache.stanbol.entityhub.query.sparql.SparqlFieldQueryFactory
+ */
+@Deprecated
+public final class SparqlFieldQueryFactory extends org.apache.stanbol.entityhub.query.sparql.SparqlFieldQuery {
+    protected static final Logger logger = LoggerFactory.getLogger(SparqlFieldQueryFactory.class);
 
     private static SparqlFieldQueryFactory instance;
 
+    @Deprecated
     public static SparqlFieldQueryFactory getInstance() {
         if (instance == null) {
             instance = new SparqlFieldQueryFactory();
@@ -36,6 +44,7 @@ public final class SparqlFieldQueryFactory implements FieldQueryFactory {
         super();
     }
 
+    @Deprecated
     @Override
     public SparqlFieldQuery createFieldQuery() {
         return new SparqlFieldQuery();
@@ -46,9 +55,10 @@ public final class SparqlFieldQueryFactory implements FieldQueryFactory {
      * 
      * @param parsedQuery
      *            the parsed Query
+     * @see org.apache.stanbol.entityhub.query.sparql.SparqlFieldQueryFactory#getSparqlFieldQuery(FieldQuery)
      */
+    @Deprecated
     public static SparqlFieldQuery getSparqlFieldQuery(FieldQuery parsedQuery) {
-        Logger logger = LoggerFactory.getLogger(SparqlFieldQueryFactory.class);
 
         if (parsedQuery == null) {
             logger.trace("Parsed query is null.");

@@ -16,7 +16,6 @@
 */
 package org.apache.stanbol.entityhub.indexing.core.config;
 
-import java.io.File;
 
 /**
  * Constants defines/used for Indexing.
@@ -49,4 +48,6 @@ public interface IndexingConstants {
     String KEY_SCORE_NORMALIZER      = "scoreNormalizer";
     String KEY_ENTITY_PROCESSOR      = "entityProcessor";
     String KEY_ENTITY_POST_PROCESSOR = "entityPostProcessor";
+    String KEY_FAIL_ON_ERROR_LOADING_RESOURCE = "failOnErrorLoadingResource";
+
 }

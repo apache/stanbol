@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
+    <version>5-SNAPSHOT</version>
+    <relativePath>../parent/pom.xml</relativePath>
+  </parent>
+
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.integration-tests</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>Apache Stanbol Integration Tests</name>
+
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/integration-tests/
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/integration-tests/
+    </developerConnection>
+    <url>http://stanbol.apache.org/</url>
+  </scm>
+
+  <properties>
+    <!-- Set this to run the server on a specific port -->
+    <http.port></http.port>
+
+    <!-- Set this to run tests against an existing server instance -->
+    <test.server.url></test.server.url>
+
+    <!-- Options for the VM that executes our runnable jar -->
+    <jar.executor.vm.options>-Xmx1g -XX:MaxPermSize=256m -Dorg.apache.stanbol.offline.mode=true -Dorg.apache.sling.commons.log.level=DEBUG</jar.executor.vm.options>
+
+    <!-- Set this to true to keep the runnable jar running - useful to debug tests -->
+    <keepJarRunning>false</keepJarRunning>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-runnable-jar</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>process-resources</phase>
+            <configuration>
+              <includeArtifactIds>org.apache.stanbol.launchers.full</includeArtifactIds>
+              <excludeTransitive>true</excludeTransitive>
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>false</overWriteSnapshots>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <!-- Find free ports to run our server -->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>reserve-server-port</id>
+            <goals>
+              <goal>reserve-network-port</goal>
+            </goals>
+            <phase>process-resources</phase>
+            <configuration>
+              <portNames>
+                <portName>http.port</portName>
+              </portNames>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <test.server.url>${test.server.url}</test.server.url>
+            <jar.executor.server.port>${http.port}</jar.executor.server.port>
+            <jar.executor.vm.options>${jar.executor.vm.options}</jar.executor.vm.options>
+            <jar.executor.jar.folder>${project.basedir}/target/dependency</jar.executor.jar.folder>
+            <jar.executor.jar.name.regexp>org.apache.stanbol.*full.*jar$</jar.executor.jar.name.regexp>
+            <jar.executor.workingdirectory>${project.build.directory}/launchdir</jar.executor.workingdirectory>
+            <keepJarRunning>${keepJarRunning}</keepJarRunning>
+            <server.ready.timeout.seconds>180</server.ready.timeout.seconds>
+            <server.ready.path.1>/:stanbol.css</server.ready.path.1>
+            <server.ready.path.2>/enhancer:Stateless REST analysis:Accept:text/html</server.ready.path.2>
+            <!-- server.ready.path.3>/contenthub:Recently uploaded Content Items</server.ready.path.3>
+            <server.ready.path.4>/entityhub:The RESTful API of the Entityhub</server.ready.path.4>
+            <server.ready.path.5>/ontonet:Apache Stanbol OntoNet:Accept:text/html</server.ready.path.5>
+            <server.ready.path.6>/reasoners:The Stanbol Reasoners provides</server.ready.path.6> -->
+          </systemPropertyVariables>
+          <excludes>
+            <!-- Config is to big and Regex check on result causes OutOfMemoryExceptions -->
+            <exclude>**/DefaultConfigTest.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.full</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.test</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <!-- Used to access constants such as Ontology URIs -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+
+    <!-- namespace prefixes mappings -->
+    <!-- used for the Stress Test Tool configuration -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.service</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency> <!-- provides the default Stanbol mappings -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency> <!-- provides the prefix.cc mappings -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.prefixcc</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore-osgi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpmime</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+   <!-- <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
+      <version>1.0.0-SNAPSHOT</version>     
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-server</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.jettison</groupId>
+      <artifactId>jettison</artifactId>
+    </dependency> -->
+
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.ontologies</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.jena.serializer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.jena.parser</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.rdfjson</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>javax.ws.rs-api</artifactId>
+    </dependency>
+    <!-- use log4j for logging -->
+    <dependency>  <!-- used for debug level logging during tests -->
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+</project>

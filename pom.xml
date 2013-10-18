@@ -82,8 +82,7 @@
 
     <module>launchers/bundlelists</module>
     <module>launchers/mini</module>
-<!--    <module>launchers/full</module> -->
-
+    <module>launchers/full</module>
     <module>launchers/stable</module>
    <!-- <module>launchers/full-war</module>
     
@@ -99,7 +98,7 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
-        <!-- <module>integration-tests</module> -->     
+        <module>integration-tests</module>     
       </modules>
     </profile>
     <profile>

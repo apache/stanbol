@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -50,7 +49,7 @@ public class RdfQueryResultList implements QueryResultList<Representation> {
         this.query = query;
         this.resultGraph = resultGraph;
         List<RdfRepresentation> results = (List<RdfRepresentation>)ModelUtils.addToCollection(
-            SparqlQueryUtils.parseQueryResultsFromMGraph(resultGraph),
+            ClerezzaQueryUtils.parseQueryResultsFromMGraph(resultGraph),
             new ArrayList<RdfRepresentation>());
         //sort the list based on the score
         Collections.sort(results,RESULT_SCORE_COMPARATOR);

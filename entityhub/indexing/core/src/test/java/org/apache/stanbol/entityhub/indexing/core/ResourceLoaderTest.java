@@ -16,6 +16,11 @@
 */
 package org.apache.stanbol.entityhub.indexing.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +37,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.junit.Assert.*;
 
 public class ResourceLoaderTest {
     /**
@@ -111,6 +115,13 @@ public class ResourceLoaderTest {
         importer.checkAllProcessed();
         
     }
+    
+    @Test
+    public void testFailOnError(){
+    	assertTrue(isFailedOnError(true));
+    	assertFalse(isFailedOnError(false));	
+    }
+    
     @Test
     public void testFolderWithoutProcessingArchives(){
         String folder = rootDir+TEST_FOLDER_NAME;
@@ -189,5 +200,20 @@ public class ResourceLoaderTest {
         assertEquals(new HashSet<String>(Arrays.asList(
             folder+"ignoreFileInFolder.txt")), 
             loader.getResources(ResourceState.IGNORED));
+    }
+    
+    private boolean isFailedOnError(boolean failOnError){
+		String folder = rootDir + TEST_FOLDER_NAME;
+		boolean failed = false;
+		DummyResourceImporter importer = new DummyResourceImporter(
+				Arrays.asList(folder + "errorFileInFolder.txt"));
+		ResourceLoader loader = new ResourceLoader(importer, false, failOnError);
+		loader.addResource(new File(folder, "errorFileInFolder.txt"));
+		try {
+			loader.loadResources();
+		} catch (IllegalStateException ex) {
+			failed = true;
+		}
+		return failed;
     }
 }

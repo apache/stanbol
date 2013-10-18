@@ -229,6 +229,20 @@ the Bundle described above. To install the data you need copy this file to the
 {name} denotes to the value you configured for the "name" property within the
 "indexing.properties" file.
 
+### A note about blank nodes
 
+If your input data sets contain large numbers of blank nodes, you may find that
+you have problems running out of heap space during indexing. This is because Jena
+(like many semantic stores) keeps a store of blank nodes in core memory while 
+importing. Keeping in mind that EntityHub does not support the use of blank nodes,
+there is a means of indexing such data sets nonetheless. You can convert them to
+named nodes and then index. There is a convenient tool packaged with Stanbol for
+this purpose, called "Urify" (org.apache.stanbol.entityhub.indexing.Urify).
+It is available in the runnable JAR file built by this indexer. To use it, put that
+JAR on your classpath, and you can execute Urify, giving it a list of files to process.
+Use the "-h" or "--help" flag to see options for Urify:
 
-
+    java -Xmx1024m -cp org.apache.stanbol.entityhub.indexing.genericrdf-*.jar \
+    org.apache.stanbol.entityhub.indexing.Urify --help
+    
+    

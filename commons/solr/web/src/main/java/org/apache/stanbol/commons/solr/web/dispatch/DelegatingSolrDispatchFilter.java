@@ -16,18 +16,14 @@
 */
 package org.apache.stanbol.commons.solr.web.dispatch;
 
-import java.io.IOException;
 
 import javax.servlet.Filter;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.solr.core.CoreContainer;
-import org.apache.solr.core.CoreContainer.Initializer;
 import org.apache.solr.servlet.SolrDispatchFilter;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 
 /**
  * A {@link SolrDispatchFilter} that does not create a new {@link CoreContainer}
@@ -50,27 +46,6 @@ public abstract class DelegatingSolrDispatchFilter extends org.apache.solr.servl
      * multiple calls to init)
      */
     private CoreContainer delegate = null;
-    /**
-     * {@link Initializer} implementation that calls the abstract
-     * {@link #getCoreContainerReference()} method to lookup the {@link ServiceReference}
-     * to the {@link CoreContainer} used for this dispatch filter
-     * 
-     */
-    private Initializer initialiser = new Initializer() {
-        @Override
-        public CoreContainer initialize() {
-            //support multiple calls
-            if(delegate != null){
-                ungetCoreContainer(); //cleanup current
-            }
-            delegate = getCoreContainer();
-            if(delegate != null){
-                return delegate;
-            } else {
-                throw new IllegalStateException("CoreContainer currently not available");
-            }
-        }
-    };
     
     
     /**
@@ -79,16 +54,16 @@ public abstract class DelegatingSolrDispatchFilter extends org.apache.solr.servl
     public DelegatingSolrDispatchFilter(){
         super();
     }
-
     @Override
-    protected Initializer createInitializer() {
-        //we do not need to initialise a new CoreContaine. Just get the service
-        //via the OSGI environment
-        return initialiser;
+    protected final CoreContainer createCoreContainer() {
+       if(delegate == null){
+           delegate = getCoreContainer();
+       }
+       return delegate;
     }
     
     @Override
-    public void destroy() {
+    public final void destroy() {
         //we need NOT do shutdown the CoreContainer! Just release the
         //OSGI service!
         try {

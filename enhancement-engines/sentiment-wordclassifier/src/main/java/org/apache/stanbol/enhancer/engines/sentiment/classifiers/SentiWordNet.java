@@ -39,6 +39,8 @@ import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileListener
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileTracker;
 import org.apache.stanbol.enhancer.engines.sentiment.api.LexicalCategoryClassifier;
 import org.apache.stanbol.enhancer.engines.sentiment.api.SentimentClassifier;
+import org.apache.stanbol.enhancer.engines.sentiment.util.WordSentimentDictionary;
+import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -55,6 +57,7 @@ import org.slf4j.LoggerFactory;
  * settings.
  * <p/>
  * @author Sebastian Schaffert
+ * @autor Rupert Westenthaler
  */
 @Component(immediate = true)
 public class SentiWordNet {
@@ -164,16 +167,14 @@ public class SentiWordNet {
      */
     public static class SentiWordNetClassifierEN extends LexicalCategoryClassifier implements SentimentClassifier {
 
-        private ReadWriteLock lock = new ReentrantReadWriteLock();
-        private Map<String,Double> wordMap = new TreeMap<String,Double>();
-
+        WordSentimentDictionary dict = new WordSentimentDictionary(Locale.ENGLISH);
+        
         private org.apache.lucene.analysis.en.EnglishMinimalStemmer stemmer = new EnglishMinimalStemmer();
 
         protected SentiWordNetClassifierEN() {}
 
         protected void parseSentiWordNet(InputStream is) throws IOException {
             BufferedReader in = new BufferedReader(new InputStreamReader(is));
-            lock.writeLock().lock();
             try {
                 // read line by line:
                 // - lines starting with # are ignored
@@ -184,6 +185,7 @@ public class SentiWordNet {
                         String[] components = line.split("\t");
     
                         try {
+                            LexicalCategory cat = parseLexCat(components[0]);
                             double posScore = Double.parseDouble(components[2]);
                             double negScore = Double.parseDouble(components[3]);
                             String synonyms = components[4];
@@ -196,33 +198,35 @@ public class SentiWordNet {
                                     // part
                                     String[] synonym = synonymToken.split("#");
                                     String stemmed = getStemmed(synonym[0]);
-                                    Double existing = wordMap.put(stemmed.toLowerCase(Locale.ENGLISH), score);
-                                    if(existing != null){
-                                        log.warn("Multiple Sentiment Scores [{},{}] for word {}",
-                                            new Object[]{existing, score, stemmed.toLowerCase(Locale.ENGLISH)});
-                                    }
+                                    dict.updateSentiment(cat, stemmed, score);
                                 }
                             }
     
-                        } catch (Exception ex) {
+                        } catch (RuntimeException ex) {
                             log.warn("could not parse SentiWordNet line '{}': {}", line, ex.getMessage());
                         }
                     }
                 }
             } finally {
-                lock.writeLock().unlock();
                 IOUtils.closeQuietly(in);
             }
         }
 
-        public int getWordCount() {
-            lock.readLock().lock();
-            try {
-                return wordMap.size();
-            } finally {
-                lock.readLock().unlock();
+        private LexicalCategory parseLexCat(String val) {
+            switch (val.charAt(0)) {
+                case 'a':
+                    return LexicalCategory.Adjective;
+                case 'v':
+                    return LexicalCategory.Verb;
+                case 'n':
+                    return LexicalCategory.Noun;
+                case 'r':
+                    return LexicalCategory.Adverb;
+                default:
+                    throw new IllegalStateException("Uncown POS tag '"+val+"'!");
             }
         }
+
 
         /**
          * Given the word passed as argument, return a value between -1 and 1 indicating its sentiment value
@@ -232,15 +236,9 @@ public class SentiWordNet {
          * @return
          */
         @Override
-        public double classifyWord(String word) {
-            String stemmed = getStemmed(word);
-            lock.readLock().lock();
-            try {
-                Double sentiment = wordMap.get(stemmed.toLowerCase(Locale.ENGLISH));
-                return sentiment != null ? sentiment.doubleValue() : 0.0;
-            } finally {
-                lock.readLock().unlock();
-            }
+        public double classifyWord(LexicalCategory cat, String word) {
+            Double sentiment = dict.getSentiment(cat, getStemmed(word));
+            return sentiment != null ? sentiment.doubleValue() : 0.0;
         }
 
         private String getStemmed(String word) {
@@ -253,12 +251,7 @@ public class SentiWordNet {
         }
         
         protected void close(){
-            lock.writeLock().lock();
-            try {
-                wordMap.clear();
-            } finally {
-                lock.writeLock().unlock();
-            }
+            dict.clear();
         }
     }
 }

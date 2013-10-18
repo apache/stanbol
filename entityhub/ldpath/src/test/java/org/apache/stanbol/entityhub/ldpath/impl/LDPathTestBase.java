@@ -57,7 +57,7 @@ public abstract class LDPathTestBase {
      */
     public static final String TEST_YARD_ID = "dbpedia";
     public static final String TEST_SOLR_CORE_NAME = "dbpedia";
-    public static final String TEST_SOLR_CORE_CONFIGURATION = "dbpedia_43k";
+    public static final String TEST_SOLR_CORE_CONFIGURATION = "dbpedia_26k.solrindex.bz2";
     protected static final String TEST_INDEX_REL_PATH = File.separatorChar + "target" + File.separatorChar
                                                         + ManagedSolrServer.DEFAULT_SOLR_DATA_DIR;
 

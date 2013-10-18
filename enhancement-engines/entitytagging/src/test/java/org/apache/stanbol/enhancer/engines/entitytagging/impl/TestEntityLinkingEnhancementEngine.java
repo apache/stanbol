@@ -63,6 +63,7 @@ import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper;
+import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -78,29 +79,30 @@ public class TestEntityLinkingEnhancementEngine {
     
     private static final Logger log = LoggerFactory.getLogger(TestEntityLinkingEnhancementEngine.class);
     
+    public static final String CONTEXT = "In March 2009, Condoleezza Rice returned "
+            +"to Stanford University near Palo Alto.";
+    
+    //The old text replaced by STANBOL-1163
+//    public static final String CONTEXT = "Dr. Patrick Marshall (1869 - November 1950) was a"
+//        + " geologist who lived in New Zealand and worked at the University of Otago.";
     /**
-     * The context for the tests (same as in TestOpenNLPEnhancementEngine)
+     * The person for the tests 
      */
-    public static final String CONTEXT = "Dr. Patrick Marshall (1869 - November 1950) was a"
-        + " geologist who lived in New Zealand and worked at the University of Otago.";
-    /**
-     * The person for the tests (same as in TestOpenNLPEnhancementEngine)
-     */
-    public static final String PERSON = "Patrick Marshall";
+    public static final String PERSON = ", Condoleezza Rice";
     /**
      * The organisation for the tests (same as in TestOpenNLPEnhancementEngine)
      */
-    public static final String ORGANISATION ="University of Otago";
+    public static final String ORGANISATION ="Stanford University";
     /**
      * The place for the tests (same as in TestOpenNLPEnhancementEngine)
      */
-    public static final String PLACE = "New Zealand";
+    public static final String PLACE = "Palo Alto";
 
     private static final ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
     
-    static NamedEntityTaggingEngine entityLinkingEngine;
-
     private static String userDir = System.getProperty("user.dir");
+    
+    private static Entityhub entityhub;
     
     @BeforeClass
     public static void setUpServices() throws IOException {
@@ -114,27 +116,7 @@ public class TestEntityLinkingEnhancementEngine {
         String testRootDir = testFiles.getCanonicalPath();
         log.info("Test 'user.dir' folder {}",testRootDir);
         System.getProperties().setProperty("user.dir", testRootDir);
-        entityLinkingEngine = new NamedEntityTaggingEngine();
-        //instead of calling activate we directly set the required fields
-        //we need a data source for linking
-        entityLinkingEngine.entityhub = new MockEntityhub();
-        entityLinkingEngine.personState = true;
-        entityLinkingEngine.personType = OntologicalClasses.DBPEDIA_PERSON.getUnicodeString();
-        entityLinkingEngine.orgState = true;
-        entityLinkingEngine.orgType = OntologicalClasses.DBPEDIA_ORGANISATION.getUnicodeString();
-        entityLinkingEngine.placeState = true;
-        entityLinkingEngine.placeType = OntologicalClasses.DBPEDIA_PLACE.getUnicodeString();
-        entityLinkingEngine.nameField = Properties.RDFS_LABEL.getUnicodeString();
-        //not implemented
-        entityLinkingEngine.dereferenceEntities = false;
-    }
-
-    @Before
-    public void bindServices() throws IOException {
-    }
-
-    @After
-    public void unbindServices() {
+        entityhub = new MockEntityhub();
     }
 
     @AfterClass
@@ -142,8 +124,39 @@ public class TestEntityLinkingEnhancementEngine {
         System.getProperties().setProperty("user.dir", userDir);
     }
 
-    public static ContentItem getContentItem(final String id, final String text) throws IOException {
-        return ciFactory.createContentItem(new UriRef(id),new StringSource(text));
+    protected NamedEntityTaggingEngine initEngine(boolean person, boolean organisation, boolean place){
+        NamedEntityTaggingEngine entityLinkingEngine = new NamedEntityTaggingEngine();
+        //instead of calling activate we directly set the required fields
+        //we need a data source for linking
+        entityLinkingEngine.entityhub = entityhub;
+        entityLinkingEngine.personState = person;
+        entityLinkingEngine.personType = OntologicalClasses.DBPEDIA_PERSON.getUnicodeString();
+        entityLinkingEngine.orgState = organisation;
+        entityLinkingEngine.orgType = OntologicalClasses.DBPEDIA_ORGANISATION.getUnicodeString();
+        entityLinkingEngine.placeState = place;
+        entityLinkingEngine.placeType = OntologicalClasses.DBPEDIA_PLACE.getUnicodeString();
+        entityLinkingEngine.nameField = Properties.RDFS_LABEL.getUnicodeString();
+        //not implemented
+        entityLinkingEngine.dereferenceEntities = false;
+        return entityLinkingEngine;
+    }
+    /**
+     * Creates and initialises a new content item using {@link #CONTEXT} as
+     * content and 
+     * @return
+     * @throws IOException
+     */
+    private ContentItem initContentItem() throws IOException {
+        ContentItem ci = ciFactory.createContentItem(
+            new UriRef("urn:iks-project:enhancer:text:content-item:person"),
+            new StringSource(CONTEXT));
+        //add three text annotations to be consumed by this test
+        getTextAnnotation(ci, PERSON, CONTEXT, DBPEDIA_PERSON);
+        getTextAnnotation(ci, ORGANISATION, CONTEXT, DBPEDIA_ORGANISATION);
+        getTextAnnotation(ci, PLACE, CONTEXT, DBPEDIA_PLACE);
+        //add the language
+        ci.getMetadata().add(new TripleImpl(ci.getUri(), Properties.DC_LANGUAGE, new PlainLiteralImpl("en")));
+        return ci;
     }
 
     public static void getTextAnnotation(ContentItem ci, String name,String context,UriRef type){
@@ -174,20 +187,48 @@ public class TestEntityLinkingEnhancementEngine {
     @Test
     public void testEntityLinkingEnhancementEngine() throws Exception{
         //create a content item
-        ContentItem ci = getContentItem("urn:iks-project:enhancer:text:content-item:person", CONTEXT);
-        //add three text annotations to be consumed by this test
-        getTextAnnotation(ci, PERSON, CONTEXT, DBPEDIA_PERSON);
-        getTextAnnotation(ci, ORGANISATION, CONTEXT, DBPEDIA_ORGANISATION);
-        getTextAnnotation(ci, PLACE, CONTEXT, DBPEDIA_PLACE);
-        //add the language
-        ci.getMetadata().add(new TripleImpl(ci.getUri(), Properties.DC_LANGUAGE, new PlainLiteralImpl("en")));
+        ContentItem ci = initContentItem();
+        NamedEntityTaggingEngine entityLinkingEngine = initEngine(true, true, true);
         //perform the computation of the enhancements
         entityLinkingEngine.computeEnhancements(ci);
-        int entityAnnotationCount = validateAllEntityAnnotations(ci);
-        assertEquals(4, entityAnnotationCount);
+        int entityAnnotationCount = validateAllEntityAnnotations(entityLinkingEngine, ci);
+        assertEquals(3, entityAnnotationCount);
+    }
+
+    @Test
+    public void testPersonLinking() throws Exception{
+        //create a content item
+        ContentItem ci = initContentItem();
+        NamedEntityTaggingEngine entityLinkingEngine = initEngine(true, false, false);
+        //perform the computation of the enhancements
+        entityLinkingEngine.computeEnhancements(ci);
+        int entityAnnotationCount = validateAllEntityAnnotations(entityLinkingEngine, ci);
+        assertEquals(1, entityAnnotationCount);
+    }
+
+    @Test
+    public void testOrganizationLinking() throws Exception{
+        //create a content item
+        ContentItem ci = initContentItem();
+        NamedEntityTaggingEngine entityLinkingEngine = initEngine(false, true, false);
+        //perform the computation of the enhancements
+        entityLinkingEngine.computeEnhancements(ci);
+        int entityAnnotationCount = validateAllEntityAnnotations(entityLinkingEngine, ci);
+        assertEquals(1, entityAnnotationCount);
     }
     
-    private static int validateAllEntityAnnotations(ContentItem ci){
+    @Test
+    public void testLocationLinking() throws Exception{
+        //create a content item
+        ContentItem ci = initContentItem();
+        NamedEntityTaggingEngine entityLinkingEngine = initEngine(false, false, true);
+        //perform the computation of the enhancements
+        entityLinkingEngine.computeEnhancements(ci);
+        int entityAnnotationCount = validateAllEntityAnnotations(entityLinkingEngine, ci);
+        assertEquals(1, entityAnnotationCount);
+    }
+
+    private static int validateAllEntityAnnotations(NamedEntityTaggingEngine entityLinkingEngine, ContentItem ci){
         Map<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
         expectedValues.put(ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(DC_CREATOR,LiteralFactory.getInstance().createTypedLiteral(

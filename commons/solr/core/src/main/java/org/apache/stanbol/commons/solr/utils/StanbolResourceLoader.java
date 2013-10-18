@@ -24,8 +24,11 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.lucene.analysis.util.ResourceLoader;
+import org.apache.lucene.analysis.util.ResourceLoaderAware;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.core.SolrInfoMBean;
 import org.apache.solr.core.SolrResourceLoader;
+import org.apache.solr.util.plugin.SolrCoreAware;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,38 +116,39 @@ public class StanbolResourceLoader implements ResourceLoader {
         }
         return lines;
     }
-
     @Override
-    public <T> T newInstance(String cname, Class<T> expectedType) {
+    public <T> Class<? extends T> findClass(String cname, Class<T> expectedType) {
         String parentMessage = null;
+        Class<? extends T> clazz = null;
         if(parent != null){
             try {
-                return parent.newInstance(cname, expectedType);
+                clazz = parent.findClass(cname, expectedType);
             } catch (SecurityException e) { //do not catch security related exceptions
                 throw e;
             } catch (RuntimeException e) {
                 parentMessage = e.getMessage();
             }
         }
-        Class<T> clazz = null;
-        // first try cname == full name
-        try {
-            clazz = (Class<T>) classloader.loadClass(cname);
-        } catch (Exception e) {
-            String newName = cname;
-            if (newName.startsWith(project)) {
-                newName = cname.substring(project.length() + 1);
-            }
-            for (String subpackage : packages) {
-                try {
-                    String name = base + '.' + subpackage + newName;
-                    log.trace("Trying class name " + name);
-                    clazz = (Class<T>) classloader.loadClass(name);
-                    break;
-                } catch (Exception e1) {
-                    // ignore... assume first exception is best.
+        if(clazz == null){
+            try {
+                clazz = (Class<T>) classloader.loadClass(cname);
+            } catch (Exception e) {
+                String newName = cname;
+                if (newName.startsWith(project)) {
+                    newName = cname.substring(project.length() + 1);
+                }
+                for (String subpackage : packages) {
+                    try {
+                        String name = base + '.' + subpackage + newName;
+                        log.trace("Trying class name " + name);
+                        clazz = (Class<T>) classloader.loadClass(name);
+                        break;
+                    } catch (Exception e1) {
+                        // ignore... assume first exception is best.
+                    }
                 }
             }
+            
         }
         if(clazz == null){
             throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, 
@@ -153,12 +157,19 @@ public class StanbolResourceLoader implements ResourceLoader {
                         + "via Classloader "+classloader);
 
         }
+        return clazz;
+    }
+
+    @Override
+    public <T> T newInstance(String cname, Class<T> expectedType) {
+        Class<? extends T> clazz = findClass(cname, expectedType);
         try {
           return clazz.newInstance();
         } catch (Exception e) {
-            throw new SolrException( SolrException.ErrorCode.SERVER_ERROR,
-                "Error instantiating class: '" + clazz.getName()+"'", e);
+          throw new SolrException( SolrException.ErrorCode.SERVER_ERROR,
+              "Error instantiating class: '" + clazz.getName()+"'", e);
         }
+        
 
     }
 }

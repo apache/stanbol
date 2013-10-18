@@ -16,10 +16,9 @@
  */
 package org.apache.stanbol.enhancer.web.topic.resource;
 
-import static javax.ws.rs.core.MediaType.TEXT_HTML;
-
 import java.util.ArrayList;
 import java.util.List;
+import static javax.ws.rs.core.MediaType.TEXT_HTML;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
@@ -37,7 +36,7 @@ import org.apache.felix.scr.annotations.Service;
 
 import org.apache.stanbol.commons.web.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.enhancer.topic.TopicClassifier;
+import org.apache.stanbol.enhancer.topic.api.TopicClassifier;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;

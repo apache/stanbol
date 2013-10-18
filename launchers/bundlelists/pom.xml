@@ -70,10 +70,10 @@
     <module>enhancer</module>
     <module>entityhub</module>
  <!--   <module>cmsadapter</module>
-    <module>contenthub</module>
+    <module>contenthub</module> -->
     <module>ontologymanager</module>
     <module>reasoners</module>
-    <module>rules</module> -->
+    <module>rules</module> 
 
     <!-- Specific features -->
     <module>security</module>

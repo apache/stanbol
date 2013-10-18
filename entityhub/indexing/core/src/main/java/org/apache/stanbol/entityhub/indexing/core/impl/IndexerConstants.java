@@ -81,8 +81,8 @@ public interface IndexerConstants {
      */
     //ignore the Type safety because the item is of
     //INDEXING_COMPLETED_QUEUE_ITEM is anyway null
-    @SuppressWarnings("unchecked")
-    QueueItem INDEXING_COMPLETED_QUEUE_ITEM = new QueueItem(null);
+    @SuppressWarnings("rawtypes")
+    QueueItem INDEXING_COMPLETED_QUEUE_ITEM = new QueueItem<Void>(null);
 
     /**
      * The sequence number for {@link IndexingDaemon}s that read from the 

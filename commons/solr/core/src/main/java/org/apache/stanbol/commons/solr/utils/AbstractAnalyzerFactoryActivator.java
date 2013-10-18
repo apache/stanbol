@@ -1,3 +1,19 @@
+/*
+* Licensed to the Apache Software Foundation (ASF) under one or more
+* contributor license agreements.  See the NOTICE file distributed with
+* this work for additional information regarding copyright ownership.
+* The ASF licenses this file to You under the Apache License, Version 2.0
+* (the "License"); you may not use this file except in compliance with
+* the License.  You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 package org.apache.stanbol.commons.solr.utils;
 
 import java.util.ArrayList;
@@ -130,28 +146,33 @@ public abstract class AbstractAnalyzerFactoryActivator implements BundleActivato
               throw new ServiceConfigurationError("The class name " + service.getName() +
                 " has wrong suffix, allowed are: " + Arrays.toString(suffixes));
             }
-            AbstractAnalysisFactory factory;
-            try {
-                factory = service.newInstance();
-            } catch (Exception e) {
-                throw new IllegalArgumentException("SPI class of type "+ type.getName()
-                    + " with name '"+name+"' cannot be instantiated. This is likely "
-                    + "due to a misconfiguration of the java class '" 
-                    + service.getName() + "': ", e);
-            }
+            //as if Solr 4.4. we can no longer create an instance of the Factories
+            //as constructors not take the Map<String,String> with the configuration
+            //(we do not have any configuration).
+            //because of that we register the new RegisteredSolrAnalyzerFactory class
+            //instead
+//            AbstractAnalysisFactory factory;
+//            try {
+//                factory = service.newInstance();
+//            } catch (Exception e) {
+//                throw new IllegalArgumentException("SPI class of type "+ type.getName()
+//                    + " with name '"+name+"' cannot be instantiated. This is likely "
+//                    + "due to a misconfiguration of the java class '" 
+//                    + service.getName() + "': ", e);
+//            }
             Dictionary<String,Object> prop = new Hashtable<String,Object>();
-            prop.put(SolrConstants.PROPERTY_ANALYZER_FACTORY_NAME,name);
-            Version version = factory.getLuceneMatchVersion();
-            if(version != null){
-                prop.put(SolrConstants.PROPERTY_LUCENE_MATCH_VERSION, version.name());
-            }
+            prop.put(SolrConstants.PROPERTY_ANALYZER_FACTORY_NAME, name);
+            prop.put(SolrConstants.PROPERTY_ANALYZER_FACTORY_IMPL, service.getName());
+            prop.put(SolrConstants.PROPERTY_ANALYZER_FACTORY_TYPE, type.getName());
             //use 0 - bundle id as service ranking. This ensures that if two
             //factories do use the same name the one provided by the bundle with the
             //lower id is used by default
             int serviceRanking = 0 - (int)bc.getBundle().getBundleId();
             prop.put(Constants.SERVICE_RANKING, serviceRanking);
             log.debug(" ... {} (name={})",service.getName(),name);
-            registrations.add(bc.registerService(type.getName(), factory, prop));
+            //register the AnalyzerFactory
+            registrations.add(bc.registerService(RegisteredSolrAnalyzerFactory.class.getName(), 
+                new RegisteredSolrAnalyzerFactory<S>(name, type, service), prop));
         }
         return registrations;
     }

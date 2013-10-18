@@ -102,6 +102,12 @@
             <exclude>src/test/resources/indexing/resources/incoming_links.txt</exclude>
 
             <exclude>dbpedia-3.8/copy_en_values.ldpath</exclude>
+
+            <!-- Configs -->
+            <exclude>src/main/resources/indexing/config/**/*.ldpath</exclude>
+            <exclude>src/main/resources/indexing/config/**/*.mappings</exclude>
+            <exclude>src/main/resources/indexing/config/**/*.txt</exclude>
+            <exclude>src/main/resources/indexing/config/**/*.config</exclude>
           </excludes>
         </configuration>
       </plugin>

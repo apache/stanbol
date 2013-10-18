@@ -47,6 +47,7 @@ import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYard;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -75,6 +76,9 @@ public class SolrYardIndexingDestinationTest {
             "schema.xml",
             "solrconfig.xml",
             "segments.gen");
+    
+    public static final Collection<String> UNEXPECTED_INDEX_ARCHIVE_FILE_NAMES =
+            Arrays.asList("write.lock"); //excluded with STANBOL1176
     
     private static final Logger log = LoggerFactory.getLogger(SolrYardIndexingDestinationTest.class);
     private static final String CONFIG_ROOT = "testConfigs";
@@ -211,9 +215,12 @@ public class SolrYardIndexingDestinationTest {
             ZipEntry entry = entries.nextElement();
             //the name of the index MUST be the root folder within the Archive!
             assertTrue(entry.getName().startsWith(config.getName()));
-            if(expected.remove(FilenameUtils.getName(entry.getName()))){
+            String name = FilenameUtils.getName(entry.getName());
+            if(expected.remove(name)){
                 log.info("found expected Entry '{}'",entry.getName());
             }
+            Assert.assertFalse("found unexpected Entry '"+entry.getName()+"' in "
+                + "SolrIndexArchive", UNEXPECTED_INDEX_ARCHIVE_FILE_NAMES.contains(name));
         }
         assertTrue("missing Files in index archive: "+expected,expected.isEmpty());
         

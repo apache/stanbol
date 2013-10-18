@@ -76,7 +76,7 @@ public class StandaloneEmbeddedSolrServerProvider {
      * by using the configName on the ManagedSolrServer referenced by 
      * {@link IndexReference#getServer()}
      */
-    public SolrServer getSolrServer(IndexReference indexRef, String configName){
+    public EmbeddedSolrServer getSolrServer(IndexReference indexRef, String configName){
         if(indexRef == null){
             throw new IllegalArgumentException("The parsed InexReference MUST NOT be NULL!");
         }

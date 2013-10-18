@@ -21,13 +21,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixProvider;
-import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.entityhub.indexing.core.EntityProcessor;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
@@ -127,7 +124,8 @@ public class FieldValueFilter implements EntityProcessor{
     /**
      * @param value
      */
-    private void parseFilterConfig(Object value) {
+    @SuppressWarnings("unchecked")
+	private void parseFilterConfig(Object value) {
         Collection<String> values; 
         if(value instanceof String){
             values = Arrays.asList(value.toString().split(";"));

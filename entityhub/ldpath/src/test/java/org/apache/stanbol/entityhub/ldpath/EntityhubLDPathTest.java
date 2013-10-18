@@ -87,24 +87,27 @@ public class EntityhubLDPathTest extends LDPathTestBase {
             vf.createText("伦敦","zh")
             )));
         expected.put("comment", new HashSet<Text>(Arrays.asList(
-            vf.createText("London is the capital of England and the United Kingdom, " +
-            		"the largest metropolitan area in the United Kingdom and the " +
-            		"largest urban zone in the European Union by most measures. " +
-            		"London has been a major settlement for two millennia, its " +
-            		"history going back to its founding by the Romans, who called " +
-            		"it Londinium. London's core, the ancient City of London, " +
-            		"largely retains its square-mile mediaeval boundaries.","en"))));
+            vf.createText("London Listen/ˈlʌndən/ is the capital city of England" +
+            		" and the United Kingdom, the largest metropolitan area in the" +
+            		" United Kingdom, and the largest urban zone in the European " +
+            		"Union by most measures. Located on the River Thames, London " +
+            		"has been a major settlement for two millennia, its history " +
+            		"going back to its founding by the Romans, who named it " +
+            		"Londinium. London's ancient core, the City of London, largely " +
+            		"retains its square-mile mediaeval boundaries.","en"))));
         // NOTE: LDPath uses String to represent anyUri
         expected.put("categories", new HashSet<Reference>(Arrays.asList(
             vf.createReference("http://dbpedia.org/resource/Category:London"),
             vf.createReference("http://dbpedia.org/resource/Category:British_capitals"),
             vf.createReference("http://dbpedia.org/resource/Category:Populated_places_established_in_the_1st_century"),
             vf.createReference("http://dbpedia.org/resource/Category:Staple_ports"),
-            vf.createReference("http://dbpedia.org/resource/Category:Articles_including_recorded_pronunciations_%28UK_English%29"),
+            vf.createReference("http://dbpedia.org/resource/Category:Articles_including_recorded_pronunciations_(UK_English)"),
             vf.createReference("http://dbpedia.org/resource/Category:Capitals_in_Europe"),
             vf.createReference("http://dbpedia.org/resource/Category:Host_cities_of_the_Commonwealth_Games"),
             vf.createReference("http://dbpedia.org/resource/Category:Host_cities_of_the_Summer_Olympic_Games"),
-            vf.createReference("http://dbpedia.org/resource/Category:Port_cities_and_towns_in_the_United_Kingdom")
+            vf.createReference("http://dbpedia.org/resource/Category:Port_cities_and_towns_in_the_United_Kingdom"),
+            vf.createReference("http://dbpedia.org/resource/Category:Arthurian_locations"),
+            vf.createReference("http://dbpedia.org/resource/Category:Robin_Hood_locations")
             )));
         expected.put("type", new HashSet<Reference>(Arrays.asList(
             vf.createReference("http://www.w3.org/2002/07/owl#Thing"),

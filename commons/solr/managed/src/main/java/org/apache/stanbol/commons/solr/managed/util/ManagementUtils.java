@@ -23,6 +23,10 @@ import java.io.InputStream;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
+import org.apache.commons.compress.compressors.CompressorException;
+import org.apache.commons.compress.compressors.CompressorStreamFactory;
+import org.apache.commons.compress.compressors.FileNameUtil;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.solr.core.SolrCore;
 import org.apache.stanbol.commons.solr.SolrConstants;
 import org.apache.stanbol.commons.solr.managed.IndexMetadata;
@@ -90,6 +94,10 @@ public class ManagementUtils {
      */
     public static final  ArchiveStreamFactory archiveStreamFactory = new ArchiveStreamFactory();
     /**
+     * An instance of the compressor stream factory
+     */
+    public static final CompressorStreamFactory compressorStreamFactory = new CompressorStreamFactory();
+    /**
      * Tries to create an {@link ArchiveInputStream} based on the parsed {@link InputStream}.
      * First the provided resource name is used to detect the type of the archive.
      * if that does not work, or the parsed resource name is <code>null</code> the
@@ -104,14 +112,38 @@ public class ManagementUtils {
         if(is == null){
             return null;
         }
-        if(resourceName != null){
+        String extension = resourceName == null ? null : 
+            FilenameUtils.getExtension(resourceName);
+        if(!is.markSupported()){
+            is = new BufferedInputStream(is);
+        }
+        InputStream as;
+        if(!"zip".equalsIgnoreCase(extension)){ //if not a zip file (the default)
+            //we need to first check if this is a compressed stream
             try {
-                return archiveStreamFactory.createArchiveInputStream(resourceName, is);
+                as =  compressorStreamFactory.createCompressorInputStream(extension,is);
+                extension = "tar"; // assume tar archives
+            } catch (CompressorException e) {
+                try {
+                    as = compressorStreamFactory.createCompressorInputStream(is);
+                    extension = "tar"; // assume tar archives
+                } catch (CompressorException e1) {
+                    //not a compression stream?
+                    as = is;
+                }
+            }
+        } else { //zip ... this is already an archive stream
+            as = is;
+        }
+        if(extension != null){
+            try {
+                return archiveStreamFactory.createArchiveInputStream(extension, as);
             } catch (ArchiveException e) {
                 //ignore
             }
         }
-        return archiveStreamFactory.createArchiveInputStream(new BufferedInputStream(is));
+        //try to detect
+        return archiveStreamFactory.createArchiveInputStream(is);
     }
     /**
      * Getter for the name of the index within the current 

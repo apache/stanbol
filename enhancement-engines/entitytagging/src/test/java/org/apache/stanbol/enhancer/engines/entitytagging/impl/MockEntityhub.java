@@ -54,11 +54,12 @@ class MockEntityhub implements Entityhub {
 
     private static final Logger log = LoggerFactory.getLogger(MockEntityhub.class);
     
+    public static final String TEST_SOLR_CORE_CONFIGURATION = "dbpedia_26k.solrindex.bz2";
     protected SolrYard yard;
     
     protected MockEntityhub(){
         SolrYardConfig config = new SolrYardConfig("dbpedia", "dbpedia");
-        config.setIndexConfigurationName("dbpedia_43k");//use dbpedia default data for initialisation
+        config.setIndexConfigurationName(TEST_SOLR_CORE_CONFIGURATION);
         config.setAllowInitialisation(true);
         IndexReference solrIndexRef = IndexReference.parse(config.getSolrServerLocation());
         SolrServer server = StandaloneEmbeddedSolrServerProvider.getInstance().getSolrServer(

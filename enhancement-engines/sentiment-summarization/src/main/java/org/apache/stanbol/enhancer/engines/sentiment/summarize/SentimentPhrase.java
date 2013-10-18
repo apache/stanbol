@@ -1,3 +1,19 @@
+/*
+* Licensed to the Apache Software Foundation (ASF) under one or more
+* contributor license agreements.  See the NOTICE file distributed with
+* this work for additional information regarding copyright ownership.
+* The ASF licenses this file to You under the Apache License, Version 2.0
+* (the "License"); you may not use this file except in compliance with
+* the License.  You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 package org.apache.stanbol.enhancer.engines.sentiment.summarize;
 
 import java.util.ArrayList;
@@ -9,7 +25,8 @@ import org.apache.stanbol.enhancer.nlp.model.Sentence;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 
 /**
- * Used to collect {@link Sentiment}s that refer the same 
+ * Represents phrases in a sentence that do hold a Sentiment value.
+ * Phrases are defined by collecting {@link Sentiment}s that refer the same 
  * {@link Sentiment#getAboutness()}
  * @author Rupert Westenthaler
  */
@@ -32,7 +49,10 @@ public class SentimentPhrase {
     public SentimentPhrase(Sentiment sentiment) {
         addSentiment(sentiment);
     }
-
+    /**
+     * Adds a Sentiment to the Phrase
+     * @param sentiment the sentiment to add
+     */
     public void addSentiment(Sentiment sentiment){
         sentiments.add(sentiment);
         nouns.addAll(sentiment.getAboutness());
@@ -73,9 +93,13 @@ public class SentimentPhrase {
         }
         return __sentiment[2];
     }
-    
+    /**
+     * The Sentence containing this phrase or <code>null</code> if no
+     * {@link Sentiment} was yet added
+     * @return the sentence
+     */
     public Sentence getSentence(){
-        return sentiments.get(0).getSentence();
+        return sentiments.isEmpty() ? null : sentiments.get(0).getSentence();
     }
     
     private void summarizeSentimentValues(){

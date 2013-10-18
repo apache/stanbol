@@ -61,11 +61,14 @@
     <module>generic/test</module>
     <module>generic/core</module>
     <module>model/clerezza</module>
+    <module>model/sesame</module>
+    <module>query/sparql</module>
     <module>query/clerezza</module>
     <module>site/linkeddata</module>
     <module>site/managed</module>
     <module>yard/clerezza</module>
     <module>yard/solr</module>
+    <module>yard/sesame</module>
     <module>jersey</module>
     <module>ldpath</module>
 
@@ -136,6 +139,7 @@
                 <exclude>**/*.tsv</exclude>
                 <exclude>**/*.sem</exclude>
                 <exclude>**/*.ldpath</exclude>
+                <exclude>**/*.mappings</exclude>
 
                 <!-- exclude test files --> 
                 <exclude>**/test/**/*.eml</exclude>
@@ -147,6 +151,7 @@
                 <exclude>**/test/**/*.rtf</exclude>
                 <exclude>**/test/**/*.rules</exclude>
                 <exclude>**/test/**/*.odt</exclude>
+                <exclude>**/test/**/*.config</exclude>
               </excludes>
             </configuration>
           </plugin>
