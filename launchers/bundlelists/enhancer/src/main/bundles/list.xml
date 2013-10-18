@@ -38,14 +38,27 @@
     <bundle> <!-- Apache Tika core (required by the LangId and TikaEngine) -->
         <groupId>org.apache.tika</groupId>
         <artifactId>tika-core</artifactId>
-        <version>1.2</version>
+        <version>1.4</version>
     </bundle>
   </startLevel>
   <startLevel level="27">
     <bundle> <!-- Apache Tika bundle (required by the TikaEngine) -->
         <groupId>org.apache.tika</groupId>
         <artifactId>tika-bundle</artifactId>
-        <version>1.2</version>
+        <version>1.4</version>
+    </bundle>
+  </startLevel>
+  <!-- 
+    TODO: tika-xmp:1.4 currently depends on com.adobe.xmp:xmpcore what is not
+    a bundle. Because of that it is currently embedded & exported by the Tika 
+    Engine. Because of that its start level is higher as that of the engine.
+    As soon as xmpcore is a bundle this should be changed back to 27.
+    -->
+  <startLevel level="31">
+    <bundle>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-xmp</artifactId>
+      <version>1.4</version>
     </bundle>
   </startLevel>
   <!-- Stanbol Enhancer infrastructure and required libraries -->
@@ -216,12 +229,11 @@
       <artifactId>org.apache.stanbol.enhancer.engines.sentiment.wordclassifier</artifactId>
       <version>0.10.1-SNAPSHOT</version>
     </bundle>
-    <!-- NOT YET READY FOR DEFAULT CONFIG
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.sentiment.summarization</artifactId>
       <version>0.10.1-SNAPSHOT</version>
-    </bundle> -->
+    </bundle>
     
     <!-- Entity Extraction/Linking -->
     <bundle><!-- NER linking (depends on the Entityhub) -->
