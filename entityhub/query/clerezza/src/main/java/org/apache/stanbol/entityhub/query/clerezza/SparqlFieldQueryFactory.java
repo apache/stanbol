@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * @see org.apache.stanbol.entityhub.query.sparql.SparqlFieldQueryFactory
  */
 @Deprecated
-public final class SparqlFieldQueryFactory extends org.apache.stanbol.entityhub.query.sparql.SparqlFieldQuery {
+public final class SparqlFieldQueryFactory implements FieldQueryFactory  {
     protected static final Logger logger = LoggerFactory.getLogger(SparqlFieldQueryFactory.class);
 
     private static SparqlFieldQueryFactory instance;
