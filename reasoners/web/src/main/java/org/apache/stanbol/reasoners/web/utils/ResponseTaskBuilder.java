@@ -17,7 +17,7 @@
 package org.apache.stanbol.reasoners.web.utils;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+//import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -34,7 +33,7 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.stanbol.commons.viewable.Viewable;
+import org.apache.stanbol.commons.web.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxOntologyFormat;
 import org.semanticweb.owlapi.io.StreamDocumentTarget;
@@ -56,12 +55,12 @@ import com.hp.hpl.jena.rdf.model.Model;
 public class ResponseTaskBuilder {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private UriInfo info;
-    private ServletContext context;
+//    private ServletContext context;
     private HttpHeaders headers;
     
-    public ResponseTaskBuilder(UriInfo info, ServletContext context, HttpHeaders headers) {
+    public ResponseTaskBuilder(UriInfo info, HttpHeaders headers) {
         this.info = info;
-        this.context = context;
+//        this.context = context;
         this.headers = headers;
     }
 
@@ -78,7 +77,7 @@ public class ResponseTaskBuilder {
     private Response build(){
         //return Response.ok().build();
         ResponseBuilder rb = Response.ok();
-        addCORSOrigin(context, rb, headers);
+//        addCORSOrigin(context, rb, headers);
         return rb.build();
     }
     
@@ -95,13 +94,11 @@ public class ResponseTaskBuilder {
             
             ResponseBuilder rb = Response.ok( 
                    new Viewable("result",
-                       new ReasoningPrettyResultResource(
-                           context, info, out)
-                       )
+                       new ReasoningPrettyResultResource(info, out))
                     );
             
             rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-            addCORSOrigin(context, rb, headers);
+//            addCORSOrigin(context, rb, headers);
             return rb.build();
         /*    return Response.ok(
                     new Viewable("result",
@@ -111,7 +108,7 @@ public class ResponseTaskBuilder {
         } else {
             //return Response.ok(object).build();
             ResponseBuilder rb = Response.ok( object );
-            addCORSOrigin(context, rb, headers);
+//            addCORSOrigin(context, rb, headers);
             return rb.build();
         }
     }
@@ -192,13 +189,12 @@ public class ResponseTaskBuilder {
                 
                 ResponseBuilder rb = Response.ok( 
                     new Viewable("result",
-                        new ReasoningPrettyResultResource(
-                            context, info, "The input is consistent :)")
+                        new ReasoningPrettyResultResource(info, "The input is consistent :)")
                         )
                      );
              
                 rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-                addCORSOrigin(context, rb, headers);
+//                addCORSOrigin(context, rb, headers);
                 return rb.build();
              
                /*return Response.ok(
@@ -211,8 +207,8 @@ public class ResponseTaskBuilder {
                 log.debug("The input is not consistent");
                 ResponseBuilder rb = Response.status(Status.CONFLICT);
                 rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-                addCORSOrigin(context, rb, headers);
-                rb.entity(new Viewable("result", new ReasoningPrettyResultResource(context, info,
+//                addCORSOrigin(context, rb, headers);
+                rb.entity(new Viewable("result", new ReasoningPrettyResultResource(info,
                         "The input is NOT consistent :(")));
                 return rb.build();
                 
@@ -229,14 +225,14 @@ public class ResponseTaskBuilder {
                 log.debug("The input is consistent");
                 //return Response.ok("The input is consistent :)").build();
                 ResponseBuilder rb = Response.ok("The input is consistent :)");
-                addCORSOrigin(context, rb, headers);
+//                addCORSOrigin(context, rb, headers);
                 return rb.build();
             } else {
                 log.debug("The input is not consistent");
                 //return Response.status(Status.CONFLICT).build();
                 
                 ResponseBuilder rb = Response.status(Status.CONFLICT);
-                addCORSOrigin(context, rb, headers);
+//                addCORSOrigin(context, rb, headers);
                 return rb.build();
             }
         }

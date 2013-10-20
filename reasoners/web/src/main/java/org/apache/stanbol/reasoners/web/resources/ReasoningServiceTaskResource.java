@@ -19,10 +19,7 @@ package org.apache.stanbol.reasoners.web.resources;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 
-import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,7 +29,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -42,31 +38,32 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Form;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.UriInfo;
 
+import org.apache.clerezza.jaxrs.utils.form.FormFile;
+import org.apache.clerezza.jaxrs.utils.form.MultiPartBody;
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.stanbol.commons.jobs.api.JobManager;
-import org.apache.stanbol.commons.viewable.Viewable;
-import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.stanbol.commons.web.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
 import org.apache.stanbol.ontologymanager.servicesapi.session.SessionManager;
 import org.apache.stanbol.reasoners.jena.JenaReasoningService;
 import org.apache.stanbol.reasoners.owlapi.OWLApiReasoningService;
-import org.apache.stanbol.reasoners.servicesapi.InconsistentInputException;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningService;
-import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceException;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputManager;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServicesManager;
 import org.apache.stanbol.reasoners.servicesapi.UnboundReasoningServiceException;
-import org.apache.stanbol.reasoners.servicesapi.UnsupportedTaskException;
 import org.apache.stanbol.reasoners.servicesapi.annotations.Documentation;
 import org.apache.stanbol.reasoners.web.input.impl.SimpleInputManager;
-import org.apache.stanbol.reasoners.web.input.provider.impl.FileInputProvider;
+import org.apache.stanbol.reasoners.web.input.provider.impl.ByteArrayInputProvider;
 import org.apache.stanbol.reasoners.web.input.provider.impl.OntologyManagerInputProvider;
 import org.apache.stanbol.reasoners.web.input.provider.impl.RecipeInputProvider;
 import org.apache.stanbol.reasoners.web.input.provider.impl.UrlInputProvider;
@@ -78,11 +75,6 @@ import org.apache.stanbol.rules.base.api.RuleStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.core.HttpContext;
-import com.sun.jersey.api.core.HttpRequestContext;
-import com.sun.jersey.multipart.BodyPart;
-import com.sun.jersey.multipart.FormDataBodyPart;
-import com.sun.jersey.multipart.FormDataMultiPart;
 
 /**
  * Endpoint for reasoning services. Services can be invoked using the service name and task in the request
@@ -101,20 +93,41 @@ import com.sun.jersey.multipart.FormDataMultiPart;
 @Path("/reasoners/{service}/{task: [^/]+}{job: (/job)?}")
 public class ReasoningServiceTaskResource extends BaseStanbolResource {
     private Logger log = LoggerFactory.getLogger(getClass());
-    private ServletContext context;
+//    private ServletContext context;
+    
     private ReasoningService<?,?,?> service;
     private String taskID;
-    private HttpContext httpContext;
+    
     private Map<String,List<String>> parameters;
-    private TcManager tcManager;
+    private FormFile file = null;
+    
+    @Reference
+    protected TcManager tcManager;
     private HttpHeaders headers;
-    private ONManager onm;
-    private SessionManager sessionManager;
-    private RuleStore ruleStore;
-    private RuleAdapterManager adapterManager;
+    
+    @Reference
+    protected ScopeManager onm;
+    
+    @Reference
+    protected SessionManager sessionManager;
+    
+    @Reference
+    protected RuleStore ruleStore;
+    
+    @Reference
+    protected RuleAdapterManager adapterManager;
     private boolean job = false;
     private String jobLocation = "";
+    
+    @Reference
+    protected ReasoningServicesManager reasoningServicesManager;
+    
+    @Reference
+    protected JobManager jobManager;
 
+    @Context private UriInfo uriInfo;
+    @Context private Form form;
+    
     /**
      * Constructor
      * 
@@ -128,17 +141,9 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
     public ReasoningServiceTaskResource(@PathParam(value = "service") String serviceID,
                                         @PathParam(value = "task") String taskID,
                                         @PathParam(value = "job") String job,
-                                        @Context ServletContext servletContext,
-                                        @Context HttpHeaders headers,
-                                        @Context HttpContext httpContext) {
+                                        @Context HttpHeaders headers) {
         super();
         log.debug("Called service {} to perform task {}", serviceID, taskID);
-
-        // ServletContext
-        this.context = servletContext;
-
-        // HttpContext
-        this.httpContext = httpContext;
 
         // HttpHeaders
         this.headers = headers;
@@ -146,29 +151,12 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         // Parameters for customized reasoning services
         this.parameters = prepareParameters();
 
-        // Clerezza storage
-        this.tcManager = (TcManager) ContextHelper.getServiceFromContext(TcManager.class, servletContext);
-
-        // Retrieve the ontology network manager
-        this.onm = (ONManager) ContextHelper.getServiceFromContext(ONManager.class, servletContext);
-
-        // Retrieve the ontology network manager
-        this.sessionManager = (SessionManager) ContextHelper.getServiceFromContext(SessionManager.class,
-            servletContext);
-
-        // Retrieve the rule store
-        this.ruleStore = (RuleStore) ContextHelper.getServiceFromContext(RuleStore.class, servletContext);
-
-        // Retrieve the rule adapter manager
-        this.adapterManager = (RuleAdapterManager) ContextHelper.getServiceFromContext(
-            RuleAdapterManager.class, servletContext);
-
         // Check if method is allowed
         // FIXME Supported methods are only GET and POST, but also PUT comes here, why?
-        String[] supported = {"GET", "POST"};
-        if (!Arrays.asList(supported).contains(this.httpContext.getRequest().getMethod())) {
-            throw new WebApplicationException(405);
-        }
+//        String[] supported = {"GET", "POST"};
+//        if (!Arrays.asList(supported).contains(this.httpContext.getRequest().getMethod())) {
+//            throw new WebApplicationException(405);
+//        }
 
         // Retrieve the service
         try {
@@ -216,16 +204,18 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         Map<String,List<String>> parameters = new HashMap<String,List<String>>();
 
         log.debug("Preparing parameters...");
-        HttpRequestContext request = this.httpContext.getRequest();
-        // Parameters for a GET request
-        MultivaluedMap<String,String> queryParameters = request.getQueryParameters();
+        
+        // Parameters for a GET request and POST
+        Map<?,?> queryParameters = uriInfo.getQueryParameters();
         log.debug("... {} query parameters found", queryParameters.size());
-        for (Entry<String,List<String>> e : queryParameters.entrySet()) {
-            parameters.put(e.getKey(), e.getValue());
+        for (Entry<?,?> e : queryParameters.entrySet()) {
+            String k = (String) e.getKey();
+            String[] v = (String[]) e.getValue();
+            parameters.put(k, Arrays.asList(v));
         }
         // Parameters for a POST request with content-type
         // application/x-www-form-urlencoded
-        MultivaluedMap<String,String> formParameters = request.getFormParameters();
+        MultivaluedMap<String,String> formParameters = form.asMap();
         log.debug("... {} form urlencoded parameters found", formParameters.size());
         for (Entry<String,List<String>> e : formParameters.entrySet()) {
             parameters.put(e.getKey(), e.getValue());
@@ -265,7 +255,7 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
     @GET
     @Produces({TEXT_HTML, "text/plain", KRFormat.RDF_XML, KRFormat.TURTLE, "text/turtle", "text/n3"})
     public Response get(@QueryParam("target") String targetGraphID) {
-        log.debug("Called {} with parameters: {} ", httpContext.getRequest().getMethod(), parameters.keySet()
+        log.debug("Called GET with parameters: {} ", parameters.keySet()
                 .toArray(new String[parameters.keySet().size()]));
         return processRequest();
     }
@@ -310,7 +300,6 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
             // return Response.ok(new Viewable("index", this)).build();
             ResponseBuilder rb = Response.ok(new Viewable("index", this));
             rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         }
         try {
@@ -321,7 +310,7 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
             ReasoningServiceExecutor executor = new ReasoningServiceExecutor(tcManager, imngr,
                     getCurrentService(), getCurrentTask(), target, parameters);
             ReasoningServiceResult<?> result = executor.call();
-            return new ResponseTaskBuilder(uriInfo, context, headers).build(result);
+            return new ResponseTaskBuilder(uriInfo, headers).build(result);
         } catch (Exception e) {
             if (e instanceof RuntimeException) {
                 throw (RuntimeException)e;
@@ -364,49 +353,37 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
     @POST
     @Consumes({MULTIPART_FORM_DATA})
     @Produces({TEXT_HTML, "text/plain", KRFormat.RDF_XML, KRFormat.TURTLE, "text/turtle", "text/n3"})
-    public Response post(FormDataMultiPart data) {
+    public Response post(MultiPartBody data) {
         log.debug(" post(FormDataMultiPart data)");
         // In this case we setup the parameter from a multipart request
-        File file = null;
-        for (BodyPart bpart : data.getBodyParts()) {
-            log.debug("is a {}", bpart.getClass());
-            if (bpart instanceof FormDataBodyPart) {
-                FormDataBodyPart dbp = (FormDataBodyPart) bpart;
-                if (dbp.getName().equals("file")) {
-                    file = bpart.getEntityAs(File.class);
-                }
-                // We put all the parameters field
-                // XXX We supports here only simple fields
-                // We do NOT support the sent of additional files, for
-                // example
-                if (dbp.isSimple()) {
-                    if (this.parameters.containsKey(dbp.getName())) {
-                        this.parameters.get(dbp.getName()).add(dbp.getValue());
-                    } else {
-                        List<String> values = new ArrayList<String>();
-                        values.add(dbp.getValue());
-                        this.parameters.put(dbp.getName(), values);
-                    }
-                }
-            }
+        
+        if(data.getFormFileParameterValues("file").length > 0){
+            file = data.getFormFileParameterValues("file")[0]; 
         }
-        // Then add the file
-        if (file != null) {
-            List<String> values = new ArrayList<String>();
-            try {
-                if (file.canRead() && file.exists()) {
-                    values.add(file.toURI().toURL().toString());
-                } else {
-                    log.error("Bad request");
-                    log.error(" file is: {}", file);
-                    throw new WebApplicationException(Response.Status.BAD_REQUEST);
-                }
-            } catch (MalformedURLException e) {
-                // This should never happen
-                throw new WebApplicationException();
-            }
-            this.parameters.put("file", values);
-        }
+        
+        for(String p : data.getTextParameterNames()){
+            this.parameters.put(p, Arrays.asList(data.getTextParameterValues(p)));
+        } 
+
+        log.debug(" parameters: {}", parameters);
+        log.debug(" file: {}", file);        
+//        // Then add the file
+//        if (file != null) {
+//            List<String> values = new ArrayList<String>();
+//            try {
+//                if (file.canRead() && file.exists()) {
+//                    values.add(file.toURI().toURL().toString());
+//                } else {
+//                    log.error("Bad request");
+//                    log.error(" file is: {}", file);
+//                    throw new WebApplicationException(Response.Status.BAD_REQUEST);
+//                }
+//            } catch (MalformedURLException e) {
+//                // This should never happen
+//                throw new WebApplicationException();
+//            }
+//            this.parameters.put("file", values);
+//        }
         return processRequest();
     }
 
@@ -421,6 +398,11 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         ReasoningServiceInputManager inmgr = new SimpleInputManager();
         String scope = null;
         String session = null;
+        
+        if(file != null){
+            inmgr.addInputProvider(new ByteArrayInputProvider(file.getContent()));
+        }
+        
         for (Entry<String,List<String>> entry : this.parameters.entrySet()) {
             if (entry.getKey().equals("url")) {
                 if (!entry.getValue().isEmpty()) {
@@ -434,21 +416,23 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
                     log.error("Parameter 'url' must have a value!");
                     throw new WebApplicationException(Response.Status.BAD_REQUEST);
                 }
-            } else if (entry.getKey().equals("file")) {
-                if (!entry.getValue().isEmpty()) {
-                    // We keep only the first value
-                    // FIXME We create the file once again...
-                    String fv = entry.getValue().iterator().next();
-                    log.debug("File value is: {}", fv);
-                    inmgr.addInputProvider(new FileInputProvider(new File(URI.create(fv))));
-                    // We remove it form the additional parameter list
-                    this.parameters.remove("url");
-                } else {
-                    // Parameter exists with no value
-                    log.error("Parameter 'url' must have a value!");
-                    throw new WebApplicationException(Response.Status.BAD_REQUEST);
-                }
-            } else if (entry.getKey().equals("scope")) {
+            }
+//            else if (entry.getKey().equals("file")) {
+//                if (!entry.getValue().isEmpty()) {
+//                    // We keep only the first value
+//                    // FIXME We create the file once again...
+//                    String fv = entry.getValue().iterator().next();
+//                    log.debug("File value is: {}", fv);
+//                    inmgr.addInputProvider(new FileInputProvider(new File(URI.create(fv))));
+//                    // We remove it form the additional parameter list
+//                    this.parameters.remove("url");
+//                } else {
+//                    // Parameter exists with no value
+//                    log.error("Parameter 'url' must have a value!");
+//                    throw new WebApplicationException(Response.Status.BAD_REQUEST);
+//                }
+//            } 
+            else if (entry.getKey().equals("scope")) {
                 if (!entry.getValue().isEmpty()) {
                     scope = entry.getValue().iterator().next();
                 } else {
@@ -552,8 +536,7 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
      */
     private ReasoningServicesManager getServicesManager() {
         log.debug("(getServicesManager()) ");
-        return (ReasoningServicesManager) ContextHelper.getServiceFromContext(ReasoningServicesManager.class,
-            this.context);
+        return reasoningServicesManager;
     }
 
     /**
@@ -573,7 +556,7 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
      */
     private JobManager getJobManager() {
         log.debug("(getJobManager()) ");
-        return (JobManager) ContextHelper.getServiceFromContext(JobManager.class, this.context);
+        return jobManager;
     }
 
     public Map<String,String> getServiceDescription() {
