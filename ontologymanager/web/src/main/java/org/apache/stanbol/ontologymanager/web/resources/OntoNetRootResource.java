@@ -692,7 +692,7 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
                         rb = Response.status(Status.CONFLICT);
                         this.submitted = guessed;
                         if (headers.getAcceptableMediaTypes().contains(MediaType.TEXT_HTML_TYPE)) {
-                            rb.entity(new Viewable("/imports/409", this));
+                            rb.entity(new Viewable("/imports/409.ftl", this));
                             rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML + "; charset=utf-8");
                         }
                         break;

@@ -55,18 +55,17 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
         <configuration>
-          <instructions>
+          <instructions><!--  com.sun.jersey.*; version="[1.15.0,2)", -->
             <Import-Package>
               javax.ws.rs.*; version="[2.0,3]",
               org.apache.stanbol.commons.web.base; provide:=true; version="[1.0.0,2)",
               org.apache.clerezza.jaxrs.utils.*,
-              com.sun.jersey.*; version="[1.15.0,2)",
               com.sun.net.httpserver.*,
               *
             </Import-Package>            
             <Export-Package>
-            org.objectweb.asm.*,  com.sun.jersey.*, org.jvnet.mimepull.*, sun.*, com.sun.*, com.sun.net.httpserver.*
-            </Export-Package>
+            org.objectweb.asm.*, org.jvnet.mimepull.*, sun.*, com.sun.*, com.sun.net.httpserver.*
+            </Export-Package> <!-- com.sun.jersey.*, -->
             <Private-Package>
               org.apache.stanbol.ontologymanager.web; version=${project.version},
               org.apache.stanbol.ontologymanager.web.resources; version=${project.version},
