@@ -67,18 +67,18 @@
     <module>commons</module>
 
     <module>entityhub</module>
-    <!-- <module>ontologymanager</module>
-    <module>rules</module> -->
+    <module>ontologymanager</module>
+    <module>rules</module>
     <module>enhancer</module>
     <!-- <module>contenthub</module> -->
 
     <module>enhancement-engines</module>
 
-    <!-- <module>cmsadapter</module>
+    <!-- <module>cmsadapter</module> -->
 
     <module>reasoners</module>
 
-    <module>demos/webvie</module> -->
+    <!-- <module>demos/webvie</module> -->
 
     <module>launchers/bundlelists</module>
     <module>launchers/mini</module>

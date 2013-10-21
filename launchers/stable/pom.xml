@@ -54,7 +54,6 @@
               <directory>.</directory>
               <includes>
                 <include>stanbol/**</include>
-                <include>factstore/**</include>
                 <include>*.log</include>
               </includes>
             </fileset>
