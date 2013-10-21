@@ -45,10 +45,10 @@
 
     <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/security/usermanagement
+            scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/security/usermanagement
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/security/usermanagement
+            scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/security/usermanagement
         </developerConnection>
         <url>http://stanbol.apache.org/</url>
     </scm>

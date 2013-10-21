@@ -34,10 +34,10 @@
   <description>A service providing classes and message body writer for response rendering with the viewable pattern.</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/web/viewable
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/web/viewable
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/web/viewable
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/web/viewable
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

@@ -31,10 +31,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/kuromoji-nlp
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancement-engines/kuromoji-nlp
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/kuromoji-nlp
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancement-engines/kuromoji-nlp
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

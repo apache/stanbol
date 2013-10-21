@@ -19,10 +19,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/stores/jcrstore
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancer/stores/jcrstore
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/stores/jcrstore
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancer/stores/jcrstore
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

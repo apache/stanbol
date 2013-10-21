@@ -29,10 +29,10 @@
   <description>A demo on how to customise Apache Stanbol for the ehealth domain</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/demo/ehealth
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/demo/ehealth
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/demo/ehealth
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/demo/ehealth
     </developerConnection>
     <url>http://stanbol.apache.org</url>
   </scm>

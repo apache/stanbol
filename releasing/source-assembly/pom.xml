@@ -45,8 +45,8 @@
   </licenses>
   
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/releasing/source-assembly</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/releasing/source-assembly</developerConnection>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/releasing/source-assembly</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/releasing/source-assembly</developerConnection>
     <url>http://stanbol.apache.org</url>
   </scm>
 

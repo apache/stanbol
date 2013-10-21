@@ -40,10 +40,10 @@
   
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/jobmanager/weightedjobmanager/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancer/jobmanager/weightedjobmanager/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/jobmanager/weightedjobmanager/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancer/jobmanager/weightedjobmanager/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

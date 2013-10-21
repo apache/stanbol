@@ -37,10 +37,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/factstore/factstore
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/factstore/factstore
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/factstore/factstore
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/factstore/factstore
     </developerConnection>
     <url>http://stanbol.apache.org</url>
   </scm>

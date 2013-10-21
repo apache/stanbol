@@ -34,10 +34,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/ldpath/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancer/ldpath/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/ldpath/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancer/ldpath/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

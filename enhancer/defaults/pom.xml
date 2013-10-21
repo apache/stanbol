@@ -32,10 +32,10 @@
   <description>This provides the default configuration for the Enhancer. This bundle can be removed by users that want/need to provide their own configuration conflicting with the defaults.</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/defaults
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancer/defaults
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/defaults
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancer/defaults
     </developerConnection>
     <url>http://stanbol.apache.org</url>
   </scm>

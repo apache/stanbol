@@ -40,10 +40,10 @@
 
 	<scm>
 		<connection>
-			scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/disambiguation-mlt/
+			scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancer/engines/disambiguation-mlt/
 		</connection>
 		<developerConnection>
-			scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/engines/disambiguation-mlt/
+			scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancer/engines/disambiguation-mlt/
 		</developerConnection>
 		<url>http://incubator.apache.org/stanbol/</url>
 	</scm>

@@ -41,10 +41,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/chian/weighted
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancer/chian/weighted
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/chain/weighted
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancer/chain/weighted
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

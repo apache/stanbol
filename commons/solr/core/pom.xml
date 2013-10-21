@@ -48,10 +48,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/solr/core
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/solr/core
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/solr/core
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/solr/core
     </developerConnection>
     <url>http://stanbol.apache.org</url>
   </scm>

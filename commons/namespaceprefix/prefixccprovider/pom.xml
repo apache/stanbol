@@ -36,10 +36,10 @@
   </description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/namespaceprefix/prefixccprovider
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/namespaceprefix/prefixccprovider
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/namespaceprefix/prefixccprovider
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/namespaceprefix/prefixccprovider
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

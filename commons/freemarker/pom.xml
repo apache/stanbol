@@ -35,10 +35,10 @@
 from the bundles. More Freemarker utilities may be added here in future.</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/freemarker
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/freemarker
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/freemarker
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/freemarker
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

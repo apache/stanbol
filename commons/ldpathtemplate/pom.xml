@@ -34,10 +34,10 @@
   <description>A service providing ldpath template rendering</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/ldpathtemplate
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/ldpathtemplate
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/ldpathtemplate
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/ldpathtemplate
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

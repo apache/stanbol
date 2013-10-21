@@ -40,10 +40,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/ldpath/clerezza
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/ldpath/clerezza
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/ldpath/clerezza
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/ldpath/clerezza
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

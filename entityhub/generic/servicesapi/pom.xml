@@ -44,10 +44,10 @@
   
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/generic/servicesapi
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/entityhub/generic/servicesapi
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/generic/servicesapi
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/entityhub/generic/servicesapi
     </developerConnection>
     <url>http://stanbol.apache.org</url>
   </scm>

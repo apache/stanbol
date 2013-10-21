@@ -43,10 +43,10 @@
   
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/indexing/freebase
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/entityhub/indexing/freebase
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/indexing/freebase
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/entityhub/indexing/freebase
     </developerConnection>
     <url>http://stanbol.apache.org</url>
   </scm>

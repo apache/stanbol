@@ -39,10 +39,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/contenthub/contenthub/store
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/contenthub/contenthub/store
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/contenthub/contenthub/store
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/contenthub/contenthub/store
     </developerConnection>
   </scm>
 

@@ -30,10 +30,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/solr/extras/paoding
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/solr/extras/paoding
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/solr/extras/paoding
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/solr/extras/paoding
     </developerConnection>
     <url>http://stanbol.apache.org</url>
   </scm>
