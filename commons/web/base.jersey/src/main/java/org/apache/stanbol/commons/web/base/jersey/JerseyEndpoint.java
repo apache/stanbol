@@ -46,17 +46,17 @@ import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.spi.container.servlet.ServletContainer;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collection;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.felix.scr.annotations.References;
-import org.apache.stanbol.commons.web.base.DefaultApplication;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.servlet.ServletContainer;
 
 /**
  * Jersey-based RESTful endpoint for the Stanbol Enhancer engines and store.
@@ -89,6 +89,9 @@ public class JerseyEndpoint {
     
     @Reference
     private Parser parser;
+    
+    @Reference
+    private EditableLayoutConfiguration layoutConfiguration;
 
     /**
      * The origins allowed for multi-host requests
@@ -164,7 +167,6 @@ public class JerseyEndpoint {
         } else {
             exposedHeaders = new HashSet<String>();
         }
-
         if (!webFragments.isEmpty()) {
             initJersey();
         }
@@ -173,8 +175,7 @@ public class JerseyEndpoint {
     /** Initialize the Jersey subsystem */
     private synchronized void initJersey() throws NamespaceException, ServletException {
         if (componentContext == null) {
-            log.debug(" ... can not init Jersey Endpoint - Component not yet activated!");
-            //throw new IllegalStateException("Null ComponentContext, not activated?");
+            //we have not yet been activated
             return;
         }
         //temporary workaround for STANBOL-1073
@@ -182,6 +183,11 @@ public class JerseyEndpoint {
                 "<http://example.org/me> <http://xmlns.com/foaf/0.1/name> \"Jane Doe\" .".getBytes());
         parser.parse(in, "text/turtle");
         //end of STANBOL-1073 work around
+        if (componentContext == null) {
+            log.debug(" ... can not init Jersey Endpoint - Component not yet activated!");
+            //throw new IllegalStateException("Null ComponentContext, not activated?");
+            return;
+        }
 
         shutdownJersey();
 
@@ -212,7 +218,8 @@ public class JerseyEndpoint {
         Collections.sort(navigationLinks);
 
         // bind the aggregate JAX-RS application to a dedicated servlet
-        ServletContainer container = new ServletContainer(app);
+        ServletContainer container = new ServletContainer(
+                ResourceConfig.forApplication(app));
         Bundle appBundle = componentContext.getBundleContext().getBundle();
         httpService.registerServlet(applicationAlias, container, getInitParams(), null);
         registeredAliases.add(applicationAlias);
@@ -221,11 +228,16 @@ public class JerseyEndpoint {
         // services
         servletContext = container.getServletContext();
         servletContext.setAttribute(BundleContext.class.getName(), componentContext.getBundleContext());
-        servletContext.setAttribute(BaseStanbolResource.ROOT_URL, applicationAlias);
-        servletContext.setAttribute(BaseStanbolResource.STATIC_RESOURCES_ROOT_URL, staticUrlRoot);
-        servletContext.setAttribute(BaseStanbolResource.LINK_RESOURCES, linkResources);
-        servletContext.setAttribute(BaseStanbolResource.SCRIPT_RESOURCES, scriptResources);
-        servletContext.setAttribute(BaseStanbolResource.NAVIGATION_LINKS, navigationLinks);
+        layoutConfiguration.setRootUrl(applicationAlias);
+        //servletContext.setAttribute(BaseStanbolResource.ROOT_URL, applicationAlias);
+        layoutConfiguration.setStaticResourcesRootUrl(staticUrlRoot);
+        //servletContext.setAttribute(BaseStanbolResource.STATIC_RESOURCES_ROOT_URL, staticUrlRoot);
+        layoutConfiguration.setLinkResources(linkResources);
+        //servletContext.setAttribute(BaseStanbolResource.LINK_RESOURCES, linkResources);
+        layoutConfiguration.setScriptResources(scriptResources);
+        //servletContext.setAttribute(BaseStanbolResource.SCRIPT_RESOURCES, scriptResources);
+        layoutConfiguration.setNavigationsLinks(navigationLinks);
+        //servletContext.setAttribute(BaseStanbolResource.NAVIGATION_LINKS, navigationLinks);
         servletContext.setAttribute(CORS_ORIGIN, corsOrigins);
         servletContext.setAttribute(CORS_ACCESS_CONTROL_EXPOSE_HEADERS, exposedHeaders);
 

@@ -20,6 +20,7 @@ package org.apache.stanbol.commons.web.base;
  * Simple data transfer object for scripts (typically javascript) to be contributed by WebFragment for
  * inclusion to the HTML head of the pages by the NavigationMixin abstract JAX-RS resource.
  */
+@Deprecated
 public class ScriptResource implements Comparable<ScriptResource> {
 
     private final String type;

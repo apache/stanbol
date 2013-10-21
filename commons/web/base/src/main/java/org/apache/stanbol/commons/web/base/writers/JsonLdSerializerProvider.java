@@ -35,6 +35,8 @@ import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.serializedform.SerializingProvider;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.jsonld.JsonLd;
 import org.apache.stanbol.commons.jsonld.JsonLdCommon;
 import org.apache.stanbol.commons.jsonld.JsonLdProperty;
@@ -49,10 +51,9 @@ import org.slf4j.LoggerFactory;
  * Implements a <a href="http://json-ld.org/">JSON-LD</a> serialization of a Clerezza
  * {@link TripleCollection}.<br>
  *
- * @scr.component immediate="true"
- * @scr.service
- *                 interface="org.apache.clerezza.rdf.core.serializedform.SerializingProvider"
  */
+@Component
+@Service(SerializingProvider.class)
 @SupportedFormat(JsonLdSerializerProvider.SUPPORTED_FORMAT)
 public class JsonLdSerializerProvider implements SerializingProvider {
 

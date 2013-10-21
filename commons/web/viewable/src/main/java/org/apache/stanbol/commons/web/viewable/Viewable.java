@@ -31,6 +31,7 @@ package org.apache.stanbol.commons.web.viewable;
  *
  */
 public class Viewable {
+    
 
     /**
      * This uses the class name of Pojo to prefix the template
@@ -39,7 +40,7 @@ public class Viewable {
      * @param graphNode the graphNode with the actual content
      */
     public Viewable(final String templatePath, final Object pojo) {
-        this(templatePath, pojo, pojo.getClass());
+        this(templatePath, pojo, null);
     }
     
     /**
@@ -48,17 +49,14 @@ public class Viewable {
      * 
      */
     public Viewable(final String templatePath, final Object pojo, final Class<?> clazz) {
-        final String slahSeparatedPacakgeName = clazz.getName().replace('.', '/');
-        if (templatePath.startsWith("/")) {
-            this.templatePath = slahSeparatedPacakgeName+templatePath;
-        } else {
-            this.templatePath = slahSeparatedPacakgeName+'/'+templatePath;
-        }
+        this.templatePath = templatePath;
         this.pojo = pojo;
+        this.contextClass = clazz;
     }
     
     private String templatePath;
     private Object pojo;
+    private Class contextClass;
     
     public String getTemplatePath() {
         return templatePath;
@@ -67,4 +65,9 @@ public class Viewable {
     public Object getPojo() {
         return pojo;
     }
+
+    public Class getContextClass() {
+        return contextClass;
+    }
+
 }

@@ -151,7 +151,7 @@ public class RdfSerializingWriter implements MessageBodyWriter<RdfViewable> {
     }
 
     private Set<UriRef> getSubjectExpansionProperties(GraphNode recipe) {
-        final MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
+        final MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters(true);
         final List<String> paramValues = queryParams.get(SUBJ_EXP_PARAM);
         final Set<UriRef> result = new HashSet<UriRef>();
         if (paramValues != null) {
@@ -173,7 +173,7 @@ public class RdfSerializingWriter implements MessageBodyWriter<RdfViewable> {
     }
 
     private Set<UriRef> getObjectExpansionProperties(GraphNode recipe) {
-        final MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
+        final MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters(true);
         final List<String> paramValues = queryParams.get(OBJ_EXP_PARAM);
         final Set<UriRef> result = new HashSet<UriRef>();
         if (paramValues != null) {

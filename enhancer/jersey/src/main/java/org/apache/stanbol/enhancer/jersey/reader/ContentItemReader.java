@@ -35,13 +35,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 
@@ -54,8 +53,11 @@ import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.RequestContext;
 import org.apache.commons.io.IOUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
-import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
@@ -66,62 +68,35 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Component
+@Service(Object.class)
+@Property(name = "javax.ws.rs", boolValue = true)
 @Provider
 public class ContentItemReader implements MessageBodyReader<ContentItem> {
     
+    
     private static Logger log = LoggerFactory.getLogger(ContentItemReader.class);
     FileUpload fu = new FileUpload();
-    private Parser __parser;
-    private ServletContext context;
-    private ContentItemFactory __ciFactory;
+    @Reference
+    private Parser parser;
+
+    @Reference
+    private ContentItemFactory ciFactory;
+    
     /**
      * Used to read the queryParameter with the ContentItem ID
      */
     @Context
-    private HttpServletRequest request;
-
+    UriInfo uriInfo;
+    
     public static final MediaType MULTIPART = MediaType.valueOf(MediaType.MULTIPART_FORM_DATA_TYPE.getType()+"/*");
 
-    public ContentItemReader(@Context ServletContext context) {
-        this.context = context;
-    }
-    /**
-     * Lazy initialisation for the parser.
-     * @return teh parser
-     */
+    
     protected Parser getParser(){
-        /*
-         * Needed because Jersey tries to create an instance
-         * during initialisation. At that time the {@link BundleContext} required
-         * by {@link ContextHelper#getServiceFromContext(Class, ServletContext)}
-         * is not yet present resulting in an Exception.
-         */
-        if(__parser == null){
-            if(context != null){
-                __parser = ContextHelper.getServiceFromContext(Parser.class, context);
-            } else {
-                throw new IllegalStateException("ServletContext is not NULL!");
-            }
-            if(__parser == null){
-                    throw new IllegalStateException("Clerezza RDF parser service is not available(service class:"
-                        + Parser.class + ")!");
-            }
-        }
-        return __parser;
+        return parser;
     }
     protected ContentItemFactory getContentItemFactory(){
-        if(__ciFactory == null){
-            if(context != null){
-                __ciFactory = ContextHelper.getServiceFromContext(ContentItemFactory.class, context);
-            } else {
-                throw new IllegalStateException("ServletContext is not NULL!");
-            }
-            if(__ciFactory == null){
-                    throw new IllegalStateException("ContentItemFactory service is not available (service class:"
-                        + ContentItemFactory.class + ")!");
-            }
-        }
-        return __ciFactory;
+        return ciFactory;
     }
     
     @Override
@@ -275,7 +250,8 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
      */
     private UriRef getContentItemId() {
         //NOTE: check for request NULL is needed because of unit tests
-        String ciUri = request == null ? null : request.getParameter("uri");
+        if (uriInfo == null) return null;        
+        final String ciUri = uriInfo.getPathParameters().getFirst("uri");
         return ciUri == null ? null : new UriRef(ciUri);
     }
     /**

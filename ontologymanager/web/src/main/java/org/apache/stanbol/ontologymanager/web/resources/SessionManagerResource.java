@@ -20,7 +20,7 @@ import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+//import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.N3;
@@ -50,8 +50,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.stanbol.commons.viewable.Viewable;
-import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.web.viewable.Viewable;
+//import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.ontologymanager.servicesapi.session.Session;
@@ -69,18 +73,21 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Path("/ontonet/session")
 public class SessionManagerResource extends BaseStanbolResource {
 
     /*
      * Placeholder for the ONManager to be fetched from the servlet context.
      */
+    @Reference
     protected SessionManager sessionManager;
 
-    public SessionManagerResource(@Context ServletContext servletContext) {
-        this.servletContext = servletContext;
-        this.sessionManager = (SessionManager) ContextHelper.getServiceFromContext(SessionManager.class,
-            servletContext);
+    public SessionManagerResource() {
+//        this.sessionManager = (SessionManager) ContextHelper.getServiceFromContext(SessionManager.class,
+//            servletContext);
     }
 
     @POST
@@ -96,7 +103,7 @@ public class SessionManagerResource extends BaseStanbolResource {
             uri = uri.substring(0, uri.length() - 1);
         uri += "/" + s.getID();
         ResponseBuilder rb = Response.created(URI.create(uri));
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -105,7 +112,7 @@ public class SessionManagerResource extends BaseStanbolResource {
     public Response getHtmlInfo(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok(new Viewable("index", this));
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -140,7 +147,7 @@ public class SessionManagerResource extends BaseStanbolResource {
         ResponseBuilder rb = Response.ok(o);
         MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
         if (mediaType != null) rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 

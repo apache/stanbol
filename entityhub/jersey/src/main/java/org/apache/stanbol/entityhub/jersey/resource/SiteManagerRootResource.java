@@ -26,8 +26,6 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JS
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
-import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.getAcceptableMediaType;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.getLDPathParseExceptionMessage;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.handleLDPathRequest;
@@ -66,7 +64,6 @@ import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.viewable.Viewable;
-import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
@@ -87,6 +84,10 @@ import org.slf4j.LoggerFactory;
 
 import at.newmedialab.ldpath.exception.LDPathParseException;
 import at.newmedialab.ldpath.model.programs.Program;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 
 
 /**
@@ -94,12 +95,19 @@ import at.newmedialab.ldpath.model.programs.Program;
  * 
  * TODO: add description
  */
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Path("/entityhub/sites")
 public class SiteManagerRootResource extends BaseStanbolResource {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    @Reference
     private NamespacePrefixService nsPrefixService;
+    
+    @Reference
+    private SiteManager referencedSiteManager;
 
     public static final Set<String> RDF_MEDIA_TYPES = new TreeSet<String>(Arrays.asList(N3, N_TRIPLE,
         RDF_XML, TURTLE, X_TURTLE, RDF_JSON));
@@ -116,22 +124,18 @@ public class SiteManagerRootResource extends BaseStanbolResource {
     private static final int DEFAULT_FIND_RESULT_LIMIT = 5;
 
     
-    public SiteManagerRootResource(@Context ServletContext context) {
-        super();
-        nsPrefixService = ContextHelper.getServiceFromContext(NamespacePrefixService.class, context);
-    }
 
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers);
+        //enableCORS(servletContext, res, headers);
         return res.build();
     }
     @OPTIONS
     @Path("/find")
     public Response handleCorsPreflightFind(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers);
+        //enableCORS(servletContext, res, headers);
         return res.build();
     }
     
@@ -139,7 +143,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
     @Path("/query")
     public Response handleCorsPreflightQuery(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers);
+        //enableCORS(servletContext, res, headers);
         return res.build();
     }
 
@@ -148,7 +152,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
     public Response getSitesPage(@Context HttpHeaders headers) {
         ResponseBuilder rb =  Response.ok(new Viewable("index", this));
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -178,18 +182,16 @@ public class SiteManagerRootResource extends BaseStanbolResource {
         if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptable)){
             ResponseBuilder rb =  Response.ok(new Viewable("referenced", this));
             rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
+            //addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         } else {
-            SiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
-                SiteManager.class, servletContext);
             JSONArray referencedSites = new JSONArray();
             for (String site : referencedSiteManager.getSiteIds()) {
                 referencedSites.put(String.format("%sentityhub/site/%s/", uriInfo.getBaseUri(), site));
             }
             ResponseBuilder rb =  Response.ok(referencedSites);
             rb.header(HttpHeaders.CONTENT_TYPE, acceptable+"; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
+            //addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         }
     }
@@ -198,7 +200,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
     @Path("/entity")
     public Response handleCorsPreflightEntity(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers,OPTIONS,GET);
+        //enableCORS(servletContext, res, headers,OPTIONS,GET);
         return res.build();
     }
     /**
@@ -224,7 +226,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
                 ResponseBuilder rb =  Response.ok(new Viewable("entity", this));
                 rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
-                addCORSOrigin(servletContext, rb, headers);
+                //addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
             } else {
                 return Response.status(Status.BAD_REQUEST)
@@ -232,13 +234,11 @@ public class SiteManagerRootResource extends BaseStanbolResource {
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
             }
         }
-        SiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
-            SiteManager.class, servletContext);
         Entity sign = referencedSiteManager.getEntity(id);
         if (sign != null) {
             ResponseBuilder rb = Response.ok(sign);
             rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
+            //addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         } else {
             // TODO: How to parse an ErrorMessage?
@@ -290,7 +290,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
                 ResponseBuilder rb =  Response.ok(new Viewable("find", this));
                 rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
-                addCORSOrigin(servletContext, rb, headers);
+                //addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
             } else {
                 return Response.status(Status.BAD_REQUEST)
@@ -319,15 +319,14 @@ public class SiteManagerRootResource extends BaseStanbolResource {
         }        
         FieldQuery query = JerseyUtils.createFieldQueryForFindRequest(name, property, language,
             limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, offset,ldpath);
-        return executeQuery(ContextHelper.getServiceFromContext(
-            SiteManager.class, servletContext), query, acceptedMediaType, headers);
+        return executeQuery(referencedSiteManager, query, acceptedMediaType, headers);
     }
     @GET
     @Path("/query")
     public Response getQueryDocumentation(@Context HttpHeaders headers){
         ResponseBuilder rb = Response.ok(new Viewable("query", this));
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");  
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
     /**
@@ -363,8 +362,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
             }
         } else {
-            return executeQuery(ContextHelper.getServiceFromContext(
-                SiteManager.class, servletContext), query, acceptedMediaType, headers);
+            return executeQuery(referencedSiteManager, query, acceptedMediaType, headers);
         }
     }
     /*
@@ -374,7 +372,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
     @Path("/ldpath")
     public Response handleCorsPreflightLDPath(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers,OPTIONS,GET,POST);
+        //enableCORS(servletContext, res, headers,OPTIONS,GET,POST);
         return res.build();
     }
     @GET
@@ -391,10 +389,8 @@ public class SiteManagerRootResource extends BaseStanbolResource {
              @FormParam(value = "context")Set<String> contexts,
              @FormParam(value = "ldpath")String ldpath,
              @Context HttpHeaders headers){
-        SiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
-            SiteManager.class, servletContext);
         return handleLDPathRequest(this,new SiteManagerBackend(referencedSiteManager), 
-            ldpath, contexts, headers, servletContext);
+            ldpath, contexts, headers);
     }
     /**
      * Executes the query parsed by {@link #queryEntities(String, File, HttpHeaders)} or created based
@@ -417,7 +413,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             QueryResultList<Representation> result = manager.find(query);
             ResponseBuilder rb = Response.ok(result);
             rb.header(HttpHeaders.CONTENT_TYPE, mediaType+"; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
+            //addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         }
     }
@@ -472,7 +468,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
         result = new QueryResultListImpl<Representation>(query, transformedResults, Representation.class);
         ResponseBuilder rb = Response.ok(result);
         rb.header(HttpHeaders.CONTENT_TYPE, mediaType+"; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 }

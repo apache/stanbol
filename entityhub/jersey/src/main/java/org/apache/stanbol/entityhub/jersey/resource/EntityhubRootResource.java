@@ -34,8 +34,6 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JS
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
-import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.getAcceptableMediaType;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.getLDPathParseExceptionMessage;
 import static org.apache.stanbol.entityhub.jersey.utils.LDPathHelper.handleLDPathRequest;
@@ -77,8 +75,7 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
-import org.apache.stanbol.commons.viewable.Viewable;
-import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.stanbol.commons.web.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
@@ -100,8 +97,14 @@ import org.slf4j.LoggerFactory;
 
 import at.newmedialab.ldpath.exception.LDPathParseException;
 import at.newmedialab.ldpath.model.programs.Program;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 
-
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Path("/entityhub")
 public class EntityhubRootResource extends BaseStanbolResource {
     
@@ -124,23 +127,21 @@ public class EntityhubRootResource extends BaseStanbolResource {
      * The default number of maximal results of searched sites.
      */
     private static final int DEFAULT_FIND_RESULT_LIMIT = 5;
+    
+    @Reference
     private NamespacePrefixService nsPrefixService;
+    
+    @Reference
     private Entityhub entityhub;
 
-    // bind the job manager by looking it up from the servlet request context
-    public EntityhubRootResource(@Context ServletContext servletContext) {
+    public EntityhubRootResource() {
         super();
-        entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
-        if(entityhub == null){
-            throw new WebApplicationException(Response.status(Status.NOT_FOUND)
-                .entity("The Entityhub Service is currently not active!").build());
-        }
-        nsPrefixService = ContextHelper.getServiceFromContext(NamespacePrefixService.class, servletContext);
     }
+    
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers);
+        //enableCORS(servletContext, res, headers);
         return res.build();
     }
     @GET
@@ -148,7 +149,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
     public Response get(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok(new Viewable("index", this));
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -166,14 +167,14 @@ public class EntityhubRootResource extends BaseStanbolResource {
             //return HTML docu
             ResponseBuilder rb = Response.ok(new Viewable("entity", this));
             rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
+            //addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         }
         if (symbolId == null || symbolId.isEmpty()) {
             // TODO: how to parse an error message
             throw new WebApplicationException(BAD_REQUEST);
         }
-        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
+        //Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
         Entity entity;
         try {
             entity = entityhub.getEntity(symbolId);
@@ -185,7 +186,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
         } else {
             ResponseBuilder rb = Response.ok(entity);
             rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
+            //addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         }
     }
@@ -207,7 +208,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
             //return docu
             ResponseBuilder rb = Response.ok(new Viewable("lookup", this));
             rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
+            //addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         } else {
             if (reference == null || reference.isEmpty()) {
@@ -226,7 +227,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
             } else {
                 ResponseBuilder rb = Response.ok(entity);
                 rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
-                addCORSOrigin(servletContext, rb, headers);
+                //addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
             }
         }
@@ -236,7 +237,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
     public Response handleCorsPreflightEntity(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
         //we need also PUT and DELETE because /entity has full CRUD
-        enableCORS(servletContext, res, headers,GET,POST,PUT,DELETE,OPTIONS);
+        //enableCORS(servletContext, res, headers,GET,POST,PUT,DELETE,OPTIONS);
         return res.build();
     }
 
@@ -282,7 +283,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
                     "not provide the id of the Entity to delete (parameter 'id').")
                     .header(HttpHeaders.ACCEPT, accepted).build();
         }
-        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
+        //Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
         Entity entity;
         ResponseBuilder rb;
         try {
@@ -306,7 +307,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
             rb = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
             .header(HttpHeaders.ACCEPT, accepted);
         }
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
     /**
@@ -327,7 +328,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
                                           boolean create, 
                                           boolean update,
                                           HttpHeaders headers){
-        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
+        //Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
         MediaType accepted = getAcceptableMediaType(headers,
             JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES, 
             MediaType.APPLICATION_JSON_TYPE);
@@ -408,7 +409,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
         if(updated.isEmpty()){
             // No (valid) data parsed
             ResponseBuilder rb = Response.status(Status.NOT_MODIFIED);
-            addCORSOrigin(servletContext, rb, headers);
+            //addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         } else {
             Entity entity = updated.values().iterator().next();
@@ -416,14 +417,14 @@ public class EntityhubRootResource extends BaseStanbolResource {
                 ResponseBuilder rb = Response.created(uriInfo.getAbsolutePathBuilder()
                     .queryParam("id", "{entityId}")
                     .build(entity.getId()));
-                addCORSOrigin(servletContext, rb, headers);
+                //addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
             } else {
                 //return Response.noContent().build();
                 //As alternative return the modified entity
                 ResponseBuilder rb =  Response.ok(entity);
                 rb.header(HttpHeaders.CONTENT_TYPE, accepted+"; charset=utf-8");
-                addCORSOrigin(servletContext, rb, headers);
+                //addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
             }
 //            if (updated.size() == 1){
@@ -442,7 +443,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
     @Path("/find")
     public Response handleCorsPreflightFind(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers);
+        //enableCORS(servletContext, res, headers);
         return res.build();
     }
     
@@ -486,7 +487,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
                 //return HTML docu
                 ResponseBuilder rb = Response.ok(new Viewable("find", this));
                 rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
-                addCORSOrigin(servletContext, rb, headers);
+                //addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
             } else {
                 return Response.status(Status.BAD_REQUEST)
@@ -537,7 +538,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
     @Path("/query")
     public Response handleCorsPreflightQuery(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers);
+        //enableCORS(servletContext, res, headers);
         return res.build();
     }
     
@@ -546,7 +547,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
     public Response getQueryDocumentation(@Context HttpHeaders headers){
         ResponseBuilder rb = Response.ok(new Viewable("query", this));
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
     /**
@@ -583,7 +584,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
      * @return the response (results of error)
      */
     private Response executeQuery(FieldQuery query, HttpHeaders headers, MediaType acceptedMediaType) throws WebApplicationException {
-        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
+        //Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
         if(query instanceof LDPathSelect && ((LDPathSelect)query).getLDPathSelect() != null){
             //use the LDPath variant to process this query
             return executeLDPathQuery(entityhub,query, ((LDPathSelect)query).getLDPathSelect(),
@@ -602,7 +603,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
             }
             ResponseBuilder rb = Response.ok(result);
             rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
+            //addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         }
     }
@@ -658,7 +659,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
         result = new QueryResultListImpl<Representation>(query, transformedResults, Representation.class);
         ResponseBuilder rb = Response.ok(result);
         rb.header(HttpHeaders.CONTENT_TYPE, mediaType+"; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }    
     /*--------------------------------------------------------------------------
@@ -669,7 +670,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
     @Path("/mapping")
     public Response handleCorsPreflightMapping(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers,GET,OPTIONS);
+        //enableCORS(servletContext, res, headers,GET,OPTIONS);
         return res.build();
     }
     
@@ -690,13 +691,13 @@ public class EntityhubRootResource extends BaseStanbolResource {
             if(TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
               ResponseBuilder rb = Response.ok(new Viewable("mapping", this));
               rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
-              addCORSOrigin(servletContext, rb, headers);
+              //addCORSOrigin(servletContext, rb, headers);
             } else {
                 return Response.status(Status.BAD_REQUEST).entity("The mapping id (URI) is missing.\n").header(
                     HttpHeaders.ACCEPT, acceptedMediaType).build();
             }
         }
-        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
+        //Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
         Entity mapping;
         try {
             mapping = entityhub.getMappingById(reference);
@@ -710,7 +711,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
         } else {
             ResponseBuilder rb = Response.ok(mapping);
             rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
+            //addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         }
     }
@@ -719,7 +720,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
     @Path("/mapping/entity")
     public Response handleCorsPreflightMappingEntity(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers,GET,OPTIONS);
+        //enableCORS(servletContext, res, headers,GET,OPTIONS);
         return res.build();
     }
 
@@ -741,14 +742,14 @@ public class EntityhubRootResource extends BaseStanbolResource {
             if(TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
                 ResponseBuilder rb = Response.ok(new Viewable("mapping_entity", this));
                 rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
-                addCORSOrigin(servletContext, rb, headers);
+                //addCORSOrigin(servletContext, rb, headers);
             } else {
                 return Response.status(Status.BAD_REQUEST).entity("No entity given. Missing parameter id.\n")
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
             }
         }
         
-        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
+        //Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
         Entity mapping;
         try {
             mapping = entityhub.getMappingBySource(entity);
@@ -761,7 +762,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
         } else {
             ResponseBuilder rb = Response.ok(mapping);
             rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
+            //addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         }
     }
@@ -770,7 +771,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
     @Path("/mapping/symbol")
     public Response handleCorsPreflightMappingSymbol(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers,GET,OPTIONS);
+        //enableCORS(servletContext, res, headers,GET,OPTIONS);
         return res.build();
     }
     
@@ -792,14 +793,14 @@ public class EntityhubRootResource extends BaseStanbolResource {
             if(TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
                 ResponseBuilder rb = Response.ok(new Viewable("mapping_symbol", this));
                 rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
-                addCORSOrigin(servletContext, rb, headers);
+                //addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
             } else {
                 return Response.status(Status.BAD_REQUEST).entity("No symbol given. Missing parameter id.\n")
                     .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
             }
         }
-        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
+        //Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
         Collection<Entity> mappings;
         try {
             mappings = entityhub.getMappingsByTarget(symbol);
@@ -816,7 +817,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
                     mappings, Entity.class);
             ResponseBuilder rb = Response.ok(mappingResultList);
             rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
+            //addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         }
     }
@@ -827,7 +828,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
     @Path("/ldpath")
     public Response handleCorsPreflightLDPath(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers,OPTIONS,GET,POST);
+        //enableCORS(servletContext, res, headers,OPTIONS,GET,POST);
         return res.build();
     }
     @GET
@@ -844,9 +845,9 @@ public class EntityhubRootResource extends BaseStanbolResource {
              @FormParam(value = "context")Set<String> contexts,
              @FormParam(value = "ldpath")String ldpath,
              @Context HttpHeaders headers){
-        Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
+        //Entityhub entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
         return handleLDPathRequest(this,new YardBackend(entityhub.getYard()), 
-            ldpath, contexts, headers, servletContext);
+            ldpath, contexts, headers);
     }
 
 }

@@ -17,7 +17,6 @@
 package org.apache.stanbol.reasoners.web.resources;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -37,8 +35,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.stanbol.commons.viewable.Viewable;
-import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.stanbol.commons.web.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningService;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServicesManager;
@@ -57,12 +54,10 @@ import org.slf4j.LoggerFactory;
 @Path("/reasoners")
 public class ReasoningServicesResource extends BaseStanbolResource {
     private Logger log = LoggerFactory.getLogger(getClass());
-    private ServletContext context;
     private UriInfo uriInfo;
 
-    public ReasoningServicesResource(@Context ServletContext servletContext, @Context UriInfo uriInfo) {
+    public ReasoningServicesResource(@Context UriInfo uriInfo) {
         super();
-        this.context = servletContext;
         this.uriInfo = uriInfo;
     }
 
@@ -75,11 +70,11 @@ public class ReasoningServicesResource extends BaseStanbolResource {
     public Response getDocumentation(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok(new Viewable("index", this));
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
     private ReasoningService<?,?,?> service = null;
+    private ReasoningServicesManager reasoningServicesManager;
     
     @GET
     @Produces(TEXT_HTML)
@@ -93,20 +88,17 @@ public class ReasoningServicesResource extends BaseStanbolResource {
 			
 			ResponseBuilder rb = Response.status(Status.NOT_FOUND);
 	        rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-	        addCORSOrigin(servletContext, rb, headers);
 	        return rb.build();
 			
 		}
     	 ResponseBuilder rb = Response.ok(new Viewable("service", this));
          rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-         addCORSOrigin(servletContext, rb, headers);
          return rb.build();
     }
     
     private ReasoningServicesManager getServicesManager() {
         log.debug("(getServicesManager()) ");
-        return (ReasoningServicesManager) ContextHelper.getServiceFromContext(ReasoningServicesManager.class,
-            this.context);
+        return reasoningServicesManager;
     }
 
     public Set<ReasoningService<?,?,?>> getActiveServices() {

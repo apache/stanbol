@@ -50,9 +50,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -63,8 +61,11 @@ import javax.ws.rs.ext.Provider;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
-import org.apache.clerezza.rdf.core.serializedform.UnsupportedSerializationFormatException;
 import org.apache.commons.io.IOUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.http.entity.mime.FormBodyPart;
 import org.apache.http.entity.mime.HttpMultipart;
 import org.apache.http.entity.mime.MIME;
@@ -72,7 +73,6 @@ import org.apache.http.entity.mime.content.AbstractContentBody;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.ContentDescriptor;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -80,6 +80,9 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+@Component
+@Service(Object.class)
+@Property(name = "javax.ws.rs", boolValue = true)
 @Provider
 public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
 
@@ -94,36 +97,11 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
         APPLICATION_JSON_TYPE.getSubtype(),
         Collections.singletonMap("charset", UTF8.toString()));
     
-    private Serializer __serializer;
+    @Reference
+    private Serializer serializer;
     
-    private ServletContext context;
-
-    public ContentItemWriter(@Context ServletContext context){
-        this.context = context;
-    }
-    /**
-     * Lazzy initialisation for the {@link Serializer}
-     * @return the {@link Serializer}
-     */
     protected Serializer getSerializer(){
-        /*
-         * Needed because Jersey tries to create an instance
-         * during initialisation. At that time the {@link BundleContext} required
-         * by {@link ContextHelper#getServiceFromContext(Class, ServletContext)}
-         * is not yet present resulting in an Exception.
-         */
-        if(__serializer == null){
-            if(context != null){
-                __serializer = ContextHelper.getServiceFromContext(Serializer.class, context);
-            } else {
-                throw new IllegalStateException("ServletContext is NULL!");
-            }
-            if(__serializer == null){
-                throw new IllegalStateException("Clerezza RDF Serializer service is not available(service class:"
-                        + Serializer.class + ")!");
-            }
-        }
-        return __serializer;
+        return serializer;
     }
     
     @Override
@@ -159,29 +137,21 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
                 if (mediaType.isWildcardType() || 
                         TEXT_PLAIN_TYPE.isCompatible(mediaType) || 
                         APPLICATION_OCTET_STREAM_TYPE.isCompatible(mediaType)) {
-                    		mediaType = new MediaType(APPLICATION_JSON_TYPE.getType(), 
-                    		APPLICATION_JSON_TYPE.getSubtype(),
-                    		//Clerezza serialisers are hard coded to use UTF-8
-                    		Collections.singletonMap("charset", UTF8.toString()));
-                    		httpHeaders.putSingle("Content-Type", mediaType.toString());
+                    mediaType = new MediaType(APPLICATION_JSON_TYPE.getType(), 
+                        APPLICATION_JSON_TYPE.getSubtype(),
+                        //Clerezza serialisers are hard coded to use UTF-8
+                        Collections.singletonMap("charset", UTF8.toString()));
+                    httpHeaders.putSingle("Content-Type", mediaType.toString());
                 }
-                try {
-                	getSerializer().serialize(entityStream, ci.getMetadata(), mediaType.toString());
-                } catch (UnsupportedSerializationFormatException e) {
-                    throw new WebApplicationException(
-                            Response.status(Response.Status.NOT_ACCEPTABLE)
-                            .entity("The enhancement results cannot be serialized in " +
-                            		"the requested media type: "+ mediaType.toString())
-                            .build());
-                }
+                getSerializer().serialize(entityStream, ci.getMetadata(), mediaType.toString());
             } else { //  (2) return a single content part
                 Entry<UriRef,Blob> contentPart = getBlob(ci, Collections.singleton(mediaType.toString()));
                 if(contentPart == null){ //no alternate content with the requeste media type
                     throw new WebApplicationException(
                         Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                         .entity("The requested enhancement chain has not created an " +
-                        		"version of the parsed content in the request media " +
-                        		"type "+ mediaType.toString())
+                        		"version of the parsed content in the reuqest media " +
+                        		"type "+mediaType.toString())
                         .build());
                 } else { //found -> stream the content to the client
                     //NOTE: This assumes that the presence of a charset

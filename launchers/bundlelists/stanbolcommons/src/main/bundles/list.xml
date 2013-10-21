@@ -16,12 +16,12 @@
   limitations under the License.
 -->
 <bundles>
-  <startLevel level="5">
+      <startLevel level="5">
     <!-- JDK Package Exporter -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.frameworkfragment</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
   </startLevel>
 
@@ -31,7 +31,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.httpqueryheaders</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
   </startLevel>
 
@@ -55,7 +55,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.installer.bundleprovider</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.sling</groupId>
@@ -147,7 +147,7 @@
       <groupId>com.googlecode.concurrentlinkedhashmap</groupId>
       <artifactId>concurrentlinkedhashmap-lru</artifactId>
       <version>1.4</version>
-    </bundle>
+     </bundle>
     <bundle> <!-- used by Solr and Clerezza -->
       <groupId>com.ibm.icu</groupId>
       <artifactId>icu4j</artifactId>
@@ -223,18 +223,96 @@
     </bundle>
   </startLevel>
   <!-- Jersey -->
+  <!-- javax.annotation has to go first! -->
+  <startLevel level="1">
+      <bundle>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+      <version>1.2</version>
+      </bundle>
+  </startLevel>
   <startLevel level="24">
     <!-- NOTE: jersey-core bug, must start before jersey-server to avoid 
       jersey spi class not found errors. Restart jersey-server manually if getting 
       those. -->
-    <bundle>
+    <!-- <bundle>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>
       <version>1.15</version>
+    </bundle> -->
+    <bundle>
+        <groupId>org.glassfish.jersey.containers</groupId>
+        <!-- if your container implements Servlet API older than 3.0, 
+        use "jersey-container-servlet-core", otherwise
+        "jersey-container-servlet"        -->
+        <artifactId>jersey-container-servlet-core</artifactId>
+        <version>2.2</version>
     </bundle>
+    <bundle>
+        <groupId>javax.validation</groupId>
+        <artifactId>validation-api</artifactId>
+        <version>1.1.0.Final</version>
+    </bundle>
+    <bundle>
+        <groupId>org.glassfish.jersey.core</groupId>
+        <artifactId>jersey-common</artifactId>
+        <version>2.2</version>
+    </bundle>
+    <bundle>
+        <groupId>org.glassfish.jersey.core</groupId>
+        <artifactId>jersey-server</artifactId>
+        <version>2.2</version>
+    </bundle>
+    <bundle>
+        <groupId>org.glassfish.jersey.core</groupId>
+        <artifactId>jersey-client</artifactId>
+        <version>2.2</version>
+    </bundle>
+    <bundle>
+        <groupId>org.glassfish.hk2</groupId>
+        <artifactId>hk2-api</artifactId>
+        <version>2.2.0-b15</version>
+    </bundle>
+    <bundle>
+        <groupId>org.glassfish.hk2</groupId>
+        <artifactId>hk2-locator</artifactId>
+        <version>2.2.0-b15</version>
+    </bundle>
+    <bundle>
+        <groupId>org.glassfish.hk2</groupId>
+        <artifactId>hk2-utils</artifactId>
+        <version>2.2.0-b15</version>
+    </bundle>
+        <bundle>
+        <groupId>org.glassfish.hk2</groupId>
+        <artifactId>osgi-resource-locator</artifactId>
+        <version>1.0.1</version>
+    </bundle>
+
+<bundle>
+        <groupId>org.glassfish.hk2.external</groupId>
+        <artifactId>javax.inject</artifactId>
+        <version>2.1.88</version>
+</bundle>
+<bundle>
+        <groupId>org.glassfish.hk2.external</groupId>
+        <artifactId>asm-all-repackaged</artifactId>
+        <version>2.1.88</version>
+</bundle>
+<bundle>
+        <groupId>org.glassfish.hk2.external</groupId>
+        <artifactId>cglib</artifactId>
+        <version>2.1.88</version>
+</bundle>
+<bundle>
+        <groupId>javax.ws.rs</groupId>
+        <artifactId>javax.ws.rs-api</artifactId>
+        <version>2.0</version>
+</bundle>
+
   </startLevel>
   <startLevel level="25">
-    <bundle>
+    <!-- <bundle>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
       <version>1.15</version>
@@ -243,19 +321,14 @@
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-servlet</artifactId>
       <version>1.15</version>
-    </bundle>
+    </bundle> -->
     <!-- needed to read data from mime multipart requests -->
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>jaxrs.utils</artifactId>
-      <version>0.7</version>
+      <version>0.8</version>
     </bundle>
-    <!-- still used in many places also it only runs on jersey and the code is not portable across jax-rs implementations -->
-    <bundle>
-      <groupId>com.sun.jersey.contribs</groupId>
-      <artifactId>jersey-multipart</artifactId>
-      <version>1.15</version>
-    </bundle>
+
     <!-- dependency of jersey-multipart -->
     <bundle>
       <groupId>org.jvnet</groupId>
@@ -270,12 +343,12 @@
     </bundle>
   </startLevel>
 
-  <!-- Clerezza storage and sparql infrastructure -->
+      <!-- Clerezza storage and sparql infrastructure -->
   <startLevel level="26">
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.core</artifactId>
-      <version>0.12-incubating</version>
+      <version>0.13</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
@@ -295,22 +368,22 @@
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.sparql</artifactId>
-      <version>0.5-incubating</version>
+      <version>0.6</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.commons</artifactId>
-      <version>0.5-incubating</version>
+      <version>0.6</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.facade</artifactId>
-      <version>0.12-incubating</version>
+      <version>0.13</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza.ext</groupId>
-      <artifactId>com.hp.hpl.jena.tdb</artifactId>
-      <version>0.3-incubating</version>
+      <artifactId>org.apache.jena.tdb</artifactId>
+      <version>0.4-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza.ext</groupId>
@@ -320,7 +393,7 @@
     <bundle>
       <groupId>org.wymiwyg</groupId>
       <artifactId>wymiwyg-commons-core</artifactId>
-      <version>0.7.5</version>
+      <version>0.7.6</version>
     </bundle>
     <!-- ICU is an bundle in the meantime
       bundle>
@@ -331,22 +404,22 @@
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.storage</artifactId>
-      <version>0.5-incubating</version>
+      <version>0.6</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.tdb.storage</artifactId>
-      <version>0.5-incubating</version>
+      <version>0.6</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.serializer</artifactId>
-      <version>0.9-incubating</version>
+      <version>0.10</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.parser</artifactId>
-      <version>0.10-incubating</version>
+      <version>0.11</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
@@ -364,10 +437,9 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
   </startLevel>
-
   <!-- Stanbol Commons -->
   <startLevel level="27">
     <!-- Allows to run Stanbol in offline mode -->
@@ -375,78 +447,77 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.stanboltools.offline
       </artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <!-- DataFileProvider and implementations -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider
       </artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider.bundle
       </artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <!-- Namespace prefix service -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.namespaceprefix.service</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle> <!-- Provides the Stanbol specific Prefix Mappings: Backward compatibility -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle> <!-- Provides the namespace prefixes managed by http://prefix.cc -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.prefixcc</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <!-- OWL libraries and utilities -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.owl</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <!-- support for JSON-LD -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.jsonld</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <!-- Support for Jobs -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.jobs.api</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.jobs.web</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
   </startLevel>
-
   <!-- OpenNLP as bundle + utilities -->
   <startLevel level="27">
     <bundle>
       <groupId>org.apache.opennlp</groupId>
       <artifactId>opennlp-maxent</artifactId>
-      <version>3.0.3</version>
+      <version>3.0.2-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.opennlp</groupId>
       <artifactId>opennlp-tools</artifactId>
-      <version>1.5.3</version>
+      <version>1.5.2-incubating</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.opennlp</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
   </startLevel>
   
@@ -455,36 +526,36 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.extras.icu</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
   </startLevel>
   <startLevel level="28">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.web</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle> <!-- defualt config for Solr -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.defaults</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
   </startLevel>
   <startLevel level="29">
     <bundle> <!-- IMPORTANT: this need to be started after commons.solr.defaults! -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.install</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
   </startLevel>
   
@@ -493,22 +564,22 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.resources</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base.jersey</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.home</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
   </startLevel>
   
@@ -527,32 +598,32 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.ldpath.clerezza</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
 	  <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.ldpathtemplate</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
        <groupId>org.apache.stanbol</groupId>
        <artifactId>org.apache.stanbol.commons.freemarker</artifactId>
-       <version>0.12.0-SNAPSHOT</version>
+       <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.rdfviewable.writer</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.viewable.writer</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </bundle>
   </startLevel>
 

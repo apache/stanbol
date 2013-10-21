@@ -16,11 +16,6 @@
  */
 package org.apache.stanbol.entityhub.jersey.resource;
 
-import static javax.ws.rs.HttpMethod.DELETE;
-import static javax.ws.rs.HttpMethod.GET;
-import static javax.ws.rs.HttpMethod.OPTIONS;
-import static javax.ws.rs.HttpMethod.POST;
-import static javax.ws.rs.HttpMethod.PUT;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
@@ -30,8 +25,6 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JS
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
-import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.getAcceptableMediaType;
 import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES;
 import static org.apache.stanbol.entityhub.jersey.utils.JerseyUtils.REPRESENTATION_SUPPORTED_MEDIA_TYPES;
@@ -53,7 +46,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -81,8 +73,7 @@ import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
-import org.apache.stanbol.commons.viewable.Viewable;
-import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.stanbol.commons.web.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.jersey.parsers.FieldQueryReader;
@@ -112,12 +103,19 @@ import org.slf4j.LoggerFactory;
 
 import at.newmedialab.ldpath.exception.LDPathParseException;
 import at.newmedialab.ldpath.model.programs.Program;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 
 /**
  * Resource to provide a REST API for the {@link SiteManager}
  * <p/>
  * TODO: add description
  */
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Path("/entityhub/site/{site}")
 public class ReferencedSiteRootResource extends BaseStanbolResource {
     
@@ -156,21 +154,16 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
      */
     private static final int DEFAULT_FIND_RESULT_LIMIT = 5;
     
-    private Site site;
+    //private Site site;
 
+    @Reference
     private NamespacePrefixService nsPrefixService;
     
-    public ReferencedSiteRootResource(@PathParam(value = "site") String siteId,
-                                      @Context ServletContext servletContext) {
-        super();
-        log.debug("<init> with site {}", siteId);
-        SiteManager referencedSiteManager = ContextHelper.getServiceFromContext(
-            SiteManager.class, servletContext);
-        if (siteId == null || siteId.isEmpty()) {
-            log.error("Missing path parameter site={}", siteId);
-            throw new WebApplicationException(Response.Status.NOT_FOUND);
-        }
-        site = referencedSiteManager.getSite(siteId);
+    @Reference
+    private SiteManager referencedSiteManager;
+    
+    private Site getSite(String siteId) {
+        Site site = referencedSiteManager.getSite(siteId);
         if (site == null) {
             log.error("Site {} not found (no referenced site with that ID is present within the Entityhub",
                 siteId);
@@ -179,22 +172,17 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         if(site instanceof ManagedSite){
             log.debug("   ... init ManagedSite");
         }
-        nsPrefixService = ContextHelper.getServiceFromContext(NamespacePrefixService.class, servletContext);
+        return site;
     }
 
-    @OPTIONS
-    public Response handleCorsPreflight(@Context HttpHeaders headers){
-        ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers);
-        return res.build();
-    }
     
     @GET
     @Produces(value=MediaType.TEXT_HTML)
-    public Response getHtmlInfo(@Context HttpHeaders headers){
+    public Response getHtmlInfo(@PathParam(value = "site") String siteId, 
+            @Context HttpHeaders headers){
         ResponseBuilder rb = Response.ok(new Viewable("index", this));
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
     /**
@@ -205,19 +193,22 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
      */
     @GET
     @Produces({APPLICATION_JSON,RDF_XML,N3,TURTLE,X_TURTLE,RDF_JSON,N_TRIPLE})
-    public Response getInfo(@Context HttpHeaders headers,
+    public Response getInfo(@PathParam(value = "site") String siteId,
+                            @Context HttpHeaders headers,
                             @Context UriInfo uriInfo) {
         MediaType acceptedMediaType = getAcceptableMediaType(headers, REPRESENTATION_SUPPORTED_MEDIA_TYPES,MediaType.APPLICATION_JSON_TYPE);
-        ResponseBuilder rb =  Response.ok(site2Representation(uriInfo.getAbsolutePath().toString()));
+        ResponseBuilder rb =  Response.ok(site2Representation(getSite(siteId), uriInfo.getAbsolutePath().toString()));
         rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
     @GET
     @Path(value=ReferencedSiteRootResource.LICENSE_PATH+"/{name}")
-    public Response getLicenseInfo(@Context HttpHeaders headers,
+    public Response getLicenseInfo(@PathParam(value = "site") String siteId,
+                                   @Context HttpHeaders headers,
                                    @Context UriInfo uriInfo,
                                    @PathParam(value = "name") String name) {
+        Site site = getSite(siteId);
         MediaType acceptedMediaType = getAcceptableMediaType(headers, MediaType.APPLICATION_JSON_TYPE);
         if(name == null || name.isEmpty()){
             //return all
@@ -237,7 +228,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                             ResponseBuilder rb = Response.ok(
                                 license2Representation(uriInfo.getAbsolutePath().toString(),license));
                             rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
-                            addCORSOrigin(servletContext, rb, headers);
+                            //addCORSOrigin(servletContext, rb, headers);
                             return rb.build();
                         }
                     }
@@ -252,12 +243,14 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     }
     @OPTIONS
     @Path("/entity")
-    public Response handleCorsPreflightEntity(@Context HttpHeaders headers){
+    public Response handleCorsPreflightEntity(@PathParam(value = "site") String siteId,
+            @Context HttpHeaders headers){
+        Site site = getSite(siteId);
         ResponseBuilder res = Response.ok();
         if(site instanceof ManagedSite){
-            enableCORS(servletContext, res, headers, OPTIONS,GET,POST,PUT,DELETE);
+            //enableCORS(servletContext, res, headers, OPTIONS,GET,POST,PUT,DELETE);
         } else {
-            enableCORS(servletContext, res, headers,OPTIONS,GET);
+            //enableCORS(servletContext, res, headers,OPTIONS,GET);
         }
         return res.build();
     }
@@ -273,7 +266,9 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
      */
     @GET
     @Path("/entity")
-    public Response getEntityById(@QueryParam(value = "id") String id, @Context HttpHeaders headers) {
+    public Response getEntityById(@PathParam(value = "site") String siteId,
+            @QueryParam(value = "id") String id, @Context HttpHeaders headers) {
+        Site site = getSite(siteId);
         log.debug("site/{}/entity Request",site.getId());
         log.debug("  > id       : " + id);
         log.debug("  > accept   : " + headers.getAcceptableMediaTypes());
@@ -286,7 +281,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
             if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
                 ResponseBuilder rb = Response.ok(new Viewable("entity", this));
                 rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
-                addCORSOrigin(servletContext, rb, headers);
+               // addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
             } else {
                 return Response.status(Status.BAD_REQUEST)
@@ -306,7 +301,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         if (entity != null) {
             ResponseBuilder rb =  Response.ok(entity);
             rb.header(HttpHeaders.CONTENT_TYPE, acceptedMediaType+"; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
+            //addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         } else {
             // TODO: How to parse an ErrorMessage?
@@ -321,7 +316,8 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     @POST
     @Path("entity/")
     @Consumes(MediaType.WILDCARD)
-    public Response createEntity(@QueryParam(value = "id") String id,
+    public Response createEntity(@PathParam(value = "site") String siteId,
+                                 @QueryParam(value = "id") String id,
                                  @QueryParam(value = "update") boolean allowUpdate,
                                  Map<String,Representation> parsed,
                                  @Context HttpHeaders headers){
@@ -330,13 +326,14 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         log.info("Headers: "+headers.getRequestHeaders());
         log.info("Entity: "+id);
         log.info("Representations : {} parsed",parsed.size());
-        return updateOrCreateEntity(id, parsed, HttpMethod.POST, true,allowUpdate,headers);
+        return updateOrCreateEntity(getSite(siteId), id, parsed, HttpMethod.POST, true,allowUpdate,headers);
     }
 
     @PUT
     @Path("entity/")
     @Consumes(MediaType.WILDCARD)
-    public Response updateEntity(@QueryParam(value = "id") String id, 
+    public Response updateEntity(@PathParam(value = "site") String siteId, 
+                                 @QueryParam(value = "id") String id, 
                                  @QueryParam(value = "create") @DefaultValue("true") boolean allowCreate,
                                  Map<String,Representation> parsed,
                                  @Context HttpHeaders headers){
@@ -345,10 +342,10 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         log.info("Headers: "+headers.getRequestHeaders());
         log.info("Entity: "+id);
         log.info("Representations : {} parsed", parsed.size());
-        return updateOrCreateEntity(id, parsed, HttpMethod.PUT, allowCreate, true, headers);
+        return updateOrCreateEntity(getSite(siteId), id, parsed, HttpMethod.PUT, allowCreate, true, headers);
     }
     
-    private Response updateOrCreateEntity(String id,
+    private Response updateOrCreateEntity(Site site, String id,
                                           Map<String,Representation> parsed,
                                           String requestMethod,
                                           boolean create,
@@ -366,7 +363,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                 String.format("The Site '%s' is not managed and does not support "
                     +"create/update nor delete operations",site.getId()))
             .header(HttpHeaders.ACCEPT, accepted);
-            addCORSOrigin(servletContext, builder, headers);
+            //addCORSOrigin(servletContext, builder, headers);
             return builder.build();
         }
         //(1) if an id is parsed we need to ignore all other representations
@@ -377,7 +374,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                 .entity(String.format("Parsed RDF data do not contain any "
                     + "Information about the parsed id '%s'",id))
                     .header(HttpHeaders.ACCEPT, accepted);
-                addCORSOrigin(servletContext, builder, headers);
+                //addCORSOrigin(servletContext, builder, headers);
                 return builder.build();
             } else {
                 parsed = Collections.singletonMap(id, r);
@@ -401,7 +398,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                             "Entity within the Entityhub (Message: %s)",
                             entry.getKey(),e.getMessage()))
                             .header(HttpHeaders.ACCEPT, accepted);
-                    addCORSOrigin(servletContext, builder, headers);
+                    //addCORSOrigin(servletContext, builder, headers);
                     return builder.build();
                 }
                 if((exists && !update) || (!exists && !create)){
@@ -414,7 +411,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                         exists ? "does already" : "does not exists",
                         exists ? "update" : "create"))
                         .header(HttpHeaders.ACCEPT, accepted);
-                    addCORSOrigin(servletContext, builder, headers);
+                    //addCORSOrigin(servletContext, builder, headers);
                     return builder.build();
 
                 }
@@ -433,7 +430,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                 + managedSite.getId() +" because of an error (Message: "
                 + e.getMessage()+")")
             .header(HttpHeaders.ACCEPT, accepted);
-            addCORSOrigin(servletContext, builder, headers);
+            //addCORSOrigin(servletContext, builder, headers);
             return builder.build();
         }
         ResponseBuilder builder;
@@ -447,18 +444,20 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         }
         log.info("   ... create/update {} entities in {}ms",
             parsed.size(),System.currentTimeMillis()-validateCompleted);
-        addCORSOrigin(servletContext, builder, headers);
+        //addCORSOrigin(servletContext, builder, headers);
         return builder.build();
     }
 
     @DELETE
     @Path("entity/")
-    public Response deleteEntity(@QueryParam(value="id") String id,
+    public Response deleteEntity(@PathParam(value = "site") String siteId,
+                                 @QueryParam(value="id") String id,
                                  @Context HttpHeaders headers){
         MediaType accepted = getAcceptableMediaType(headers,
             JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES, 
             MediaType.APPLICATION_JSON_TYPE);
         ManagedSite managedSite;
+        Site site = getSite(siteId);
         if(site instanceof ManagedSite){
             managedSite = (ManagedSite)site;
         } else {
@@ -466,14 +465,14 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                 String.format("The Site '%s' is not managed and does not support "
                     +"create/update nor delete operations",site.getId()))
             .header(HttpHeaders.ACCEPT, accepted);
-            addCORSOrigin(servletContext, builder, headers);
+            //addCORSOrigin(servletContext, builder, headers);
             return builder.build();
         }
         if(id == null || id.isEmpty()){
             ResponseBuilder builder =  Response.status(Status.BAD_REQUEST).entity("The Request does" +
                     "not provide the id of the Entity to delete (parameter 'id').")
                     .header(HttpHeaders.ACCEPT, accepted);
-            addCORSOrigin(servletContext, builder, headers);
+            //addCORSOrigin(servletContext, builder, headers);
             return builder.build();
         }
         ResponseBuilder builder;
@@ -498,20 +497,21 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
             .entity(message + ' '+ e.getClass().getSimpleName()+": "+ e.getMessage())
             .header(HttpHeaders.ACCEPT, accepted);
         }
-        addCORSOrigin(servletContext, builder, headers);
+        //addCORSOrigin(servletContext, builder, headers);
         return builder.build();
     }    
     @OPTIONS
     @Path("/find")
     public Response handleCorsPreflightFind(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers);
+        //enableCORS(servletContext, res, headers);
         return res.build();
     }
     
     @GET
     @Path("/find")
-    public Response findEntitybyGet(@QueryParam(value = "name") String name,
+    public Response findEntitybyGet(@PathParam(value = "site") String siteId,
+                                    @QueryParam(value = "name") String name,
                                     @QueryParam(value = "field") String field,
                                     @QueryParam(value = "lang") String language,
                                     // @QueryParam(value="select") String select,
@@ -519,12 +519,13 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                                     @QueryParam(value = "offset") @DefaultValue(value = "0") int offset,
                                     @QueryParam(value = "ldpath") String ldpath,
                                     @Context HttpHeaders headers) {
-        return findEntity(name, field, language, limit, offset, ldpath, headers);
+        return findEntity(siteId, name, field, language, limit, offset, ldpath, headers);
     }
     
     @POST
     @Path("/find")
-    public Response findEntity(@FormParam(value = "name") String name,
+    public Response findEntity(@PathParam(value = "site") String siteId,
+                               @FormParam(value = "name") String name,
                                @FormParam(value = "field") String parsedField,
                                @FormParam(value = "lang") String language,
                                // @FormParam(value="select") String select,
@@ -532,6 +533,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                                @FormParam(value = "offset") Integer offset,
                                @FormParam(value = "ldpath") String ldpath,
                                @Context HttpHeaders headers) {
+        Site site = getSite(siteId);
         log.debug("site/{}/find Request",site.getId());
         Collection<String> supported = new HashSet<String>(JerseyUtils.QUERY_RESULT_SUPPORTED_MEDIA_TYPES);
         supported.add(TEXT_HTML);
@@ -541,7 +543,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
             if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
                 ResponseBuilder rb = Response.ok(new Viewable("find", this));
                 rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
-                addCORSOrigin(servletContext, rb, headers);
+                //addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
             } else {
                 return Response.status(Status.BAD_REQUEST)
@@ -568,7 +570,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
                 }
             }
         }
-        return executeQuery(createFieldQueryForFindRequest(
+        return executeQuery(site, createFieldQueryForFindRequest(
                 name, property, language,
                 limit == null || limit < 1 ? DEFAULT_FIND_RESULT_LIMIT : limit, 
                 offset,ldpath),
@@ -579,7 +581,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     @Path("/query")
     public Response handleCorsPreflightQuery(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers);
+        //enableCORS(servletContext, res, headers);
         return res.build();
     }
     /**
@@ -596,9 +598,10 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     @POST
     @Path("/query")
     @Consumes( {APPLICATION_JSON})
-    public Response queryEntities(FieldQuery query,
+    public Response queryEntities(@PathParam(value = "site") String siteId,
+                                  FieldQuery query,
                                   @Context HttpHeaders headers) {
-        return executeQuery(query,headers);
+        return executeQuery(getSite(siteId), query,headers);
     }
     @GET
     @Path("/query")
@@ -606,7 +609,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     public Response getQueryDocumentation(@Context HttpHeaders headers){
         ResponseBuilder rb = Response.ok(new Viewable("query", this));
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
     
@@ -619,12 +622,12 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
      * @param headers the request headers
      * @return the response (results of error)
      */
-    private Response executeQuery(FieldQuery query, HttpHeaders headers) throws WebApplicationException {
+    private Response executeQuery(Site site, FieldQuery query, HttpHeaders headers) throws WebApplicationException {
         MediaType mediaType = getAcceptableMediaType(headers, ENTITY_SUPPORTED_MEDIA_TYPES, 
             APPLICATION_JSON_TYPE);
         if(query instanceof LDPathSelect && ((LDPathSelect)query).getLDPathSelect() != null){
             //use the LDPath variant to process this query
-            return executeLDPathQuery(query, ((LDPathSelect)query).getLDPathSelect(),
+            return executeLDPathQuery(site, query, ((LDPathSelect)query).getLDPathSelect(),
                 mediaType, headers);
         } else { //use the default query execution
             QueryResultList<Representation> result;
@@ -640,7 +643,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
             }
             ResponseBuilder rb = Response.ok(result);
             rb.header(HttpHeaders.CONTENT_TYPE, mediaType+"; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
+            //addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         }
     }
@@ -652,7 +655,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
      * @param headers the http headers of the request
      * @return the response
      */
-    private Response executeLDPathQuery(FieldQuery query, String ldpathProgramString, MediaType mediaType, HttpHeaders headers) {
+    private Response executeLDPathQuery(Site site, FieldQuery query, String ldpathProgramString, MediaType mediaType, HttpHeaders headers) {
         QueryResultList<Representation> result;
         ValueFactory vf = new RdfValueFactory(new IndexedMGraph());
         SiteBackend backend = new SiteBackend(site,vf);
@@ -702,7 +705,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         result = new QueryResultListImpl<Representation>(query, transformedResults, Representation.class);
         ResponseBuilder rb = Response.ok(result);
         rb.header(HttpHeaders.CONTENT_TYPE, mediaType+"; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -714,25 +717,27 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     @Path("/ldpath")
     public Response handleCorsPreflightLDPath(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
-        enableCORS(servletContext, res, headers,OPTIONS,GET,POST);
+        //enableCORS(servletContext, res, headers,OPTIONS,GET,POST);
         return res.build();
     }
     @GET
     @Path("/ldpath")
-    public Response handleLDPathGet(
+    public Response handleLDPathGet(@PathParam(value = "site") String siteId,
             @QueryParam(value = "context")Set<String> contexts,
             @QueryParam(value = "ldpath")String ldpath,
             @Context HttpHeaders headers){
-        return handleLDPathPost(contexts, ldpath, headers);
+        return handleLDPathPost(siteId, contexts, ldpath, headers);
     }
     @POST
     @Path("/ldpath")
     public Response handleLDPathPost(
+             @PathParam(value = "site") String siteId,
              @FormParam(value = "context")Set<String> contexts,
              @FormParam(value = "ldpath")String ldpath,
              @Context HttpHeaders headers){
+        Site site = getSite(siteId);
         return handleLDPathRequest(this,new SiteBackend(site), 
-            ldpath, contexts, headers, servletContext);
+            ldpath, contexts, headers);
     }
     
     /*
@@ -743,7 +748,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
      * @param context
      * @return
      */
-    private Representation site2Representation(String id){
+    private Representation site2Representation(Site site, String id){
         RdfValueFactory valueFactory = RdfValueFactory.getInstance();
         RdfRepresentation rep = valueFactory.createRepresentation(id);
         String namespace = NamespaceEnum.entityhub.getNamespace();
@@ -822,10 +827,4 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         return rep;
     }
     
-    public boolean isManagedSite(){
-        return site instanceof ManagedSite;
-    }
-    public Site getSite(){
-        return site;
-    }
 }

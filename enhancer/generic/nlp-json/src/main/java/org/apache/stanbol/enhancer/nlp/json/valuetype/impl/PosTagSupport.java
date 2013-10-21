@@ -28,7 +28,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.enhancer.nlp.json.JsonUtils;
 import org.apache.stanbol.enhancer.nlp.json.valuetype.ValueTypeParser;
 import org.apache.stanbol.enhancer.nlp.json.valuetype.ValueTypeSerializer;
-import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.Pos;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
@@ -59,7 +58,7 @@ public class PosTagSupport implements ValueTypeParser<PosTag>, ValueTypeSerializ
         return PosTag.class;
     }
     @Override
-    public PosTag parse(ObjectNode jValue, AnalysedText at) {
+    public PosTag parse(ObjectNode jValue) {
         PosTagInfo tagInfo = new PosTagInfo();
         JsonNode tag = jValue.path("tag");
         if(!tag.isTextual()){

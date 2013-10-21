@@ -47,7 +47,9 @@ import java.util.Set;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.ext.RuntimeDelegate;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
@@ -70,12 +72,13 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata;
+import org.glassfish.jersey.internal.RuntimeDelegateImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.core.util.StringKeyIgnoreCaseMultivaluedMap;
+//import com.sun.jersey.core.util.StringKeyIgnoreCaseMultivaluedMap;
 
 public class ContentItemReaderWriterTest {
     
@@ -100,6 +103,7 @@ public class ContentItemReaderWriterTest {
                 "    This is a <b>ContentItem</b> to <i>Mime Multipart</i> test!\n" +
                 "  </body>\n" +
                 "</html>","text/html"));
+        RuntimeDelegate.setInstance(new RuntimeDelegateImpl());
         contentItem.addPart(new UriRef("run:text:text"), 
             ciFactory.createBlob(new StringSource(
             "This is a ContentItem to Mime Multipart test!")));
@@ -119,7 +123,7 @@ public class ContentItemReaderWriterTest {
         final Serializer serializer = new Serializer();
         serializer.bindSerializingProvider(new JenaSerializerProvider());
         serializer.bindSerializingProvider(new JsonLdSerializerProvider());
-        ciWriter = new ContentItemWriter(null) {
+        ciWriter = new ContentItemWriter() {
             protected org.apache.clerezza.rdf.core.serializedform.Serializer getSerializer() {
                 return serializer;
             };
@@ -127,7 +131,7 @@ public class ContentItemReaderWriterTest {
 
         final Parser parser = new Parser();
         parser.bindParsingProvider(new JenaParserProvider());
-        ciReader = new ContentItemReader(null){
+        ciReader = new ContentItemReader(){
             @Override
             protected Parser getParser() {
                 return parser;
@@ -144,7 +148,7 @@ public class ContentItemReaderWriterTest {
      * @throws IOException
      */
     private MediaType serializeContentItem(ByteArrayOutputStream out) throws IOException {
-        MultivaluedMap<String,Object> headers = new StringKeyIgnoreCaseMultivaluedMap<Object>();
+        MultivaluedMap<String,Object> headers = new MultivaluedHashMap<String, Object>();//StringKeyIgnoreCaseMultivaluedMap<Object>();
         ciWriter.writeTo(contentItem, ContentItem.class, null, null, MediaType.MULTIPART_FORM_DATA_TYPE, 
             headers , out);
         //check the returned content type

@@ -148,7 +148,6 @@ public class RecipeInputProvider implements ReasoningServiceInputProvider {
 	                return iterator.hasNext();
 	            }
 
-	            @SuppressWarnings("unchecked")
 	            @Override
 	            public T next() {
 	                return (T) iterator.next();
@@ -222,7 +221,6 @@ public class RecipeInputProvider implements ReasoningServiceInputProvider {
 	                return jRiterator.hasNext();
 	            }
 
-	            @SuppressWarnings("unchecked")
 	            @Override
 	            public T next() {
 	                return (T) jRiterator.next();

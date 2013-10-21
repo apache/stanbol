@@ -18,8 +18,6 @@ package org.apache.stanbol.commons.web.sparql.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
-import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,11 +25,9 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -50,8 +46,12 @@ import org.apache.clerezza.rdf.core.sparql.QueryParser;
 import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
 import org.apache.clerezza.rdf.core.sparql.query.DescribeQuery;
 import org.apache.clerezza.rdf.core.sparql.query.Query;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.viewable.Viewable;
-import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -78,6 +78,9 @@ import org.osgi.framework.ServiceReference;
  * </p>
  * 
  */
+@Component
+@Service(Object.class)
+@Property(name = "javax.ws.rs", boolValue = true)
 @Path("/sparql")
 public class SparqlEndpointResource extends BaseStanbolResource {
 
@@ -104,23 +107,25 @@ public class SparqlEndpointResource extends BaseStanbolResource {
         
     };
     
-    private ServletContext servletContext;
-
+    @Reference
     protected TcManager tcManager;
 
     private static final String GRAPH_URI = "graph.uri";
+    private BundleContext bundleContext;
 
-    public SparqlEndpointResource(@Context ServletContext servletContext) {
-        this.tcManager = ContextHelper.getServiceFromContext(TcManager.class, servletContext);
-        this.servletContext = servletContext;
+
+    @Activate
+    protected void activate(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 
-    @OPTIONS
+    //TODO re-enable
+    /*@OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder res = Response.ok();
         enableCORS(servletContext, res, headers);
         return res.build();
-    }
+    }*/
 
     /**
      * HTTP GET service to execute SPARQL queries on {@link TripleCollection}s registered to OSGi environment.
@@ -165,7 +170,7 @@ public class SparqlEndpointResource extends BaseStanbolResource {
             rb = Response.status(Status.NOT_FOUND).entity(
                 String.format("There is no registered graph with given uri: %s", graphUri));
         }
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -210,7 +215,6 @@ public class SparqlEndpointResource extends BaseStanbolResource {
 
     private LinkedHashMap<ServiceReference,TripleCollection> getServices(String graphUri) throws InvalidSyntaxException {
         LinkedHashMap<ServiceReference,TripleCollection> registeredGraphs = new LinkedHashMap<ServiceReference,TripleCollection>();
-        BundleContext bundleContext = ContextHelper.getBundleContext(servletContext);
         ServiceReference[] refs = bundleContext.getServiceReferences(TripleCollection.class.getName(),
             getFilter(graphUri));
         if (refs != null) {

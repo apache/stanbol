@@ -23,8 +23,11 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 
-import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
@@ -34,34 +37,22 @@ import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Path("/entityhub/site/{site}/reconcile")
 public class ReferencedSiteReconcileResource extends BaseGoogleRefineReconcileResource {
     
     private final Logger log = LoggerFactory.getLogger(ReferencedSiteReconcileResource.class);
-    private SiteManager _siteManager;
-    private final String siteId;
     
-    public ReferencedSiteReconcileResource(@Context ServletContext context,
-                                           @PathParam(value = "site") String siteId) {
-       super(context);
-       if (siteId == null || siteId.isEmpty()) {
-           log.error("Missing path parameter site={}", siteId);
-           throw new WebApplicationException(Response.Status.NOT_FOUND);
-       }
-       this.siteId = siteId;
-    }
-    private Site getSite() throws WebApplicationException {
-        if(_siteManager == null){
-            _siteManager = ContextHelper.getServiceFromContext(
-                SiteManager.class, servletContext);
-            if(_siteManager == null){
-                throw new IllegalStateException("Unable to lookup ReferencedSite '"
-                        +siteId+"' because ReferencedSiteManager service is unavailable!");
-            }
-        }
+    @Reference
+    private SiteManager _siteManager;
+
+    private Site getSite(String siteId) throws WebApplicationException {
+        
         Site site = _siteManager.getSite(siteId);
         if (site == null) {
-            String message = String.format("ReferencedSite '%s' not acitve!",siteId);
+            String message = String.format("ReferencedSite '%s' not active!",siteId);
             log.error(message);
             throw new WebApplicationException(
                 Response.status(Status.NOT_FOUND).entity(message).build());
@@ -73,16 +64,16 @@ public class ReferencedSiteReconcileResource extends BaseGoogleRefineReconcileRe
      * @return
      * @throws SiteException
      */
-    protected QueryResultList<Representation> performQuery(FieldQuery query) throws SiteException {
-        return getSite().find(query);
+    protected QueryResultList<Representation> performQuery(@PathParam(value = "site") String siteId, FieldQuery query) throws SiteException {
+        return getSite(siteId).find(query);
     }
     @Override
-    protected String getSiteName() {
-        return getSite().getId() + "Referenced Site";
+    protected String getSiteName(@PathParam(value = "site") String siteId) {
+        return getSite(siteId).getId() + "Referenced Site";
     }
     @Override
-    protected FieldQuery createFieldQuery() {
-        return getSite().getQueryFactory().createFieldQuery();
+    protected FieldQuery createFieldQuery(@PathParam(value = "site") String siteId) {
+        return getSite(siteId).getQueryFactory().createFieldQuery();
     }
     
 }

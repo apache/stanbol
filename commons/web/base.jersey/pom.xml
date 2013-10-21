@@ -21,13 +21,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>4-SNAPSHOT</version>
+    <version>5-SNAPSHOT</version>
     <relativePath>../../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.web.base.jersey</artifactId>
-  <version>0.12.0-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Web Base Jersey</name>
@@ -67,28 +67,13 @@
             <Private-Package>
               org.apache.stanbol.commons.web.base.jersey;version=${project.version}
             </Private-Package>
-            <Import-Package>
-              !javax.servlet.jsp.*,
-              !org.apache.tools.*,
-              !org.mortbay.*,
-              !org.apache.xpath.*,
-              !org.jdom.*,
-              !org.jaxen.*,
-              !org.apache.xml.*,
-              !org.mozilla.javascript.*,
-              !org.python.*,
-              !org.dom4j.*,
-              !org.apache.log.*,
-              !com.sun.org.apache.*,
-              !javax.el,
-              !org.slf4j.spi,
-              !org.zeroturnaround.javarebel,
+            <!-- <Import-Package>
               javax.servlet; version="[2.5.0,4.0.0)",
               javax.servlet.http; version="[2.5.0,4.0.0)",
               org.apache.stanbol.commons.web.base,
               org.apache.stanbol.commons.web.base.*,
               *
-            </Import-Package>
+            </Import-Package> -->
           </instructions>
         </configuration>
       </plugin>
@@ -97,23 +82,29 @@
 
   <dependencies>
       <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+      </dependency>
+      <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     
     <!-- Jersey -->
     <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-server</artifactId>
+        <groupId>org.glassfish.jersey.containers</groupId>
+        <!-- if your container implements Servlet API older than 3.0, 
+        use "jersey-container-servlet-core", otherwise
+        "jersey-container-servlet"        -->
+        <artifactId>jersey-container-servlet-core</artifactId>
+        <version>2.2</version>
     </dependency>
+    <!-- jersey depends on unavailable version -->
     <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-servlet</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-core</artifactId>
+        <groupId>javax.annotation</groupId>
+        <artifactId>javax.annotation-api</artifactId>
+        <version>1.2-b04</version>
     </dependency>
     <!-- <dependency>
       <groupId>com.sun.jersey</groupId>
@@ -139,13 +130,11 @@
       <artifactId>org.apache.felix.scr.annotations</artifactId>
     </dependency>
 
-    <!-- Jetty -->
+    <!-- only for temporary workaround for STANBOL-1073, TODO: update zz dependencies and remove -->
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty</artifactId>
-      <scope>provided</scope>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.core</artifactId>
     </dependency>
-
     <!-- for tests -->
     <dependency>
       <groupId>junit</groupId>

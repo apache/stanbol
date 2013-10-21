@@ -21,13 +21,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>4-SNAPSHOT</version>
+    <version>5-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.rules.web</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Rules Web</name>
@@ -63,7 +63,7 @@
               !org.apache.felix.http.jetty, 
               !org.mortbay.jetty.*,
               javax.servlet.*; version="[2.5.0,4.0.0)",
-              javax.ws.rs.*; version="[0,2)",
+              javax.ws.rs.*; version="[2.0,3)",
               org.apache.stanbol.commons.web.base; provide:=true,
               *
             </Import-Package>
@@ -96,32 +96,32 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
-    <version>0.11.0</version>      
+    <version>1.0.0-SNAPSHOT</version>      
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.manager</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.refactor</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.base</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.owl</artifactId>
-      <version>0.11.0</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -141,20 +141,26 @@
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
     </dependency>
-    
+    <!--
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
+      <version>1.15</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>
+      <version>1.15</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-multipart</artifactId>
+      <version>1.15</version>
+      <scope>compile</scope>
     </dependency>
-   
+   -->
 
     <!-- OSGi tax -->
     <dependency>
@@ -175,7 +181,12 @@
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.core</artifactId>
     </dependency>
-    	
+       
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>jaxrs.utils</artifactId>
+    </dependency>
+   
     	<!-- Tests -->
     <dependency>
         <groupId>junit</groupId>

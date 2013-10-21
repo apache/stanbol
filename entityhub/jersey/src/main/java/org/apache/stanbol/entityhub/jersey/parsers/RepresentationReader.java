@@ -48,8 +48,11 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedParsingFormatException;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
-import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.jersey.utils.MessageBodyReaderUtils;
 import org.apache.stanbol.entityhub.jersey.utils.MessageBodyReaderUtils.RequestData;
@@ -68,6 +71,9 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  *
  */
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Provider
 @Consumes({ //First the data types directly supported for parsing representations
             MediaType.APPLICATION_JSON, SupportedFormat.N3, SupportedFormat.N_TRIPLE,
@@ -79,8 +85,7 @@ import org.slf4j.LoggerFactory;
 public class RepresentationReader implements MessageBodyReader<Map<String,Representation>> {
     
     private static final Logger log = LoggerFactory.getLogger(RepresentationReader.class);
-    @Context
-    protected ServletContext servletContext;
+
 
     public static final Set<String> supportedMediaTypes;
     private static final MediaType DEFAULT_ACCEPTED_MEDIA_TYPE = MediaType.TEXT_PLAIN_TYPE;
@@ -96,6 +101,9 @@ public class RepresentationReader implements MessageBodyReader<Map<String,Repres
         types.add(SupportedFormat.X_TURTLE.toLowerCase());
         supportedMediaTypes = Collections.unmodifiableSet(types);
     }
+    
+    @Reference
+    private Parser parser;
     
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
@@ -240,7 +248,6 @@ public class RepresentationReader implements MessageBodyReader<Map<String,Repres
             RdfValueFactory valueFactory = RdfValueFactory.getInstance();
             Map<String,Representation> representations = new HashMap<String,Representation>();
             Set<NonLiteral> processed = new HashSet<NonLiteral>();
-            Parser parser = ContextHelper.getServiceFromContext(Parser.class, servletContext);
             MGraph graph = new IndexedMGraph();
             try {
                 parser.parse(graph,content.getEntityStream(), content.getMediaType().toString());

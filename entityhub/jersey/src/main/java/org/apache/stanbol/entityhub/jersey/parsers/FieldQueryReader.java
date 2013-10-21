@@ -39,9 +39,12 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
-import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.core.query.FieldQueryImpl;
@@ -63,6 +66,9 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Provider
 public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
     private static final Logger log = LoggerFactory.getLogger(FieldQueryReader.class);
@@ -70,14 +76,11 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
     private static final ValueFactory valueFactory = InMemoryValueFactory.getInstance();
     private static final ValueConverterFactory converterFactory = ValueConverterFactory.getDefaultInstance();
     
-    private ServletContext context;
-    
-    public FieldQueryReader(@Context ServletContext context) {
-        this.context = context;
-    }
+    @Reference
+    NamespacePrefixService namespacePrefixService;
     
     private NamespacePrefixService getNsPrefixService(){
-        return ContextHelper.getServiceFromContext(NamespacePrefixService.class, context);
+        return namespacePrefixService;
     }
     
     @Override

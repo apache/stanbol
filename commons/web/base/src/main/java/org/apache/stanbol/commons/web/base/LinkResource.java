@@ -20,6 +20,7 @@ package org.apache.stanbol.commons.web.base;
  * Simple data transfer object for stylesheet (CSS) and fiveicon list to be contributed by WebFragment for
  * inclusion to the HTML head of the pages by the NavigationMixin abstract JAX-RS resource.
  */
+@Deprecated
 public class LinkResource implements Comparable<LinkResource> {
 
     private final String rel;

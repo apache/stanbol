@@ -34,9 +34,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
@@ -44,10 +42,12 @@ import javax.ws.rs.ext.Provider;
 
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
-import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.felix.scr.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+//TODO check if clerezza rdf.jaxrs prvoder fits the purpose?
+//TODO make it a service/component
 @Provider
 // @Produces({TEXT_PLAIN, N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE, RDF_JSON, APPLICATION_JSON})
 public class GraphWriter implements MessageBodyWriter<TripleCollection> {
@@ -70,12 +70,8 @@ public class GraphWriter implements MessageBodyWriter<TripleCollection> {
 
     public static final String ENCODING = "UTF-8";
 
-    @Context
-    protected ServletContext servletContext;
-
-    protected Serializer getSerializer() {
-        return ContextHelper.getServiceFromContext(Serializer.class, servletContext);
-    }
+    @Reference
+    private Serializer serializer;
 
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
         String mediaTypeString = mediaType.getType() + '/' + mediaType.getSubtype();
@@ -103,9 +99,9 @@ public class GraphWriter implements MessageBodyWriter<TripleCollection> {
         if (mediaType.isWildcardType() || TEXT_PLAIN.equals(mediaTypeString)
             || APPLICATION_OCTET_STREAM.equals(mediaTypeString)) {
             httpHeaders.putSingle("Content-Type", APPLICATION_JSON);
-            getSerializer().serialize(entityStream, t, APPLICATION_JSON);
+            serializer.serialize(entityStream, t, APPLICATION_JSON);
         } else {
-            getSerializer().serialize(entityStream, t, mediaTypeString);
+            serializer.serialize(entityStream, t, mediaTypeString);
         }
         log.debug("Serialized {} in {}ms", t.size(), System.currentTimeMillis() - start);
     }

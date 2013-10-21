@@ -21,13 +21,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>4-SNAPSHOT</version>
+    <version>5-SNAPSHOT</version>
     <relativePath>../../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-  <version>0.12.0-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Web Base</name>
@@ -70,9 +70,9 @@
             </Export-Package>
             <Import-Package>
               javax.servlet.*; version="[2.5.0,4.0.0)",
-              javax.ws.rs;version="[0,2)",
-              javax.ws.rs.ext;version="[0,2)",
-              javax.ws.rs.core;version="[0,2)",
+              javax.ws.rs;version="[2,3)",
+              javax.ws.rs.ext;version="[2,3)",
+              javax.ws.rs.core;version="[2,3)",
               org.apache.stanbol.commons.web.base,
               org.apache.stanbol.commons.web.base.format,
               org.apache.stanbol.commons.web.base.readers,
@@ -91,7 +91,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.jsonld</artifactId>
-      <version>0.11.0</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
 
     <!-- Clerezza dependencies -->
@@ -102,12 +102,12 @@
 
     <dependency>
         <groupId>javax.ws.rs</groupId>
-        <artifactId>jsr311-api</artifactId>
+        <artifactId>javax.ws.rs-api</artifactId>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
-    </dependency>
+    </dependency> -->
 
     <!-- generic tax -->
     <dependency>

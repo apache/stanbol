@@ -29,7 +29,7 @@
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-parent</artifactId>
   <packaging>pom</packaging>
-  <version>4-SNAPSHOT</version>
+  <version>5-SNAPSHOT</version>
 
   <name>Apache Stanbol Parent</name>
   <description>Parent POM for the Apache Stanbol project</description>
@@ -57,8 +57,6 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jersey-version>1.15</jersey-version>
-    <freemarker-version>2.3.19</freemarker-version>
     <owlapi-version>3.3</owlapi-version>
     <solr-version>4.4.0</solr-version>
     <pax-exam-version>2.3.0.M1</pax-exam-version>
@@ -168,6 +166,10 @@
           <inherited>true</inherited>
           <configuration>
             <instructions>
+              <Import-Package>
+                javax.ws.rs.*; version="[0,3)",
+                *
+              </Import-Package>
               <Bundle-DocURL>http://stanbol.apache.org</Bundle-DocURL>
               <Bundle-Vendor>Apache Stanbol</Bundle-Vendor>
               <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
@@ -180,7 +182,7 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
-        <version>1.7.4</version>
+        <version>1.12.0</version>
         <!-- slf4j impl is needed when QDox inspects/loads classes that use a
              static field for the logger, so that those classes can be loaded. -->
           <dependencies>
@@ -494,6 +496,11 @@
   </developers>
 
   <dependencyManagement>
+      
+      <!-- TODO: evaluate/discus hwat really belongs into here, 
+      - only the dependency in mini launcher
+      - everything used by more than one component
+      - or ...      -->
     <dependencies>
 
       <!-- CMIS -->
@@ -547,12 +554,12 @@
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.scr</artifactId>
-        <version>1.6.0</version>
+        <version>1.6.2</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.scr.annotations</artifactId>
-        <version>1.6.0</version>
+        <version>1.9.2</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
@@ -568,13 +575,13 @@
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.http.jetty</artifactId>
-        <version>2.2.1</version>
+        <version>2.2.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.http.whiteboard</artifactId>
-        <version>2.2.1</version>
+        <version>2.2.0</version>
         <scope>test</scope>
       </dependency>
 
@@ -588,7 +595,7 @@
       <dependency>
         <groupId>org.wymiwyg</groupId>
         <artifactId>wymiwyg-commons-core</artifactId>
-        <version>0.7.5</version>
+        <version>0.7.6</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
@@ -598,12 +605,17 @@
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.core</artifactId>
-        <version>0.12-incubating</version>
+        <version>0.13</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.utils</artifactId>
         <version>0.13-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>jaxrs.utils</artifactId>
+        <version>0.8</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
@@ -618,17 +630,17 @@
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.serializer</artifactId>
-        <version>0.9-incubating</version>
+        <version>0.10</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.parser</artifactId>
-        <version>0.10-incubating</version>
+        <version>0.11</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.sparql</artifactId>
-        <version>0.5-incubating</version>
+        <version>0.6</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
@@ -653,7 +665,7 @@
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>jaxrs.rdf.providers</artifactId>
-        <version>0.13-incubating</version>
+        <version>0.14</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
@@ -663,7 +675,7 @@
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.facade</artifactId>
-        <version>0.12-incubating</version>
+        <version>0.13</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
@@ -842,65 +854,20 @@
         <version>2.5</version>
       </dependency>
 
-      <!-- Jersey -->
-      <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-server</artifactId>
-        <version>${jersey-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-servlet</artifactId>
-        <version>${jersey-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-core</artifactId>
-        <version>${jersey-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-json</artifactId>
-        <version>${jersey-version}</version>
-        <exclusions>
-          <!-- jaxb is now part of java 6 -->
-          <exclusion>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>stax</groupId>
-            <artifactId>stax-api</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>com.sun.jersey.contribs</groupId>
-        <artifactId>jersey-multipart</artifactId>
-        <version>${jersey-version}</version>
-      </dependency>
-
       <!-- JAX-RS JSR311 -->
-      <!-- NOTE that JAX-RS is included and exported by jersey-core
-          using Jersey in combination with this one might cause
-          incompatibilities
-        -->
+
       <dependency>
-        <groupId>javax.ws.rs</groupId>
-        <artifactId>jsr311-api</artifactId>
-        <version>1.1.1</version>
+          <groupId>javax.ws.rs</groupId>
+          <artifactId>javax.ws.rs-api</artifactId>
+          <version>2.0</version>
       </dependency>
 
       <!-- Freemarker -->
-      <dependency>
+      <!-- <dependency>
         <groupId>org.freemarker</groupId>
         <artifactId>freemarker</artifactId>
         <version>${freemarker-version}</version>
-      </dependency>
+      </dependency> -->
 
       <!-- JSON libraries -->
       <!-- Jettison -->
@@ -1389,11 +1356,12 @@
     </dependency>
 
     <!-- Apache James -->
-    <dependency>
+    <!-- do we need this?
+<dependency>
       <groupId>org.apache.james</groupId>
       <artifactId>apache-mime4j</artifactId>
       <version>0.6</version>
-    </dependency>    
+    </dependency> -->
 
     <!-- Testing Deps -->
     <dependency>
@@ -1434,10 +1402,26 @@
     </dependency>
 
     <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-client</artifactId>
-      <version>${jersey-version}</version>
-      <scope>test</scope>
+        <groupId>org.glassfish.jersey.core</groupId>
+        <artifactId>jersey-client</artifactId>
+        <version>2.2</version>
+        <scope>test</scope>
+    </dependency>
+    
+    <dependency>
+        <groupId>org.glassfish.hk2</groupId>
+        <artifactId>hk2-locator</artifactId>
+        <version>2.2.0-b15</version>
+    </dependency>
+    <dependency>
+        <groupId>org.glassfish.hk2</groupId>
+        <artifactId>hk2-utils</artifactId>
+        <version>2.2.0-b15</version>
+    </dependency>
+        <dependency>
+        <groupId>org.glassfish.hk2</groupId>
+        <artifactId>osgi-resource-locator</artifactId>
+        <version>1.0.1</version>
     </dependency>
 
     <!-- Test configuration to run a lightweight felix based OSGi container in
@@ -1472,13 +1456,6 @@
       <version>4.0.2</version>
       <scope>test</scope>
     </dependency>
-    <!--  already present
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr</artifactId>
-      <version>1.6.0</version>
-      <scope>test</scope>
-    </dependency>  -->
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
       <artifactId>pax-exam-container-paxrunner</artifactId>

@@ -27,6 +27,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.jobs.api.Job;
 import org.apache.stanbol.commons.jobs.api.JobManager;
 /**
@@ -34,11 +36,9 @@ import org.apache.stanbol.commons.jobs.api.JobManager;
  * 
  * @author enridaga
  *
- *
- * @scr.component immediate="true"
- * @scr.service
- *
  */
+@Component(immediate = true)
+@Service(JobManager.class)
 public class JobManagerImpl implements JobManager {
     private ExecutorService pool;
     private Map<String,Future<?>> taskMap;

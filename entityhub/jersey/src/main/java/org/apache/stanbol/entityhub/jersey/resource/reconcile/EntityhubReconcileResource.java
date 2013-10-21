@@ -19,45 +19,45 @@ package org.apache.stanbol.entityhub.jersey.resource.reconcile;
 import javax.servlet.ServletContext;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 
-import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Path("/entityhub/reconcile")
 public class EntityhubReconcileResource extends BaseGoogleRefineReconcileResource {
 
     private Entityhub _entityhub;
     
-    public EntityhubReconcileResource(@Context ServletContext context) {
-        super(context);
-    }
-    private Entityhub getEntityhub(){
-        if(_entityhub == null){
-            _entityhub = ContextHelper.getServiceFromContext(Entityhub.class, servletContext);
-            if(_entityhub == null){
-                throw new IllegalArgumentException("The Entityhub service is currently not available!");
-            }
-        }
-        return _entityhub;
+    public EntityhubReconcileResource() {
+        super();
     }
     
+    @Reference
+    private Entityhub entityhub;
+    
     @Override
-    protected QueryResultList<Representation> performQuery(FieldQuery query) throws EntityhubException {
-        return getEntityhub().find(query);
+    protected QueryResultList<Representation> performQuery(String siteId, FieldQuery query) throws EntityhubException {
+        return entityhub.find(query);
     }
 
     @Override
-    protected String getSiteName() {
+    protected String getSiteName(String siteId) {
         return "Entityhub (local managed Entities)";
     }
 
     @Override
-    protected FieldQuery createFieldQuery() {
-        return getEntityhub().getQueryFactory().createFieldQuery();
+    protected FieldQuery createFieldQuery(String siteId) {
+        return entityhub.getQueryFactory().createFieldQuery();
     }
 
 }

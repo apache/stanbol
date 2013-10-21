@@ -23,7 +23,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.enhancer.nlp.json.valuetype.ValueTypeParser;
 import org.apache.stanbol.enhancer.nlp.json.valuetype.ValueTypeSerializer;
-import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.ner.NerTag;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 import org.codehaus.jackson.JsonNode;
@@ -42,7 +41,7 @@ public class NerTagSupport implements ValueTypeParser<NerTag>, ValueTypeSerializ
         return NerTag.class;
     }
     @Override
-    public NerTag parse(ObjectNode jValue, AnalysedText at) {
+    public NerTag parse(ObjectNode jValue) {
         JsonNode tag = jValue.path("tag");
         if(!tag.isTextual()){
             throw new IllegalStateException("Unable to parse NerTag. The value of the "

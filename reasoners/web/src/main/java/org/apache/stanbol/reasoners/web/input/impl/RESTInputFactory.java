@@ -24,7 +24,7 @@ import java.util.Map.Entry;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
 import org.apache.stanbol.ontologymanager.servicesapi.session.SessionManager;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputFactory;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputManager;
@@ -47,14 +47,14 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class RESTInputFactory implements ReasoningServiceInputFactory {
-    ONManager onm;
+    ScopeManager onm;
     SessionManager sessionManager;
     RuleStore rStore;
     RuleAdapterManager adapterManager;
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    public RESTInputFactory(ONManager onm,
+    public RESTInputFactory(ScopeManager onm,
                             SessionManager sm,
                             RuleStore rStore,
                             RuleAdapterManager adapterManager) {

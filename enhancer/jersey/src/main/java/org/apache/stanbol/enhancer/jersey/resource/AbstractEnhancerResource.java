@@ -24,8 +24,6 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JS
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
-import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.INCLUDE_EXECUTION_METADATA;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.OMIT_METADATA;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.OMIT_PARSED_CONTENT;
@@ -39,11 +37,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -54,12 +49,14 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.commons.web.base.resource.LayoutConfiguration;
+import org.apache.stanbol.commons.web.base.resource.TemplateLayoutConfiguration;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
@@ -83,38 +80,38 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata;
  * @author Rupert Westenthaler
  *
  */
-public abstract class AbstractEnhancerResource extends BaseStanbolResource {
+public abstract class AbstractEnhancerResource extends TemplateLayoutConfiguration {
 
     protected final EnhancementJobManager jobManager;
     protected final EnhancementEngineManager engineManager;
     protected final ChainManager chainManager;
     protected final ContentItemFactory ciFactory;
+    private LayoutConfiguration layoutConfiguration;
+    private UriInfo uriInfo;
 
-    public AbstractEnhancerResource(@Context ServletContext context) {
-        super();
-        // bind the job manager by looking it up from the servlet request context
-        // also throw exception if not available to make debugging easier!
-        jobManager = ContextHelper.getServiceFromContext(EnhancementJobManager.class, context);
-        if(jobManager == null){
-            throw new IllegalStateException("Unable to get "+EnhancementJobManager.class.getSimpleName()
-                + "service via ServletContext!");
-        }
-        chainManager = ContextHelper.getServiceFromContext(ChainManager.class, context);
-        if(jobManager == null){
-            throw new IllegalStateException("Unable to get "+ChainManager.class.getSimpleName()
-                + "service via ServletContext!");
-        }
-        engineManager = ContextHelper.getServiceFromContext(EnhancementEngineManager.class, context);
-        if(jobManager == null){
-            throw new IllegalStateException("Unable to get "+EnhancementEngineManager.class.getSimpleName()
-                + "service via ServletContext!");
-        }
-        ciFactory = ContextHelper.getServiceFromContext(ContentItemFactory.class, context);
-        if(jobManager == null){
-            throw new IllegalStateException("Unable to get "+ContentItemFactory.class.getSimpleName()
-                + "service via ServletContext!");
-        }
+    public AbstractEnhancerResource(
+            EnhancementJobManager jobManager, 
+            EnhancementEngineManager engineManager, 
+            ChainManager chainManager, 
+            ContentItemFactory ciFactory,
+            LayoutConfiguration layoutConfiguration,
+            UriInfo uriInfo) {
+        this.jobManager = jobManager;
+        this.engineManager = engineManager;
+        this.chainManager = chainManager;
+        this.ciFactory = ciFactory;
+        this.layoutConfiguration = layoutConfiguration;
+        this.uriInfo = uriInfo;
     }
+    
+    protected LayoutConfiguration getLayoutConfiguration() {
+        return layoutConfiguration;
+    }
+    
+    protected UriInfo getUriInfo() {
+        return uriInfo;
+    }
+
     /**
      * Getter for the Enhancement {@link Chain}
      * @return the enhancement chain. MUST NOT return <code>null</code>
@@ -122,7 +119,7 @@ public abstract class AbstractEnhancerResource extends BaseStanbolResource {
      */
     protected abstract Chain getChain() throws ChainException;
     
-    @OPTIONS
+    /*@OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder res = Response.ok();
         enableCORS(servletContext, res, headers);
@@ -135,7 +132,7 @@ public abstract class AbstractEnhancerResource extends BaseStanbolResource {
         ResponseBuilder res = Response.ok();
         enableCORS(servletContext, res, headers,HttpMethod.OPTIONS,HttpMethod.GET);
         return res.build();
-    }
+    }*/
 
     @GET
     @Path("/ep")
@@ -152,7 +149,7 @@ public abstract class AbstractEnhancerResource extends BaseStanbolResource {
                     .entity("The Enhancement Chain "+chainName+"is currently" +
                     		"not executeable (message: "+e.getMessage()+")!");
         }
-        addCORSOrigin(servletContext, res, headers);
+        //addCORSOrigin(servletContext, res, headers);
         return res.build();
         
         
@@ -218,7 +215,7 @@ public abstract class AbstractEnhancerResource extends BaseStanbolResource {
         if (mediaType != null) {
             rb.header(HttpHeaders.CONTENT_TYPE, mediaType);
         }
-        addCORSOrigin(servletContext, rb, headers);
+        //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 

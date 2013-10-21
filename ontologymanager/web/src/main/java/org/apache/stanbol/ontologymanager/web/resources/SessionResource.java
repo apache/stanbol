@@ -16,11 +16,11 @@
  */
 package org.apache.stanbol.ontologymanager.web.resources;
 
-import static javax.ws.rs.HttpMethod.DELETE;
-import static javax.ws.rs.HttpMethod.GET;
-import static javax.ws.rs.HttpMethod.OPTIONS;
-import static javax.ws.rs.HttpMethod.POST;
-import static javax.ws.rs.HttpMethod.PUT;
+//import static javax.ws.rs.HttpMethod.DELETE;
+//import static javax.ws.rs.HttpMethod.GET;
+//import static javax.ws.rs.HttpMethod.OPTIONS;
+//import static javax.ws.rs.HttpMethod.POST;
+//import static javax.ws.rs.HttpMethod.PUT;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
@@ -31,8 +31,6 @@ import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
-import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.FUNCTIONAL_OWL;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.MANCHESTER_OWL;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.N3;
@@ -44,6 +42,7 @@ import static org.apache.stanbol.commons.web.base.format.KRFormat.TURTLE;
 import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -78,12 +77,18 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.clerezza.jaxrs.utils.form.FormFile;
+import org.apache.clerezza.jaxrs.utils.form.MultiPartBody;
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
-import org.apache.stanbol.commons.viewable.Viewable;
-import org.apache.stanbol.commons.web.base.ContextHelper;
+//import org.apache.stanbol.commons.viewable.Viewable;
+import org.apache.stanbol.commons.web.viewable.Viewable;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.io.LibrarySource;
 import org.apache.stanbol.ontologymanager.servicesapi.collector.IrremovableOntologyException;
@@ -112,10 +117,13 @@ import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.sun.jersey.multipart.BodyPart;
-import com.sun.jersey.multipart.FormDataBodyPart;
-import com.sun.jersey.multipart.FormDataMultiPart;
+//
+//import com.sun.jersey.multipart.BodyPart;
+//import com.sun.jersey.multipart.FormDataBodyPart;
+//import com.sun.jersey.multipart.FormDataMultiPart;
+//import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+//import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+//import org.apache.stanbol.commons.web.base.ContextHelper;
 
 /**
  * The REST resource of an OntoNet {@link Session} whose identifier is known.
@@ -123,77 +131,91 @@ import com.sun.jersey.multipart.FormDataMultiPart;
  * @author alexdma
  * 
  */
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Path("/ontonet/session/{id}")
 public class SessionResource extends AbstractOntologyAccessResource {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
+    @Reference
     protected ScopeManager onMgr;
 
+    @Reference
     protected OntologyProvider<TcProvider> ontologyProvider;
 
     /*
      * Placeholder for the RegistryManager to be fetched from the servlet context.
      */
+    @Reference
     protected RegistryManager regMgr;
 
     /*
      * Placeholder for the session manager to be fetched from the servlet context.
      */
+    @Reference
     protected SessionManager sesMgr;
 
     protected Session session;
 
-    public SessionResource(@PathParam(value = "id") String sessionId, @Context ServletContext servletContext) {
-        this.servletContext = servletContext;
-        this.sesMgr = (SessionManager) ContextHelper.getServiceFromContext(SessionManager.class,
-            servletContext);
-        this.regMgr = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
-            servletContext);
-        this.ontologyProvider = (OntologyProvider<TcProvider>) ContextHelper.getServiceFromContext(
-            OntologyProvider.class, servletContext);
-        this.onMgr = (ScopeManager) ContextHelper.getServiceFromContext(ScopeManager.class, servletContext);
-        session = sesMgr.getSession(sessionId);
+    public SessionResource() {
+//        public SessionResource(@PathParam(value = "id") String sessionId, @Context ServletContext servletContext) {
+//        this.servletContext = servletContext;
+//        this.sesMgr = (SessionManager) ContextHelper.getServiceFromContext(SessionManager.class,
+//            servletContext);
+//        this.regMgr = (RegistryManager) ContextHelper.getServiceFromContext(RegistryManager.class,
+//            servletContext);
+//        this.ontologyProvider = (OntologyProvider<TcProvider>) ContextHelper.getServiceFromContext(
+//            OntologyProvider.class, servletContext);
+//        this.onMgr = (ScopeManager) ContextHelper.getServiceFromContext(ScopeManager.class, servletContext);
+        
     }
 
     @GET
     @Produces(value = {APPLICATION_JSON, N3, N_TRIPLE, RDF_JSON})
-    public Response asOntologyGraph(@PathParam("scopeid") String scopeid,
+    public Response asOntologyGraph(@PathParam(value = "id") String sessionId,
+                                    @PathParam("scopeid") String scopeid,
                                     @DefaultValue("false") @QueryParam("merge") boolean merge,
                                     @Context HttpHeaders headers) {
+        session = sesMgr.getSession(sessionId);
         if (session == null) return Response.status(NOT_FOUND).build();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
         // Export to Clerezza Graph, which can be rendered as JSON-LD.
         ResponseBuilder rb = Response.ok(session.export(Graph.class, merge, prefix));
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
     @GET
     @Produces(value = {RDF_XML, TURTLE, X_TURTLE})
-    public Response asOntologyMixed(@PathParam("scopeid") String scopeid,
+    public Response asOntologyMixed(@PathParam(value = "id") String sessionId,
+                                    @PathParam("scopeid") String scopeid,
                                     @DefaultValue("false") @QueryParam("merge") boolean merge,
                                     @Context HttpHeaders headers) {
+        session = sesMgr.getSession(sessionId);
         if (session == null) return Response.status(NOT_FOUND).build();
         ResponseBuilder rb;
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
         // Export smaller graphs to OWLOntology due to the more human-readable rendering.
         if (merge) rb = Response.ok(session.export(Graph.class, merge, prefix));
         else rb = Response.ok(session.export(OWLOntology.class, merge, prefix));
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
     @GET
     @Produces(value = {MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML, TEXT_PLAIN})
-    public Response asOntologyOWL(@PathParam("scopeid") String scopeid,
+    public Response asOntologyOWL(@PathParam(value = "id") String sessionId,
+                                  @PathParam("scopeid") String scopeid,
                                   @DefaultValue("false") @QueryParam("merge") boolean merge,
                                   @Context HttpHeaders headers) {
+        session = sesMgr.getSession(sessionId);
         if (session == null) return Response.status(NOT_FOUND).build();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
         // Export to OWLOntology, the only to support OWL formats.
         ResponseBuilder rb = Response.ok(session.export(OWLOntology.class, merge, prefix));
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -209,7 +231,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
      */
     @PUT
     public Response createSession(@PathParam("id") String sessionId,
-                                  @Context UriInfo uriInfo,
+//                                  @Context UriInfo uriInfo,
                                   @Context HttpHeaders headers) {
         try {
             session = sesMgr.createSession(sessionId);
@@ -219,7 +241,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
             throw new WebApplicationException(e, FORBIDDEN);
         }
         ResponseBuilder rb = Response.created(uriInfo.getRequestUri());
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -235,20 +257,22 @@ public class SessionResource extends AbstractOntologyAccessResource {
      */
     @DELETE
     public Response deleteSession(@PathParam("id") String sessionId,
-                                  @Context UriInfo uriInfo,
+//                                  @Context UriInfo uriInfo,
                                   @Context HttpHeaders headers) {
+        session = sesMgr.getSession(sessionId);
         if (session == null) return Response.status(NOT_FOUND).build();
         sesMgr.destroySession(sessionId);
         session = null;
         ResponseBuilder rb = Response.ok();
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
     @POST
     @Produces({WILDCARD})
-    public Response emptyPost(@Context HttpHeaders headers) {
+    public Response emptyPost(@PathParam("id") String sessionId, @Context HttpHeaders headers) {
         log.debug(" post(no data)");
+        session = sesMgr.getSession(sessionId);
         for (Scope sc : getAllScopes()) { // First remove appended scopes not in the list
             String scid = sc.getID();
             if (getAppendedScopes().contains(scid)) {
@@ -257,7 +281,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
             }
         }
         ResponseBuilder rb = Response.ok();
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -294,12 +318,14 @@ public class SessionResource extends AbstractOntologyAccessResource {
 
     @GET
     @Produces(TEXT_HTML)
-    public Response getHtmlInfo(@Context HttpHeaders headers) {
+    public Response getHtmlInfo(@PathParam("id") String sessionId, @Context HttpHeaders headers) {
         ResponseBuilder rb;
+
+        session = sesMgr.getSession(sessionId);
         if (session == null) rb = Response.status(NOT_FOUND);
         else rb = Response.ok(new Viewable("index", this));
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -329,7 +355,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
     @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-        enableCORS(servletContext, rb, headers, GET, POST, PUT, DELETE, OPTIONS);
+//        enableCORS(servletContext, rb, headers, GET, POST, PUT, DELETE, OPTIONS);
         return rb.build();
     }
 
@@ -337,7 +363,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
     @Path("/{ontologyId:.+}")
     public Response handleCorsPreflightOntology(@Context HttpHeaders headers) {
         ResponseBuilder rb = Response.ok();
-        enableCORS(servletContext, rb, headers, GET, DELETE, OPTIONS);
+//        enableCORS(servletContext, rb, headers, GET, DELETE, OPTIONS);
         return rb.build();
     }
 
@@ -359,13 +385,15 @@ public class SessionResource extends AbstractOntologyAccessResource {
     public Response managedOntologyGetGraph(@PathParam("id") String sessionId,
                                             @PathParam("ontologyId") String ontologyId,
                                             @DefaultValue("false") @QueryParam("merge") boolean merge,
-                                            @Context UriInfo uriInfo,
+//                                            @Context UriInfo uriInfo,
                                             @Context HttpHeaders headers) {
+
+        session = sesMgr.getSession(sessionId);
         if (session == null) return Response.status(NOT_FOUND).build();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
         Graph o = session.getOntology(OntologyUtils.decode(ontologyId), Graph.class, merge, prefix);
         ResponseBuilder rb = (o != null) ? Response.ok(o) : Response.status(NOT_FOUND);
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -387,9 +415,11 @@ public class SessionResource extends AbstractOntologyAccessResource {
     public Response managedOntologyGetMixed(@PathParam("id") String sessionId,
                                             @PathParam("ontologyId") String ontologyId,
                                             @DefaultValue("false") @QueryParam("merge") boolean merge,
-                                            @Context UriInfo uriInfo,
+//                                            @Context UriInfo uriInfo,
                                             @Context HttpHeaders headers) {
         ResponseBuilder rb;
+
+        session = sesMgr.getSession(sessionId);
         if (session == null) rb = Response.status(NOT_FOUND);
         else {
             IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
@@ -402,7 +432,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
                 rb = (o != null) ? Response.ok(o) : Response.status(NOT_FOUND);
             }
         }
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -424,14 +454,16 @@ public class SessionResource extends AbstractOntologyAccessResource {
     public Response managedOntologyGetOWL(@PathParam("id") String sessionId,
                                           @PathParam("ontologyId") String ontologyId,
                                           @DefaultValue("false") @QueryParam("merge") boolean merge,
-                                          @Context UriInfo uriInfo,
+//                                          @Context UriInfo uriInfo,
                                           @Context HttpHeaders headers) {
+
+        session = sesMgr.getSession(sessionId);
         if (session == null) return Response.status(NOT_FOUND).build();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
         OWLOntology o = session.getOntology(OntologyUtils.decode(ontologyId), OWLOntology.class, merge,
             prefix);
         ResponseBuilder rb = (o != null) ? Response.ok(o) : Response.status(NOT_FOUND);
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -453,14 +485,14 @@ public class SessionResource extends AbstractOntologyAccessResource {
             else try {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 o.getOWLOntologyManager().saveOntology(o, new ManchesterOWLSyntaxOntologyFormat(), out);
-                rb = Response.ok(new Viewable("ontology", new OntologyPrettyPrintResource(servletContext,
+                rb = Response.ok(new Viewable("ontology", new OntologyPrettyPrintResource(
                         uriInfo, out, session)));
             } catch (OWLOntologyStorageException e) {
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             }
         }
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -483,9 +515,10 @@ public class SessionResource extends AbstractOntologyAccessResource {
     @Path(value = "/{ontologyId:.+}")
     public Response managedOntologyUnload(@PathParam("id") String sessionId,
                                           @PathParam("ontologyId") String ontologyId,
-                                          @Context UriInfo uriInfo,
+//                                          @Context UriInfo uriInfo,
                                           @Context HttpHeaders headers) {
         ResponseBuilder rb;
+        session = sesMgr.getSession(sessionId);
         if (session == null) rb = Response.status(NOT_FOUND);
         else {
             OWLOntologyID id = OntologyUtils.decode(ontologyId);
@@ -501,7 +534,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
                 throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
             }
         }
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -520,9 +553,11 @@ public class SessionResource extends AbstractOntologyAccessResource {
     @POST
     @Consumes(value = {RDF_XML, OWL_XML, N_TRIPLE, N3, TURTLE, X_TURTLE, FUNCTIONAL_OWL, MANCHESTER_OWL,
                        RDF_JSON})
-    public Response manageOntology(InputStream content, @Context HttpHeaders headers) {
+    public Response manageOntology(InputStream content, @PathParam("id") String sessionId, @Context HttpHeaders headers) {
         long before = System.currentTimeMillis();
         ResponseBuilder rb;
+
+        session = sesMgr.getSession(sessionId);
         String mt = headers.getMediaType().toString();
         if (session == null) rb = Response.status(NOT_FOUND); // Always check session first
         else try {
@@ -558,7 +593,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
             log.error("FAILED parse with media type {}.", mt);
             throw new WebApplicationException(e, BAD_REQUEST);
         }
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
@@ -576,7 +611,9 @@ public class SessionResource extends AbstractOntologyAccessResource {
      */
     @POST
     @Consumes(value = MediaType.TEXT_PLAIN)
-    public Response manageOntology(String iri, @Context HttpHeaders headers) {
+    public Response manageOntology(String iri, @PathParam("id") String sessionId, @Context HttpHeaders headers) {
+
+        session = sesMgr.getSession(sessionId);
         if (session == null) return Response.status(NOT_FOUND).build();
         try {
             session.addOntology(new RootOntologySource(IRI.create(iri)));
@@ -586,14 +623,14 @@ public class SessionResource extends AbstractOntologyAccessResource {
             throw new WebApplicationException(e, INTERNAL_SERVER_ERROR);
         }
         ResponseBuilder rb = Response.ok();
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
 
     @POST
     @Consumes({MULTIPART_FORM_DATA})
     @Produces({WILDCARD})
-    public Response postOntology(FormDataMultiPart data, @Context HttpHeaders headers) {
+    public Response postOntology(MultiPartBody data, @Context HttpHeaders headers) {
         log.debug(" post(FormDataMultiPart data)");
         long before = System.currentTimeMillis();
         ResponseBuilder rb;
@@ -602,53 +639,96 @@ public class SessionResource extends AbstractOntologyAccessResource {
         rb = Response.status(BAD_REQUEST);
 
         IRI location = null, library = null;
-        File file = null; // If found, it takes precedence over location.
+        FormFile file = null; // If found, it takes precedence over location.
         String format = null;
         Set<String> toAppend = null;
         Set<String> keys = new HashSet<String>();
 
-        for (BodyPart bpart : data.getBodyParts()) {
-            log.debug("Found body part of type {}", bpart.getClass());
-            if (bpart instanceof FormDataBodyPart) {
-                FormDataBodyPart dbp = (FormDataBodyPart) bpart;
-                String name = dbp.getName();
-                log.debug("Detected form parameter \"{}\".", name);
-                if (name.equals("file")) {
-                    file = bpart.getEntityAs(File.class);
-                } else {
-                    String value = dbp.getValue();
-                    if (name.equals("format") && !value.equals("auto")) {
-                        log.debug(" -- Expected format : {}", value);
-                        format = value;
-                    } else if (name.equals("url")) try {
-                        URI.create(value); // To throw 400 if malformed.
-                        location = IRI.create(value);
-                        log.debug(" -- Will load ontology from URL : {}", location);
-                    } catch (Exception ex) {
-                        log.error("Malformed IRI for " + value, ex);
-                        throw new WebApplicationException(ex, BAD_REQUEST);
-                    }
-                    else if (name.equals("library") && !"null".equals(value)) try {
-                        log.debug(" -- Library ID : {}", value);
-                        URI.create(value); // To throw 400 if malformed.
-                        library = IRI.create(value);
-                        log.debug(" ---- (is well-formed URI)");
-                    } catch (Exception ex) {
-                        log.error("Malformed IRI for " + value, ex);
-                        throw new WebApplicationException(ex, BAD_REQUEST);
-                    }
-                    else if (name.equals("stored") && !"null".equals(value)) {
-                        log.info("Request to manage ontology with key {}", value);
-                        keys.add(value);
-                    } else if (name.equals("scope")) {
-                        log.info("Request to append scope \"{}\".", value);
-                        if (toAppend == null) toAppend = new HashSet<String>();
-                        toAppend.add(value);
-                    }
-                }
+//        for (BodyPart bpart : data.getBodyParts()) {
+//            log.debug("Found body part of type {}", bpart.getClass());
+//            if (bpart instanceof FormDataBodyPart) {
+//                FormDataBodyPart dbp = (FormDataBodyPart) bpart;
+//                String name = dbp.getName();
+//                log.debug("Detected form parameter \"{}\".", name);
+//                if (name.equals("file")) {
+//                    file = bpart.getEntityAs(File.class);
+//                } else {
+//                    String value = dbp.getValue();
+//                    if (name.equals("format") && !value.equals("auto")) {
+//                        log.debug(" -- Expected format : {}", value);
+//                        format = value;
+//                    } else if (name.equals("url")) try {
+//                        URI.create(value); // To throw 400 if malformed.
+//                        location = IRI.create(value);
+//                        log.debug(" -- Will load ontology from URL : {}", location);
+//                    } catch (Exception ex) {
+//                        log.error("Malformed IRI for " + value, ex);
+//                        throw new WebApplicationException(ex, BAD_REQUEST);
+//                    }
+//                    else if (name.equals("library") && !"null".equals(value)) try {
+//                        log.debug(" -- Library ID : {}", value);
+//                        URI.create(value); // To throw 400 if malformed.
+//                        library = IRI.create(value);
+//                        log.debug(" ---- (is well-formed URI)");
+//                    } catch (Exception ex) {
+//                        log.error("Malformed IRI for " + value, ex);
+//                        throw new WebApplicationException(ex, BAD_REQUEST);
+//                    }
+//                    else if (name.equals("stored") && !"null".equals(value)) {
+//                        log.info("Request to manage ontology with key {}", value);
+//                        keys.add(value);
+//                    } else if (name.equals("scope")) {
+//                        log.info("Request to append scope \"{}\".", value);
+//                        if (toAppend == null) toAppend = new HashSet<String>();
+//                        toAppend.add(value);
+//                    }
+//                }
+//            }
+//        }
+        if (data.getFormFileParameterValues("file").length > 0) {
+            file = data.getFormFileParameterValues("file")[0];
+        }
+        // else {
+        if (data.getTextParameterValues("format").length > 0) {
+            String value = data.getTextParameterValues("format")[0];
+            if (!value.equals("auto")) {
+                format = value;
             }
         }
-        boolean fileOk = file != null && file.canRead() && file.exists();
+        if (data.getTextParameterValues("url").length > 0) {
+            String value = data.getTextParameterValues("url")[0];
+            try {
+                URI.create(value); // To throw 400 if malformed.
+                location = IRI.create(value);
+            } catch (Exception ex) {
+                log.error("Malformed IRI for param url " + value, ex);
+                throw new WebApplicationException(ex, BAD_REQUEST);
+            }
+        }
+        if (data.getTextParameterValues("library").length > 0) {
+            String value = data.getTextParameterValues("library")[0];
+            try {
+                URI.create(value); // To throw 400 if malformed.
+                library = IRI.create(value);
+            } catch (Exception ex) {
+                log.error("Malformed IRI for param library " + value, ex);
+                throw new WebApplicationException(ex, BAD_REQUEST);
+            }
+        }
+        if (data.getTextParameterValues("stored").length > 0) {
+            String value = data.getTextParameterValues("stored")[0];
+            keys.add(value);
+        }
+        if (data.getTextParameterValues("scope").length > 0) {
+            String value = data.getTextParameterValues("scope")[0];
+            log.info("Request to append scope \"{}\".", value);
+            if (toAppend == null) {
+                toAppend = new HashSet<String>();
+            }
+            toAppend.add(value);
+        }
+        
+        boolean fileOk = file != null;
         if (fileOk || location != null || library != null) { // File and location take precedence
             // Then add the file
             OntologyInputSource<?> src = null;
@@ -661,7 +741,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
                         log.debug("Trying format {}.", f);
                         long b4buf = System.currentTimeMillis();
                         // Recreate the stream on each attempt
-                        InputStream content = new BufferedInputStream(new FileInputStream(file));
+                        InputStream content = new BufferedInputStream(new ByteArrayInputStream(file.getContent()));
                         log.debug("Streams created in {} ms", System.currentTimeMillis() - b4buf);
                         log.debug("Creating ontology input source...");
                         b4buf = System.currentTimeMillis();
@@ -675,7 +755,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
                                 rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML + "; charset=utf-8");
                             }
                         } else {
-                            content = new BufferedInputStream(new FileInputStream(file));
+                            content = new BufferedInputStream(new ByteArrayInputStream(file.getContent()));
                             src = new GraphContentInputSource(content, f, ontologyProvider.getStore());
                         }
                         log.debug("Done in {} ms", System.currentTimeMillis() - b4buf);
@@ -757,7 +837,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
         // throw new WebApplicationException(BAD_REQUEST);
         // }
         // rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
-        addCORSOrigin(servletContext, rb, headers);
+//        addCORSOrigin(servletContext, rb, headers);
         log.info("POST ontology completed in {} ms.", System.currentTimeMillis() - before);
         return rb.build();
     }

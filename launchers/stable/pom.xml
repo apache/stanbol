@@ -21,13 +21,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>4-SNAPSHOT</version>
+    <version>5-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.launchers.stable</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Apache Stanbol Launchers Stable Launcher</name>
@@ -54,7 +54,6 @@
               <directory>.</directory>
               <includes>
                 <include>stanbol/**</include>
-                <include>factstore/**</include>
                 <include>*.log</include>
               </includes>
             </fileset>
@@ -81,9 +80,7 @@
               <jarWebSupport>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.http.jetty</artifactId>
-                <!-- depends on OSGI frameowrk (startLevel=2) and is required
-                     by felix.http.whiteboard (startLevel=4) -->
-                <startLevel>3</startLevel>
+                <version>2.2.0</version>
               </jarWebSupport>
             </configuration>
           </execution>
@@ -128,11 +125,21 @@
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
-          <excludes>
-            <!-- auto generated -->
-            <exclude>src/license/THIRD-PARTY.properties</exclude>
-            <exclude>dependency-reduced-pom.xml</exclude>
-          </excludes>
+          <excludes></excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.7</version>
+        <configuration>
+          <target>
+            <property name="vm.args" value=""/>
+            <java fork="true" jar="${project.build.directory}/${project.build.finalName}.jar"
+                dir="${project.build.directory}">
+              <jvmarg line="-Xmx1024m -XX:MaxPermSize=256M ${vm.args}"/>
+            </java>
+          </target>
         </configuration>
       </plugin>
     </plugins>
@@ -143,7 +150,7 @@
       <!-- The Apache Stanbol lauchpad -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.launchpad</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <!-- maven-launchpad-plugin builds on the launchpad.base app -->
@@ -156,7 +163,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.osgiframework</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -165,16 +172,16 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.stanbolcommons</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
 
     <!-- Stanbol Enhancer Bundle List -->
-    <dependency>
+   <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.enhancer</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -192,7 +199,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.entityhub</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>

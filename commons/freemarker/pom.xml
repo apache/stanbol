@@ -21,13 +21,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>4-SNAPSHOT</version>
+    <version>5-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.freemarker</artifactId>
-  <version>0.12.0-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Freemarker Utilities</name>
@@ -42,7 +42,9 @@ from the bundles. More Freemarker utilities may be added here in future.</descri
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
-
+  <properties>
+      <freemarker-version>2.3.20</freemarker-version>
+  </properties>
   <build>
     <!-- make it an OSGi bundle -->
     <plugins>
@@ -65,7 +67,6 @@ from the bundles. More Freemarker utilities may be added here in future.</descri
             <Import-Package>
               !javax.servlet.jsp.*,
               !org.apache.tools.*,
-              !org.mortbay.*,
               !org.apache.xpath.*,
               !org.jdom.*,
               !org.jaxen.*,
@@ -78,9 +79,6 @@ from the bundles. More Freemarker utilities may be added here in future.</descri
               !javax.el,
               !org.zeroturnaround.javarebel,
               javax.servlet.*; version="[2.5.0,4.0.0)",
-              javax.ws.rs;version="[0,2)",
-              javax.ws.rs.ext;version="[0,2)",
-              javax.ws.rs.core;version="[0,2)",
               *
             </Import-Package>
           </instructions>
@@ -104,6 +102,7 @@ from the bundles. More Freemarker utilities may be added here in future.</descri
     <dependency>
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
+      <version>${freemarker-version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>

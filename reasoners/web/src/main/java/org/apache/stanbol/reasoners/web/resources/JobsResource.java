@@ -16,13 +16,9 @@
  */
 package org.apache.stanbol.reasoners.web.resources;
 
-import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
-import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
-
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
@@ -35,9 +31,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.stanbol.commons.jobs.api.JobManager;
-import org.apache.stanbol.commons.viewable.Viewable;
-import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.stanbol.commons.web.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.reasoners.web.utils.ReasoningServiceResult;
 import org.apache.stanbol.reasoners.web.utils.ResponseTaskBuilder;
@@ -54,13 +50,15 @@ import org.slf4j.LoggerFactory;
 @Path("/reasoners/jobs")
 public class JobsResource extends BaseStanbolResource {
     private Logger log = LoggerFactory.getLogger(getClass());
-    private ServletContext context;
+    
     private HttpHeaders headers;
 
     private String jobLocation = "";
+
+    @Reference
+    private JobManager jobManager;
     
-    public JobsResource(@Context ServletContext servletContext,@Context HttpHeaders headers) {
-        this.context = servletContext;
+    public JobsResource(@Context HttpHeaders headers) {
         this.headers = headers;
     }
 
@@ -72,8 +70,7 @@ public class JobsResource extends BaseStanbolResource {
      */
     @GET
     @Path("/{jid}")
-    public Response get(@PathParam("jid") String id,
-                        @Context HttpHeaders headers) {
+    public Response get(@PathParam("jid") String id) {
         
         
         log.info("Pinging job {}", id);
@@ -81,7 +78,6 @@ public class JobsResource extends BaseStanbolResource {
         // No id
         if(id == null || id.equals("")){
             ResponseBuilder rb = Response.status(Status.BAD_REQUEST);
-            addCORSOrigin(servletContext, rb, headers);
             return rb.build();
         }
         
@@ -101,7 +97,7 @@ public class JobsResource extends BaseStanbolResource {
                     if(o instanceof ReasoningServiceResult){
                         log.debug("Is a ReasoningServiceResult");
                         ReasoningServiceResult<?> result = (ReasoningServiceResult<?>) o;
-                        return new ResponseTaskBuilder(uriInfo,context,headers).build(result);
+                        return new ResponseTaskBuilder(uriInfo, headers).build(result);
                     }else{
                         log.error("Job {} does not belong to reasoners", id);
                         throw new WebApplicationException(Response.Status.NOT_FOUND);
@@ -121,20 +117,16 @@ public class JobsResource extends BaseStanbolResource {
                 String jobService = new StringBuilder().append(getPublicBaseUri()).append("jobs/").append(id).toString();
                 this.jobLocation = jobService;
                 Viewable viewable = new Viewable("404.ftl",this);
-                //return Response.status(404).header("Content-Location", jobService).header("Content-type","text/html").entity( viewable ).build();
                 
                 ResponseBuilder rb = Response.status(Status.NOT_FOUND);
                 rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML+ "; charset=utf-8");
-                addCORSOrigin(servletContext, rb, headers);
                 rb.entity(viewable);
                 return rb.build();
             }
         } else {
             log.info("No job found with id {}", id);
-            //return Response.status(Response.Status.NOT_FOUND).build();
             ResponseBuilder rb = Response.status(Status.NOT_FOUND);
             rb.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML+ "; charset=utf-8");
-            addCORSOrigin(servletContext, rb, headers);
             return rb.build();
             
         }
@@ -156,13 +148,12 @@ public class JobsResource extends BaseStanbolResource {
      */
     private JobManager getJobManager() {
         log.debug("(getJobManager()) ");
-        return (JobManager) ContextHelper.getServiceFromContext(JobManager.class, this.context);
+        return jobManager;
     }
     
     @OPTIONS
-    public Response handleCorsPreflight(@Context HttpHeaders headers) {
+    public Response handleCorsPreflight() {
         ResponseBuilder rb = Response.ok();
-        enableCORS(servletContext, rb, headers);
         return rb.build();
     }
 }

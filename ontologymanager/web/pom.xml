@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>4-SNAPSHOT</version>
+    <version>5-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.ontologymanager.web</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Ontology Manager : Web</name>
@@ -55,15 +55,17 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
         <configuration>
-          <instructions>
+          <instructions><!--  com.sun.jersey.*; version="[1.15.0,2)", -->
             <Import-Package>
-              javax.ws.rs.*; version="[0,2)",
-              org.apache.stanbol.commons.web.base; provide:=true; version="[0.11,0.13)",
+              javax.ws.rs.*; version="[2.0,3]",
+              org.apache.stanbol.commons.web.base; provide:=true; version="[1.0.0,2)",
+              org.apache.clerezza.jaxrs.utils.*,
+              com.sun.net.httpserver.*,
               *
             </Import-Package>            
-            <!-- Export-Package>
-              org.apache.stanbol.ontologymanager.web.*
-            </Export-Package -->
+            <Export-Package>
+            org.objectweb.asm.*, org.jvnet.mimepull.*, sun.*, com.sun.*, com.sun.net.httpserver.*
+            </Export-Package> <!-- com.sun.jersey.*, -->
             <Private-Package>
               org.apache.stanbol.ontologymanager.web; version=${project.version},
               org.apache.stanbol.ontologymanager.web.resources; version=${project.version},
@@ -94,56 +96,72 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
-      <version>0.11.0</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.owl</artifactId>
-      <version>0.11.0</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.ontologymanager.servicesapi</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.ontologymanager.sources.clerezza</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.ontologymanager.sources.owlapi</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.ontologymanager.registry</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
-
 
     <!-- specific deps for this project -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
   	  <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
-      <version>0.11.0</version>      
+      <version>1.0.0-SNAPSHOT</version>      
+    </dependency>
+    
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>jaxrs.utils</artifactId>
     </dependency>
 
     <!-- Jersey specific JAX-RS annotations -->
-    <dependency> <!-- because of ImplicitProduces -->
+    <!--<dependency>  because of ImplicitProduces 
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
-    </dependency>
-    <dependency> <!-- because of multipart -->
+      <version>1.15</version>
+      <scope>compile</scope>
+    </dependency>-->
+    <!-- dependency>  because of multipart
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-multipart</artifactId>
+      <version>1.15</version>
+      <scope>compile</scope>
     </dependency>
+    <dependency>  because of jersey (temporary) 
+      <groupId>com.sun.net.httpserver</groupId>
+      <artifactId>http</artifactId>
+      <version>20070405</version>
+      <scope>compile</scope>
+    </dependency>-->
+
+
 
     <!-- generic tax -->
     <dependency>
@@ -177,6 +195,7 @@
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-client</artifactId>
+      <version>1.15</version>
       <scope>test</scope>
     </dependency>
     

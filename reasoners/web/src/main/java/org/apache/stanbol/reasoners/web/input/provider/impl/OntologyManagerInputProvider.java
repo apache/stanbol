@@ -22,8 +22,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.stanbol.commons.owl.transformation.JenaToOwlConvert;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.Scope;
+import org.apache.stanbol.ontologymanager.servicesapi.scope.ScopeManager;
 import org.apache.stanbol.ontologymanager.servicesapi.session.Session;
 import org.apache.stanbol.ontologymanager.servicesapi.session.SessionManager;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputProvider;
@@ -57,7 +57,7 @@ public class OntologyManagerInputProvider implements ReasoningServiceInputProvid
 
     private String scopeId;
     private String sessionId;
-    private ONManager onManager;
+    private ScopeManager onManager;
     private SessionManager sessionManager;
 
     /**
@@ -66,7 +66,7 @@ public class OntologyManagerInputProvider implements ReasoningServiceInputProvid
      * @param onManager
      * @param scopeId
      */
-    public OntologyManagerInputProvider(ONManager onManager, String scopeId) {
+    public OntologyManagerInputProvider(ScopeManager onManager, String scopeId) {
         this(onManager, null, scopeId, null);
     }
 
@@ -77,7 +77,7 @@ public class OntologyManagerInputProvider implements ReasoningServiceInputProvid
      * @param scopeId
      * @param sessionId
      */
-    public OntologyManagerInputProvider(ONManager onManager,
+    public OntologyManagerInputProvider(ScopeManager onManager,
                                         SessionManager sessionManager,
                                         String scopeId,
                                         String sessionId) {

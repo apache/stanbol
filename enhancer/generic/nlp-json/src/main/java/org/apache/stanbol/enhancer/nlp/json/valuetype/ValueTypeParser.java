@@ -16,7 +16,6 @@
 */
 package org.apache.stanbol.enhancer.nlp.json.valuetype;
 
-import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.codehaus.jackson.node.ObjectNode;
 /**
  * Interface allowing to extend how Classes used as generic type for
@@ -35,6 +34,6 @@ public interface ValueTypeParser<T> {
 
     Class<T> getType();
     
-    T parse(ObjectNode jAnnotation, AnalysedText at);
+    T parse(ObjectNode jAnnotation);
     
 }

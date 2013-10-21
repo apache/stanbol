@@ -134,26 +134,13 @@ public class ValueTypeParserRegistry {
                 valueTypeParsers = new HashMap<Class<?>,ValueTypeParser<?>>();
                 ServiceLoader<ValueTypeParser> loader = ServiceLoader.load(ValueTypeParser.class);
                 for(Iterator<ValueTypeParser> it = loader.iterator();it.hasNext();){
-                    try {
-                        ValueTypeParser vts = it.next();
-                        ValueTypeParser<?> serializer = valueTypeParsers.get(vts.getType());
-                        if(serializer != null){
-                            log.warn("Multiple Parsers for type {} (keep: {}, ignoreing: {}",
-                                new Object[]{vts.getType(),serializer,vts});
-                        } else {
-                            valueTypeParsers.put(vts.getType(), vts);
-                        }
-                    } catch (NoClassDefFoundError e) {
-                        //ignore services that can not be loaded
-                        //e.g. when mixing different version of the stanbol.enhancer.nlp
-                        //and the stanbol.enhancer.nlp-json module
-                        //It is better to throw an exception if an Node for the failed
-                        //ValueTypeParser appears in the JSON as when loading all
-                        //registered services
-                        log.warn("Unable to load a ValueTypeParser service because class '"
-                            +e.getMessage()+" could not be loaded! This may happen if the "
-                            + "classpath mixes different versions of o.a.stanbol.enhancer.nlp* "
-                            + "modules!");
+                    ValueTypeParser vts = it.next();
+                    ValueTypeParser<?> serializer = valueTypeParsers.get(vts.getType());
+                    if(serializer != null){
+                        log.warn("Multiple Parsers for type {} (keep: {}, ignoreing: {}",
+                            new Object[]{vts.getType(),serializer,vts});
+                    } else {
+                        valueTypeParsers.put(vts.getType(), vts);
                     }
                 }
             }

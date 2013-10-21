@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.web.util;
 
-import javax.servlet.ServletContext;
+//import javax.servlet.ServletContext;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
@@ -34,17 +34,17 @@ public class OntologyPrettyPrintResource extends BaseStanbolResource {
 
     private Object result;
 
-    public OntologyPrettyPrintResource(ServletContext context, UriInfo uriInfo, Object result) {
+    public OntologyPrettyPrintResource(UriInfo uriInfo, Object result) {
         this.result = result;
-        this.servletContext = context;
+//        this.servletContext = context;
         this.uriInfo = uriInfo;
     }
 
-    public OntologyPrettyPrintResource(ServletContext context,
+    public OntologyPrettyPrintResource(
                                        UriInfo uriInfo,
                                        Object result,
                                        NamedArtifact owner) {
-        this(context, uriInfo, result);
+        this(uriInfo, result);
         this.owner = owner;
     }
 

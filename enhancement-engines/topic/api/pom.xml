@@ -23,13 +23,13 @@
     <parent>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>apache-stanbol-enhancement-engines</artifactId>
-        <version>0.10.1-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
         <relativePath>../..</relativePath>
     </parent>
 
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.enhancer.engine.topic.api</artifactId>
-    <version>0.10.1-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <name>Apache Stanbol Enhancement Engine : Topic Classification (API)</name>

@@ -29,12 +29,9 @@ import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
-import org.apache.stanbol.commons.web.home.resource.StanbolRootResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.TemplateLoader;
 
 /**
  * Statically define the list of available resources and providers to be contributed to the the Stanbol JAX-RS
@@ -64,7 +61,6 @@ public class HomeWebFragment implements WebFragment {
     @Override
     public Set<Class<?>> getJaxrsResourceClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
-        classes.add(StanbolRootResource.class);
         return classes;
     }
 

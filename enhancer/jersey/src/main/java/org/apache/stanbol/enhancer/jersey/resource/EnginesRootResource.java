@@ -16,9 +16,17 @@
 */
 package org.apache.stanbol.enhancer.jersey.resource;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.Context;
+import org.apache.clerezza.rdf.core.serializedform.Serializer;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
+import org.apache.stanbol.enhancer.servicesapi.ChainManager;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 /**
  * This provides backward compatibility for the "/engines" endpoint that was
  * used to enhance content parsed to the Stanbol Enhancer before the 
@@ -30,10 +38,28 @@ import javax.ws.rs.core.Context;
  * @author Rupert Westenthaler
  *
  */
+@Component
+@Service(Object.class)
+@Property(name = "javax.ws.rs", boolValue = true)
 @Path("/engines")
-public final class EnginesRootResource extends AbstractEnhancerUiResource {
+public final class EnginesRootResource extends BaseStanbolResource  {
     
-    public EnginesRootResource(@Context ServletContext context) {
-        super(null,context);
+    @Reference
+    private EnhancementJobManager jobManager;
+    @Reference
+    private EnhancementEngineManager engineManager;
+    @Reference
+    private ChainManager chainManager;
+    @Reference
+    private ContentItemFactory ciFactory;
+    @Reference
+    private Serializer serializer;
+    
+    @Path("")
+    public GenericEnhancerUiResource get() {
+        return new GenericEnhancerUiResource(null, jobManager, 
+                engineManager, chainManager, ciFactory, serializer,
+                getLayoutConfiguration(), getUriInfo());
     }
+    
 }

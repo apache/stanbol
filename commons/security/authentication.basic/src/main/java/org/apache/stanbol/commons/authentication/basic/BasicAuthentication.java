@@ -123,7 +123,7 @@ public class BasicAuthentication implements WeightedAuthenticationMethod {
 				"Basic realm=\"Apache Stanbol authentication needed\"");
 		final java.io.InputStream pipedIn = new ByteArrayInputStream(message.getBytes());
 		response.setHeader("Content-Length", ""+message.getBytes().length);
-		response.getOutputStream().write(message.getBytes());
+                response.getOutputStream().write(message.getBytes());
 	}
 
 	@Override

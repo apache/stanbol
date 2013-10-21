@@ -21,13 +21,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>4-SNAPSHOT</version>
+    <version>5-SNAPSHOT</version>
     <relativePath>../../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.stanboltools.datafileprovider</artifactId>
-  <version>0.12.0-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Data File Provider</name>
@@ -58,7 +58,7 @@
           <instructions>
             <Import-Package>
               javax.servlet.*; version="[2.5.0,4.0.0)",
-              org.apache.stanbol.commons.stanboltools.datafileprovider; provide:=true; version="[0.9,0.13)",
+              org.apache.stanbol.commons.stanboltools.datafileprovider; provide:=true; version="[0.9,1.1)",
               *
             </Import-Package>
             <Export-Package>
@@ -99,6 +99,7 @@
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
     </dependency>
+    <!-- needed for webconsole plugin -->
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>

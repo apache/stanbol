@@ -55,6 +55,8 @@ import org.w3c.dom.Document;
  * Clerezza does provide such a writer, but it seems to require
  * quite a lot of Clerezza dependencies that we don't really need.
  */
+//TODO check if clerezza rdf.jaxrs prvoder fits the purpose?
+//make component/service
 @Provider
 //@Produces({"application/sparql-results+xml", "application/xml", "text/xml"})
 public class ResultSetWriter implements MessageBodyWriter<ResultSet> {

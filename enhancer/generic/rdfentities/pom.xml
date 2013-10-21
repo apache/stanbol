@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancer</artifactId>
-    <version>0.11.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
 
@@ -54,16 +54,11 @@
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.enhancer.rdfentities; provide:=true,
-              org.apache.stanbol.enhancer.rdfentities.fise; provide:=true,
-              *
-            </Export-Package>
-            <Export-Package>
-              org.apache.stanbol.enhancer.rdfentities;version=${project.version}
+              org.apache.stanbol.enhancer.rdfentities;version=${project.version},
               org.apache.stanbol.enhancer.rdfentities.fise;version=${project.version}
             </Export-Package>
             <Private-Package>
-              org.apache.stanbol.enhancer.rdfentities.impl;version=${project.version}
+              org.apache.stanbol.enhancer.rdfentities.impl
             </Private-Package>
           </instructions>
         </configuration>
@@ -75,12 +70,12 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-      <version>0.10.0</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
-      <version>0.11.0</version>
+      <version>1.0.0-SNAPSHOT</version>
      </dependency>
 
     <dependency>
@@ -100,7 +95,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.core</artifactId>
-      <version>0.10.0</version>
+      <version>1.0.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
