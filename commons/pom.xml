@@ -173,7 +173,7 @@
               </excludes>
             </configuration>
           </plugin>
-          <plugin>
+          <!-- plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>license-maven-plugin</artifactId>
             <executions>
@@ -183,7 +183,7 @@
                 </goals>
               </execution>
             </executions>
-          </plugin>
+          </plugin -->
         </plugins>
       </build>
     </profile>    
