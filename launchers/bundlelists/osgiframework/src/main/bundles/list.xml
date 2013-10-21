@@ -17,7 +17,7 @@
 -->
 <bundles>
   <!-- OSGi infrastructure -->
-  <startLevel level="5">
+  <startLevel level="2">
     <!-- OSGI infrastructure -->
     <bundle>
       <groupId>org.apache.felix</groupId>
@@ -83,7 +83,7 @@
 
 
   <!-- Logging Dependencies -->
-  <startLevel level="5">
+  <startLevel level="2">
     <bundle> <!-- STANNBOL-1025 upgraded to Sling logging 3.0.0 -->
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.commons.log</artifactId>
@@ -113,7 +113,11 @@
   
   
   <!-- HTTP service and Http related Utilities -->
-  <startLevel level="5">
+  <!-- 
+    NOTE: in case of a JAR launcher the <jarWebSupport> bundle (by default the
+      felix.http.jetty bundle) is expected to use a startLevel of 3 
+   -->
+  <startLevel level="4">
     <bundle>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.http.whiteboard</artifactId>

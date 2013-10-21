@@ -80,7 +80,9 @@
               <jarWebSupport>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.http.jetty</artifactId>
-                <!-- version>2.2.1</version -->
+                <!-- depends on OSGI frameowrk (startLevel=2) and is required
+                     by felix.http.whiteboard (startLevel=4) -->
+                <startLevel>3</startLevel>
               </jarWebSupport>
             </configuration>
           </execution>
