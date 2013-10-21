@@ -65,9 +65,11 @@
             <exclude>src/main/resources/config/org.apache.stanbol.enhancer.chain.weighted.impl.WeightedChain-default.config</exclude>
             <exclude>src/main/resources/config/org.apache.stanbol.enhancer.chain.weighted.impl.WeightedChain-dbpediapropernoun.config</exclude>
             <exclude>src/main/resources/config/org.apache.stanbol.enhancer.chain.weighted.impl.WeightedChain-dbpediadisambiguation.config</exclude>
+            <exclude>src/main/resources/config/org.apache.stanbol.enhancer.chain.weighted.impl.WeightedChain-dbpedia_fst.config</exclude>
             <exclude>src/main/resources/config/org.apache.stanbol.enhancer.engines.entityhublinking.EntityhubLinkingEngine-entityhub.config</exclude>
             <exclude>src/main/resources/config/org.apache.stanbol.enhancer.engines.entityhublinking.EntityhubLinkingEngine-dbpedia.config</exclude>
             <exclude>src/main/resources/config/org.apache.stanbol.enhancer.engines.entityhublinking.EntityhubLinkingEngine-dbpediadisamblinking.config</exclude>
+            <exclude>src/main/resources/config/org.apache.stanbol.enhancer.engines.lucenefstlinking.FstLinkingEngineComponent-dbpedia_fst.config</exclude>
           </excludes>
         </configuration>
       </plugin>

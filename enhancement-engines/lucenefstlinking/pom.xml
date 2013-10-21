@@ -79,6 +79,19 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- AL20 licensed files -->
+            <exclude>src/test/resources/merkel_nlp.json</exclude>
+            <exclude>src/test/resources/merkel.txt</exclude>
+
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+          </excludes>
+        </configuration>
+      </plugin>      
     </plugins>
   </build>
 
