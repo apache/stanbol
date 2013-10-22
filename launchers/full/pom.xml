@@ -80,7 +80,9 @@
               <jarWebSupport>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.http.jetty</artifactId>
-                <version>2.2.0</version>
+                <!-- depends on OSGI frameowrk (startLevel=2) and is required
+                     by felix.http.whiteboard (startLevel=4) -->
+                <startLevel>3</startLevel>
               </jarWebSupport>
             </configuration>
           </execution>
@@ -279,14 +281,14 @@
     </dependency>
     
     <!-- Language Extras -->
-    <!-- Basic Cinese language support (STANBOL-855
+    <!-- Basic Cinese language support (STANBOL-855) -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.languageextras.smartcn</artifactId>
       <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
-    </dependency> -->
+    </dependency>
     <!-- TODO Paoding does not yet support Solr 4 -->
     <!-- dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -295,14 +297,14 @@
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency -->
-    <!-- Japanese Language Support
+    <!-- Japanese Language Support  -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.languageextras.kuromoji</artifactId>
       <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
-    </dependency> -->
+    </dependency>
     
   </dependencies>
 </project>
