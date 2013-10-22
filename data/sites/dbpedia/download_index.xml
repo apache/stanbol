@@ -22,6 +22,8 @@
     to 'target.directory'
   </description>
    
+  <!-- ensure the delition of the no longer used Swedish tokenizer -->  
+  <delete dir="${target.directory}" includes="${index.name.old}" />
   <target name="download">
     <copy todir="${target.directory}" flatten="true">
       <resources>
