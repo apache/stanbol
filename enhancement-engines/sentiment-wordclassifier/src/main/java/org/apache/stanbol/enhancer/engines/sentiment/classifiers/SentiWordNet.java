@@ -25,9 +25,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -57,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * settings.
  * <p/>
  * @author Sebastian Schaffert
- * @autor Rupert Westenthaler
+ * @author Rupert Westenthaler
  */
 @Component(immediate = true)
 public class SentiWordNet {
