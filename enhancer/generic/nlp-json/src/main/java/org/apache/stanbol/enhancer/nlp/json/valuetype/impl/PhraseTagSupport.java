@@ -22,6 +22,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.enhancer.nlp.json.valuetype.ValueTypeParser;
 import org.apache.stanbol.enhancer.nlp.json.valuetype.ValueTypeSerializer;
+import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.phrase.PhraseTag;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.codehaus.jackson.JsonNode;
@@ -57,7 +58,7 @@ public class PhraseTagSupport implements ValueTypeParser<PhraseTag>, ValueTypeSe
 
 
     @Override
-    public PhraseTag parse(ObjectNode jValue) {
+    public PhraseTag parse(ObjectNode jValue, AnalysedText at) {
         JsonNode tag = jValue.path("tag");
         if(!tag.isTextual()){
             throw new IllegalStateException("Unable to parse PhraseTag. The value of the "
