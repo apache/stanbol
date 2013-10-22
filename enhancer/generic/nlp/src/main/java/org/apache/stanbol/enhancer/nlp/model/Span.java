@@ -29,35 +29,6 @@ import org.apache.stanbol.enhancer.nlp.model.annotation.Annotated;
 public interface Span extends Annotated, Comparable<Span>{
 
     /**
-     * Enumeration over different types - or roles - spans defined for an
-     * {@link AnalysedText} may play.
-     */
-    public static enum SpanTypeEnum {
-        /**
-         * The Text as a whole
-         */
-        Text,
-        /**
-         * An section of the text (chapter, page, paragraph ...). NOTE: this
-         * does NOT define types of sections.
-         */
-        TextSection,
-        /**
-         * An Sentence
-         */
-        Sentence,
-        /**
-         * A Chunk (e.g. a Noun Phrase) NOTE: this does NOT define types of
-         * Chunks
-         */
-        Chunk,
-        /**
-         * A Token (e.g. a noun, verb, punctuation) NOTE: this does NOT define
-         * types of Tokens
-         */
-        Token;
-    }
-    /**
      * The type of the Span
      * @return
      */

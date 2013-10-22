@@ -14,17 +14,34 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.apache.stanbol.enhancer.nlp.model.impl;
+package org.apache.stanbol.enhancer.nlp.model;
 
-import org.apache.stanbol.enhancer.nlp.model.Chunk;
-import org.apache.stanbol.enhancer.nlp.model.Span;
-import org.apache.stanbol.enhancer.nlp.model.SpanTypeEnum;
-
-
-public final class ChunkImpl extends SectionImpl implements Chunk {
-
-    protected ChunkImpl(AnalysedTextImpl at, Span relativeTo,int start, int end){
-        super(at,SpanTypeEnum.Chunk,relativeTo,start,end);
-    }
-        
+/**
+ * Enumeration over different types - or roles - spans defined for an
+ * {@link AnalysedText} may play.
+ */
+public enum SpanTypeEnum {
+    /**
+     * The Text as a whole
+     */
+    Text,
+    /**
+     * An section of the text (chapter, page, paragraph ...). NOTE: this
+     * does NOT define types of sections.
+     */
+    TextSection,
+    /**
+     * An Sentence
+     */
+    Sentence,
+    /**
+     * A Chunk (e.g. a Noun Phrase) NOTE: this does NOT define types of
+     * Chunks
+     */
+    Chunk,
+    /**
+     * A Token (e.g. a noun, verb, punctuation) NOTE: this does NOT define
+     * types of Tokens
+     */
+    Token;
 }

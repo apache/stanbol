@@ -31,7 +31,6 @@ import java.util.Set;
 
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
-import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Annotation;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
 import org.apache.stanbol.enhancer.servicesapi.Blob;

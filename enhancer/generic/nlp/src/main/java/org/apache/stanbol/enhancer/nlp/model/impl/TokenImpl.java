@@ -19,6 +19,7 @@ package org.apache.stanbol.enhancer.nlp.model.impl;
 import java.util.Arrays;
 
 import org.apache.stanbol.enhancer.nlp.model.Span;
+import org.apache.stanbol.enhancer.nlp.model.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 
 

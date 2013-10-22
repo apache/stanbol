@@ -21,6 +21,7 @@ import java.util.Iterator;
 import org.apache.stanbol.enhancer.nlp.model.Chunk;
 import org.apache.stanbol.enhancer.nlp.model.Sentence;
 import org.apache.stanbol.enhancer.nlp.model.Span;
+import org.apache.stanbol.enhancer.nlp.model.SpanTypeEnum;
 
 
 public final class SentenceImpl extends SectionImpl implements Sentence {

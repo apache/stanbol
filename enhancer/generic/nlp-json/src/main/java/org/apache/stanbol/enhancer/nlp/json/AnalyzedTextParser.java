@@ -26,9 +26,6 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import javax.swing.JPanel;
-
-import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Reference;
@@ -38,10 +35,8 @@ import org.apache.stanbol.enhancer.nlp.json.valuetype.ValueTypeParserRegistry;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedTextFactory;
 import org.apache.stanbol.enhancer.nlp.model.Span;
-import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
+import org.apache.stanbol.enhancer.nlp.model.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
-import org.apache.stanbol.enhancer.servicesapi.Blob;
-import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
@@ -301,7 +296,7 @@ public class AnalyzedTextParser {
         ValueTypeParser<?> parser = this.valueTypeParserRegistry.getParser(clazz);
         Object value;
         if(parser != null){
-            value = parser.parse(jValue);
+            value = parser.parse(jValue, span.getContext());
         } else {
             JsonNode valueNode = jValue.path("value");
             if(valueNode.isMissingNode()){

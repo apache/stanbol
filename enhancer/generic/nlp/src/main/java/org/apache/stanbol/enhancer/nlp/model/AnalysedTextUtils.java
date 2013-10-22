@@ -30,7 +30,6 @@ import java.util.TreeSet;
 import java.util.Map.Entry;
 
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.impl.SectionImpl;
 import org.apache.stanbol.enhancer.nlp.model.impl.SpanImpl;
 import org.apache.stanbol.enhancer.servicesapi.Blob;

@@ -20,6 +20,7 @@ import java.lang.ref.SoftReference;
 import java.util.Arrays;
 
 import org.apache.stanbol.enhancer.nlp.model.Span;
+import org.apache.stanbol.enhancer.nlp.model.SpanTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -29,7 +29,7 @@ import org.apache.stanbol.enhancer.nlp.json.valuetype.ValueTypeParser;
 import org.apache.stanbol.enhancer.nlp.json.valuetype.ValueTypeSerializer;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.Span;
-import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
+import org.apache.stanbol.enhancer.nlp.model.SpanTypeEnum;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
