@@ -70,6 +70,7 @@ import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.namespaceprefix.service.StanbolNamespacePrefixService;
 import org.apache.stanbol.commons.testing.http.Request;
 import org.apache.stanbol.commons.testing.http.RequestExecutor;
+import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.execution.Execution;
 import org.apache.stanbol.enhancer.servicesapi.helper.execution.ExecutionMetadata;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
@@ -88,6 +89,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class MultiThreadedTestBase extends EnhancerTestBase {
     
+    private static final String TEXT_PLAIN = "text/plain";
     /**
      * The name of the Enhancement Chain this test runs against. If not defined
      * the default chain is used.
@@ -222,27 +224,27 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
         } else { // else uncompressed data ...
             log.info("  - uncompressed source: {}",name);
         }
-        MediaType mediaType;
+        String mediaType;
         if(settings.getTestDataMediaType() != null){
-            mediaType = MediaType.valueOf(settings.getTestDataMediaType());
+            mediaType = settings.getTestDataMediaType();
         } else { //parse based on extension
             String ext = FilenameUtils.getExtension(name);
             if("txt".equalsIgnoreCase(ext)){
-                mediaType = MediaType.TEXT_PLAIN_TYPE;
+                mediaType = TEXT_PLAIN;
             } else if("rdf".equalsIgnoreCase(ext)){
-                mediaType = MediaType.valueOf(SupportedFormat.RDF_XML);
+                mediaType = SupportedFormat.RDF_XML;
             } else if("xml".equalsIgnoreCase(ext)){
-                mediaType = MediaType.valueOf(SupportedFormat.RDF_XML);
+                mediaType = SupportedFormat.RDF_XML;
             } else if("ttl".equalsIgnoreCase(ext)){
-                mediaType = MediaType.valueOf(SupportedFormat.TURTLE);
+                mediaType = SupportedFormat.TURTLE;
             } else if("n3".equalsIgnoreCase(ext)){
-                mediaType = MediaType.valueOf(SupportedFormat.N3);
+                mediaType = SupportedFormat.N3;
             } else if("nt".equalsIgnoreCase(ext)){
-                mediaType = MediaType.valueOf(SupportedFormat.N_TRIPLE);
+                mediaType = SupportedFormat.N_TRIPLE;
             } else if("json".equalsIgnoreCase(ext)){
-                mediaType = MediaType.valueOf(SupportedFormat.RDF_JSON);
+                mediaType = SupportedFormat.RDF_JSON;
             } else if(name.indexOf('.')<0){ //no extension
-                mediaType = MediaType.TEXT_PLAIN_TYPE; //try plain text
+                mediaType = TEXT_PLAIN; //try plain text
             } else {
                 log.info("Unkown File Extension {} for resource name {}",
                     ext,name);
@@ -255,7 +257,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
         
         log.info("  - Media-Type: {}", mediaType);
         //now init the iterator for the test data
-        return mediaType.isCompatible(MediaType.TEXT_PLAIN_TYPE) ?
+        return TEXT_PLAIN.equalsIgnoreCase(mediaType) ?
             createTextDataIterator(is, mediaType) :
             createRdfDataIterator(is, mediaType,settings.getContentProperty());
     }
@@ -274,7 +276,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
      * @param mediaType the Media-Type of the stream. MUST BE supported by
      * the Apache Clerezza RDF parsers.
      */
-    private Iterator<String> createRdfDataIterator(InputStream is, MediaType mediaType, final String propertyString) {
+    private Iterator<String> createRdfDataIterator(InputStream is, String mediaType, final String propertyString) {
         final SimpleMGraph graph = new SimpleMGraph();
         try {
             rdfParser.parse(graph, is, mediaType.toString());
@@ -527,8 +529,8 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
      * @param mediaType the Media-Type - only used to parse the charset from. If
      * no charset is specified UTF-8 is uses as default.
      */
-    private static Iterator<String> createTextDataIterator(InputStream is, MediaType mediaType) {
-        String charsetString = mediaType.getParameters().get("charset");
+    private static Iterator<String> createTextDataIterator(InputStream is, String mediaType) {
+        String charsetString = ContentItemHelper.parseMimeType(mediaType).get("charset");
         Charset charset = Charset.forName(charsetString == null ? "UTF-8" : charsetString);
         log.info("  ... using charset {} for parsing Text data",charset);
         final BufferedReader reader = new BufferedReader(new InputStreamReader(is, charset));
