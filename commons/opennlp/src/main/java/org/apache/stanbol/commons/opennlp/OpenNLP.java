@@ -21,6 +21,9 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -537,8 +540,21 @@ public class OpenNLP {
      * @return the stream or <code>null</code> if not found
      * @throws IOException an any error while opening the model file
      */
-    protected InputStream lookupModelStream(String modelName, Map<String,String> properties) throws IOException {
-        return dataFileProvider.getInputStream(null, modelName,properties);
+    protected InputStream lookupModelStream(final String modelName, final Map<String,String> properties) throws IOException {
+        try {
+            return AccessController.doPrivileged(new PrivilegedExceptionAction<InputStream>() {
+                public InputStream run() throws IOException {
+                    return dataFileProvider.getInputStream(null, modelName,properties);
+                }
+            });
+        } catch (PrivilegedActionException pae) {
+            Exception e = pae.getException();
+            if(e instanceof IOException){
+                throw (IOException)e;
+            } else {
+                throw RuntimeException.class.cast(e);
+            }
+        }        
     }
 
     /**
