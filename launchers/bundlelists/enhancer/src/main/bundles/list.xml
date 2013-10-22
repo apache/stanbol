@@ -216,12 +216,11 @@
       <artifactId>org.apache.stanbol.enhancer.engines.sentiment.wordclassifier</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </bundle>
-    <!-- NOT YET READY FOR DEFAULT CONFIG
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.sentiment.summarization</artifactId>
       <version>1.0.0-SNAPSHOT</version>
-    </bundle> -->
+    </bundle>
     
     <!-- Entity Extraction/Linking -->
     <bundle><!-- NER linking (depends on the Entityhub) -->
@@ -255,7 +254,11 @@
       <artifactId>org.apache.stanbol.enhancer.engines.entityhublinking</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </bundle>
-
+    <bundle><!-- FST Linking Engine (STANBOL-1128) -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.lucenefstlinking</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </bundle>
 
 	  <!-- Post-Processing engine -->
     
