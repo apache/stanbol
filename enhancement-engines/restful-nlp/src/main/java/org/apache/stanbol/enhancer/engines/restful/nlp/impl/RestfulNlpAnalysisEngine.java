@@ -95,7 +95,7 @@ import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedTextFactory;
 import org.apache.stanbol.enhancer.nlp.model.Sentence;
 import org.apache.stanbol.enhancer.nlp.model.Span;
-import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
+import org.apache.stanbol.enhancer.nlp.model.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
 import org.apache.stanbol.enhancer.nlp.ner.NerTag;
 import org.apache.stanbol.enhancer.nlp.utils.LanguageConfiguration;

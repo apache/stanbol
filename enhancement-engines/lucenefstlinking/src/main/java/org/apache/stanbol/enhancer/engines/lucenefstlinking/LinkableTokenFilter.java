@@ -42,7 +42,7 @@ import org.apache.stanbol.enhancer.engines.entitylinking.impl.TokenData;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.Section;
 import org.apache.stanbol.enhancer.nlp.model.Sentence;
-import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
+import org.apache.stanbol.enhancer.nlp.model.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.opensextant.solrtexttagger.TagClusterReducer;
 import org.opensextant.solrtexttagger.TagLL;

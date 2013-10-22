@@ -40,7 +40,7 @@ import org.apache.stanbol.enhancer.nlp.model.Chunk;
 import org.apache.stanbol.enhancer.nlp.model.Section;
 import org.apache.stanbol.enhancer.nlp.model.Sentence;
 import org.apache.stanbol.enhancer.nlp.model.Span;
-import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
+import org.apache.stanbol.enhancer.nlp.model.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.nlp.pos.Pos;
 import org.slf4j.Logger;

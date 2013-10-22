@@ -53,7 +53,7 @@ import org.apache.stanbol.enhancer.nlp.model.Chunk;
 import org.apache.stanbol.enhancer.nlp.model.Section;
 import org.apache.stanbol.enhancer.nlp.model.Span;
 import org.apache.stanbol.enhancer.nlp.model.Token;
-import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
+import org.apache.stanbol.enhancer.nlp.model.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
 import org.apache.stanbol.enhancer.nlp.model.tag.TagSet;
 import org.apache.stanbol.enhancer.nlp.phrase.PhraseTag;
