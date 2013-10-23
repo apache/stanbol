@@ -61,6 +61,8 @@ import javax.ws.rs.ext.Provider;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
+import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
+import org.apache.clerezza.rdf.core.serializedform.UnsupportedSerializationFormatException;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
@@ -79,6 +81,8 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 @Service(Object.class)
@@ -86,6 +90,8 @@ import org.codehaus.jettison.json.JSONObject;
 @Provider
 public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
 
+    Logger log = LoggerFactory.getLogger(ContentItemWriter.class);
+    
     /**
      * The "multipart/*" wilrcard
      */
@@ -143,16 +149,19 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
                         Collections.singletonMap("charset", UTF8.toString()));
                     httpHeaders.putSingle("Content-Type", mediaType.toString());
                 }
-                getSerializer().serialize(entityStream, ci.getMetadata(), mediaType.toString());
+                try {
+                	getSerializer().serialize(entityStream, ci.getMetadata(), mediaType.toString());
+                } catch (UnsupportedSerializationFormatException e) {
+                    throw new WebApplicationException("The enhancement results "
+                        + "cannot be serialized in the requested media type: "
+                        + mediaType.toString(),Response.Status.NOT_ACCEPTABLE);
+                }
             } else { //  (2) return a single content part
                 Entry<UriRef,Blob> contentPart = getBlob(ci, Collections.singleton(mediaType.toString()));
                 if(contentPart == null){ //no alternate content with the requeste media type
-                    throw new WebApplicationException(
-                        Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
-                        .entity("The requested enhancement chain has not created an " +
-                        		"version of the parsed content in the reuqest media " +
-                        		"type "+mediaType.toString())
-                        .build());
+                    throw new WebApplicationException("The requested enhancement chain has not created an "
+                            + "version of the parsed content in the reuqest media type "
+                            + mediaType.toString(),Response.Status.UNSUPPORTED_MEDIA_TYPE);
                 } else { //found -> stream the content to the client
                     //NOTE: This assumes that the presence of a charset
                     //      implies reading/writing character streams
@@ -195,12 +204,10 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
                             DEFAULT_RDF_FORMAT.getParameters());
                     }
                 } catch (IllegalArgumentException e) {
-                    throw new WebApplicationException(e, 
-                        Response.status(Response.Status.BAD_REQUEST)
-                        .entity(String.format("The specified RDF format '%s' (used "
-                            + " to serialize all RDF parts of multipart MIME responses)"
-                            + " is not a well formated MIME type",rdfFormatString))
-                        .build());
+                    throw new WebApplicationException("The specified RDF format '"
+                        + rdfFormatString +"' (used to serialize all RDF parts of " 
+                        + "multipart MIME responses) is not a well formated MIME type",
+                        Response.Status.BAD_REQUEST);
                 }
             }
             //(1) setting the correct header
@@ -236,10 +243,10 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
                     try {
                         object = toJson(properties);
                     } catch (JSONException e) {
-                        throw new WebApplicationException(e,
-                            Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                            .entity("Unable to convert EnhancementProperties to " +
-                            		"JSON (values : "+properties+")!").build());
+                        String message = "Unable to convert EnhancementProperties " 
+                                + "to JSON (values : "+properties+")!";
+                        log.error(message,e);
+                        throw new WebApplicationException(message, Response.Status.INTERNAL_SERVER_ERROR);
                     }
                     entity.addBodyPart(new FormBodyPart(
                         ENHANCEMENT_PROPERTIES_URI.getUnicodeString(), 
@@ -370,12 +377,9 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
                         try {
                             includeMediaTypes.add(MediaType.valueOf(includeString));
                         } catch (IllegalArgumentException e){
-                            throw new WebApplicationException(e, 
-                                Response.status(Response.Status.BAD_REQUEST)
-                                .entity("The parsed outputContent parameter "
-                                    + includeMediaTypeStrings +" contain an "
-                                    + "illegal formated MediaType!")
-                                .build());
+                            throw new WebApplicationException("The parsed outputContent "
+                                + "parameter " + includeMediaTypeStrings +" contain an "
+                                + "illegal formated MediaType!", Response.Status.BAD_REQUEST);
                         }
                     }
                 }
