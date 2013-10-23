@@ -1,0 +1,423 @@
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+    <!-- 
+     
+     Lucene FST field types:
+     
+     Those field types do use the same name as the normal, but with the suffix '_fst'.
+     They are used by the FST linking engine to analyze Labels of Entities when building
+     the FST corpus. 
+     
+     Those types MUST NOT include any filter that creates position increments != 1. Becuase
+     of that Stoprword filter as well as WerDelimiter filter factories are not present.
+     
+     To allow using the same SolrIndex for both (1) normal queries and (2) building 
+     FST corpora the Stanbol FST engine 
+     
+     1. gets the {field-type} name of the Field used to build the FST corpus
+     2. tries to get a FieldType form the schema that uses '{field-type}_fst'
+     3. if '{field-type}_fst' is not present the {field-type} is used to create the FST corpus
+     -->
+    
+    <!-- ENGLISH -->
+    <fieldType name="text_en_fst" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.EnglishPossessiveFilterFactory" />
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+        <filter class="solr.EnglishMinimalStemFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- GERMAN -->
+    <fieldType name="text_de_fst" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.GermanNormalizationFilterFactory"/>
+        <filter class="solr.GermanLightStemFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- ARABIC -->
+    <fieldType name="text_ar_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <!-- for any non-arabic -->
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <!-- normalizes ﻯ to ﻱ, etc -->
+        <filter class="solr.ArabicNormalizationFilterFactory"/>
+        <filter class="solr.ArabicStemFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Armenian (hy) -->
+    <fieldType name="text_hy_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.SnowballPorterFilterFactory" language="Armenian"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Basque (eu) -->
+    <fieldType name="text_eu_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.SnowballPorterFilterFactory" language="Basque"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Brazilian Portuguese -->
+    <fieldType name="text_pt_BR_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.BrazilianStemFilterFactory" />
+      </analyzer>
+    </fieldType>
+    
+    <!-- Bulgarian (bg) -->
+    <fieldType name="text_bg_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.BulgarianStemFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Catalan (ca) -->
+    <fieldType name="text_ca_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.ElisionFilterFactory" ignoreCase="true" articles="lang/contractions_ca.txt"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.SnowballPorterFilterFactory" language="Catalan"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Basic CJK (Chinese, Japanese, Korean)   -->
+    <fieldType name="text_cjk_fst" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <!-- normalize width before bigram, as e.g. half-width dakuten combine  -->
+        <filter class="solr.CJKWidthFilterFactory"/>
+        <!-- for any non-CJK -->
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.CJKBigramFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- CHINESE ... no specia FST field necessary -->
+    
+    <!-- Japanese -->
+    <!-- TODO: this type still produces position increments != 1 -->
+    <fieldType name="text_ja_fst" class="solr.TextField" positionIncrementGap="100" autoGeneratePhraseQueries="false">
+      <analyzer>
+        <tokenizer class="solr.JapaneseTokenizerFactory" mode="search"/>
+        <filter class="solr.JapaneseBaseFormFilterFactory"/>
+        <filter class="solr.CJKWidthFilterFactory"/>
+        <filter class="solr.JapaneseKatakanaStemFilterFactory" minimumLength="4"/>
+        <!-- Lower-cases romaji characters -->
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Czech (cs) -->
+    <fieldType name="text_cs_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.CzechStemFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Danish -->
+    <fieldType name="text_da_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.SnowballPorterFilterFactory" language="Danish"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Dutch -->
+    <fieldType name="text_nl_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.StemmerOverrideFilterFactory" dictionary="lang/stemdict_nl.txt" ignoreCase="false"/>
+        <filter class="solr.SnowballPorterFilterFactory" language="Dutch"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Finnish (fi) -->
+    <fieldType name="text_fi_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.FinnishLightStemFilterFactory" />
+      </analyzer>
+    </fieldType>
+    
+    <!-- FRENCH -->
+    <fieldType name="text_fr_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <!-- removes l', etc -->
+        <filter class="solr.ElisionFilterFactory" ignoreCase="true" articles="lang/contractions_fr.txt"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.FrenchLightStemFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Galician (gl) -->
+    <fieldType name="text_gl_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.GalicianMinimalStemFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Greek (el) -->
+    <fieldType name="text_el_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <!-- greek specific lowercase for sigma -->
+        <filter class="solr.GreekLowerCaseFilterFactory"/>
+        <filter class="solr.GreekStemFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Hebrew -->
+    <fieldType name="text_he_fst" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
+      <analyzer >
+        <tokenizer class="solr.ICUTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Hindi (hi) -->
+    <fieldType name="text_hi_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <!-- normalizes unicode representation -->
+        <filter class="solr.IndicNormalizationFilterFactory"/>
+        <!-- normalizes variation in spelling -->
+        <filter class="solr.HindiNormalizationFilterFactory"/>
+        <filter class="solr.HindiStemFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Hungarian (hu) -->
+    <fieldType name="text_hu_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.HungarianLightStemFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Indonesian (id) -->
+    <fieldType name="text_id_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <!-- for a less aggressive approach (only inflectional suffixes), set stemDerivational to false -->
+        <filter class="solr.IndonesianStemFilterFactory" stemDerivational="true"/>
+      </analyzer>
+    </fieldType>
+    
+    
+    <!-- Irish (ga) -->
+    <fieldType name="text_ga_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <!-- removes d', etc -->
+        <filter class="solr.ElisionFilterFactory" ignoreCase="true" articles="lang/contractions_ga.txt"/>
+        <!-- removes n-, etc. position increments is intentionally false! -->
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/hyphenations_ga.txt" enablePositionIncrements="false"/>
+        <filter class="solr.IrishLowerCaseFilterFactory"/>
+        <filter class="solr.SnowballPorterFilterFactory" language="Irish"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- ITALIAN -->
+    <fieldType name="text_it_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <!-- removes l', etc -->
+        <filter class="solr.ElisionFilterFactory" ignoreCase="true" articles="lang/contractions_fr.txt"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.ItalianLightStemFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Latvian -->
+    <fieldType name="text_lv_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.LatvianStemFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Norwegian (no)
+     
+     -->
+    <fieldType name="text_no_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.NorwegianLightStemFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Persian / Farsi (fa) -->
+    <fieldType name="text_fa_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <!-- for ZWNJ -->
+        <charFilter class="solr.PersianCharFilterFactory"/>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.ArabicNormalizationFilterFactory"/>
+        <filter class="solr.PersianNormalizationFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Polish (pl) -->
+    <fieldType name="text_pl_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <!-- enabling this stemmer will require to load the commons.solr.extras.stempel module -->
+        <!-- filter class="solr.solr.StempelPolishStemFilterFactory"/>
+         <filter class="solr.RemoveDuplicatesTokenFilterFactory"/ -->
+      </analyzer>
+    </fieldType>
+    
+    <!-- Portuguese -->
+    <fieldType name="text_pt_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.PortugueseLightStemFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Romanian (ro) -->
+    <fieldType name="text_ro_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.SnowballPorterFilterFactory" language="Romanian"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Russian -->
+    <fieldType name="text_ru_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.RussianLightStemFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Spanish -->
+    <fieldType name="text_es_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.SpanishLightStemFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Swedish -->
+    <fieldType name="text_sv_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.SwedishLightStemFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Thai (th) -->
+    <fieldType name="text_th_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.ThaiWordFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Turkish -->
+    <fieldType name="text_tr_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.TurkishLowerCaseFilterFactory"/>
+        <filter class="solr.SnowballPorterFilterFactory" language="Turkish"/>
+      </analyzer>
+    </fieldType>
+    
+    <!-- Ukrainian (uk) -->
+    
+    <fieldType name="text_uk_fst" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.SnowballPorterFilterFactory" language="Russian"/>
+      </analyzer>
+    </fieldType>
+
+    <!-- END FST field type definitions -->

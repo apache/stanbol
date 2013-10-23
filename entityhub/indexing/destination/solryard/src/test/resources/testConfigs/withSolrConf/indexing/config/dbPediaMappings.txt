@@ -1,0 +1,61 @@
+# --- Define the Languages for all fields ---
+| @=null;en;de;fr;it
+
+# --- RDF, RDFS and OWL Mappings ---
+rdfs:label
+rdfs:comment
+rdf:type | d=entityhub:ref
+# used by LOD to link to URIs used to identify the same Entity
+owl:sameAs | d=entityhub:ref
+
+# --- Dublin Core (dc terms and dc elements) ---
+dc:*
+# all DC Elements (one could also define the mappings to the DC Terms counterparts here
+dc-elements:*
+
+# --- Spatial Things ---
+geo:lat | d=xsd:double
+geo:long | d=xsd:double
+geo:alt | d=xsd:int;xsd:float
+# one can also copy the valued from the DBpedia properties
+#dbp-prop:latitude | d=xsd:decimal > geo:lat
+#dbp-prop:longitude | d=xsd:decimal > geo:long
+
+# --- Thesaurus (via SKOS) ---
+#SKOS can be used to define hierarchical terminologies
+skos:*
+skos:broader | d=entityhub:ref
+skos:narrower | d=entityhub:ref
+skos:related | d=entityhub:ref
+skos:member | d=entityhub:ref
+skos:subject | d=entityhub:ref
+skos:inScheme | d=entityhub:ref
+skos:hasTopConcept | d=entityhub:ref
+skos:topConceptOf | d=entityhub:ref
+
+# --- Social Networks (via foaf) ---
+#The Friend of a Friend schema often used to describe social relations between people
+foaf:* 
+foaf:knows | d=entityhub:ref
+foaf:made | d=entityhub:ref
+foaf:maker | d=entityhub:ref
+foaf:member | d=entityhub:ref
+foaf:homepage | d=xsd:anyURI
+# also use the DBpedia property website for oaf:homepage!
+dbp-prop:website | d=xsd:anyURI > foaf:homepage
+foaf:depiction | d=xsd:anyURI
+# also use the DBpedia thumbnail as oaf:depiction
+dbp-ont:thumbnail | d=xsd:anyURI > foaf:depiction
+foaf:img | d=xsd:anyURI
+foaf:logo | d=xsd:anyURI
+# Documents about the entity
+foaf:page | d=xsd:anyURI
+
+# --- dbpedia specific
+# the "dbp-ont" defines knowledge mapped to the DBPedia ontology
+dbp-ont:*
+# the "DBpedia properties are all key values pairs extracted from the info boxes
+# on the right hand side of Wikipedia pages.
+#dbp-prop:*
+# Copy only population for now (one could add additional if necessary)!
+dbp-prop:population | d=xsd:integer

@@ -1,0 +1,130 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# --- Labels and Descriptions ---
+#rdfs:label is used for names
+rdfs:label | d=entityhub:text
+
+#SKOS alt label is used for alias
+fb:common.topic.alias | d=entityhub:text > skos:altLabel
+
+# fise:matchLabel
+# This property allows to match against labels and alias
+rdfs:label | d=entityhub:text > fise:matchLabel
+fb:common.topic.alias | d=entityhub:text > fise:matchLabel
+
+# copy over the topic descriptions
+rdfs:comment | d=entityhub:text
+fb:common.topic.description | d=entityhub:text > rdfs:comment
+
+
+# --- types, links ---
+# RDF type is directly used by Freebase
+rdf:type | d=entityhub:ref
+
+# The dc:type is currently used for notable_for. However values of the 
+# fb:common.topic.notable_for field are bugged in the dump. so most (all)
+# values are missing
+fb:common.topic.notable_for | d=entityhub:ref > dc:type
+
+#seeAlso is currently not used, but might be by the FreebaseKeyProcessor
+rdfs:seeAlso | d=entityhub:ref
+
+# used by default by the FreebaseKeyProcessor for dbpedia and musicbrainz links
+owl:sameAs | d=entityhub:ref
+
+# owl:sameAs is used to store links to other ontologies
+fb:base.ontologies.ontology_instance.equivalent_instances | d=entityhub:ref > owl:sameAs
+
+
+# all unmapped authority keys are copied (and converted to strings)
+# NOTE that those values are encoded using the Freebase key encoding rules
+key:authority.* | d=xsd:string
+
+# homepage is set via LDpath (see mappings.ldpath)
+foaf:homepage | d=xsd:anyURI
+
+
+# --- Entity Metadata ---
+# Metadata are mapped to the DC Terms ontology
+fb:type.object.timestamp | d=xsd:dateTime > dc:created
+#fb:type.object.creator | d=entityhub:ref > dc:creator
+fb:type.object.mid > dc:identifier
+
+
+
+# --- Images ---
+# FOAF is used for used for images
+foaf:thumbnail | d=xsd:anyURI
+foaf:depiction | d=xsd:anyURI
+
+
+# --- Spatial Things ---
+# those three properties are created by the mappings.ldpath
+geo:lat | d=xsd:double
+geo:long | d=xsd:double
+geo:alt | d=xsd:double
+
+
+# --- Entity Hierarchy
+# SKOS is used to encode location hierarchy (at least for now)
+fb:location.location.containedby | d=entityhub:ref > skos:broader
+
+# Organisations can also have parents
+fb:organization.organization.parent | d=entityhub:ref > skos:broader
+
+# make persons skos:related with their nation
+#fb:people.person.nationality | d=entityhub:ref > skos:related
+
+# --- other indexed Freebase properties ---
+
+# for Persons
+fb:people.person.date_of_birth
+fb:people.person.place_of_birth
+fb:people.deceased_person.date_of_death
+fb:people.deceased_person.place_of_death
+fb:people.person.nationality
+#fb:people.person.gender
+#fb:people.person.places_lived
+#fb:influence.influence_node.influenced_by
+#fb:influence.influence_node.influenced
+#fb:influence.influence_node.peers
+
+# Organization
+
+fb:organization.organization.date_founded
+
+# Drugs
+#fb:medicine.drug.atccode
+#fb:medicine.drug.drug_class
+#fb:medicine.drug.drug_class | d=entityhub:ref > skos:broader
+#fb:medicine.drug.active_moieties
+#fb:medicine.drug_formulation.active_ingredients
+#fb:medicine.drug_formulation.drug_category
+#fb:medicine.drug_formulation.drug_category | d=entityhub:ref > skos:broader
+#fb:medicine.drug_formulation.formulation_of | d=entityhub:ref > skos:broader
+
+# Music
+
+#fb:music.artist.genre
+#fb:music.artist.label
+#fb:music.artist.album
+#fb:music.artist.track
+#fb:music.album.artist
+#fb:music.album.release_date
+#fb:music.album.genre
+#fb:music.recording.artist
+#fb:music.recording.song
+#fb:music.composition.composer

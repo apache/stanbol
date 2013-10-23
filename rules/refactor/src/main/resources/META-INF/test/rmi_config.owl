@@ -1,0 +1,218 @@
+<?xml version="1.0"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY rmi "http://kres.iks-project.eu/ontology/meta/rmi.owl#" >
+    <!ENTITY sequence "http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://kres.iks-project.eu/ontology/meta/rmi.owl#"
+     xml:base="http://kres.iks-project.eu/ontology/meta/rmi_config.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:sequence="http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:rmi="http://kres.iks-project.eu/ontology/meta/rmi.owl#">
+    <owl:Ontology rdf:about="http://kres.iks-project.eu/ontology/meta/rmi_config.owl">
+        <owl:imports rdf:resource="http://ontologydesignpatterns.org/ont/iks/kres/rmi.owl"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi.owl#endWith -->
+
+    <owl:ObjectProperty rdf:about="&rmi;endWith"/>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi.owl#hasRule -->
+
+    <owl:ObjectProperty rdf:about="&rmi;hasRule"/>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi.owl#startWith -->
+
+    <owl:ObjectProperty rdf:about="&rmi;startWith"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#directlyPrecedes -->
+
+    <owl:ObjectProperty rdf:about="&sequence;directlyPrecedes"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi.owl#hasBodyAndHead -->
+
+    <owl:DatatypeProperty rdf:about="&rmi;hasBodyAndHead"/>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi.owl#hasDescription -->
+
+    <owl:DatatypeProperty rdf:about="&rmi;hasDescription"/>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi.owl#hasSequence -->
+
+    <owl:DatatypeProperty rdf:about="&rmi;hasSequence"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi.owl#KReSRule -->
+
+    <owl:Class rdf:about="&rmi;KReSRule"/>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi.owl#Recipe -->
+
+    <owl:Class rdf:about="&rmi;Recipe"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRecipeA -->
+
+    <owl:NamedIndividual rdf:about="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRecipeA">
+        <rdf:type rdf:resource="&rmi;Recipe"/>
+        <rmi:hasDescription rdf:datatype="&xsd;string">Some description here</rmi:hasDescription>
+        <rmi:hasSequence rdf:datatype="&xsd;string">http://eu.iksproject.kres/KReSOntologyRules.owl#MyRuleB,http://eu.iksproject.kres/KReSOntologyRules.owl#MyRuleA</rmi:hasSequence>
+        <rmi:hasRule rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRuleA"/>
+        <rmi:endWith rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRuleA"/>
+        <rmi:hasRule rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRuleB"/>
+        <rmi:startWith rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRuleB"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRuleA -->
+
+    <owl:NamedIndividual rdf:about="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRuleA">
+        <rdf:type rdf:resource="&rmi;KReSRule"/>
+        <rmi:hasDescription rdf:datatype="&xsd;string">An example of description for my rule A</rmi:hasDescription>
+        <rmi:hasBodyAndHead rdf:datatype="&xsd;string">BodyA -&gt; BodyB</rmi:hasBodyAndHead>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRuleB -->
+
+    <owl:NamedIndividual rdf:about="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRuleB">
+        <rdf:type rdf:resource="&rmi;KReSRule"/>
+        <rmi:hasDescription rdf:datatype="&xsd;string">An example of description..for my rule B</rmi:hasDescription>
+        <rmi:hasBodyAndHead rdf:datatype="&xsd;string">BodyB -&gt; HeadB</rmi:hasBodyAndHead>
+        <sequence:directlyPrecedes rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyRuleA"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi_config.owl#ProvaParentRecipe -->
+
+    <owl:NamedIndividual rdf:about="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#ProvaParentRecipe">
+        <rdf:type rdf:resource="&rmi;Recipe"/>
+        <rmi:hasDescription rdf:datatype="&xsd;string">A single rule recipe.</rmi:hasDescription>
+        <rmi:hasSequence rdf:datatype="&xsd;string">http://kres.iks-project.eu/ontology/meta/rmi.owl#ProvaParentRule</rmi:hasSequence>
+        <rmi:endWith rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#ProvaParentRule"/>
+        <rmi:hasRule rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#ProvaParentRule"/>
+        <rmi:startWith rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#ProvaParentRule"/>
+    </owl:NamedIndividual>
+    
+    
+    <owl:NamedIndividual rdf:about="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyTestRecipe">
+        <rdf:type rdf:resource="&rmi;Recipe"/>
+        <rmi:hasDescription rdf:datatype="&xsd;string">Test recipe</rmi:hasDescription>
+        <rmi:hasSequence rdf:datatype="&xsd;string">http://kres.iks-project.eu/ontology/meta/rmi.owl#TestRule</rmi:hasSequence>
+        <rmi:endWith rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#TestRule"/>
+        <rmi:hasRule rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#TestRule"/>
+        <rmi:startWith rdf:resource="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#TestRule"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi_config.owl#ProvaParentRule -->
+
+    <owl:NamedIndividual rdf:about="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#ProvaParentRule">
+        <rdf:type rdf:resource="&rmi;KReSRule"/>
+        <rmi:hasDescription rdf:datatype="&xsd;string">A rule to inference if a person has an uncle.</rmi:hasDescription>
+        <rmi:hasBodyAndHead rdf:datatype="&xsd;string">ProvaParent = &lt;http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#&gt; . rule1[ has(ProvaParent:hasParent, ?x, ?y) . has(ProvaParent:hasBrother, ?y, ?z) -&gt; has(ProvaParent:hasUncle, ?x, ?z) ]</rmi:hasBodyAndHead>
+    </owl:NamedIndividual>
+    
+    <owl:NamedIndividual rdf:about="http://kres.iks-project.eu/ontology/meta/rmi_config.owl#TestRule">
+        <rdf:type rdf:resource="&rmi;KReSRule"/>
+        <rmi:hasDescription rdf:datatype="&xsd;string">A rule to infer that a kres person is a foaf person.</rmi:hasDescription>
+        <rmi:hasBodyAndHead rdf:datatype="&xsd;string">kres = &lt;http://kres.iks-project.eu/ontology.owl#&gt; . foaf = &lt;http://xmlns.com/foaf/0.1/&gt; . rule1[ is(kres:Person, ?x) -&gt; is(foaf:Person, ?x) ]</rmi:hasBodyAndHead>
+    </owl:NamedIndividual>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.0.0.1451) http://owlapi.sourceforge.net -->
+

@@ -1,0 +1,67 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+
+Bundle adding support for the Kuromoji Analyzer 
+=============================================
+
+If installed to Apache Stanbol it will allow Solr Cores managed by Apache Stanbol ('org.apache.stanbol.commons.solr.core' module) to support fieldType definitions referring to Kuromoji analyzers.
+
+Kuromoji has a search mode (default) that does segmentation useful for search.  A heuristic is used to segment compounds into its parts and the compound itself is kept as synonym.
+
+Valid values for attribute mode are:
+
+* normal: regular segmentation
+* search: segmentation useful for search with synonyms compounds (default)
+* extended: same as search mode, but unigrams unknown words (experimental)
+
+For some applications it might be good to use search mode for indexing and normal mode for queries to reduce recall and prevent parts of compounds from being matched and highlighted. Use <analyzer type="index"> and <analyzer type="query"> for this and mode normal in query.
+
+Kuromoji also has a convenient user dictionary feature that allows overriding the statistical model with your own entries for segmentation, part-of-speech tags and readings without a need to specify weights.  Notice that user dictionaries have not been subject to extensive testing.
+
+User dictionary attributes are:
+
+* userDictionary: user dictionary filename
+* userDictionaryEncoding: user dictionary encoding (default is UTF-8)
+
+See lang/userdict_ja.txt for a sample user dictionary file. Punctuation characters are discarded by default.  Use discardPunctuation="false" to keep them.
+
+See http://wiki.apache.org/solr/JapaneseLanguageSupport for more on Japanese language support.
+
+    :::xml
+    <fieldType name="text_ja" class="solr.TextField" positionIncrementGap="100" autoGeneratePhraseQueries="false">
+      <analyzer>
+      <!--
+        -->
+        <tokenizer class="solr.JapaneseTokenizerFactory" mode="search"/>
+        <!--<tokenizer class="solr.JapaneseTokenizerFactory" mode="search" userDictionary="lang/userdict_ja.txt"/>-->
+        <!-- Reduces inflected verbs and adjectives to their base/dictionary forms (辞書形) -->
+        <filter class="solr.JapaneseBaseFormFilterFactory"/>
+        <!-- Removes tokens with certain part-of-speech tags -->
+        <filter class="solr.JapanesePartOfSpeechStopFilterFactory" tags="lang/stoptags_ja.txt" enablePositionIncrements="true"/>
+        <!-- Normalizes full-width romaji to half-width and half-width kana to full-width (Unicode NFKC subset) -->
+        <filter class="solr.CJKWidthFilterFactory"/>
+        <!-- Removes common tokens typically not useful for search, but have a negative effect on ranking -->
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_ja.txt" enablePositionIncrements="true" />
+        <!-- Normalizes common katakana spelling variations by removing any last long sound character (U+30FC) -->
+        <filter class="solr.JapaneseKatakanaStemFilterFactory" minimumLength="4"/>
+        <!-- Lower-cases romaji characters -->
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+    </fieldType>
+
+Installing this bundle is required because Solr when running within OSGI can not load classes from Jar files located in the '{instanceDir}/lib' Directory.

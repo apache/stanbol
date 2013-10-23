@@ -1,0 +1,82 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#NOTE: THIS IS A DEFAULT MAPPING SPECIFICATION THAT INCLUDES MAPPINGS FOR
+#      COMMON ONTOLOGIES. USERS MIGHT WANT TO ADAPT THIS CONFIGURATION BY
+#      COMMENTING/UNCOMMENTING AND/OR ADDING NEW MAPPINGS
+
+rdf:type | d=entityhub:ref
+
+rdfs:label 
+rdfs:comment
+rdfs:seeAlso | d=entityhub:ref
+
+owl:sameAs | d=entityhub:ref
+
+#mapping for all dc-terms properties
+dc:*
+
+# --- Schema.org --
+
+# Defines an Ontology used by search engines (Google, Yahoo and Bing) for 
+# indexing websites.
+
+schema:*
+# Copy all names of schema instances over to rdfs:label
+schema:name > rdfs:label
+
+# --- Simple Knowledge Organization System (SKOS) ---
+
+# A common data model for sharing and linking knowledge organization systems 
+# via the Semantic Web. Typically used to encode controlled vocabularies as
+# a thesaurus  
+skos:*
+
+# copy all SKOS labels (preferred, alternative and hidden) over to rdfs:label
+skos:prefLabel > rdfs:label
+skos:altLabel > rdfs:label
+skos:hiddenLabel > rdfs:label
+
+# copy values of **Match relations to the according related, broader and narrower
+skos:relatedMatch > skos:related
+skos:broadMatch > skos:broader
+skos:narrowMatch > skos:skos:narrower
+skos:narrowerTransitive > skos:narrower
+skos:broaderTransitive > skos:broader
+
+# geonames.org specific mappers
+
+geonames:*
+geonames:population | d=xsd:long
+geo:alt | d=xsd:int
+geo:lat | d=xsd:decimal
+geo:long | d=xsd:decimal
+
+#mappings
+# copy  labels
+geonames:name > rdfs:label
+geonames:alternateName > rdfs:label
+# transitive closure over the hierarchy
+geonames:parentADM1 > geonames:parentFeature
+geonames:parentADM2 > geonames:parentFeature
+geonames:parentADM3 > geonames:parentFeature
+geonames:parentADM4 > geonames:parentFeature
+geonames:parentCountry > geonames:parentFeature
+
+
+
+
+
+

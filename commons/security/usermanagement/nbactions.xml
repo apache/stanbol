@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+  <action>
+    <actionName>CUSTOM-deploy to localhost:8080</actionName>
+    <displayName>deploy to localhost:8080</displayName>
+    <goals>
+      <goal>install</goal>
+      <goal>org.apache.sling:maven-sling-plugin:install</goal>
+    </goals>
+  </action>
+</actions>

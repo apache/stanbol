@@ -1,0 +1,15 @@
+# --- Define the Languages for all fields ---
+| @=null;en;de;fr;it
+
+# --- RDF, RDFS and OWL Mappings ---
+rdf:*
+rdfs:*
+# convert rdf:type statements to References
+rdf:type | d=entityhub:ref
+
+# --- Dublin Core (dc terms and dc elements) ---
+dc:*
+# convert DC Elements to dc namespace
+dc-elements:title > dc:title
+dc-elements:created > dc:created
+dc-elements:creator > dc:creator

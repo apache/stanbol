@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>CUSTOM-update-parents</actionName>
+            <displayName>update-parents</displayName>
+            <goals>
+                <goal>versions:update-parent</goal>
+            </goals>
+            <properties>
+                <allowSnapshots>true</allowSnapshots>
+            </properties>
+        </action>
+        <action>
+            <actionName>build</actionName>
+            <goals>
+                <goal>install</goal>
+            </goals>
+            <properties>
+                <Env.MAVEN_OPTS>-Xmx1024M -XX:MaxPermSize=128M</Env.MAVEN_OPTS>
+            </properties>
+        </action>
+        <action>
+            <actionName>rebuild</actionName>
+            <goals>
+                <goal>clean</goal>
+                <goal>install</goal>
+            </goals>
+            <properties>
+                <Env.MAVEN_OPTS>-Xmx1024M -XX:MaxPermSize=128M</Env.MAVEN_OPTS>
+            </properties>
+        </action>
+        <action>
+            <actionName>CUSTOM-use-latests-versions</actionName>
+            <displayName>use-latests-versions</displayName>
+            <goals>
+                <goal>versions:use-latest-versions</goal>
+            </goals>
+            <properties>
+                <includes>org.apache.stanbol</includes>
+                <allowSnapshots>true</allowSnapshots>
+            </properties>
+        </action>
+    </actions>

@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one or more
+ contributor license agreements.  See the NOTICE file distributed with
+ this work for additional information regarding copyright ownership.
+ The ASF licenses this file to You under the Apache License, Version 2.0
+ (the "License"); you may not use this file except in compliance with
+ the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<!--  
+ This is the Solr schema file. This file should be named "schema.xml" and
+ should be in the conf directory under the solr home
+ (i.e. ./solr/conf/schema.xml by default) 
+ or located where the classloader for the Solr webapp can find it.
+
+ This schema will be used by the Apache Stanbol SolrYard implementation to
+ index entities.
+ The implementation of the SolrYard does made several assumptions on
+ configurations defined in this Schema. So changes to this schema that do
+ affect such assumptions will most likelly cause unpredictable errors!
+ 
+ However there are also a lot of places where users can optimize this schema
+ to specific requirements. See the comments within this schema for more
+ details!
+
+ For more information, on how to customize this file, please see
+ http://wiki.apache.org/solr/SchemaXml
+
+-->
+
+<schema name="Apache Stanbol SolrYard Schema" version="1.5">
+  <!--
+    The SolrYard supports a list of types that is reflected by
+    "fieldType" specifications within this schema.
+    See the specific fieldType definition for more information
+  -->
+  <types>
+    <!-- 
+      This fieldType is used to store values with the dataType "xsd:string".
+      It is NOT used for natural language texts. Assume that this data type is
+      used for ISBN numbers, article numbers, string representations of
+      unsupported data types ...
+    -->
+    <!-- The StrField type is not analyzed, but indexed/stored verbatim. -->
+    <fieldType name="string" class="solr.StrField" sortMissingLast="true" omitNorms="false"/>    
+
+    <!-- 
+      This can be used as alternative to "string" to enable case insensitive
+      searches on string values.
+      The KeywordTokenizerFactory ensures that the whole string is preserved as
+      a single token.
+    -->
+    <!-- lowercases the entire field value, keeping it as a single token.  -->
+    <fieldType name="lowercase" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
+      <analyzer>
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+        <filter class="solr.LowerCaseFilterFactory" />
+      </analyzer>
+    </fieldType>
+
+
+    <!-- boolean type: "true" or "false" used to store values with the datatype "xsd:boolean" -->
+    <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true" omitNorms="false"/>
+    <!--Binary data type. The data should be sent/retrieved in as Base64 encoded Strings.
+        Currently not used by the SolrYard implementation, but reserved for future use. -->
+    <fieldtype name="binary" class="solr.BinaryField"/>
+    <fieldType name="int" class="solr.TrieIntField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="float" class="solr.TrieFloatField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="long" class="solr.TrieLongField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="double" class="solr.TrieDoubleField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="tint" class="solr.TrieIntField" precisionStep="8" positionIncrementGap="0"/>
+    <fieldType name="tfloat" class="solr.TrieFloatField" precisionStep="8" positionIncrementGap="0"/>
+    <fieldType name="tlong" class="solr.TrieLongField" precisionStep="8" positionIncrementGap="0"/>
+    <fieldType name="tdouble" class="solr.TrieDoubleField" precisionStep="8" positionIncrementGap="0"/>
+ 
+    <fieldType name="date" class="solr.TrieDateField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="tdate" class="solr.TrieDateField" precisionStep="6" positionIncrementGap="0"/>
+    
+    <fieldType name="random" class="solr.RandomSortField" indexed="true" />
+
+    <!-- Special non-natural language field types -->
+    
+    <!-- This point type indexes the coordinates as separate fields (subFields)
+     If subFieldType is defined, it references a type, and a dynamic field
+     definition is created matching *___<typename>.  Alternately, if
+     subFieldSuffix is defined, that is used to create the subFields.
+     Example: if subFieldType="double", then the coordinates would be
+     indexed in fields myloc_0___double,myloc_1___double.
+     Example: if subFieldSuffix="_d" then the coordinates would be indexed
+     in fields myloc_0_d,myloc_1_d
+     The subFields are an implementation detail of the fieldType, and end
+     users normally should not need to know about them.
+     -->
+    <fieldType name="point" class="solr.PointType" dimension="2" subFieldSuffix="_d"/>
+    
+    <!-- A specialized field for geospatial search. If indexed, this fieldType must not be multivalued. -->
+    <fieldType name="location" class="solr.LatLonType" subFieldSuffix="_coordinate"/>
+    
+    <!-- An alternative geospatial field type new to Solr 4.  It supports multiValued and polygon shapes.
+     For more information about this and other Spatial fields new to Solr 4, see:
+     http://wiki.apache.org/solr/SolrAdaptersForLuceneSpatial4
+     -->
+    <fieldType name="location_rpt" class="solr.SpatialRecursivePrefixTreeFieldType"
+    geo="true" distErrPct="0.025" maxDistErr="0.000009" units="degrees" />
+    
+    
+    <!--
+      Natural Language Texts
+     
+      Indexing of natural language texts are supported by the solr.TextField class that
+      allows the specification of custom text analyzers specified as a tokenizer and a
+      list of token filters.
+      
+      For more info on customizing your analyzer chain, please see
+      http://wiki.apache.org/solr/AnalyzersTokenizersTokenFilters
+      
+      The SolrYard has support for different languages. Within the schema.xml one need
+      to define first a "fieldType" for language and second a dynamicField for the
+      prefix used by the SolrYard for this language.
+      For more information about the prefixes used by the SolrYard see the notes in the
+      field section of this configuration.
+      
+      In addition the SolrYard also indexes natural language values (of any language)
+      together with string values within a special field to support searches for
+      texts without an specified language.
+    -->
+
+    <!-- 
+         ENGLISH
+     
+         This is the default fieldType used for english language texts. It is
+         based on the "text_en_splitting_tight" of the default Solr 4.1 distribution
+         
+         Less flexible matching, but less false matches.  Probably not ideal for product names,
+         but may be good for SKUs.  Can insert dashes in the wrong place and still match. -->
+    <fieldType name="text_en" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
+      <analyzer type="index">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="false"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_en.txt"/>
+        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="0" generateNumberParts="0" catenateWords="1" catenateNumbers="1" catenateAll="0"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+        <filter class="solr.EnglishMinimalStemFilterFactory"/>
+        <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="false"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_en.txt"/>
+        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="0" generateNumberParts="0" catenateWords="1" catenateNumbers="1" catenateAll="0"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+        <filter class="solr.EnglishMinimalStemFilterFactory"/>
+        <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
+      </analyzer>
+    </fieldType>
+
+    <!-- 
+         GENERIC (no specific lanugage support)
+     
+         The default for any language without a special field definition.
+         
+         Uses the ICUTokenizer and tries to convert alphabetic, numeric, and symbolic Unicode characters which 
+         are not in the first 127 ASCII characters (the "Basic Latin" Unicode block) into their ASCII 
+         equivalents, if one exists. (STANBOL-
+         (see http://lucene.apache.org/java/2_9_1/api/all/org/apache/lucene/analysis/ASCIIFoldingFilter.html)
+
+     	-->
+    <fieldType name="textgen" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
+      <analyzer>
+        <tokenizer class="solr.ICUTokenizerFactory"/>
+        <filter class="solr.ASCIIFoldingFilterFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+    </fieldType>
+
+
+    <!-- A KeywordTokenizer that does not include some properties of the source text.
+         
+         TODO:
+          - This might be usefull for searching labels
+          - Rename to label if used for that
+          - Add 0-9 to the regex patter to preserve numbers
+         
+      -->
+    <fieldType name="alphaOnlySort" class="solr.TextField" sortMissingLast="true" omitNorms="false">
+      <analyzer>
+        <!-- KeywordTokenizer does not tokenize -->
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+        <filter class="solr.LowerCaseFilterFactory" />
+        <filter class="solr.TrimFilterFactory" />
+        <filter class="solr.PatternReplaceFilterFactory" pattern="([^a-z])" replacement="" replace="all" />
+      </analyzer>
+    </fieldType>
+    
+    <fieldType name="text_path" class="solr.TextField" positionIncrementGap="100" omitNorms="false">
+      <analyzer>
+        <tokenizer class="solr.PathHierarchyTokenizerFactory"/>
+      </analyzer>
+    </fieldType>
+
+    <!-- since fields of this type are by default not stored or indexed,
+         any data added to them will be ignored outright.  --> 
+    <fieldtype name="ignored" stored="false" indexed="false" multiValued="true" class="solr.StrField" />
+
+    <!-- Spatial features are not yet supported by the Entityhub
+    <fieldType name="point" class="solr.PointType" dimension="2" subFieldSuffix="_d"/>
+    <fieldType name="location" class="solr.LatLonType" subFieldSuffix="_coordinate"/>
+    <fieldtype name="geohash" class="solr.GeoHashField"/>
+     -->
+ </types>
+
+
+ <fields>
+   <!-- 
+     For Information about the different attributes for fields
+     see http://wiki.apache.org/solr/SchemaXml. 
+   -->
+    <!--
+      The uri field is used as ID for documents indexed by the SolrYard.
+      Do not change this definition!
+    -->
+   <field name="uri" type="string" indexed="true" stored="true" required="true" />
+
+   <!-- 
+     used to index all natural language texts of all fields of a document
+    (via copyField). This is used as default search field.
+    The type may be changed.
+     -->
+   <field name="_text" type="textgen" indexed="true" stored="false" multiValued="true" termVectors="true"/>
+   <!-- 
+     used to store all references of the document (via copyField).
+     This field may be used to search for related entities.
+     Do not change this definition!
+    -->
+   <field name="_ref" type="string" indexed="true" stored="false" multiValued="true"/>
+   <!-- 
+     Field used to store the domain in case multiple datasets are stored witin the same
+     Solr index (search for "Multi Yard Layout" for details).
+     Do not change this definition!
+   -->
+   <field name="_domain" type="string" indexed="true" stored="false" multiValued="true"/>
+   
+   <!-- defined to fullfill required fields for SolrCloud (see http://wiki.apache.org/solr/SolrCloud#schema.xml )-->
+   <field name="_version_" type="long" indexed="true" stored="true" multiValued="false"/>
+
+   <!-- 
+     Dynamic field definitions (used if a field name is not found)
+     see http://wiki.apache.org/solr/SchemaXml for details.
+     
+     The SolrYard heavily uses dynamic fields to index fields based on there
+     data type.
+     Notes:
+       - By default all dynamicField specifications use multiValued="true"
+         because this schema.xml does not make any assumptions on the data stored.
+         Even a boolean field may define both "true" and "false" as values.
+       - The SolrYard currently uses only prefixes to represent data types 
+         and languages. However postfixes are reserved for future extensions.
+         That means that postfixes MUST NOT be used for dynamicField definitions
+   -->
+   <!--
+     Used for all fields with boolean data type.
+     One can change multivalued to "false" in case the data indexed do confirm to
+     this restriction
+   -->
+   <dynamicField name="bool/*" type="boolean" indexed="true"  stored="true" multiValued="true"/>
+   <!--
+     Numeric dataTypes.
+     Note that thy type can be changed to fieldTypes supporting hierarchical
+     indexing of values to increase performance of ranged queries
+   -->
+   <dynamicField name="int/*"  type="int"     indexed="true"  stored="true" multiValued="true"/>
+   <dynamicField name="lon/*"  type="long"    indexed="true"  stored="true" multiValued="true"/>
+   <dynamicField name="flo/*"  type="float"   indexed="true"  stored="true" multiValued="true"/>
+   <dynamicField name="dou/*"  type="double"  indexed="true"  stored="true" multiValued="true"/>
+   <dynamicField name="cal/*"  type="date"    indexed="true"  stored="true" multiValued="true"/>
+   <dynamicField name="dur/*"  type="string"  indexed="true"  stored="true" multiValued="true"/>
+   <!-- Additional dynamic fiels for geo spatial search (currently not supported by the SolrYard) -->
+   <dynamicField name="coord/*"  type="tdouble" indexed="true"  stored="false" />
+   <dynamicField name="loc/*"    type="location" indexed="true" stored="true"/>
+   <dynamicField name="geo/*"    type="location_rpt"  indexed="true" stored="true"  multiValued="true" />
+
+   <!--
+     String fields that are not natural language
+     To support case insensitive searches in such fields change 
+     the type to "lowercase"
+   -->
+   <dynamicField name="str/*"  type="string"  indexed="true"  stored="true" multiValued="true" omitNorms="false"/>
+   <!-- 
+     references are values that represent IDs of other resources.
+     Typically this will store URIs but in principle also other IDs
+     could be used.
+   -->
+   <dynamicField name="ref/*"  type="string"  indexed="true"  stored="true" multiValued="true"/>
+
+   <!--
+     DynamicFields representing natural language texts.
+     
+     The type of such fields may be changed to one of the alternatives 
+     descibed in the types section of this configuration.
+
+     The SolrYard prefixes natural language texts with "@"
+     followed by the defined language.
+     Currently no processing of the language is done. So
+     defineing the language "1xx5zr7" for Text will create
+     a field with the prefix "@1xx5zr7".
+     
+     To define a special field type for a language one has
+     to use "@" plus the key for the language as prefix.
+     See the specification for English language texts as example.
+     
+     Also prefixes for country specific languages can be
+     realized by defining dynamic fields like follows:
+       use @en* to match en-GB and en-US
+       use @en/* to match only en but not en-GB or en-US
+       use @en-GB/* and @en* to have a special field type for 
+         en-GB and one for other english text
+   -->
+   <!-- 
+    Dynamic field for English languages.
+    Note that the prefix "@en*" matches also "@en-GB" and "@en-US"
+   -->
+   <dynamicField name="@en*"  type="text_en" indexed="true" stored="true" multiValued="true" omitNorms="false"/>
+
+   <!--
+     The "@*" catches all the other languages including "@/"
+     (default language) used for texts without a defined language
+   -->
+   <dynamicField name="@*"  type="textgen"  indexed="true"  stored="true" multiValued="true" omitNorms="false"/>
+
+   <!--
+     To add special configurations for specific fields one
+     has to include the fieldName within the prefix of the
+     dynamicField specification.
+     The SolrYard uses namespace prefixes to generate
+     field names. When defined prefixes defined in the
+     NamespaceEnum of the Entityhub are used.
+     Currently there is no way to define used prefixes for
+     other namespaces.
+     
+     This example shows how to activate lower case search
+     for the dcmi-terms format property
+  <dynamicField name="str/dc:format*" type="lowercase" indexed="true"  stored="true" multiValued="true"/>
+     
+     This example shows how to activate fast ranged queries
+     for spatial searches
+  <dynamicField name="dou/geo:lat*" type="tdouble" indexed="true"  stored="true" multiValued="true"/>
+  <dynamicField name="dou/geo:lon*" type="tdouble" indexed="true"  stored="true" multiValued="true"/>
+  <dynamicField name="int/geo:alt*" type="tint" indexed="true"  stored="true" multiValued="true"/>
+     
+     This example defines to use the type "text_en" for
+     english language rdfs:comment values.
+   
+   <dynamicField name="@en/rdfs:comment*"  type="text_en"  indexed="true"  stored="true" multiValued="true"/>
+     
+     Note that this would not match "en-GB" nor "en-US".
+   -->
+    
+    
+   <!--
+     The following dynamic field specifications define fiedls used
+     by the SolrYard implementation for special purposes.
+   -->
+         
+   <!-- 
+     the "_!@*" fields contain a copy of all languages AND string values
+     for that field. This field is used for text queries with no specified
+     language.
+     This field need not to be stored. The type can be changed to alternatives
+     as described in the types section of this configuration.
+   -->
+   <dynamicField name="_!@*"  type="textgen"  indexed="true"  stored="false" multiValued="true" omitNorms="false"/>
+   <!-- 
+     fields starting with "_config/" are used to store configurations about how the
+     index was created within the index (e.g. used namespace prefixes).
+     Do not change this definition!
+   -->
+   <dynamicField name="_config/*" type="string" indexed="false" multiValued="true"/>
+   
+ </fields>
+
+ <!-- 
+   Field to use to determine and enforce document uniqueness.
+   -->
+ <uniqueKey>uri</uniqueKey>
+
+ <!-- 
+   defaultSearchFiel is DEPRECATED as of Solr 4
+ <defaultSearchField>_text</defaultSearchField> -->
+
+ <!--
+   solrQueryParser defaultOperator is DEPRECATED as of Solr 4
+ <solrQueryParser defaultOperator="OR"/> -->
+
+  <!--
+    The SolrYard Implementation assumes the following copyField commands.
+    This commands MUST NOT be removed! 
+   -->
+
+   <!-- 
+     Values of all fields that represent natural language texts
+     or string values are copied to the default search field
+     "_text".
+     Currently the SolrYard does not use this field, but it is
+     reserved for future useage and MUST therefoer already be
+     included when indexing documents
+   -->
+   <copyField source="@*" dest="_text"/>
+   <copyField source="str/*" dest="_text"/>
+   <!--
+     All references to other entities (documents) need to be
+     copied to the "_ref" field.
+     This field is required to query for dependencies of other
+     documents (e.g. when one needs to remove a docuemnt and
+     all references to it)
+   -->
+   <copyField source="ref/*" dest="_ref"/>
+	
+
+
+</schema>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<project name="OpenNLP Model Download Helper" default="download" basedir=".">
+  <description>
+    Contains only a singel target that is used by the Maven Ant
+    Plugin to download OpenNLP Models from the Web
+  </description>
+  <!-- We need to use the merge mapper to rename model files from
+       "se-*" to "sv-*"
+   -->
+  <mapper type="merge" />
+  <!-- ensure the delition of the no longer used Swedish tokenizer -->  
+  <delete dir="${target.directory}" includes="sv-token.bin" />
+  <!-- switched from perceptron to maxent for POS tagging for openNLP 1.5.2 -->
+  <delete file="${target.directory}/sv-pos-perceptron.bin" quiet="true"></delete>
+   
+  <target name="download">
+<!-- Based on some testing the decision was to use the SimpleTokenizer for 
+     the Swidish language
+      <copy toDir="${target.directory}/">
+          <resources>
+              <url url="${model.url}/se-token.bin"/>
+          </resources>
+          <mergemapper to="sv-token.bin"/>
+      </copy>
+      -->
+      <copy toDir="${target.directory}/">
+          <resources>
+              <url url="${model.url}/se-sent.bin"/>
+          </resources>
+          <mergemapper to="sv-sent.bin"/>
+      </copy>
+      <!-- copy toDir="${target.directory}/">
+          <resources>
+              <url url="${model.url}/se-pos-perceptron.bin"/>
+          </resources>
+          <mergemapper to="sv-pos-perceptron.bin"/>
+      </copy -->
+      <copy toDir="${target.directory}/">
+          <resources>
+              <url url="${model.url}/se-pos-maxent.bin"/>
+          </resources>
+          <mergemapper to="sv-pos-maxent.bin"/>
+      </copy>
+  </target>
+</project>

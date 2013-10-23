@@ -1,0 +1,328 @@
+<?xml version="1.0"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements. See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version
+    2.0 (the "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0 
+    
+    Unless required by applicable law or agreed to in writing, software 
+    distributed under the License is distributed on an "AS IS" BASIS, 
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or 
+    implied. See the License for the specific language governing 
+    permissions and limitations under the License.
+-->
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY ns "http://w3.org/ns/" >
+    <!ENTITY sioc "http://rdfs.org/sioc/" >
+    <!ENTITY stuff "http://purl.org/stuff/" >
+    <!ENTITY docs "http://schema.org/docs/" >
+    <!ENTITY www "http://www.w3.org/2006/" >
+    <!ENTITY c4dm "http://purl.org/NET/c4dm/" >
+    <!ENTITY spec "http://xmlns.com/foaf/spec/" >
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY skos2 "http://www.w3.org/2004/02/skos/" >
+    <!ENTITY provenance "http://purl.org/net/provenance/" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY dul "http://www.ontologydesignpatterns.org/ont/dul/" >
+    <!ENTITY alignments "http://www.ontologydesignpatterns.org/ont/alignments/" >
+    <!ENTITY meta "http://www.ontologydesignpatterns.org/schemas/meta.owl#" >
+    <!ENTITY coddata "http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#" >
+    <!ENTITY codkernel "http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://stanbol.apache.org/ontologies/registries/stanbol_network/"
+     xml:base="http://stanbol.apache.org/ontologies/registries/stanbol_network/"
+     xmlns:spec="http://xmlns.com/foaf/spec/"
+     xmlns:ns="http://w3.org/ns/"
+     xmlns:docs="http://schema.org/docs/"
+     xmlns:www="http://www.w3.org/2006/"
+     xmlns:c4dm="http://purl.org/NET/c4dm/"
+     xmlns:coddata="http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#"
+     xmlns:meta="http://www.ontologydesignpatterns.org/schemas/meta.owl#"
+     xmlns:sioc="http://rdfs.org/sioc/"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:provenance="http://purl.org/net/provenance/"
+     xmlns:codkernel="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#"
+     xmlns:stuff="http://purl.org/stuff/"
+     xmlns:skos2="http://www.w3.org/2004/02/skos/"
+     xmlns:alignments="http://www.ontologydesignpatterns.org/ont/alignments/"
+     xmlns:dul="http://www.ontologydesignpatterns.org/ont/dul/"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://www.ontologydesignpatterns.org/registry/stanbol_network">
+        <owl:versionInfo rdf:datatype="&xsd;string">0.5.2</owl:versionInfo>
+        <owl:versionInfo xml:lang="en">Created by Alessandro Adamou</owl:versionInfo>
+        <owl:versionInfo xml:lang="en">Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the &quot;License&quot;); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+    </owl:versionInfo>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:AnnotationProperty rdf:about="&meta;isOntologyOf"/>
+    <owl:AnnotationProperty rdf:about="&meta;hasOntology"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#OntologyLibrary -->
+
+    <owl:Class rdf:about="&coddata;OntologyLibrary"/>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#Ontology -->
+
+    <owl:Class rdf:about="&codkernel;Ontology"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://purl.org/NET/c4dm/event.owl -->
+
+    <owl:NamedIndividual rdf:about="&c4dm;event.owl">
+        <rdf:type rdf:resource="&codkernel;Ontology"/>
+        <rdfs:label rdf:datatype="&xsd;string">Event Ontology</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://purl.org/dc/elements/1.1/ -->
+
+    <owl:NamedIndividual rdf:about="http://purl.org/dc/elements/1.1/">
+        <rdf:type rdf:resource="&codkernel;Ontology"/>
+        <rdfs:label rdf:datatype="&xsd;string">Dublin Core metadata schema (legacy)</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://purl.org/dc/terms/ -->
+
+    <owl:NamedIndividual rdf:about="http://purl.org/dc/terms/">
+        <rdf:type rdf:resource="&codkernel;Ontology"/>
+        <rdfs:label rdf:datatype="&xsd;string">Dublin Core metadata schema</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://purl.org/net/provenance/ns -->
+
+    <owl:NamedIndividual rdf:about="&provenance;ns">
+        <rdf:type rdf:resource="&codkernel;Ontology"/>
+        <rdfs:label rdf:datatype="&xsd;string">Provenance Vocabulary Core Ontology (PVCO)</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://purl.org/stuff/rev -->
+
+    <owl:NamedIndividual rdf:about="&stuff;rev">
+        <rdf:type rdf:resource="&codkernel;Ontology"/>
+        <rdfs:label rdf:datatype="&xsd;string">Revyu vocabulary</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://rdfs.org/sioc/ns -->
+
+    <owl:NamedIndividual rdf:about="&sioc;ns">
+        <rdf:type rdf:resource="&codkernel;Ontology"/>
+        <rdfs:label rdf:datatype="&xsd;string">Semantically-Interlinked Online Communities</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://schema.org/docs/schemaorg.owl -->
+
+    <owl:NamedIndividual rdf:about="&docs;schemaorg.owl">
+        <rdf:type rdf:resource="&codkernel;Ontology"/>
+        <rdfs:label rdf:datatype="&xsd;string">Schema.org</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/registries/stanbol_network/Alignments -->
+
+    <owl:NamedIndividual rdf:about="http://stanbol.apache.org/ontologies/registries/stanbol_network/Alignments">
+        <rdf:type rdf:resource="&coddata;OntologyLibrary"/>
+        <rdfs:label rdf:datatype="&xsd;string">Cross-vocabulary alignments</rdfs:label>
+        <owl:versionInfo rdf:datatype="&xsd;string">0.1</owl:versionInfo>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/registries/stanbol_network/Foundational -->
+
+    <owl:NamedIndividual rdf:about="http://stanbol.apache.org/ontologies/registries/stanbol_network/Foundational">
+        <rdf:type rdf:resource="&coddata;OntologyLibrary"/>
+        <rdfs:label rdf:datatype="&xsd;string">Foundational</rdfs:label>
+        <owl:versionInfo rdf:datatype="&xsd;string">0.1</owl:versionInfo>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/registries/stanbol_network/GeneralPurposeOntologies -->
+
+    <owl:NamedIndividual rdf:about="http://stanbol.apache.org/ontologies/registries/stanbol_network/GeneralPurposeOntologies">
+        <rdf:type rdf:resource="&coddata;OntologyLibrary"/>
+        <rdfs:label rdf:datatype="&xsd;string">General Purpose Ontologies</rdfs:label>
+        <owl:versionInfo rdf:datatype="&xsd;string">0.2</owl:versionInfo>
+        <meta:hasOntology rdf:resource="&c4dm;event.owl"/>
+        <meta:hasOntology rdf:resource="http://purl.org/dc/terms/"/>
+        <meta:hasOntology rdf:resource="&docs;schemaorg.owl"/>
+        <meta:hasOntology rdf:resource="&ns;org"/>
+        <meta:hasOntology rdf:resource="&skos2;core"/>
+        <meta:hasOntology rdf:resource="&www;time"/>
+        <meta:hasOntology rdf:resource="&spec;index.rdf"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/registries/stanbol_network/SocialNetworks -->
+
+    <owl:NamedIndividual rdf:about="http://stanbol.apache.org/ontologies/registries/stanbol_network/SocialNetworks">
+        <rdf:type rdf:resource="&coddata;OntologyLibrary"/>
+        <rdfs:label rdf:datatype="&xsd;string">Social Network Models</rdfs:label>
+        <owl:versionInfo rdf:datatype="&xsd;string">0.3</owl:versionInfo>
+        <meta:hasOntology rdf:resource="&provenance;ns"/>
+        <meta:hasOntology rdf:resource="&sioc;ns"/>
+        <meta:hasOntology rdf:resource="&spec;index.rdf"/>
+        <meta:hasOntology rdf:resource="&stuff;rev"/>
+        <meta:hasOntology rdf:resource="http://www.holygoat.co.uk/owl/redwood/0.1/tags/"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/registries/stanbol_network/W3C -->
+
+    <owl:NamedIndividual rdf:about="http://stanbol.apache.org/ontologies/registries/stanbol_network/W3C">
+        <rdf:type rdf:resource="&coddata;OntologyLibrary"/>
+        <rdfs:label rdf:datatype="&xsd;string">W3C Ontology Recommendations</rdfs:label>
+        <owl:versionInfo rdf:datatype="&xsd;string">0.1</owl:versionInfo>
+        <meta:hasOntology rdf:resource="&ns;org"/>
+        <meta:hasOntology rdf:resource="&skos2;core"/>
+        <meta:hasOntology rdf:resource="&www;time"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://w3.org/ns/org -->
+
+    <owl:NamedIndividual rdf:about="&ns;org">
+        <rdf:type rdf:resource="&codkernel;Ontology"/>
+        <rdfs:label rdf:datatype="&xsd;string">Organisation Ontology</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.holygoat.co.uk/owl/redwood/0.1/tags/ -->
+
+    <owl:NamedIndividual rdf:about="http://www.holygoat.co.uk/owl/redwood/0.1/tags/">
+        <rdf:type rdf:resource="&codkernel;Ontology"/>
+        <rdfs:label rdf:datatype="&xsd;string">Tag ontology</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/alignments/schemaorg.owl -->
+
+    <owl:NamedIndividual rdf:about="&alignments;schemaorg.owl">
+        <rdf:type rdf:resource="&codkernel;Ontology"/>
+        <rdfs:label rdf:datatype="&xsd;string">Alignments to schema.org</rdfs:label>
+        <meta:isOntologyOf rdf:resource="http://stanbol.apache.org/ontologies/registries/stanbol_network/Alignments"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/ont/dul/DUL.owl -->
+
+    <owl:NamedIndividual rdf:about="&dul;DUL.owl">
+        <rdf:type rdf:resource="&codkernel;Ontology"/>
+        <rdfs:label rdf:datatype="&xsd;string">DOLCE UltraLite</rdfs:label>
+        <meta:isOntologyOf rdf:resource="http://stanbol.apache.org/ontologies/registries/stanbol_network/Foundational"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.w3.org/2004/02/skos/core -->
+
+    <owl:NamedIndividual rdf:about="&skos2;core">
+        <rdf:type rdf:resource="&codkernel;Ontology"/>
+        <rdfs:label rdf:datatype="&xsd;string">Simple Knowledge Organization System (SKOS)</rdfs:label>
+        <meta:isOntologyOf rdf:resource="http://stanbol.apache.org/ontologies/registries/stanbol_network/Foundational"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.w3.org/2006/time -->
+
+    <owl:NamedIndividual rdf:about="&www;time">
+        <rdf:type rdf:resource="&codkernel;Ontology"/>
+        <rdfs:label rdf:datatype="&xsd;string">OWL-Time</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://xmlns.com/foaf/spec/index.rdf -->
+
+    <owl:NamedIndividual rdf:about="&spec;index.rdf">
+        <rdf:type rdf:resource="&codkernel;Ontology"/>
+        <rdfs:label rdf:datatype="&xsd;string">Friend-Of-A-Friend</rdfs:label>
+    </owl:NamedIndividual>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.2.3.1824) http://owlapi.sourceforge.net -->
+

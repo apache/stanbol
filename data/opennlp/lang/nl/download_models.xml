@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<project name="OpenNLP Model Download Helper" default="download" basedir=".">
+  <description>
+    Contains only a singel target that is used by the Maven Ant
+    Plugin to download OpenNLP Models from the Web
+  </description>
+   
+  <target name="download">
+    <!-- switched from perceptron to maxent for POS tagging for openNLP 1.5.2 -->
+    <delete file="${target.directory}/nl-pos-perceptron.bin" quiet="true"></delete>
+    <copy todir="${target.directory}" flatten="true">
+      <resources>
+        <url url="${model.url}/nl-token.bin"/>
+        <url url="${model.url}/nl-sent.bin"/>
+        <!-- url url="${model.url}/nl-pos-perceptron.bin"/ -->
+        <url url="${model.url}/nl-pos-maxent.bin"/>
+        <!-- no Chunker for nl
+         <url url="${model.url}/nl-chunker.bin"/>
+          -->
+      </resources>
+    </copy>
+  </target>
+</project>

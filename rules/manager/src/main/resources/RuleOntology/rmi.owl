@@ -1,0 +1,306 @@
+<?xml version="1.0"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY rmi "http://kres.iks-project.eu/ontology/meta/rmi.owl#" >
+    <!ENTITY sequence "http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://kres.iks-project.eu/ontology/meta/rmi.owl#"
+     xml:base="http://kres.iks-project.eu/ontology/meta/rmi.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:sequence="http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:rmi="http://kres.iks-project.eu/ontology/meta/rmi.owl#">
+    <owl:Ontology rdf:about="http://kres.iks-project.eu/ontology/meta/rmi.owl">
+    <!--
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/cp/owl/sequence.owl"/>
+    -->
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:AnnotationProperty rdf:about="&rdfs;label"/>
+    <owl:AnnotationProperty rdf:about="&rdfs;comment"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi.owl#endWith -->
+
+    <owl:ObjectProperty rdf:about="&rmi;endWith">
+        <rdfs:label xml:lang="en">end with</rdfs:label>
+        <rdfs:label xml:lang="it">finisce con</rdfs:label>
+        <rdfs:comment xml:lang="en">This property identifies the final rule of a recipe.</rdfs:comment>
+        <rdfs:comment xml:lang="it">Questa propriet&#224; identific la regola con cui termina la ricett&#224;.</rdfs:comment>
+        <rdfs:range rdf:resource="&rmi;KReSRule"/>
+        <rdfs:domain rdf:resource="&rmi;Recipe"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi.owl#hasRule -->
+
+    <owl:ObjectProperty rdf:about="&rmi;hasRule">
+        <rdfs:label xml:lang="en">has rule</rdfs:label>
+        <rdfs:label xml:lang="it">ha regola</rdfs:label>
+        <rdfs:comment xml:lang="en">This property links a Recipe istance to one o more KReS rules.</rdfs:comment>
+        <rdfs:comment xml:lang="it">Questa propriet&#224; lega una ricetta ad una o pi&#249; regole.</rdfs:comment>
+        <rdfs:range rdf:resource="&rmi;KReSRule"/>
+        <rdfs:domain rdf:resource="&rmi;Recipe"/>
+        <owl:inverseOf rdf:resource="&rmi;isRuleOf"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi.owl#isRuleOf -->
+
+    <owl:ObjectProperty rdf:about="&rmi;isRuleOf">
+        <rdfs:label xml:lang="en">is rule of</rdfs:label>
+        <rdfs:label xml:lang="it">&#232; regola di</rdfs:label>
+        <rdfs:comment xml:lang="en">This is the inverse of hasRule. Link the rule to one or more recipes.</rdfs:comment>
+        <rdfs:comment xml:lang="it">Questa propriet&#224; &#232; l&#39;inversa di &quot;hasRule&quot;.</rdfs:comment>
+        <rdfs:domain rdf:resource="&rmi;KReSRule"/>
+        <rdfs:range rdf:resource="&rmi;Recipe"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi.owl#startWith -->
+
+    <owl:ObjectProperty rdf:about="&rmi;startWith">
+        <rdfs:label xml:lang="en">start with</rdfs:label>
+        <rdfs:label xml:lang="it">inizia con</rdfs:label>
+        <rdfs:comment xml:lang="en">This property idntifies the starting rule of a recipe.</rdfs:comment>
+        <rdfs:comment xml:lang="it">Questa propriet&#224; identifica la regola con cui inizia un recipe.</rdfs:comment>
+        <rdfs:range rdf:resource="&rmi;KReSRule"/>
+        <rdfs:domain rdf:resource="&rmi;Recipe"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#directlyPrecedes -->
+
+    <owl:ObjectProperty rdf:about="&sequence;directlyPrecedes"/>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#topObjectProperty -->
+
+    <owl:ObjectProperty rdf:about="&owl;topObjectProperty"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi.owl#hasBodyAndHead -->
+
+    <owl:DatatypeProperty rdf:about="&rmi;hasBodyAndHead">
+        <rdfs:label xml:lang="en">has body and head</rdfs:label>
+        <rdfs:label xml:lang="it">ha corpo e testa</rdfs:label>
+        <rdfs:comment xml:lang="en">Physical Storage of a rule. Here there is the kres rule string or a rule in some other syntax.</rdfs:comment>
+        <rdfs:comment xml:lang="it">La regola viene conservata fisicamente secondo un corpo ed una testa. La sintassi pu&#242; essere KReS o SWRL o un&#39;altra sintassi legibile dal ragionatore.</rdfs:comment>
+        <rdfs:domain rdf:resource="&rmi;KReSRule"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi.owl#hasDescription -->
+
+    <owl:DatatypeProperty rdf:about="&rmi;hasDescription">
+        <rdfs:label xml:lang="en">has description</rdfs:label>
+        <rdfs:label xml:lang="it">ha descrizione</rdfs:label>
+        <rdfs:comment xml:lang="en">To add some description to rules or recipes.</rdfs:comment>
+        <rdfs:comment xml:lang="it">Aggiungere una descrizione alle regole o alle ricette</rdfs:comment>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:domain rdf:resource="&owl;Thing"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi.owl#hasSequence -->
+
+    <owl:DatatypeProperty rdf:about="&rmi;hasSequence">
+        <rdfs:label xml:lang="en">has sequence</rdfs:label>
+        <rdfs:label xml:lang="it">ha sequenza</rdfs:label>
+        <rdfs:comment xml:lang="en">Define the rule sequence of a recipe on the form: &lt;rule-IRI1&gt;, &lt;rule-IRI2&gt;, etc. N.B. The sequence can be retrievied also via query SPARQL by following object properties.</rdfs:comment>
+        <rdfs:comment xml:lang="it">Definisce la sequenza delle regole nella forma: &lt;rule-IRI1&gt;, &lt;rule-IRI2&gt;, etc. N.B. La sequenza pu&#242; anche essere recuperata via query SPARQL sequendo le propriet&#224; dell&#39;oggetto.</rdfs:comment>
+        <rdfs:domain rdf:resource="&rmi;Recipe"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#topDataProperty -->
+
+    <owl:DatatypeProperty rdf:about="&owl;topDataProperty"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi.owl#KReSRule -->
+
+    <owl:Class rdf:about="&rmi;KReSRule">
+        <rdfs:label xml:lang="en">KReS rule</rdfs:label>
+        <rdfs:label xml:lang="it">regole KReS</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&rmi;isRuleOf"/>
+                <owl:someValuesFrom rdf:resource="&rmi;Recipe"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="&rmi;Recipe"/>
+        <rdfs:comment xml:lang="en">This class contains the IRI (the name) that identifies the rule.</rdfs:comment>
+        <rdfs:comment xml:lang="it">Questa classe contiene gli IRI che identificano le regole (i nomi) su una o pi&#249; ontologie.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://kres.iks-project.eu/ontology/meta/rmi.owl#Recipe -->
+
+    <owl:Class rdf:about="&rmi;Recipe">
+        <rdfs:label xml:lang="en">Recipe</rdfs:label>
+        <rdfs:label xml:lang="it">Ricetta</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:comment xml:lang="en">This class contains the IRI that identifies a sequence of rules to perform particular action on the dataset. It must have at least one KReS rule.</rdfs:comment>
+        <rdfs:comment xml:lang="it">Questa classe contiene l&#39;IRI che identifica una sequenza di regole che eseguirano una particolare azione sul dataset. L&#39;istanza di questa classe deve contenere almeno una regola KReS.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotations
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <rdf:Description rdf:about="http://www.semanticweb.org/ontologies/ontologyrules.owl#KReSRule">
+        <rdfs:label xml:lang="en">SWRL rules</rdfs:label>
+        <rdfs:label xml:lang="it">regole SWRL</rdfs:label>
+        <rdfs:comment xml:lang="en">This class contains the IRI (the name) that identifies the rule. </rdfs:comment>
+        <rdfs:comment xml:lang="it">Questa classe contiene gli IRI che identificano le regole (i nomi) su una o pi&#249; ontologie. </rdfs:comment>
+    </rdf:Description>
+    <rdf:Description rdf:about="http://www.semanticweb.org/ontologies/ontologyrules.owl#hasDescription">
+        <rdfs:label xml:lang="en">has description</rdfs:label>
+        <rdfs:label xml:lang="it">ha descrizione</rdfs:label>
+        <rdfs:comment xml:lang="en">Any kind of description about rules or recipes.</rdfs:comment>
+    </rdf:Description>
+    <rdf:Description rdf:about="http://www.semanticweb.org/ontologies/ontologyrules.owl#Recipe">
+        <rdfs:label xml:lang="en">Receipt</rdfs:label>
+        <rdfs:label xml:lang="it">Ricevere</rdfs:label>
+        <rdfs:comment xml:lang="en">This class contains the IRI that identifies a sequence of rules to perform particular action on the dataset. It must have at least one KReS rule</rdfs:comment>
+        <rdfs:comment xml:lang="it">Questa classe contiene l&#39;IRI che identifica una sequenza di regole che eseguirano una particolare azione sul dataset. L&#39;istanza di questa classe deve contenere almeno una regola KReS</rdfs:comment>
+    </rdf:Description>
+    <rdf:Description rdf:about="http://www.semanticweb.org/ontologies/ontologyrules.owl#endWith">
+        <rdfs:label xml:lang="en">end with</rdfs:label>
+        <rdfs:label xml:lang="it">finisce con</rdfs:label>
+        <rdfs:comment xml:lang="en">This property indentifies the last rule of the recipe.</rdfs:comment>
+    </rdf:Description>
+    <rdf:Description rdf:about="http://www.semanticweb.org/ontologies/ontologyrules.owl#hasSequence">
+        <rdfs:label xml:lang="en">has sequence</rdfs:label>
+        <rdfs:label xml:lang="it">ha sequenza</rdfs:label>
+        <rdfs:comment xml:lang="en">Define the rule sequence of a recipe.</rdfs:comment>
+    </rdf:Description>
+    <rdf:Description rdf:about="http://www.semanticweb.org/ontologies/ontologyrules.owl#hasBodyAndHead">
+        <rdfs:label xml:lang="en">has body and head</rdfs:label>
+        <rdfs:label xml:lang="it">ha corpo e testa</rdfs:label>
+        <rdfs:comment xml:lang="en">Physical Storage of a rule. Here there is the kres rule string.</rdfs:comment>
+    </rdf:Description>
+    <rdf:Description rdf:about="http://www.semanticweb.org/ontologies/ontologyrules.owl#hasRule">
+        <rdfs:label xml:lang="en">has rule</rdfs:label>
+        <rdfs:label xml:lang="it">ha regola</rdfs:label>
+        <rdfs:comment xml:lang="en">This property links a Recipe istance to a KReS rule.</rdfs:comment>
+    </rdf:Description>
+    <rdf:Description rdf:about="http://www.semanticweb.org/ontologies/ontologyrules.owl#isRuleOf">
+        <rdfs:label xml:lang="en">is rule of</rdfs:label>
+        <rdfs:label xml:lang="it">&#232; regola di</rdfs:label>
+        <rdfs:comment xml:lang="en">This property links a KReS rule to a Recipe</rdfs:comment>
+    </rdf:Description>
+    <rdf:Description rdf:about="http://www.semanticweb.org/ontologies/ontologyrules.owl#startWith">
+        <rdfs:label xml:lang="en">start with</rdfs:label>
+        <rdfs:label xml:lang="it">inizia con</rdfs:label>
+        <rdfs:comment xml:lang="en">This property identifies the starting rule of the recipe.</rdfs:comment>
+    </rdf:Description>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.0.0.1451) http://owlapi.sourceforge.net -->
+

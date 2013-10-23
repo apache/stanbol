@@ -1,0 +1,28 @@
+#This is a similar version of the dbPediaMappings.txt but excludes mapping rules
+# --- Define the Languages for all fields ---
+| @=null;en;de;fr;it
+
+# --- RDF, RDFS and OWL Mappings ---
+rdfs:label
+rdfs:comment
+rdf:type
+# used by LOD to link to URIs used to identify the same Entity
+owl:sameAs
+
+# --- Other Namespaces to include---
+dc:*
+dc-elements:*
+geo:*
+skos:*
+foaf:* 
+
+# --- dbpedia specific
+# the "dbp-ont" defines knowledge mapped to the DBPedia ontology
+dbp-ont:*
+
+# the "DBpedia properties are all key values pairs extracted from the info boxes
+# on the right hand side of Wikipedia pages.
+# uncomment the next line to include all
+#dbp-prop:*
+# Currently only the population is added
+dbp-prop:population

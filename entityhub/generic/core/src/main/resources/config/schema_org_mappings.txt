@@ -1,0 +1,117 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# ------------------------------------------------------------------------------
+# This File defines mappings for typical Ontologies to schema.org
+# ------------------------------------------------------------------------------
+# NOTE: currently it is not yet used
+#-----------------------------------
+# (1) Define the Languages to be imported (globally for all fields)
+# may be removed to import all languages
+ | @=null;en;de;fr;it 
+#  --- RDF RDFS and OWL Mappings ---
+rdfs:label
+rdfs:label > name
+rdfs:comment
+rdfs:comment > description
+# The types
+rdf:type | d=entityhub:ref
+# used by LOD to link to URIs used to identify the same Entity
+owl:sameAs | d=entityhub:ref
+
+#  --- Dublin Core ---
+# keep all DC Terms properties
+dc:* 
+dc:title > name
+dc:description > description
+# copy all DC Element values over to the DC Term equivalents 
+dc-elements:contributor > dc:contributor
+dc-elements:coverage > dc:coverage
+dc-elements:creator > dc:creator
+dc-elements:date > dc:date
+dc-elements:description > dc:description
+dc-elements:format > dc:format
+dc-elements:identifier > dc:identifier
+dc-elements:language > dc:language
+dc-elements:publisher > dc:publisher
+dc-elements:relation > dc:relation
+dc-elements:rights > dc:rights
+dc-elements:source > dc:source
+dc-elements:subject > dc:subject
+dc-elements:title > dc:title
+dc-elements:type > dc:type
+#also use ec-elements:title as label
+dc-elements:title > rdfs:label
+# also use dc elements title and descriptions for name and description
+dc-elements:title > name
+dc-elements:description > description
+
+#  --- Spatial Things ---
+# schema.org uses the GeoCoordinates type for spatial things
+geo:lat | d=xsd:double
+geo:lat | d=xsd:double > latitude
+geo:long | d=xsd:double
+geo:long | d=xsd:double > longitude
+# also allow floating point if one needs to use fractions of meters
+geo:alt | d=xsd:int;xsd:float
+geo:alt | d=xsd:int;xsd:float > elevation
+
+#  --- Thesaurus (via SKOS) ---
+# SKOS can be used to define hierarchical terminologies
+skos:*
+skos:prefLabel  > name
+skos:definition > description
+skos:note > description
+
+# no support for controlled vocabularies within schema.org
+skos:broader | d=entityhub:ref
+skos:narrower | d=entityhub:ref
+skos:related | d=entityhub:ref
+skos:member | d=entityhub:ref
+skos:subject | d=entityhub:ref
+skos:inScheme | d=entityhub:ref
+skos:hasTopConcept | d=entityhub:ref
+skos:topConceptOf | d=entityhub:ref
+
+# Some SKOS thesaurus do use "skos:transitiveBroader" and "skos:transitiveNarrower"
+# however such properties are only intended to be used by reasoners to
+# calculate transitive closures over broader/narrower hierarchies.
+# see http://www.w3.org/TR/skos-reference/#L2413 for details
+# to correct such cases we will copy transitive relations to there counterpart
+skos:narrowerTransitive > skos:narrower
+skos:broaderTransitive > skos:broader
+
+#  --- Social Networks (via foaf) ---
+# The Friend of a Friend schema often used to describe social relations between people
+foaf:* 
+foaf:name > name
+foaf:knows | d=entityhub:ref
+foaf:knows | d=entityhub:ref > knows
+foaf:made | d=entityhub:ref
+foaf:maker | d=entityhub:ref
+foaf:member | d=entityhub:ref
+foaf:member | d=entityhub:ref > memberOf
+foaf:homepage | d=xsd:anyURI
+foaf:homepage | d=xsd:anyURI > url
+foaf:depiction | d=xsd:anyURI
+foaf:depiction | d=xsd:anyURI > img
+foaf:img | d=xsd:anyURI
+foaf:img | d=xsd:anyURI > img
+foaf:logo | d=xsd:anyURI
+foaf:logo | d=xsd:anyURI > img
+# page about the entity
+foaf:page | d=xsd:anyURI
+foaf:page | d=xsd:anyURI > url
+

@@ -1,0 +1,45 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+Stanbol HTTP Endpoints
+======================
+
+The following bundles provide the base infrastructure for building a
+consistent set JAX-RS based HTTP endpoints (RESTful webservices) to
+publish services implemented by the various OSGi bundles of a Stanbol
+distribution.
+
+The general convention is to make each endpoint self-documented by
+implementing a @GET annotated method that "Accept: text/html" and return
+an HTML page that explains how the endpoint works and give usage examples
+with the `curl` commandline tool and HTML forms to quickly test the
+service from inside the browser.
+
+- `stanbol/commons/web/base` provides the java interface and OSGi / JAX-RS context
+  bridging tooling but not actual JAX-RS resources
+
+- `stanbol/commons/web/home` provides a simple resource for the home page and
+  default CSS / icons and base freemarker template to be reused by other Stanbol
+  JAX-RS resources for consistent look and feel accross the all documentation.
+
+- `stanbol/commons/web/sparql` provides a sample JAX-RS resource to publish
+  access to the registered clerezza triple stores using the standardized SPARQL
+  HTTP endpoint API.
+
+TODO: write the documentation to contribute new endpoints that reuse the styling
+and menu navigation of the default components.
+

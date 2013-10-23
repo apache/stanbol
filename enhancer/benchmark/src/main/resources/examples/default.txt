@@ -1,0 +1,54 @@
+# Default example benchmarks
+# Some failures are expected in this example
+            
+= INPUT =
+# Comments such as this one are ignored
+# This is the enhancer input, can be split on several lines
+Bob
+Marley was born in Kingston, Jamaica.
+
+= EXPECT =
+# EXPECT defines groups of predicate/object matchers that we expect to find in the output
+# Each group applies to one given enhancement: for the expectation to succeed, at least
+# one enhancement must match all lines in the group
+
+Description: Kingston must be found
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Kingston,_Jamaica
+
+Description: This one should fail
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Basel
+
+# The description: line starts a new group
+Description: Bob Marley must be found as a musical artist
+http://fise.iks-project.eu/ontology/entity-type URI http://dbpedia.org/ontology/MusicalArtist
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Bob_Marley
+
+= COMPLAIN =
+
+Description: Miles Davis must not be found
+http://fise.iks-project.eu/ontology/entity-type URI http://dbpedia.org/ontology/MusicalArtist
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Miles_Davis
+
+Description: Bob Marley in the COMPLAIN section should fail
+http://fise.iks-project.eu/ontology/entity-type URI http://dbpedia.org/ontology/MusicalArtist
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/resource/Bob_Marley
+
+
+= INPUT =
+Second benchmark: something happened in Geneva yesterday.
+
+= EXPECT =
+Description: Geneva, Switzerland must be found
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/page/Geneva
+
+
+= INPUT =
+Third benchmark: something happened in Geneva, Ohio yesterday.
+
+= EXPECT =
+Description: Geneva, Ohio must be found
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/page/Geneva%2C_Ohio
+
+= COMPLAIN =
+Description: Geneva, Switzerland must not be found
+http://fise.iks-project.eu/ontology/entity-reference URI http://dbpedia.org/page/Geneva

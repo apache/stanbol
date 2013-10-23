@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
+    <version>5-SNAPSHOT</version>
+    <relativePath>../../parent</relativePath>
+  </parent>
+
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.launchers.full</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>Apache Stanbol Launchers Full Launcher</name>
+  <description>Runnable jar that runs the full Stanbol configuration</description>
+
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/launchers/full/
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/launchers/full/
+    </developerConnection>
+    <url>http://stanbol.apache.org/</url>
+  </scm>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>.</directory>
+              <includes>
+                <include>stanbol/**</include>
+                <include>*.log</include>
+              </includes>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.sling</groupId>
+        <artifactId>maven-launchpad-plugin</artifactId>
+        <!--
+          TODO the maven-launchpad-plugin can also generate a war file and
+          Karaf description, we could add this. See
+          http://sling.apache.org/site/maven-launchpad-plugin.html
+        -->
+        <executions>
+          <execution>
+            <id>prepare-package</id>
+            <goals>
+              <goal>prepare-package</goal>
+            </goals>
+            <configuration>
+              <includeDefaultBundles>false</includeDefaultBundles>
+              <!-- Standalone jar requires an OSGi http service implementation -->
+              <jarWebSupport>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.http.jetty</artifactId>
+                <!-- depends on OSGI frameowrk (startLevel=2) and is required
+                     by felix.http.whiteboard (startLevel=4) -->
+                <startLevel>3</startLevel>
+              </jarWebSupport>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>org.apache.stanbol.launchpad.Main</mainClass>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>1.7.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <artifactSet>
+              <!-- Use this to in/exclude only specific dependencies -->
+                <includes>
+                  <include>org.apache.stanbol:org.apache.stanbol.commons.launchpad</include>
+                  <include>org.apache.sling:org.apache.sling.launchpad.base</include>
+                </includes>
+              </artifactSet>
+              <!-- transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ComponentsXmlResourceTransformer" />
+              </transformers -->
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes></excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.7</version>
+        <configuration>
+          <target>
+            <property name="vm.args" value=""/>
+            <java fork="true" jar="${project.build.directory}/${project.build.finalName}.jar"
+                dir="${project.build.directory}">
+              <jvmarg line="-Xmx1024m -XX:MaxPermSize=256M ${vm.args}"/>
+            </java>
+          </target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <!-- The Apache Stanbol lauchpad -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.launchpad</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <!-- maven-launchpad-plugin builds on the launchpad.base app -->
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.launchpad.base</artifactId>
+      <classifier>app</classifier>
+    </dependency>
+    
+    <!-- OSGi Framemework Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.osgiframework</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+    
+    <!-- Stanbol Commons Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.stanbolcommons</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Security Support -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.security</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency> 
+    
+    <!-- zz> Shell Bundle List  --> 
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.zzshell</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Stanbol CMS Adapter Bundle List 
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.cmsadapter</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency> -->
+
+    <!-- Stanbol Contenthub Bundle List
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.contenthub</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency> -->
+
+    <!-- Stanbol Data Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.defaultdata</artifactId>
+      <version>1.1.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency> 
+    <!-- include all OpenNLP models in the full launcher  -->
+    <dependency> 
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.opennlp</artifactId>
+      <version>1.1.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Stanbol Enhancer Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.enhancer</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Stanbol Entityhub Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.entityhub</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Stanbol Ontology Manager Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.ontologymanager</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Stanbol Rules Bundle List  -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.rules</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+    
+    <!-- Stanbol Reasoners Bundle List -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.reasoners</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+    
+    <!-- Language Extras -->
+    <!-- Basic Cinese language support (STANBOL-855) -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.languageextras.smartcn</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+    <!-- TODO Paoding does not yet support Solr 4 -->
+    <!-- dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.languageextras.paoding</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency -->
+    <!-- Japanese Language Support  -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.languageextras.kuromoji</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+    
+  </dependencies>
+</project>

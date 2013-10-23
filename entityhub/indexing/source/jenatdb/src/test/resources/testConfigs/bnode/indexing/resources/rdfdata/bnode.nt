@@ -1,0 +1,8 @@
+_:node16nh4idjhx60161366 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdf.data-vocabulary.org/#Organization>   .
+_:node16nh4idjhx60161366 <http://rdf.data-vocabulary.org/#name> "Century 21 Agawam Realty/ Southhampton"   .
+_:node16nh4idjhx60161366 <http://rdf.data-vocabulary.org/#address> _:node16nh4idjhx60161367   .
+_:node16nh4idjhx60161367 <http://rdf.data-vocabulary.org/#street-address> "85 \u00A0 Jobs Lane,"   .
+_:node16nh4idjhx60161367 <http://rdf.data-vocabulary.org/#locality> "Southampton"   .
+_:node16nh4idjhx60161367 <http://rdf.data-vocabulary.org/#region> "NY"   .
+_:node16nh4idjhx60161367 <http://rdf.data-vocabulary.org/#postal-code> "11968"   .
+_:node16nh4idjhx60161366 <http://rdf.data-vocabulary.org/#tel> "631-283-9200"   .

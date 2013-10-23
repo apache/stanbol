@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY ontologies "http://stanbol.apache.org/ontologies/" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY meta "http://www.ontologydesignpatterns.org/schemas/meta.owl#" >
+    <!ENTITY onmtest "http://stanbol.apache.org/ontologies/registries/onmtest.owl#" >
+    <!ENTITY coddata "http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#" >
+    <!ENTITY codkernel "http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#" >
+]>
+
+
+<rdf:RDF xmlns="&ontologies;registries/onmtest_additions.owl#"
+     xml:base="&ontologies;registries/onmtest_additions.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:codkernel="http://www.ontologydesignpatterns.org/cpont/codo/codkernel.owl#"
+     xmlns:ontologies="http://stanbol.apache.org/ontologies/"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:onmtest="&ontologies;registries/onmtest.owl#"
+     xmlns:coddata="http://www.ontologydesignpatterns.org/cpont/codo/coddata.owl#"
+     xmlns:meta="http://www.ontologydesignpatterns.org/schemas/meta.owl#">
+    <owl:Ontology rdf:about="&ontologies;registries/onmtest_additions.owl">
+        <owl:versionInfo rdf:datatype="&xsd;string">0.1.0</owl:versionInfo>
+        <rdfs:comment>A registry that adds ontologies to libraries already defined in http://stanbol.apache.org/ontologies/registries/onmtest.owl (which is NOT imported by this ontology). Used for unit testing.</rdfs:comment>
+        <owl:versionInfo xml:lang="en">Created by Alessandro Adamou</owl:versionInfo>
+        <owl:versionInfo xml:lang="en">Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the &quot;License&quot;); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+        </owl:versionInfo>
+        <owl:imports rdf:resource="http://www.ontologydesignpatterns.org/schemas/meta.owl"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/test1.owl -->
+
+    <owl:NamedIndividual rdf:about="&ontologies;test1.owl">
+        <rdf:type rdf:resource="&codkernel;Ontology"/>
+        <rdfs:label rdf:datatype="&xsd;string">Test Model 1</rdfs:label>
+        <meta:isOntologyOf rdf:resource="&ontologies;registries/onmtest.owl#Library1"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://stanbol.apache.org/ontologies/registries/onmtest.owl#Library1 -->
+
+    <owl:NamedIndividual rdf:about="&ontologies;registries/onmtest.owl#Library1">
+        <rdf:type rdf:resource="&coddata;OntologyLibrary"/>
+    </owl:NamedIndividual>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.2.3.1824) http://owlapi.sourceforge.net -->
+

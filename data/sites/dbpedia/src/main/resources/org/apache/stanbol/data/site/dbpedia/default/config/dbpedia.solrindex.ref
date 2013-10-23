@@ -1,0 +1,4 @@
+Name=SolrIndex for dbpedia
+Description=DBpedia.org 
+Index-Archive=dbpedia.solrindex.zip,dbpedia_26k.solrindex.bz2
+Download-Location=http://dev.iks-project.eu/downloads/stanbol-indices/dbpedia-3.8/dbpedia.solrindex.zip

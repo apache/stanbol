@@ -1,0 +1,459 @@
+/*
+* Licensed to the Apache Software Foundation (ASF) under one or more
+* contributor license agreements.  See the NOTICE file distributed with
+* this work for additional information regarding copyright ownership.
+* The ASF licenses this file to You under the Apache License, Version 2.0
+* (the "License"); you may not use this file except in compliance with
+* the License.  You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+/*
+* Throughout this css, relative paths to resources are used to be able to fetch them from
+* correct location when Stanbol has a different alias for its root URL.  
+*/
+body {
+  font: normal 13px/20px Arial,Helvetica,sans-serif;
+  padding: 0;
+  margin: 0;
+  background-color: #eff9f0;
+}
+
+img {
+  border: none;
+}
+
+a:link, a:visited, a:hover {
+  color: #c43187;
+}
+
+a:active {
+  color: black;  
+}
+
+a:focus {
+  outline: none;
+}
+
+dt, dd {
+  margin-top: 1em;
+}
+
+pre, textarea {
+  border: 1px solid #f8dcbb;
+  padding: 1em;
+  background-color: #f8f8f8;
+  font-size: 90%;  
+  overflow: auto;
+}
+
+textarea {
+  width: 100%;
+}
+
+textarea.input {
+  style="background-color: #fff; 
+  border: 2px inset;	
+}
+
+pre {
+  white-space: pre-wrap;       /* css-3 */
+  white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+  white-space: -pre-wrap;      /* Opera 4-6 */
+  white-space: -o-pre-wrap;    /* Opera 7 */
+  word-wrap: break-word;       /* Internet Explorer 5.5+ */  
+}
+
+form  {
+  margin-bottom: 2em;
+}
+
+.home {
+  position: absolute;
+}
+
+.header {
+  padding: 0.5em 1em;
+  background: #4c4c4c url("../images/header_bg.png") repeat-x top left;  
+  border-bottom: 1px solid black;
+}
+
+.header h1 {
+  float: left;
+}
+
+.header .mainNavigationMenu {
+  margin: 23px 1em 0;
+  text-align: right;
+}
+
+.header .mainNavigationMenu ul {
+  display: inline;
+}
+
+.header .mainNavigationMenu li {
+  display: inline;
+  margin-left: 0.5em;
+  border: 1px solid transparent;
+  padding: 0.3em 0.5em 0.5em 0.5em;
+  border-radius: 8px;
+}
+
+.header .mainNavigationMenu li.selected {
+  border: 1px solid #222;
+  background-color: #333;
+}
+
+.header .mainNavigationMenu a {
+  font-weight: bold;
+  color: #EFF9F0;
+}
+
+
+.restapitabs {
+  text-align: right;
+}
+
+.restapitabs ul {
+  display: inline;
+}
+
+.restapitabs li {
+  display: inline;
+  margin-left: 0.5em;
+  border: 1px solid transparent;
+  padding: 0.5em 0.5em 0.5em 0.5em;
+  border-radius: 8px;
+}
+
+.restapitabs a {
+  text-decoration: none;
+}
+
+.restapitabs li.selected {
+  font-weight: bold;
+}
+
+h1 {
+  color: #e9e9e9;
+  font-size: 18px;
+  font-weight: normal;
+  margin: 22px 0 3px;
+  padding: 0 0 0 200px;
+  text-shadow: 0 1px 0 #000;
+}
+
+h2 {
+  padding: 0;
+  margin: 1em 0;
+  font-size: 16px;
+}
+
+h3 {
+  padding: 0;
+  margin: 1em 0;
+  font-size: 14px;
+  font-weight:bold;
+}
+
+.content {
+  background-color: #fff;
+  border-color: #d1dfce;
+  border-style: solid;
+  border-width: 0 1px 2px;
+  margin: 0 auto 5em;
+  padding: 0.5em 2em 1em;
+  width: 75%;
+}
+
+.content img.preview {
+  border: 1px solid gray;  
+  max-width: 800px;  
+}
+
+.content fieldset {
+  border: 1px solid #d1dfce;
+}
+
+.footer {
+  background-color: #494949;
+  border-top: 2px solid #373737;
+  color: #d9d9d9;
+  font-size: 85%;
+  padding: 1em 1em 2em;
+  text-shadow: 0 1px 0 #111111;
+}
+
+.footer .column {
+  float: left;
+  width: 48%;
+  padding: 0.5em;
+}
+
+.column a img {
+  border: 1px solid #373737;
+}
+
+.footer img.swcube {
+  padding: 6px;
+  background-color: white;  
+}
+
+.right {
+  text-align: right;
+} 
+
+table {
+  text-align: left;
+  width: 100%;
+}
+
+.storeContents table {
+  border-collapse: collapse;
+  margin: 5px 0 0;
+}
+
+.storeContents th {  
+  color: #000;
+  font-size: 105%;
+  font-weight: normal;
+  padding: 6px 10px;
+  border-bottom: 1px solid #d1dfce;
+  background-color:#f8f8f8;
+}
+
+.storeContents th img {
+  vertical-align: top;
+  border: medium none;
+  margin: 0 0.1em;
+}
+
+.storeContents td {
+  padding: 4px 10px 5px;
+  border-bottom: 1px solid #ffe8f9;
+}
+
+.content h2 {
+  float: left;  
+}
+
+.content input.url {
+  width: 600px;
+}
+
+.content .contentItemPreview pre {
+  max-height: 200px;  
+}
+
+.content table {
+  font-size: 95%; 
+}
+
+.entitylistings {
+  margin-top: 20px;
+  }
+
+.entitylisting h3 {
+  text-align: center;  
+}
+
+.entitylisting {
+  float: left;
+  width: 33%;
+  margin: auto;
+}
+
+.entitylisting p {
+  margin: 0.2em;
+}
+
+.entitylisting table {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: url("../images/foldable_unfolded.png") no-repeat scroll right 17px transparent;
+}
+
+.entitylisting table.collapsed {
+  background: url("../images/foldable_folded.png") no-repeat scroll right center transparent;
+  }
+
+.entitylisting .subheader {
+  height: 25px;
+}
+
+.entitylisting .subheader td {
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #eee;
+  border-top: 1px solid #eee;
+  font-weight: bold;
+  padding: 0 10px;
+}
+
+.entitylisting img {
+  vertical-align: middle;
+  border: 1px solid transparent;
+}
+
+.entitylisting .thumb {
+  height: 44px;
+  width: 50px;
+  text-align: center;
+}
+
+.entitylisting .thumb img {
+  max-width: 48px;
+  max-height: 42px;
+}
+
+.entitylisting thead {
+  cursor: pointer;
+}
+
+.entitylisting tbody{
+  background-color: #fcfcfc;
+  }
+
+.entitylisting tbody tr {
+  height: 42px;
+}
+
+.entitylisting .collapsed tbody tr {
+  display: none;
+}
+
+.downloadLinks, .previousNext {
+  list-style: none;
+  text-align: right;
+  padding: 0;
+  }
+
+.downloadLinks li, .previousNext li {
+  border: 1px solid #c3c3c3;
+  display: inline;
+  margin: 0 0 0 30px;
+  padding: 4px 6px 5px;
+  background-color: #fafafa;
+  }
+
+.downloadLinks li a, .previousNext li a {
+  color: #333;
+  text-decoration: none;
+  }
+
+.downloadLinks li a:hover, .previousNext li a:hover {
+  text-decoration: underline;
+  }
+
+li.older a {
+  background: url("../images/next.png") no-repeat scroll right center transparent;
+  padding: 0 12px 0 0;
+  }
+  
+li.moreRecent a {
+  background: url("../images/previous.png") no-repeat scroll left center transparent;
+  padding: 0 0 0 13px;
+  }
+
+.download {
+  background: url("../images/download.png") no-repeat scroll left center transparent;
+  padding: 0 0 2px 20px;
+  }
+
+.downloadRDF {
+  background: url("../images/download_rdf.png") no-repeat scroll left center transparent;
+  padding: 0 0 2px 20px;
+  }
+
+.external {
+  background: url("../images/external.png") no-repeat scroll right center transparent;
+  padding: 0 18px 0 0;
+  }
+  
+#enginesOuputWaiter {
+  opacity: 90%;
+  font-style: italic;
+  text-align: center;  
+}
+
+#enginesOuput pre {
+  max-height: 50em;
+}
+
+.enginelisting {
+  padding: 0.5em;
+  border: 1px solid #eee;
+  border-radius: 8px;
+}
+
+.enginelisting .collapseheader {
+  margin: 0.1em;
+  cursor: pointer;
+  background: url("../images/foldable_unfolded.png") no-repeat scroll right center transparent;
+}
+
+.enginelisting .collapsed .collapseheader {
+  background: url("../images/foldable_folded.png") no-repeat scroll right center transparent;
+}
+
+.enginelisting ul {
+  padding-left: 0;
+}
+
+.enginelisting .collapsed .collapsable {
+  display: none;
+}
+
+.enginelisting li {
+  list-style: none;
+  padding-left: 20px; 
+  background: transparent url(../images/black_gear_16.png) no-repeat scroll 0% 50%;
+}
+
+#enginesInput .submitButtons {
+  text-align: right;  
+}
+
+p.note {
+  font-size: 90%;
+  font-style: italic;
+  text-align: right;
+}
+
+.metadata {
+  font-size: 85%;
+  color: #666;
+}
+
+.mapContainer {
+  margin: 1em auto 1em auto; width: 800px;
+}
+
+.mapContainer img {
+  opacity: 0.6;
+}
+
+.mapContainer .olPopup {
+  border: 1px solid #333;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 110%;
+}
+
+div.enginelisting span.active {
+  color: #006600;
+}
+
+div.enginelisting span.optional {
+  color: #666666;
+}
+
+div.enginelisting span.inactive {
+  color: #660000;
+}

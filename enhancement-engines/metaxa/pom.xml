@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>apache-stanbol-enhancement-engines</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <relativePath>..</relativePath>
+  </parent>
+
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.enhancer.engines.metaxa</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>bundle</packaging>
+
+  <name>Apache Stanbol Enhancement Engine : Metaxa</name>
+  <description>Extracts metadata and text from a number of document formats like pdf, Word doc, etc.</description>
+
+  <inceptionYear>2010</inceptionYear>
+
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/metaxa/
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/metaxa/
+    </developerConnection>
+    <url>http://stanbol.apache.org/</url>
+  </scm>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>
+              org.apache.stanbol.enhancer.engines.metaxa;version=${project.version},
+            </Export-Package>
+            <Embed-Dependency>
+              *;scope=compile
+            </Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive>
+            <Import-Package>
+              !org.apache.log.*,
+              !org.apache.avalon.*,
+              !com.jacob.*,
+              !jcifs.*,
+              !org.bibsonomy.*,
+              !ronaldhttpclient.*,
+              !org.htmlparser.*,
+              !org.jaudiotagger.*,
+              !org.textmining.*,
+              !com.sun.image.codec.jpeg.*,
+              !com.sun.javadoc,
+              !com.sun.msv.*,
+              !com.sun.xml.*,
+              !com.thoughtworks.*,
+              !groovy.*,
+              !javax.jcr.*,
+              !javax.xml.rpc.*,
+              !junit.framework.*,
+              !junit.textui.*,
+              !net.sf.ehcache.*,
+              !org.antlr.*,
+              !org.apache.axis.*,
+              !org.apache.commons.dbcp.*,
+              !org.apache.commons.fileupload.*,
+              !org.apache.commons.net.nntp.*,
+              !org.apache.jackrabbit.*,
+              !org.apache.lucene.*,
+              !org.apache.tools.ant.*,
+              !org.apache.xml.resolver.*,
+              !org.apache.xmlbeans.impl.*,
+              !org.jaxen.pattern.*,
+              !org.codehaus.groovy.*,
+              !org.ho.yaml.*,
+              !org.jcrom.*,
+              !org.jdom.*,
+              !org.relaxng.*,
+              !org.springframework.*,
+              !org.jaxen.*,
+              !org.jvnet.*,
+              !com.sun.tools.javadoc,
+              !org.openxmlformats.schemas.*,
+              !org.xmlpull.v1,
+              !org.gjt.xpp,
+              !schemasMicrosoftComOfficePowerpoint,
+              !schemasMicrosoftComOfficeWord,
+              org.w3c.dom,
+              javax.xml.namespace,
+              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.11,1.1)",
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.11,1.1)",
+              org.apache.stanbol.enhancer.engines.metaxa,
+              *
+            </Import-Package>
+            <Private-Package>
+              org.apache.stanbol.enhancer.engines.metaxa.*
+            </Private-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- AL20 licensed files. See src/test/resources/README -->
+            <exclude>src/test/resources/rdfa-res.txt</exclude>
+            <exclude>src/test/resources/html-res.txt</exclude>
+            <exclude>src/test/resources/pdf-res.txt</exclude>
+            <exclude>src/test/resources/mail-multipart-test.eml</exclude>
+
+            <exclude>src/license/THIRD-PARTY.properties</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+        
+    <dependency>
+      <groupId>org.semanticdesktop.aperture</groupId>
+      <artifactId>aperture-core</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.semanticdesktop.aperture</groupId>
+      <artifactId>aperture-runtime-optional</artifactId>
+      <type>pom</type>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge</groupId>
+      <artifactId>htmlcleaner</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>mp3agic</groupId>
+      <artifactId>mp3agic</artifactId>
+      <version>0.6</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-httpclient</groupId>
+      <artifactId>commons-httpclient</artifactId>
+      <version>3.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.ibm.icu</groupId>
+      <artifactId>icu4j</artifactId>
+      <version>3.4.4</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-jdk14</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    
+    <!-- Test dependencies -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <repositories>
+    <repository>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>aduna-opensource.releases</id>
+      <name>Aduna Open Source - Maven releases</name>
+      <url>http://repo.aduna-software.org/maven2/releases</url>
+    </repository>
+    <repository>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>aperture-repo</id>
+      <name>Aperture Dependencies Repo</name>
+      <url>http://aperture.sourceforge.net/maven/</url>
+    </repository>
+    <repository>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>dfki-lt-repo</id>
+      <name>DFKI LT Repository</name>
+      <url>http://www.dfki.de/~kasper/IKS/maven</url>
+    </repository>
+  </repositories>
+
+</project>
