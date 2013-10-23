@@ -24,8 +24,13 @@ import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHe
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -250,8 +255,40 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
      */
     private UriRef getContentItemId() {
         //NOTE: check for request NULL is needed because of unit tests
-        if (uriInfo == null) return null;        
-        final String ciUri = uriInfo.getPathParameters().getFirst("uri");
+        if (uriInfo == null) return null;
+        URI uri = uriInfo.getRequestUri();
+        String query = uri.getQuery();
+        log.debug("parse ContentItem ID from URI: {}",uri);
+        //TODO: workaround for uriInfo.getPathParameters() not working as expected
+        //MultivaluedMap<String,String> params = uriInfo.getPathParameters();
+        //final String ciUri = params.getFirst("uri");
+        String ciUri = null; //parse the uri parameter manually from the request URI
+        if(query != null){
+            int index = query.indexOf("uri=");
+            if(index >= 0){
+               index = index+4; //add "uri=".length
+               int endIndex = query.indexOf('&', index);
+               if(endIndex <= index){
+                   endIndex = query.length();
+               }
+               if(index < endIndex){
+                   try {
+                    ciUri = URLDecoder.decode(query.substring(index, endIndex), "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    throw new IllegalStateException(e); //should never happen
+                }
+               }
+            }
+        }
+        if(ciUri != null){
+            try { //validate the parsed URI
+                new URI(ciUri);
+            } catch (URISyntaxException e) {
+               throw new WebApplicationException("The parsed ContentItem URI '"
+                       + ciUri +"' is not a valid URI. Please check the value "
+                       + "of the 'uri' parameter",Response.Status.BAD_REQUEST);
+            }
+        }
         return ciUri == null ? null : new UriRef(ciUri);
     }
     /**
