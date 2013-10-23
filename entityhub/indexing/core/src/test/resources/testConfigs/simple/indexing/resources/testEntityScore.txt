@@ -1,3 +1,0 @@
-http://www.example.org/entity/test	100
-http://www.example.org/entity/test2	10
-http://www.example.org/entity/test3	1

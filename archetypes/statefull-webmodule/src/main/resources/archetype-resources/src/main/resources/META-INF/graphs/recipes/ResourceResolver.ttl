@@ -1,0 +1,12 @@
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix recipe: <http://vocab.netlabs.org/recipe#> .
+
+[] a recipe:Recipe;
+  rdfs:label "Stanbol RdvViewable sample";
+  recipe:ingredient
+    [a recipe:Ingredient;
+        recipe:ingredientInverseProperty <http://stanbol.apache.org/ontology/entityhub/entityhub#about>],
+    [a recipe:Ingredient;
+        recipe:ingredientProperty <http://example.org/service-description#describes>];
+  recipe:recipeDomain "${package.replace(".","/")}/ResourceResolver" .

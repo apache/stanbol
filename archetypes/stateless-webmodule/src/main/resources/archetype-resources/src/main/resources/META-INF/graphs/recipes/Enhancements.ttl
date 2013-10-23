@@ -1,0 +1,12 @@
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix recipe: <http://vocab.netlabs.org/recipe#> .
+
+[] a recipe:Recipe;
+  rdfs:label "When presenting an enhanced document the property of its enhancements should be presented too";
+  recipe:ingredient
+    [a recipe:Ingredient;
+        recipe:ingredientInverseProperty <http://fise.iks-project.eu/ontology/extracted-from>],
+    [a recipe:Ingredient;
+        recipe:ingredientProperty <http://fise.iks-project.eu/ontology/entity-reference>];
+  recipe:recipeDomain "${package.replace(".","/")}/Enhancements" .
