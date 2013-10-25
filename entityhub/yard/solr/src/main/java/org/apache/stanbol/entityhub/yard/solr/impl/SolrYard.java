@@ -690,25 +690,34 @@ public class SolrYard extends AbstractYard implements Yard {
         if(closed){
             log.warn("The SolrYard '{}' was already closed!",config.getName());
         }
-        try {
-            UpdateRequest update = new UpdateRequest();
-            if (!immediateCommit) {
-                update.setCommitWithin(commitWithin);
-            }
-            update.add(inputDocs);
-            update.process(server);
-            if (immediateCommit) {
-                server.commit();
-            }
-        } catch (SolrServerException e) {
-            throw new YardException("Exception while adding Documents to the Solr Server!", e);
-        } catch (IOException e) {
-            throw new YardException("Unable to access Solr server", e);
+        final UpdateRequest update = new UpdateRequest();
+        if (!immediateCommit) {
+            update.setCommitWithin(commitWithin);
         }
-        long ready = System.currentTimeMillis();
-        log.debug(String.format(
-            "Processed store request for %d documents in %dms (created %dms| stored%dms)", inputDocs.size(),
-            ready - start, created - start, ready - created));
+        update.add(inputDocs);
+        try {
+            AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+                public Object run() throws IOException, SolrServerException {
+		            update.process(server);
+		            if (immediateCommit) {
+		                server.commit();
+		            }
+		            return null;
+                }
+            });
+            long ready = System.currentTimeMillis();
+            log.debug(String.format(
+                "Processed store request for %d documents in %dms (created %dms| stored%dms)", inputDocs.size(),
+                ready - start, created - start, ready - created));
+        } catch (PrivilegedActionException pae){
+            if(pae.getException() instanceof SolrServerException){
+                throw new YardException("Exception while adding Documents to the Solr Server!", pae.getException());
+            } else if( pae.getException() instanceof IOException){
+                throw new YardException("Unable to access SolrServer", pae.getException());
+            } else {
+                throw RuntimeException.class.cast(pae.getException());
+            }
+        }
         return added;
     }
 
@@ -856,9 +865,8 @@ public class SolrYard extends AbstractYard implements Yard {
     }
 
     @Override
-    public final Representation update(Representation representation) throws IllegalArgumentException,
-                                                                     NullPointerException,
-                                                                     YardException {
+    public final Representation update(Representation representation) 
+    		throws IllegalArgumentException, NullPointerException, YardException {
         if (representation == null) {
             throw new IllegalArgumentException("The parsed Representation MUST NOT be NULL!");
         }
@@ -867,15 +875,13 @@ public class SolrYard extends AbstractYard implements Yard {
             return store(representation); // there is no "update" for solr
         } else {
             throw new IllegalArgumentException("Parsed Representation " + representation.getId()
-                                               + " in not managed by this Yard " + getName() + "(id="
-                                               + getId() + ")");
+            		+ " in not managed by this Yard " + getName() + "(id=" + getId() + ")");
         }
     }
 
     @Override
-    public final Iterable<Representation> update(Iterable<Representation> representations) throws YardException,
-                                                                                          IllegalArgumentException,
-                                                                                          NullPointerException {
+    public final Iterable<Representation> update(Iterable<Representation> representations)
+    		throws YardException, IllegalArgumentException, NullPointerException {
         if (representations == null) {
             throw new IllegalArgumentException("The parsed Iterable over Representations MUST NOT be NULL!");
         }
@@ -894,9 +900,8 @@ public class SolrYard extends AbstractYard implements Yard {
         try {
             ids = checkRepresentations(ids); // returns the ids found in the solrIndex
         } catch (SolrServerException e) {
-            throw new YardException(
-                    "Error while searching for alredy present documents before executing the actual update for the parsed Representations",
-                    e);
+            throw new YardException("Error while searching for alredy present documents "
+            		+ "before executing the actual update for the parsed Representations", e);
         } catch (IOException e) {
             throw new YardException("Unable to access SolrServer", e);
         }
@@ -939,11 +944,10 @@ public class SolrYard extends AbstractYard implements Yard {
             }
         }
         long ready = System.currentTimeMillis();
-        log.info(String
-                .format(
-                    "Processed updateRequest for %d documents (%d in index | %d updated) in %dms (checked %dms|created %dms| stored%dms)",
-                    numDocs, ids.size(), updated.size(), ready - start, checked - start, created - checked,
-                    ready - created));
+        log.info(String.format( "Processed updateRequest for %d documents (%d in index "
+        		+ "| %d updated) in %dms (checked %dms|created %dms| stored%dms)",
+        		numDocs, ids.size(), updated.size(), ready - start, checked - start, 
+        		created - checked, ready - created));
         return updated;
     }
 
