@@ -348,7 +348,7 @@
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.core</artifactId>
-      <version>0.13</version>
+      <version>0.14-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
@@ -409,7 +409,7 @@
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.tdb.storage</artifactId>
-      <version>0.6</version>
+      <version>0.7-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
