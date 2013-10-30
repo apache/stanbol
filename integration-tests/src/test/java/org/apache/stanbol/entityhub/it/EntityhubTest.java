@@ -255,7 +255,8 @@ public final class EntityhubTest extends QueryTestBase {
             //assert that the entity was created (or already existed)
             //some projects seams to have more than a single doap file
             int status = re.getResponse().getStatusLine().getStatusCode();
-            Assert.assertTrue(status == 200 || status == 304);
+            Assert.assertTrue("Unable to add '"+entry.getName()+"'! Status:" 
+                    + re.getResponse().getStatusLine(), status == 200 || status == 304);
         }
         
         testFindNameQuery();

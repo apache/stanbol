@@ -49,6 +49,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
     public void testNoContext() throws IOException {
         executor.execute(
             builder.buildPostRequest("/entityhub/site/dbpedia/ldpath")
+            .withHeader("Content-Type", "application/x-www-form-urlencoded")
             .withFormContent(
                 "ldpath","name = rdfs:label[@en] :: xsd:string;")
         )
@@ -58,6 +59,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
     public void testEmptyContext() throws IOException {
         executor.execute(
             builder.buildPostRequest("/entityhub/site/dbpedia/ldpath")
+            .withHeader("Content-Type", "application/x-www-form-urlencoded")
             .withFormContent(
                 "ldpath","name = rdfs:label[@en] :: xsd:string;",
                 "context","")
@@ -65,6 +67,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
         .assertStatus(Status.BAD_REQUEST.getStatusCode());
         executor.execute(
             builder.buildPostRequest("/entityhub/site/dbpedia/ldpath")
+            .withHeader("Content-Type", "application/x-www-form-urlencoded")
             .withFormContent(
                 "ldpath","name = rdfs:label[@en] :: xsd:string;",
                 "context",null)
@@ -75,6 +78,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
     public void testNoLDPath() throws IOException {
         executor.execute(
             builder.buildPostRequest("/entityhub/site/dbpedia/ldpath")
+            .withHeader("Content-Type", "application/x-www-form-urlencoded")
             .withFormContent(
                 "context","http://dbpedia.org/resource/Paris")
         )
@@ -84,6 +88,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
     public void testEmptyLDPath() throws IOException {
         executor.execute(
             builder.buildPostRequest("/entityhub/site/dbpedia/ldpath")
+            .withHeader("Content-Type", "application/x-www-form-urlencoded")
             .withFormContent(
                 "context","http://dbpedia.org/resource/Paris",
                 "ldpath",null)
@@ -91,6 +96,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
         .assertStatus(Status.BAD_REQUEST.getStatusCode());
         executor.execute(
             builder.buildPostRequest("/entityhub/site/dbpedia/ldpath")
+            .withHeader("Content-Type", "application/x-www-form-urlencoded")
             .withFormContent(
                 "context","http://dbpedia.org/resource/Paris",
                 "ldpath","")
@@ -101,6 +107,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
     public void testIllegalLDPath() throws IOException {
         executor.execute(
             builder.buildPostRequest("/entityhub/site/dbpedia/ldpath")
+            .withHeader("Content-Type", "application/x-www-form-urlencoded")
             .withFormContent(
                 "context","http://dbpedia.org/resource/Paris",
                 //missing semicolon
@@ -109,6 +116,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
         .assertStatus(Status.BAD_REQUEST.getStatusCode());
         executor.execute(
             builder.buildPostRequest("/entityhub/site/dbpedia/ldpath")
+            .withHeader("Content-Type", "application/x-www-form-urlencoded")
             .withFormContent(
                 "context","http://dbpedia.org/resource/Paris",
                 //unknown namespace prefix
@@ -117,6 +125,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
         .assertStatus(Status.BAD_REQUEST.getStatusCode());
         executor.execute(
             builder.buildPostRequest("/entityhub/site/dbpedia/ldpath")
+            .withHeader("Content-Type", "application/x-www-form-urlencoded")
             .withFormContent(
                 "context","http://dbpedia.org/resource/Paris",
                 //unknown dataType prefix
@@ -128,6 +137,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
     public void testMultipleContext() throws IOException {
         executor.execute(
             builder.buildPostRequest("/entityhub/site/dbpedia/ldpath")
+            .withHeader("Content-Type", "application/x-www-form-urlencoded")
             .withFormContent(
                 "context","http://dbpedia.org/resource/Paris",
                 "context","http://dbpedia.org/resource/London",
@@ -144,6 +154,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
     public void testUnknownContext() throws IOException {
         executor.execute(
             builder.buildPostRequest("/entityhub/site/dbpedia/ldpath")
+            .withHeader("Content-Type", "application/x-www-form-urlencoded")
             .withFormContent(
                 "context","http://dbpedia.org/resource/ThisEntityDoesNotExist_ForSure_49283",
                 "ldpath","name = rdfs:label[@en] :: xsd:string;")
@@ -155,6 +166,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
     public void testLDPath() throws IOException {
         executor.execute(
             builder.buildPostRequest("/entityhub/site/dbpedia/ldpath")
+            .withHeader("Content-Type", "application/x-www-form-urlencoded")
             .withFormContent(
                 "context","http://dbpedia.org/resource/Paris",
                 "ldpath","@prefix dct : <http://purl.org/dc/terms/subject/> ;" +
@@ -189,6 +201,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
         //parse some illegal LDPath
         executor.execute(
             builder.buildPostRequest("/entityhub/site/dbpedia/ldpath")
+            .withHeader("Content-Type", "application/x-www-form-urlencoded")
             .withHeader("Accept", "text/turtle")
             .withFormContent(
                 "name","Vienna",
@@ -204,6 +217,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
         //select the German label on a query for the english one
         executor.execute(
             builder.buildPostRequest("/entityhub/site/dbpedia/find")
+            .withHeader("Content-Type", "application/x-www-form-urlencoded")
             .withHeader("Accept", "text/turtle")
             .withFormContent(
                 "name","Vienna",
@@ -215,14 +229,15 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
          .assertContentType("text/turtle")
          .assertContentContains(
              "<http://stanbol.apache.org/ontology/entityhub/query#score>",
-             "<http://dbpedia.org/resource/Vienna>",
-             "<name_de> \"Wien\"@de .");
+             "<http://dbpedia.org/resource/Vienna>")
+          .assertContentRegexp("<name_de>\\s+\"Wien\"@de");
     }
     @Test
     public void testFindLDPathOnMultipleResults() throws IOException {
         //select multiple end check that LD-Path is executed on all results
         executor.execute(
             builder.buildPostRequest("/entityhub/site/dbpedia/find")
+            .withHeader("Content-Type", "application/x-www-form-urlencoded")
             .withHeader("Accept", "text/turtle")
             .withFormContent(
                 "name","York",
@@ -247,6 +262,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
         //same category
         executor.execute(
             builder.buildPostRequest("/entityhub/site/dbpedia/find")
+            .withHeader("Content-Type", "application/x-www-form-urlencoded")
             .withHeader("Accept", "text/turtle")
             .withFormContent(
                 "name","Webspinnen",
@@ -261,7 +277,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
          .assertContentType("text/turtle")
          .assertContentRegexp(
              "<http://stanbol.apache.org/ontology/entityhub/query#score>",
-             "<name>  \"Spider\"@en ;",
+             "<name>\\s+\"Spider\"@en ;",
              "<category>.*<http://dbpedia.org/resource/Category:Arachnids>",
              "<category>.*<http://dbpedia.org/resource/Category:Spiders>",
              "<others>.*<http://dbpedia.org/resource/Opiliones>",
@@ -366,13 +382,13 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
             "<http://dbpedia.org/resource/Koblenz>",
             "<http://dbpedia.org/resource/Cologne>",
             //now some values based on the LDPath
-            "<name>  \"Koblenz\"@en",
-            "<lat>   \"50.359722\"",
-            "<long>  \"7.597778\"",
+            "<name>\\s+\"Koblenz\"@en",
+            "<lat>\\s+\"50.359722\"",
+            "<long>\\s+\"7.597778\"",
             "<type>.*<http://www.w3.org/2002/07/owl#Thing>",
             "<type>.*<http://www.opengis.net/gml/_Feature>",
             "<type>.*<http://dbpedia.org/ontology/Town>",
-            "<population> 314926");
+            "<population>\\s+314926");
     }
     
     
