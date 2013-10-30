@@ -95,6 +95,8 @@ public class FindQueryTestCase extends QueryTestCase {
             //default search field is required to be included in results
             setField(null);
         }
+        //find queries use application/x-www-form-urlencoded
+        this.setHeader("Content-Type", "application/x-www-form-urlencoded");
     }
     /**
      * @return the language
