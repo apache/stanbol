@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory;
  * {@link TripleCollection}.<br>
  *
  */
+//TODO this seems to be in the wron project as it is not web-specific
 @Component
 @Service(SerializingProvider.class)
 @SupportedFormat(JsonLdSerializerProvider.SUPPORTED_FORMAT)

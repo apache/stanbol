@@ -48,6 +48,9 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.clerezza.rdf.core.sparql.ResultSet;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.w3c.dom.Document;
 
 /**
@@ -55,8 +58,10 @@ import org.w3c.dom.Document;
  * Clerezza does provide such a writer, but it seems to require
  * quite a lot of Clerezza dependencies that we don't really need.
  */
-//TODO check if clerezza rdf.jaxrs prvoder fits the purpose?
-//make component/service
+//TODO maybe more to clerezza rdf.jaxrs provider
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Provider
 //@Produces({"application/sparql-results+xml", "application/xml", "text/xml"})
 public class ResultSetWriter implements MessageBodyWriter<ResultSet> {

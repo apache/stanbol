@@ -41,8 +41,13 @@ import org.w3c.dom.Document;
 
 
 import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 
-
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Provider
 //@Produces({"application/rdf+xml", "application/xml", "text/xml"})
 public class JenaModelWriter implements MessageBodyWriter<Model> {
