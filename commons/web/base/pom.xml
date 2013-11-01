@@ -79,6 +79,8 @@
               org.apache.stanbol.commons.web.base.resource,
               org.apache.stanbol.commons.web.base.utils,
               org.apache.stanbol.commons.web.base.writers,
+              org.apache.stanbol.commons.jsonld;resolution:=optional,
+              org.codehaus.jettison.json;resolution:=optional,
               *
             </Import-Package>
           </instructions>
