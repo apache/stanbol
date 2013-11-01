@@ -36,7 +36,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationException;
@@ -48,8 +47,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Collection;
-import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.felix.scr.annotations.References;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
@@ -87,8 +84,6 @@ public class JerseyEndpoint {
     @Property(value = "/static")
     public static final String STATIC_RESOURCES_URL_ROOT_PROPERTY = "org.apache.stanbol.commons.web.static.url";
     
-    @Reference
-    private Parser parser;
     
     @Reference
     private EditableLayoutConfiguration layoutConfiguration;
@@ -178,10 +173,6 @@ public class JerseyEndpoint {
             //we have not yet been activated
             return;
         }
-        //temporary workaround for STANBOL-1073
-        InputStream in = new ByteArrayInputStream(
-                "<http://example.org/me> <http://xmlns.com/foaf/0.1/name> \"Jane Doe\" .".getBytes());
-        parser.parse(in, "text/turtle");
         //end of STANBOL-1073 work around
         if (componentContext == null) {
             log.debug(" ... can not init Jersey Endpoint - Component not yet activated!");

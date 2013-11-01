@@ -16,20 +16,7 @@
 package org.apache.stanbol.commons.web.base.jersey;
 
 import java.util.List;
-import javax.ws.rs.core.UriBuilder;
-import org.apache.stanbol.commons.web.base.NavigationLink;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.web.base.LinkResource;

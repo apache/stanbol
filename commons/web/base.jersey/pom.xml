@@ -129,12 +129,6 @@
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
     </dependency>
-
-    <!-- only for temporary workaround for STANBOL-1073, TODO: update zz dependencies and remove -->
-    <dependency>
-        <groupId>org.apache.clerezza</groupId>
-        <artifactId>rdf.core</artifactId>
-    </dependency>
     <!-- for tests -->
     <dependency>
       <groupId>junit</groupId>

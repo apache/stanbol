@@ -16,17 +16,11 @@
 */
 package org.apache.stanbol.commons.web.base.jersey;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.core.Application;
 
-import org.apache.stanbol.commons.web.base.writers.GraphWriter;
-import org.apache.stanbol.commons.web.base.writers.JenaModelWriter;
-import org.apache.stanbol.commons.web.base.writers.ResultSetWriter;
-import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
