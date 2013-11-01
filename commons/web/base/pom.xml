@@ -81,6 +81,8 @@
               org.apache.stanbol.commons.web.base.writers,
               org.apache.stanbol.commons.jsonld;resolution:=optional,
               org.codehaus.jettison.json;resolution:=optional,
+              com.hp.hpl.jena.rdf.model;resolution:=optional,
+              org.apache.clerezza.rdf.core.*;resolution:=optional,
               *
             </Import-Package>
           </instructions>
