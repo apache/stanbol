@@ -318,7 +318,7 @@ public class SesameYard extends AbstractYard implements Yard {
             statement = outgoing.next();
             model.add(statement);
             Value object = statement.getObject();
-            if(object instanceof BNode && visited.contains(object)){
+            if(object instanceof BNode && !visited.contains(object)){
                 bnodes.add((BNode)object);
             }
         }

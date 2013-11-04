@@ -18,6 +18,7 @@ package org.apache.stanbol.entityhub.yard.sesame;
 
 import org.junit.Assert;
 
+import org.apache.stanbol.entityhub.model.sesame.RdfRepresentation;
 import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
@@ -31,6 +32,10 @@ import org.apache.stanbol.entityhub.yard.sesame.SesameYardConfig;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openrdf.model.BNode;
+import org.openrdf.model.Model;
+import org.openrdf.model.URI;
+import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.sail.memory.MemoryStore;
@@ -79,6 +84,34 @@ public class SesameYardTest extends YardTest {
          */
         test.add(NamespaceEnum.rdf+"type", representationType);
     }
+    
+    @Test
+    public void testBNodeSupport() throws YardException, RepositoryException {
+        RepositoryConnection con = repo.getConnection();
+        org.openrdf.model.ValueFactory sesameFactory = con.getValueFactory();
+        URI subject = sesameFactory.createURI("urn:test.sesameyard:bnodesupport.subject");
+        URI property = sesameFactory.createURI("urn:test.sesameyard:bnodesupport.property");
+        URI value = sesameFactory.createURI("urn:test.sesameyard:bnodesupport.value");
+        URI property2 = sesameFactory.createURI("urn:test.sesameyard:bnodesupport.property2");
+        URI loop1 = sesameFactory.createURI("urn:test.sesameyard:bnodesupport.loop1");
+        URI loop2 = sesameFactory.createURI("urn:test.sesameyard:bnodesupport.loop2");
+        BNode bnode1 = sesameFactory.createBNode();
+        BNode bnode2 = sesameFactory.createBNode();
+        
+        con.add(subject, property, bnode1);
+        con.add(bnode1, property2, value);
+        con.add(bnode1, loop1, bnode2);
+        con.add(bnode2, loop2, bnode1);
+        Yard yard = getYard();
+        Representation rep = yard.getRepresentation(subject.stringValue());
+        Assert.assertTrue(rep instanceof RdfRepresentation);
+        Model model = ((RdfRepresentation)rep).getModel();
+        //Assert for the indirect statements to be present in the model
+        Assert.assertFalse(model.filter(null, property2, null).isEmpty());
+        Assert.assertFalse(model.filter(null, loop1, null).isEmpty());
+        Assert.assertFalse(model.filter(null, loop2, null).isEmpty());
+    }
+    
     /**
      * This Method removes all Representations create via {@link #create()} or
      * {@link #create(String, boolean)} from the tested {@link Yard}.
