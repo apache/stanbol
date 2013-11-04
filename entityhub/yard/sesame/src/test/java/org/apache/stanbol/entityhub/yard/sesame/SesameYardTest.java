@@ -102,6 +102,8 @@ public class SesameYardTest extends YardTest {
         con.add(bnode1, property2, value);
         con.add(bnode1, loop1, bnode2);
         con.add(bnode2, loop2, bnode1);
+        con.commit();
+        con.close();
         Yard yard = getYard();
         Representation rep = yard.getRepresentation(subject.stringValue());
         Assert.assertTrue(rep instanceof RdfRepresentation);
