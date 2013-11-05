@@ -124,6 +124,7 @@
               -->
               <target>
                 <property name="target.directory" value="${project.basedir}/downloads/resources/${dbpedia.default.index.path}" />
+                <property name="index.name.old" value="${dbpedia.default.index.old}"/>
                 <property name="index.url" value="${dbpedia.default.index.url}" />
                                 
                 <echo message="copy Solr Index " />
