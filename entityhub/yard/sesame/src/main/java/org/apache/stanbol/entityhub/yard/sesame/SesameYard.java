@@ -627,8 +627,10 @@ public class SesameYard extends AbstractYard implements Yard {
      * SPARQL.
      */
     private TupleQueryResult executeSparqlFieldQuery(RepositoryConnection con, final SparqlFieldQuery fieldQuery, int limit, boolean select) throws RepositoryException, YardException, QueryEvaluationException {
+        log.debug("> execute FieldQuery: {}", fieldQuery);
         String sparqlQueryString = SparqlQueryUtils.createSparqlSelectQuery(
-            fieldQuery, select,limit,SparqlEndpointTypeEnum.Sesame);
+            fieldQuery, select, limit, SparqlEndpointTypeEnum.Sesame);
+        log.debug(" - SPARQL Query: {}", sparqlQueryString);
         TupleQuery sparqlOuery;
         try {
             sparqlOuery = con.prepareTupleQuery(QueryLanguage.SPARQL, sparqlQueryString);
@@ -718,6 +720,7 @@ public class SesameYard extends AbstractYard implements Yard {
             //create an own valueFactors so that all the data of the query results
             //are added to the same Sesame Model
             Model model = new TreeModel();
+            RdfValueFactory valueFactory = new RdfValueFactory(model, sesameFactory);
             List<Representation> representations = new ArrayList<Representation>(limit);
             Map<String,URI> bindings = new HashMap<String,URI>(query.getFieldVariableMappings().size());
             for(Entry<String,String> mapping : query.getFieldVariableMappings().entrySet()){
@@ -734,9 +737,11 @@ public class SesameYard extends AbstractYard implements Yard {
                     for(String binding : result.getBindingNames()){
                         URI property = bindings.get(binding);
                         if(property != null){
-                            model.add(subject, property, value);
+                            model.add(subject, property, result.getValue(binding));
                         } //else no mapping for the query.getRootVariableName()
                     }
+                    //create a representation and add it to the results
+                    representations.add(valueFactory.createRdfRepresentation(subject));
                 } //ignore non URI results
             }
             con.commit();
