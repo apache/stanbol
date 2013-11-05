@@ -923,7 +923,7 @@ public final class SparqlQueryUtils {
                 } else {
                     queryString.append(" || ");
                 }
-                queryString.append("regex(str(").append(var).append(",\"");
+                queryString.append("regex(str(?").append(var).append("),\"");
                 addGrammarEscapedValue(queryString, regex);
                 queryString.append('\"');
                 if(!isCasesensitive){
@@ -1131,8 +1131,8 @@ public final class SparqlQueryUtils {
         // "text value","anothertest","some more values"),true));
         // query.setConstraint("urn:field2a", new TextConstraint(":-]"));
         // //tests escaping of REGEX
-        // query.setConstraint("urn:field3", new TextConstraint("language text","en"));
-        query.setConstraint("urn:field4", new TextConstraint("multi language text", "en", "de", null));
+         query.setConstraint("urn:field3", new TextConstraint("language text",PatternType.wildcard, true, "en"));
+        //query.setConstraint("urn:field4", new TextConstraint("multi language text", "en", "de", null));
         // query.setConstraint("urn:field5", new
         // TextConstraint("wildcar*",PatternType.wildcard,false,"en","de"));
         // query.addSelectedField("urn:field5");
@@ -1144,7 +1144,7 @@ public final class SparqlQueryUtils {
         // query.setConstraint("urn:field10", new RangeConstraint((int)5, (int)10, false));
         // query.setConstraint("urn:field11", new RangeConstraint(null, (int)10, true));
         // query.setConstraint("urn:field12", new RangeConstraint((int)5, null, true));
-        query.setConstraint("urn:field12", new RangeConstraint(new Date(), null, true));
+        //query.setConstraint("urn:field12", new RangeConstraint(new Date(), null, true));
         // query.addSelectedField("urn:field2a");
         // query.addSelectedField("urn:field3");
         query.setLimit(5);
