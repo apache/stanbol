@@ -923,7 +923,7 @@ public final class SparqlQueryUtils {
                 } else {
                     queryString.append(" || ");
                 }
-                queryString.append("regex(str(").append(var).append(",\"");
+                queryString.append("regex(str(?").append(var).append("),\"");
                 addGrammarEscapedValue(queryString, regex);
                 queryString.append('\"');
                 if(!isCasesensitive){
