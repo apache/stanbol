@@ -752,6 +752,9 @@ public final class SparqlQueryUtils {
                     if (constraint.getPatternType() == PatternType.none) {
                         if (constraint.isCaseSensitive()) {
                             boolean first = true;
+                            if(constraint.getTexts().size() > 1){
+                                queryString.append('('); //start language filter group (STANBOL-1204)
+                            }
                             for (String textConstraint : constraint.getTexts()) {
                                 if (first) {
                                     first = false;
@@ -763,6 +766,9 @@ public final class SparqlQueryUtils {
                                     addGrammarEscapedValue(queryString, textConstraint);
                                     queryString.append("\")");
                                 }
+                            }
+                            if(constraint.getTexts().size() > 1){
+                                queryString.append(')'); //end language filter group (STANBOL-1204)
                             }
                         } else {
                             Collection<String> regexQueryTexts = new ArrayList<String>(
@@ -795,7 +801,6 @@ public final class SparqlQueryUtils {
                 }
             }
         } // else nothing to do add language Filters
-        // TODO check if FILTER ( is already written!
         if (constraint.getLanguages() != null && !constraint.getLanguages().isEmpty()) {
 
             log.trace("Constraint has languages [filter-added :: {}].", 
@@ -916,6 +921,9 @@ public final class SparqlQueryUtils {
                                        Collection<String> regexContraints,
                                        boolean isCasesensitive) {
         boolean first = true;
+        if(regexContraints.size() > 1){
+            queryString.append('('); //STANBOL-1204
+        }
         for (String regex : regexContraints) {
             if (regex != null && !regex.isEmpty()) {
                 if (first) {
@@ -931,6 +939,9 @@ public final class SparqlQueryUtils {
                 }
                 queryString.append(')');
             }
+        }
+        if(regexContraints.size() > 1){
+            queryString.append(')'); //STANBOL-1204
         }
     }
 
