@@ -18,18 +18,22 @@ package org.apache.stanbol.entityhub.query.sparql;
 
 import static org.apache.stanbol.entityhub.servicesapi.defaults.SpecialFieldEnum.isSpecialField;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.stanbol.entityhub.core.utils.TimeUtils;
 import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
@@ -557,12 +561,15 @@ public final class SparqlQueryUtils {
                                            String intend) {
         String rootVarName = selectedFields.get(null);
         Collection<String> dataTypes = constraint.getDataTypes();
-        if (dataTypes == null) {
-            // we need not to distinguish between empty and null
-            // because SPARQL includes support for automatic detection of
-            // dataTypes
-            // see http://www.w3.org/TR/rdf-sparql-query/#QSynLiterals
-            dataTypes = Collections.emptySet();
+        if(dataTypes == null || dataTypes.isEmpty()){
+            //guess dataTypes
+            dataTypes = new HashSet<String>();
+            for(Object value : constraint.getValues()){
+                String xsdType = guessXsdType(value.getClass());
+                if(xsdType != null){
+                    dataTypes.add(xsdType);
+                }
+            }
         }
         if (constraint.getValues() != null) {
             if (dataTypes.size() <= 1) {
@@ -999,15 +1006,26 @@ public final class SparqlQueryUtils {
                                       boolean lowerBound,
                                       boolean inclusive,
                                       Object value) {
-        String stringValue;
-        if (value instanceof Date) {// for dates add the data type!
-            stringValue = String.format("%s^^<%s>", TimeUtils.toString(DataTypeEnum.DateTime, (Date)value), XSD_DATE_TIME);
-        } else { // add additional "if" for special types if necessary
-            stringValue = value.toString();
+        // adds (?var >/<[=] "valueString"^^xsd:type)
+        queryString.append("(?").append(var).append(' ');
+        queryString.append(lowerBound ? '>' : '<');
+        if(inclusive){
+            queryString.append('=');
         }
-        // adds (?var >/<[=] valueString)
-        queryString.append(String.format("(?%s %c%s %s)", var, lowerBound ? '>' : '<', inclusive ? "=" : "",
-            stringValue));
+        queryString.append(" \"");
+        //append the string representation of the parsed value
+        if (value instanceof Date) {// for dates add the data type!
+            queryString.append(TimeUtils.toString(DataTypeEnum.DateTime, (Date)value));
+        } else { // add additional "if" for special types if necessary
+            queryString.append(value.toString());
+        }
+        queryString.append('"');
+        //append the xsd:dataType
+        String xsdType = guessXsdType(value.getClass());
+        if(xsdType != null){
+            queryString.append("^^").append('<').append(xsdType).append('>');
+        }
+        queryString.append(')');
     }
 
     /**
@@ -1109,6 +1127,44 @@ public final class SparqlQueryUtils {
             queryString.append(")");
         }
     }
+    /**
+     * Return the appropriate XSD type for RDF literals based on the parsed Java class.
+     * This is used for encoding {@link ValueConstraint} and {@link RangeConstraint}s.
+     * Based on <code>org.apache.marmotta.commons.sesame.model.LiteralCommons(Class<?> javaClass)</code>
+     * @param javaClass
+     * @return
+     */
+    public static String guessXsdType(Class<?> javaClass) {
+        // if a string is parsed the query expects a plain literal. For xsd:String
+        // users need to explicitly parse the data type
+//        if(String.class.isAssignableFrom(javaClass)) {
+//            return NamespaceEnum.xsd + "string";
+//        } else 
+        if(Integer.class.isAssignableFrom(javaClass) || int.class.isAssignableFrom(javaClass)) {
+            return NamespaceEnum.xsd + "int";
+        } else if(BigInteger.class.isAssignableFrom(javaClass)){
+            return NamespaceEnum.xsd + "integer";
+        } else if(Long.class.isAssignableFrom(javaClass) || long.class.isAssignableFrom(javaClass)) {
+            return NamespaceEnum.xsd + "long";
+        } else if(Double.class.isAssignableFrom(javaClass) || double.class.isAssignableFrom(javaClass)) {
+            return NamespaceEnum.xsd +"double";
+        } else if(Float.class.isAssignableFrom(javaClass) || float.class.isAssignableFrom(javaClass)) {
+            return NamespaceEnum.xsd + "float";
+        } else if(BigDecimal.class.isAssignableFrom(javaClass)){
+            return NamespaceEnum.xsd + "decimal";
+        } else if(Date.class.isAssignableFrom(javaClass)) {
+            return NamespaceEnum.xsd + "dateTime";
+        } else if(Boolean.class.isAssignableFrom(javaClass) || boolean.class.isAssignableFrom(javaClass)) {
+            return NamespaceEnum.xsd + "boolean";
+        } else if(Short.class.isAssignableFrom(javaClass) || short.class.isAssignableFrom(javaClass)){
+            return NamespaceEnum.xsd + "short";
+        } else if(Byte.class.isAssignableFrom(javaClass) || byte.class.isAssignableFrom(javaClass)) {
+            return NamespaceEnum.xsd + "byte";
+        } else {
+            return null; //Namespaces.NS_XSD+"string";
+        }
+    }
+    
 
     public static void main(String[] args) {
         SparqlFieldQuery query = SparqlFieldQueryFactory.getInstance().createFieldQuery();
