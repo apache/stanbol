@@ -277,7 +277,7 @@ public class SesameYard extends AbstractYard implements Yard {
      */
     protected final Representation getRepresentation(RepositoryConnection con, URI uri, boolean check) throws RepositoryException {
         if(!check || isRepresentation(con,uri)){
-            return createRepresentationGraph(con,uri);
+            return createRepresentationGraph(con, valueFactory, uri);
         } else {
             return null; //not found
         }
@@ -287,11 +287,12 @@ public class SesameYard extends AbstractYard implements Yard {
      * Extracts the triples that belong to the {@link Representation} with the
      * parsed id from the Sesame repository.
      * @param con the repository connection
+     * @param valueFactory the {@link RdfValueFactory} to use
      * @param uri the subject of the Representation to extract
      * @return the representation with the extracted data.
      * @throws RepositoryException 
      */
-    protected RdfRepresentation createRepresentationGraph(RepositoryConnection con, URI uri) throws RepositoryException{
+    protected RdfRepresentation createRepresentationGraph(RepositoryConnection con, RdfValueFactory valueFactory, URI uri) throws RepositoryException{
         RdfRepresentation rep = valueFactory.createRdfRepresentation(uri);
         Model model = rep.getModel();
         extractRepresentation(con, model, uri, new HashSet<BNode>());
@@ -584,7 +585,7 @@ public class SesameYard extends AbstractYard implements Yard {
                 getConfig().getMaxQueryResultNumber());
             results = executeSparqlFieldQuery(con, query, limit, false);
             //parse the results
-            List<String> ids = new ArrayList<String>(limit);
+            List<String> ids = limit > 0 ? new ArrayList<String>(limit) : new ArrayList<String>();
             while(results.hasNext()){
                 BindingSet result = results.next();
                 Value value = result.getValue(query.getRootVariableName());
@@ -672,14 +673,16 @@ public class SesameYard extends AbstractYard implements Yard {
             //are added to the same Sesame Model
             Model model = new TreeModel();
             RdfValueFactory valueFactory = new RdfValueFactory(model, sesameFactory);
-            List<Representation> representations = new ArrayList<Representation>(limit);
+            List<Representation> representations = limit > 0 ? 
+                    new ArrayList<Representation>(limit) : new ArrayList<Representation>();
             while(results.hasNext()){
                 BindingSet result = results.next();
                 Value value = result.getValue(query.getRootVariableName());
                 if(value instanceof URI){
-                    createRepresentationGraph(con, (URI)value); //copy all data to the model
+                    //copy all data to the model and create the representation
+                    RdfRepresentation rep = createRepresentationGraph(con, valueFactory, (URI)value); 
                     model.add(queryRoot, queryResult, value); //link the result with the query result
-                    representations.add(valueFactory.createRdfRepresentation((URI)value));
+                    representations.add(rep);
                 } //ignore non URI results
             }
             con.commit();
@@ -721,7 +724,8 @@ public class SesameYard extends AbstractYard implements Yard {
             //are added to the same Sesame Model
             Model model = new TreeModel();
             RdfValueFactory valueFactory = new RdfValueFactory(model, sesameFactory);
-            List<Representation> representations = new ArrayList<Representation>(limit);
+            List<Representation> representations = limit > 0 ? new ArrayList<Representation>(limit)
+                    : new ArrayList<Representation>();
             Map<String,URI> bindings = new HashMap<String,URI>(query.getFieldVariableMappings().size());
             for(Entry<String,String> mapping : query.getFieldVariableMappings().entrySet()){
                 bindings.put(mapping.getValue(), sesameFactory.createURI(mapping.getKey()));
