@@ -49,7 +49,7 @@
         <dependency>
             <groupId>org.apache.stanbol</groupId>
             <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-            <version>0.10.0-incubating</version>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.stanbol</groupId>
