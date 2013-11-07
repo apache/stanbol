@@ -43,17 +43,9 @@ public class DependencyRelation {
 	 */
 	private Span partner;
 
-	public DependencyRelation() {
-	}
-
-	public DependencyRelation(GrammaticalRelationTag grammaticalRelationTag) {
+	public DependencyRelation(GrammaticalRelationTag grammaticalRelationTag, boolean isDependent,
+			Span partner) {
 		this.grammaticalRelationTag = grammaticalRelationTag;
-	}
-
-	public DependencyRelation(GrammaticalRelationTag grammaticalRelationTag,
-			boolean isDependent, Span partner) {
-		this(grammaticalRelationTag);
-
 		this.isDependent = isDependent;
 		this.partner = partner;
 	}
@@ -62,25 +54,12 @@ public class DependencyRelation {
 		return grammaticalRelationTag;
 	}
 
-	public void setGrammaticalRelationTag(
-			GrammaticalRelationTag grammaticalRelationTag) {
-		this.grammaticalRelationTag = grammaticalRelationTag;
-	}
-
 	public boolean isDependent() {
 		return isDependent;
 	}
 
-	public void setDependent(boolean isDependent) {
-		this.isDependent = isDependent;
-	}
-
 	public Span getPartner() {
 		return this.partner;
-	}
-
-	public void setPartner(Span partner) {
-		this.partner = partner;
 	}
 
 	public int hashCode() {
@@ -90,14 +69,14 @@ public class DependencyRelation {
 	}
 
 	public boolean equals(Object obj) {
-		return super.equals(obj)
-				&& (obj instanceof DependencyRelation)
+		return (obj instanceof DependencyRelation)
 				&& (this.grammaticalRelationTag
 						.equals(((DependencyRelation) obj)
 								.getGrammaticalRelationTag()))
 				&& (this.isDependent == ((DependencyRelation) obj)
 						.isDependent())
-				&& (this.partner
-						.equals(((DependencyRelation) obj).getPartner()));
+				&& (this.partner == null
+						&& ((DependencyRelation) obj).getPartner() == null || this.partner
+							.equals(((DependencyRelation) obj).getPartner()));
 	}
 }

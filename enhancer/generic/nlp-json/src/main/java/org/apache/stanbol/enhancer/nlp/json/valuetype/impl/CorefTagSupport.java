@@ -15,6 +15,7 @@
  * limitations under the License.
  */package org.apache.stanbol.enhancer.nlp.json.valuetype.impl;
 
+import java.util.Collections;
 import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
@@ -85,14 +86,13 @@ public class CorefTagSupport implements ValueTypeParser<CorefTag>, ValueTypeSeri
 			throw new IllegalStateException("Field 'isRepresentative' must have a true/false format");
 		}
 		
-		CorefTag corefTag = new CorefTag(jIsRepresentative.asBoolean());
-		
 		JsonNode node = jCoref.path(MENTIONS_TAG);
-        
+		Set<Span> mentions = Collections.<Span> emptySet();
+		
 		if(node.isArray()) {
             ArrayNode jMentions = (ArrayNode)node;
             
-            for(int i=0;i<jMentions.size();i++) {
+            for(int i = 0;i < jMentions.size();i++) {
                 JsonNode member = jMentions.get(i);
                 
                 if(member.isObject()) {
@@ -116,11 +116,11 @@ public class CorefTagSupport implements ValueTypeParser<CorefTag>, ValueTypeSeri
                     
                     }
                     
-                    corefTag.addMention(mentionedSpan);
+                    mentions.add(mentionedSpan);
                 }
             }
 		}    
                 
-		return corefTag;
+		return new CorefTag(jIsRepresentative.asBoolean(), Collections.unmodifiableSet(mentions));
 	}	
 }

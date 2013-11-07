@@ -39,14 +39,23 @@ public class GrammaticalRelationTag extends Tag<GrammaticalRelationTag> {
 			GrammaticalRelation grammaticalRelation) {
 		this(tag);
 
-		this.setGrammaticalRelation(grammaticalRelation);
+		this.grammaticalRelation = grammaticalRelation;
 	}
 
 	public GrammaticalRelation getGrammaticalRelation() {
 		return grammaticalRelation;
 	}
 
-	public void setGrammaticalRelation(GrammaticalRelation grammaticalRelation) {
-		this.grammaticalRelation = grammaticalRelation;
+	@Override
+	public int hashCode() {
+		return super.hashCode() + grammaticalRelation.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj)
+				&& obj instanceof GrammaticalRelationTag
+				&& grammaticalRelation
+						.equals(((GrammaticalRelationTag) obj).grammaticalRelation);
 	}
 }

@@ -16,8 +16,9 @@
 */
 package org.apache.stanbol.enhancer.nlp.dependency;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -499,9 +500,9 @@ public enum GrammaticalRelation {
 	private GrammaticalRelationCategory category;
 
 	/**
-	 * The parents of this grammatical relation.
+	 * The parent of this grammatical relation.
 	 */
-	private Set<GrammaticalRelation> parents;
+	private GrammaticalRelation parent;
 
 	GrammaticalRelation(GrammaticalRelationCategory category) {
 		this(category, null);
@@ -513,34 +514,49 @@ public enum GrammaticalRelation {
 
 	GrammaticalRelation(GrammaticalRelationCategory category,
 			GrammaticalRelation parent) {
-		if (parent != null) {
-			this.parents = new HashSet<GrammaticalRelation>();
-			addParents(parent);
-		}
-
-		if (category != null) {
-			this.category = category;
-		}
+		this.parent = parent;
+		this.category = category;
 	}
 
 	public GrammaticalRelationCategory getCategory() {
 		return this.category;
 	}
 
-	public Collection<GrammaticalRelation> getParents() {
-		return this.parents;
+	public GrammaticalRelation getParent() {
+		return this.parent;
 	}
 
-	private void addParents(GrammaticalRelation parent) {
-		this.parents.add(parent);
+	public Set<GrammaticalRelation> hierarchy() {
+		return transitiveClosureMap.get(this);
+	}
 
-		Collection<GrammaticalRelation> grandParents = parent.getParents();
-		if (grandParents == null) {
-			this.category = parent.getCategory();
-		} else {
-			for (GrammaticalRelation grandParent : grandParents) {
-				addParents(grandParent);
-			}
+	/**
+	 * This is needed because one can not create EnumSet instances before the
+	 * initialization of an Enum has finished.
+	 * <p>
+	 * To keep using the much faster {@link EnumSet} a static member initialised
+	 * in an static {} block is used as a workaround.
+	 */
+	private static final Map<GrammaticalRelation, Set<GrammaticalRelation>> transitiveClosureMap;
+
+	static {
+		transitiveClosureMap = new EnumMap<GrammaticalRelation, Set<GrammaticalRelation>>(
+				GrammaticalRelation.class);
+
+		for (GrammaticalRelation relation : GrammaticalRelation.values()) {
+			Set<GrammaticalRelation> parents = EnumSet.of(relation);
+
+			GrammaticalRelation relationParent = relation.getParent();
+			Set<GrammaticalRelation> transParents = transitiveClosureMap
+					.get(relationParent);
+
+			if (transParents != null) {
+				parents.addAll(transParents);
+			} else if (relationParent != null) {
+				parents.add(relationParent);
+			} // else no parent
+
+			transitiveClosureMap.put(relation, parents);
 		}
 	}
 }

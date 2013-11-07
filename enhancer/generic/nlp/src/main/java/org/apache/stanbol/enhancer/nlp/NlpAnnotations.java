@@ -17,7 +17,7 @@
 package org.apache.stanbol.enhancer.nlp;
 
 import org.apache.stanbol.enhancer.nlp.coref.CorefTag;
-import org.apache.stanbol.enhancer.nlp.dependency.DependencyFeatures;
+import org.apache.stanbol.enhancer.nlp.dependency.DependencyRelation;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.Chunk;
 import org.apache.stanbol.enhancer.nlp.model.Token;
@@ -77,8 +77,8 @@ public interface NlpAnnotations {
 	 * other words in the sentence. Typically used on {@link Token}s.
 	 * <p>
 	 */
-	Annotation<DependencyFeatures> DEPENDENCY_ANNOTATION = new Annotation<DependencyFeatures>(
-			"stanbol.enhancer.nlp.dependency", DependencyFeatures.class);
+	Annotation<DependencyRelation> DEPENDENCY_ANNOTATION = new Annotation<DependencyRelation>(
+			"stanbol.enhancer.nlp.dependency", DependencyRelation.class);
 
 	/**
 	 * {@link Annotation} representing all the words which are a

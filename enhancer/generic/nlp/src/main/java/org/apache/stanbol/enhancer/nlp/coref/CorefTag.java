@@ -44,19 +44,18 @@ public class CorefTag extends Tag<CorefTag> {
 	 */
 	private Set<Span> mentions;
 
-	
 	public CorefTag() {
-	    //TODO: if mentions can be modified you can not use Collections.emptySet
-	    //      because this would cause exceptions in #addMention or if users
-	    //      to #getMentions().remove(...)
-	    //IMHO mentions should be made immutable by using a
-	    //Collections.unmodifiableSet(..) for the field and removing the
-	    //#addMentions(..) method.
-		this(null, false, Collections.<Span> emptySet());
+		this(null, false, Collections.unmodifiableSet(Collections
+				.<Span> emptySet()));
 	}
 
 	public CorefTag(boolean isRepresentative) {
-		this(null, isRepresentative, Collections.<Span> emptySet());
+		this(null, isRepresentative, Collections.unmodifiableSet(Collections
+				.<Span> emptySet()));
+	}
+	
+	public CorefTag(boolean isRepresentative, Set<Span> mentions) {
+		this(null, isRepresentative, mentions);
 	}
 
 	public CorefTag(String tag, boolean isRepresentative, Set<Span> mentions) {
@@ -65,24 +64,34 @@ public class CorefTag extends Tag<CorefTag> {
 		this.isRepresentative = isRepresentative;
 		this.mentions = mentions;
 	}
+
 	/**
 	 * Getter whether the {@link Token} to which this tag is attached is the
-     * representative metion in the chain.
+	 * representative mention in the chain.
+	 * 
 	 * @return the representative state
 	 */
 	public boolean isRepresentative() {
 		return this.isRepresentative;
 	}
+
 	/**
-	 * Getter for the set of {@link Token}s representing mentions
-	 * of the {@link Token} to which this tag is attached.
+	 * Getter for the set of {@link Token}s representing mentions of the
+	 * {@link Token} to which this tag is attached.
+	 * 
 	 * @return
 	 */
 	public Set<Span> getMentions() {
 		return this.mentions;
 	}
 
-	public void addMention(Span mention) {
-		this.mentions.add(mention);
+	public int hashCode() {
+		return super.hashCode()
+				+ ((this.mentions != null) ? this.mentions.hashCode() : 0);
+	}
+
+	public boolean equals(Object obj) {
+		return super.equals(obj) && (obj instanceof CorefTag)
+				&& (this.mentions.equals(((CorefTag) obj).getMentions()));
 	}
 }
