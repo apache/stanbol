@@ -35,24 +35,18 @@ import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.core.site.AbstractEntitySearcher;
 import org.apache.stanbol.entityhub.query.clerezza.RdfQueryResultList;
-import org.apache.stanbol.entityhub.query.clerezza.SparqlFieldQuery;
-import org.apache.stanbol.entityhub.query.clerezza.SparqlFieldQueryFactory;
-import org.apache.stanbol.entityhub.query.clerezza.SparqlQueryUtils.EndpointTypeEnum;
+import org.apache.stanbol.entityhub.query.sparql.SparqlFieldQuery;
+import org.apache.stanbol.entityhub.query.sparql.SparqlFieldQueryFactory;
+import org.apache.stanbol.entityhub.query.sparql.SparqlEndpointTypeEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.site.EntitySearcher;
 import org.slf4j.LoggerFactory;
 
-@Component(name = "org.apache.stanbol.entityhub.searcher.VirtuosoSearcher", factory = "org.apache.stanbol.entityhub.searcher.VirtuosoSearcherFactory", policy = ConfigurationPolicy.REQUIRE, // the
-// queryUri
-// and
-// the
-// SPARQL
-// Endpoint
-// are
-// required
-specVersion = "1.1")
+@Component(name = "org.apache.stanbol.entityhub.searcher.VirtuosoSearcher", 
+    factory = "org.apache.stanbol.entityhub.searcher.VirtuosoSearcherFactory", 
+    specVersion = "1.1")
 public class VirtuosoSearcher extends AbstractEntitySearcher implements EntitySearcher {
     @Reference
     private Parser parser;
@@ -65,7 +59,7 @@ public class VirtuosoSearcher extends AbstractEntitySearcher implements EntitySe
     public final QueryResultList<Representation> find(FieldQuery parsedQuery) throws IOException {
         long start = System.currentTimeMillis();
         final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
-        query.setEndpointType(EndpointTypeEnum.Virtuoso);
+        query.setSparqlEndpointType(SparqlEndpointTypeEnum.Virtuoso);
         String sparqlQuery = query.toSparqlConstruct();
         long initEnd = System.currentTimeMillis();
         log.info("  > InitTime: " + (initEnd - start));
@@ -94,7 +88,7 @@ public class VirtuosoSearcher extends AbstractEntitySearcher implements EntitySe
     @Override
     public final QueryResultList<String> findEntities(FieldQuery parsedQuery) throws IOException {
         final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
-        query.setEndpointType(EndpointTypeEnum.Virtuoso);
+        query.setSparqlEndpointType(SparqlEndpointTypeEnum.Virtuoso);
         String sparqlQuery = query.toSparqlSelect(false);
         log.trace("Sending Sparql request [{}].", sparqlQuery);
         InputStream in = sendSparqlRequest(getQueryUri(), sparqlQuery,

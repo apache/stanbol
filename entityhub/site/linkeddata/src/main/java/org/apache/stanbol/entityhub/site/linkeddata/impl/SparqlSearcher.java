@@ -25,7 +25,6 @@ import java.util.List;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.commons.io.IOUtils;
@@ -36,9 +35,8 @@ import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.core.site.AbstractEntitySearcher;
 import org.apache.stanbol.entityhub.query.clerezza.RdfQueryResultList;
-import org.apache.stanbol.entityhub.query.clerezza.SparqlFieldQuery;
-import org.apache.stanbol.entityhub.query.clerezza.SparqlFieldQueryFactory;
-import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
+import org.apache.stanbol.entityhub.query.sparql.SparqlFieldQuery;
+import org.apache.stanbol.entityhub.query.sparql.SparqlFieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
@@ -52,7 +50,6 @@ import org.slf4j.LoggerFactory;
 @Component(
         name="org.apache.stanbol.entityhub.searcher.SparqlSearcher",
         factory="org.apache.stanbol.entityhub.searcher.SparqlSearcherFactory",
-        policy=ConfigurationPolicy.REQUIRE, //the queryUri and the SPARQL Endpoint are required
         specVersion="1.1"
         )
 public class SparqlSearcher extends AbstractEntitySearcher implements EntitySearcher {

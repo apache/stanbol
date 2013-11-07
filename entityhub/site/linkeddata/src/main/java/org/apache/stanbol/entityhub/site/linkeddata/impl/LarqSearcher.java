@@ -34,9 +34,9 @@ import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.core.site.AbstractEntitySearcher;
 import org.apache.stanbol.entityhub.query.clerezza.RdfQueryResultList;
-import org.apache.stanbol.entityhub.query.clerezza.SparqlFieldQuery;
-import org.apache.stanbol.entityhub.query.clerezza.SparqlFieldQueryFactory;
-import org.apache.stanbol.entityhub.query.clerezza.SparqlQueryUtils.EndpointTypeEnum;
+import org.apache.stanbol.entityhub.query.sparql.SparqlFieldQuery;
+import org.apache.stanbol.entityhub.query.sparql.SparqlFieldQueryFactory;
+import org.apache.stanbol.entityhub.query.sparql.SparqlEndpointTypeEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
 @Component(
         name="org.apache.stanbol.entityhub.searcher.LarqSearcher",
         factory="org.apache.stanbol.entityhub.searcher.LarqSearcherFactory",
-        policy=ConfigurationPolicy.REQUIRE, //the queryUri and the SPARQL Endpoint are required
         specVersion="1.1"
         )
 public class LarqSearcher extends AbstractEntitySearcher implements EntitySearcher {
@@ -62,7 +61,7 @@ public class LarqSearcher extends AbstractEntitySearcher implements EntitySearch
     public final QueryResultList<Representation> find(FieldQuery parsedQuery) throws IOException {
         long start = System.currentTimeMillis();
         final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
-        query.setEndpointType(EndpointTypeEnum.LARQ);
+        query.setSparqlEndpointType(SparqlEndpointTypeEnum.LARQ);
         String sparqlQuery = query.toSparqlConstruct();
         long initEnd = System.currentTimeMillis();
         log.debug("  > InitTime: "+(initEnd-start));
@@ -90,7 +89,7 @@ public class LarqSearcher extends AbstractEntitySearcher implements EntitySearch
     @Override
     public final QueryResultList<String> findEntities(FieldQuery parsedQuery) throws IOException {
         final SparqlFieldQuery query = SparqlFieldQueryFactory.getSparqlFieldQuery(parsedQuery);
-        query.setEndpointType(EndpointTypeEnum.LARQ);
+        query.setSparqlEndpointType(SparqlEndpointTypeEnum.LARQ);
         String sparqlQuery = query.toSparqlSelect(false);
         InputStream in = sendSparqlRequest(getQueryUri(), sparqlQuery, SparqlSearcher.DEFAULT_SPARQL_RESULT_CONTENT_TYPE);
         //Move to util class!

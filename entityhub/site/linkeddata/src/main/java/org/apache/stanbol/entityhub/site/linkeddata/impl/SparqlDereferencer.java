@@ -21,7 +21,6 @@ import java.io.InputStream;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.felix.scr.annotations.Component;
@@ -44,7 +43,6 @@ import org.slf4j.LoggerFactory;
 @Component(
         name="org.apache.stanbol.entityhub.dereferencer.SparqlDereferencer",
         factory="org.apache.stanbol.entityhub.dereferencer.SparqlDereferencerFactory",
-        policy=ConfigurationPolicy.REQUIRE, //the baseUri and the SPARQL Endpoint are required
         specVersion="1.1"
         )
 @Service(value=EntityDereferencer.class)
