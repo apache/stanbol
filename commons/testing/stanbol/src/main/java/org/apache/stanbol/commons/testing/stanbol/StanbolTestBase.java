@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.commons.testing.stanbol;
 
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
@@ -85,12 +86,14 @@ public class StanbolTestBase {
 
     @Before
     public void waitForServerReady() throws Exception {
+        log.debug("> before {}#waitForServerReady()",getClass().getSimpleName());
         // initialize instance request builder and HTTP client
         builder = new RequestBuilder(serverBaseUrl);
         httpClient = new DefaultHttpClient();
         executor = new RequestExecutor(httpClient);
 
         if (serverReady) {
+            log.debug(" ... server already marked as ready!");
             return;
         }
 
@@ -123,15 +126,20 @@ public class StanbolTestBase {
 
             // A test path is in the form path:substring or just path, in which case
             // we don't check that the content contains the substring 
+            log.debug(" - check serverReady Paths");
             for (String p : testPaths) {
+                log.debug("    > path: {}", p);
                 final String[] s = p.split(":");
                 final String path = s[0];
                 final String substring = (s.length > 0 ? s[1] : null);
                 final String url = serverBaseUrl + path;
+                log.debug("    > url: {}", url);
+                log.debug("    > content: {}", substring);
                 final HttpGet get = new HttpGet(url);
                 //authenticate as admin with password admin
                 get.setHeader("Authorization", "Basic YWRtaW46YWRtaW4=");
                 for(int i = 2; i+1<s.length;i=i+2){
+                    log.debug("    > header: {}:{}", s[i], s[i+1]);
                     if(s[i] != null && !s[i].isEmpty() &&
                             s[i+1] != null && !s[i+1].isEmpty()){
                         get.setHeader(s[i], s[i+1]);
@@ -139,28 +147,35 @@ public class StanbolTestBase {
                 }
                 HttpEntity entity = null;
                 try {
+                    log.debug("    > execute: {}", get);
                     HttpResponse response = httpClient.execute(get);
+                    log.debug("    > response: {}", response);
                     entity = response.getEntity();
                     final int status = response.getStatusLine().getStatusCode();
                     if (status != 200) {
-                        log.info("Got " + status + " at " + url + " - will retry");
+                        log.info("Got {} at {} - will retry", status, url);
                         continue readyLoop;
+                    } else {
+                        log.debug("Got {} at {} - will retry", status, url);
                     }
 
                     if (substring != null) {
                         if (entity == null) {
-                            log.info("No entity returned for " + url + " - will retry");
+                            log.info("No entity returned for {} - will retry", url);
                             continue readyLoop;
                         }
                         final String content = EntityUtils.toString(entity);
                         if (!content.contains(substring)) {
-                            log.info("Returned content for " + url
-                                    + " does not contain " + substring + " - will retry");
+                            log.info("Returned content for {}  does not contain " 
+                                    + "{} - will retry", url, substring);
                             continue readyLoop;
+                        } else {
+                            log.debug("Returned content for {}  contains {} - ready", 
+                                url, substring);
                         }
                     }
-                } catch (HttpHostConnectException e) {
-                    log.info("Got HttpHostConnectException at " + url + " - will retry");
+                } catch (ConnectException e) {
+                    log.info("Got {} at {} - will retry", e.getClass().getSimpleName(), url);
                     continue readyLoop;
                 } finally {
                     if (entity != null) {
@@ -168,8 +183,8 @@ public class StanbolTestBase {
                     }
                 }
             }
-            serverReady = true;
             log.info("Got expected content for all configured requests, server is ready");
+            serverReady = true;
         }
 
         if (!serverReady) {
