@@ -20,7 +20,9 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -48,7 +50,10 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.clerezza.jaxrs.utils.form.FormFile;
 import org.apache.clerezza.jaxrs.utils.form.MultiPartBody;
 import org.apache.clerezza.rdf.core.access.TcManager;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.jobs.api.JobManager;
 import org.apache.stanbol.commons.web.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
@@ -90,20 +95,22 @@ import org.slf4j.LoggerFactory;
  * Support for long term operations is provided by adding /job to the request URI.
  * 
  */
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Path("/reasoners/{service}/{task: [^/]+}{job: (/job)?}")
 public class ReasoningServiceTaskResource extends BaseStanbolResource {
     private Logger log = LoggerFactory.getLogger(getClass());
 //    private ServletContext context;
     
     private ReasoningService<?,?,?> service;
-    private String taskID;
     
     private Map<String,List<String>> parameters;
     private FormFile file = null;
     
     @Reference
     protected TcManager tcManager;
-    private HttpHeaders headers;
+    
     
     @Reference
     protected ScopeManager onm;
@@ -125,28 +132,27 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
     @Reference
     protected JobManager jobManager;
 
-    @Context private UriInfo uriInfo;
-    @Context private Form form;
+    @Context 
+    private UriInfo uriInfo;
+    @Context 
+    private Form form = null;
+    @Context 
+    private HttpHeaders headers;
+    
+    private String taskID;
     
     /**
      * Constructor
      * 
-     * @param serviceID
-     * @param taskID
-     * @param job
-     * @param servletContext
-     * @param headers
-     * @param httpContext
      */
-    public ReasoningServiceTaskResource(@PathParam(value = "service") String serviceID,
-                                        @PathParam(value = "task") String taskID,
-                                        @PathParam(value = "job") String job,
-                                        @Context HttpHeaders headers) {
+    public ReasoningServiceTaskResource() {
         super();
-        log.debug("Called service {} to perform task {}", serviceID, taskID);
+    }
 
-        // HttpHeaders
-        this.headers = headers;
+    public void prepare(String serviceID, String taskIDstr, String jobFlag) {
+        this.taskID = taskIDstr;
+        
+        log.debug("Called service {} to perform task {}", serviceID, taskID);
 
         // Parameters for customized reasoning services
         this.parameters = prepareParameters();
@@ -168,16 +174,16 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         log.debug("Service retrieved");
         // Check if the task is allowed
         if (this.service.supportsTask(taskID) || taskID.equals(ReasoningServiceExecutor.TASK_CHECK)) {
-            this.taskID = taskID;
+            // Ok
         } else {
             log.error("Unsupported task (not found): {}", taskID);
             throw new WebApplicationException(new Exception("Unsupported task (not found): " + taskID),
                     Response.Status.NOT_FOUND);
         }
         // Check for the job parameter
-        if (!job.equals("")) {
+        if (!jobFlag.equals("")) {
             log.debug("Job param is {}", job);
-            if (job.equals("/job")) {
+            if (jobFlag.equals("/job")) {
                 log.debug("Ask for background job");
                 this.job = true;
             } else {
@@ -210,15 +216,33 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         log.debug("... {} query parameters found", queryParameters.size());
         for (Entry<?,?> e : queryParameters.entrySet()) {
             String k = (String) e.getKey();
-            String[] v = (String[]) e.getValue();
-            parameters.put(k, Arrays.asList(v));
+            log.debug(" param: {} ", k);
+            List<String> v = new ArrayList<String>();
+            /*
+             * XXX 
+             * It looks like that param values here are not urldecoded
+             * This is odd because the not on the method says exactly the opposite.
+             * @see getQueryParameters()
+             */
+            for(String s : (List<String>) e.getValue()){
+                try {
+                    s = URLDecoder.decode(s, "UTF-8");
+                } catch (UnsupportedEncodingException e1) {
+                    e1.printStackTrace();
+                }
+                log.debug("   value {}", v);
+                v.add(s);
+            }
+            parameters.put(k, v);
         }
         // Parameters for a POST request with content-type
         // application/x-www-form-urlencoded
-        MultivaluedMap<String,String> formParameters = form.asMap();
-        log.debug("... {} form urlencoded parameters found", formParameters.size());
-        for (Entry<String,List<String>> e : formParameters.entrySet()) {
-            parameters.put(e.getKey(), e.getValue());
+        if(form!=null){
+            MultivaluedMap<String,String> formParameters = form.asMap();
+            log.debug("... {} form urlencoded parameters found", formParameters.size());
+            for (Entry<String,List<String>> e : formParameters.entrySet()) {
+                parameters.put(e.getKey(), e.getValue());
+            }
         }
         log.debug("Parameters prepared");
         return parameters;
@@ -234,14 +258,19 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
     @POST
     @Consumes({APPLICATION_FORM_URLENCODED})
     @Produces({TEXT_HTML, "text/plain", KRFormat.RDF_XML, KRFormat.TURTLE, "text/turtle", "text/n3"})
-    public Response post() {
+    public Response post(@PathParam(value = "service")  String serviceID, 
+                         @PathParam(value = "task") String taskID,
+                         @PathParam(value = "job")  String jobFlg) {
+        prepare(serviceID, taskID, jobFlg);
         return processRequest();
     }
 
     private Response processRequest() {
         if (job) {
+            log.trace("Processing in background");
             return processBackgroundRequest();
         } else {
+            log.trace("Processing in foreground");
             return processRealTimeRequest();
         }
     }
@@ -254,9 +283,15 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
      */
     @GET
     @Produces({TEXT_HTML, "text/plain", KRFormat.RDF_XML, KRFormat.TURTLE, "text/turtle", "text/n3"})
-    public Response get(@QueryParam("target") String targetGraphID) {
+    public Response get(@QueryParam("target") String targetGraphID,
+                        @PathParam(value = "service")  String serviceID, 
+                        @PathParam(value = "task") String taskID,
+                        @PathParam(value = "job")  String jobFlg) {
+        log.debug("Called GET serviceID {} taskID {}",serviceID, taskID);
+        prepare(serviceID, taskID, jobFlg);
         log.debug("Called GET with parameters: {} ", parameters.keySet()
                 .toArray(new String[parameters.keySet().size()]));
+        
         return processRequest();
     }
 
@@ -296,7 +331,8 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
     private Response processRealTimeRequest() {
         // If all parameters are missing we produce the service/task welcome
         // page
-        if (this.parameters.isEmpty()) {
+        if (this.parameters.isEmpty() && file == null) {
+            log.debug("no parameters no input file, show default index page");
             // return Response.ok(new Viewable("index", this)).build();
             ResponseBuilder rb = Response.ok(new Viewable("index", this));
             rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
@@ -310,7 +346,7 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
             ReasoningServiceExecutor executor = new ReasoningServiceExecutor(tcManager, imngr,
                     getCurrentService(), getCurrentTask(), target, parameters);
             ReasoningServiceResult<?> result = executor.call();
-            return new ResponseTaskBuilder(uriInfo, headers).build(result);
+            return new ResponseTaskBuilder(new ReasoningTaskResult(uriInfo, headers)).build(result);
         } catch (Exception e) {
             if (e instanceof RuntimeException) {
                 throw (RuntimeException)e;
@@ -353,12 +389,18 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
     @POST
     @Consumes({MULTIPART_FORM_DATA})
     @Produces({TEXT_HTML, "text/plain", KRFormat.RDF_XML, KRFormat.TURTLE, "text/turtle", "text/n3"})
-    public Response post(MultiPartBody data) {
-        log.debug(" post(FormDataMultiPart data)");
+    public Response post(MultiPartBody data,
+                         @PathParam(value = "service")  String serviceID, 
+                         @PathParam(value = "task") String taskID,
+                         @PathParam(value = "job")  String jobFlg) {
+        prepare(serviceID, taskID, jobFlg);
+        log.debug("Called POST post(MultiPartBody data, ...)");
         // In this case we setup the parameter from a multipart request
         
         if(data.getFormFileParameterValues("file").length > 0){
             file = data.getFormFileParameterValues("file")[0]; 
+        }else{
+            log.debug("No files in multipart body");
         }
         
         for(String p : data.getTextParameterNames()){
@@ -587,5 +629,29 @@ public class ReasoningServiceTaskResource extends BaseStanbolResource {
         serviceProperties.put("path", service.getPath());
         return serviceProperties;
     }
+    
+    public class ReasoningTaskResult extends ResultData implements ReasoningResult {
+        private Object result;
+        private UriInfo uriInfo;
+        private HttpHeaders headers;
+        public ReasoningTaskResult(UriInfo uriInfo, HttpHeaders headers) {
+            this.headers = headers;
+            this.uriInfo = uriInfo;
+        }
 
+        public void setResult(Object result){
+            this.result = result;
+        }
+        public Object getResult() {
+            return this.result;
+        }
+
+        public HttpHeaders getHeaders() {
+            return headers;
+        }
+        
+        public UriInfo getUriInfo(){
+            return uriInfo;
+        }
+    }
 }

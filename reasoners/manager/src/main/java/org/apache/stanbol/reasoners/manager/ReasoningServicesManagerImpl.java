@@ -20,6 +20,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningService;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServicesManager;
 import org.apache.stanbol.reasoners.servicesapi.UnboundReasoningServiceException;
@@ -32,16 +37,14 @@ import org.slf4j.LoggerFactory;
  * 
  * @author enridaga
  * 
- * @scr.component immediate="true"
- * @scr.service
- * @scr.reference name="ReasoningService"
- *                interface="org.apache.stanbol.reasoners.servicesapi.ReasoningService" cardinality="0..n"
- *                policy="dynamic")
  */
+@Component(immediate=true)
+@Service
 public class ReasoningServicesManagerImpl implements ReasoningServicesManager {
 
     private static final Logger log = LoggerFactory.getLogger(ReasoningServicesManagerImpl.class);
 
+    @Reference(name = "ReasoningService", referenceInterface = org.apache.stanbol.reasoners.servicesapi.ReasoningService.class, policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
     private Set<ReasoningService<?,?,?>> services = new HashSet<ReasoningService<?,?,?>>();
 
     public void bindReasoningService(ReasoningService<?,?,?> service) {

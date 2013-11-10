@@ -35,6 +35,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.stanbol.commons.web.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
+import org.apache.stanbol.reasoners.web.resources.ReasoningResult;
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxOntologyFormat;
 import org.semanticweb.owlapi.io.StreamDocumentTarget;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -54,14 +55,18 @@ import com.hp.hpl.jena.rdf.model.Model;
  */
 public class ResponseTaskBuilder {
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private UriInfo info;
+//    private UriInfo info;
 //    private ServletContext context;
-    private HttpHeaders headers;
-    
-    public ResponseTaskBuilder(UriInfo info, HttpHeaders headers) {
-        this.info = info;
-//        this.context = context;
-        this.headers = headers;
+//    private HttpHeaders headers;
+    private ReasoningResult result;
+//    public ResponseTaskBuilder(UriInfo info, HttpHeaders headers) {
+//        this.info = info;
+////        this.context = context;
+//        this.headers = headers;
+//    }
+
+    public ResponseTaskBuilder(ReasoningResult reasoningPrettyResultResource) {
+        this.result = reasoningPrettyResultResource;
     }
 
     /**
@@ -91,11 +96,9 @@ public class ResponseTaskBuilder {
     private Response build(Object object){
         if (isHTML()) {
             OutputStream out = stream(object);
-            
+            this.result.setResult(out);
             ResponseBuilder rb = Response.ok( 
-                   new Viewable("result",
-                       new ReasoningPrettyResultResource(info, out))
-                    );
+                   new Viewable("result", result));
             
             rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
 //            addCORSOrigin(context, rb, headers);
@@ -159,7 +162,7 @@ public class ResponseTaskBuilder {
         String[] formats = { TEXT_HTML, "text/plain", KRFormat.RDF_XML,
                 KRFormat.TURTLE, "text/turtle", "text/n3" };
         rdfformats.addAll(Arrays.asList(formats));
-        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        List<MediaType> mediaTypes = result.getHeaders().getAcceptableMediaTypes();
         for (MediaType t : mediaTypes) {
             String strty = t.toString();
             log.debug("Acceptable is {}", t);
@@ -186,10 +189,10 @@ public class ResponseTaskBuilder {
         if (isHTML()) {
             if (isConsistent) {
                 log.debug("The input is consistent");
-                
+                result.setResult("The input is consistent :)");
                 ResponseBuilder rb = Response.ok( 
                     new Viewable("result",
-                        new ReasoningPrettyResultResource(info, "The input is consistent :)")
+                        result
                         )
                      );
              
@@ -208,8 +211,8 @@ public class ResponseTaskBuilder {
                 ResponseBuilder rb = Response.status(Status.CONFLICT);
                 rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML + "; charset=utf-8");
 //                addCORSOrigin(context, rb, headers);
-                rb.entity(new Viewable("result", new ReasoningPrettyResultResource(info,
-                        "The input is NOT consistent :(")));
+                result.setResult("The input is NOT consistent :(");
+                rb.entity(new Viewable("result", result));
                 return rb.build();
                 
                 /*return Response

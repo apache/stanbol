@@ -33,8 +33,11 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.web.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningService;
@@ -51,14 +54,18 @@ import org.slf4j.LoggerFactory;
  * @author enridaga
  *
  */
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Path("/reasoners")
 public class ReasoningServicesResource extends BaseStanbolResource {
     private Logger log = LoggerFactory.getLogger(getClass());
-    private UriInfo uriInfo;
 
-    public ReasoningServicesResource(@Context UriInfo uriInfo) {
+    @Reference
+    private ReasoningServicesManager reasoningServicesManager;
+
+    public ReasoningServicesResource() {
         super();
-        this.uriInfo = uriInfo;
     }
 
     public String getCurrentPath() {
@@ -74,8 +81,7 @@ public class ReasoningServicesResource extends BaseStanbolResource {
     }
 
     private ReasoningService<?,?,?> service = null;
-    private ReasoningServicesManager reasoningServicesManager;
-    
+        
     @GET
     @Produces(TEXT_HTML)
     @Path("{service}")
@@ -138,6 +144,7 @@ public class ReasoningServicesResource extends BaseStanbolResource {
 		serviceProperties.put("path", service.getPath());
 		return serviceProperties;
     }
+    
     public List<Map<String,String>> getServicesDescription(){
     	List<Map<String,String>> descriptions = new ArrayList<Map<String,String>>();
     	for(ReasoningService<?, ?, ?> service : getActiveServices()){
