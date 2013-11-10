@@ -53,7 +53,10 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.jaxrs.utils.form.MultiPartBody;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.web.viewable.Viewable;
 //import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
@@ -88,6 +91,9 @@ import org.slf4j.LoggerFactory;
  * @author elvio, anuzzolese
  * 
  */
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Path("/rules")
 //@ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
 public class RulesResource extends BaseStanbolResource {
@@ -112,10 +118,13 @@ public class RulesResource extends BaseStanbolResource {
 //            RuleAdapterManager.class, servletContext);
 //    }
 
+    class RulesResourceResultData extends ResultData{
+        
+    }
     @GET
     @Produces(TEXT_HTML)
     public Response get(@Context HttpHeaders headers) {
-        ResponseBuilder responseBuilder = Response.ok(new Viewable("index", this), TEXT_HTML);
+        ResponseBuilder responseBuilder = Response.ok(new Viewable("index", new RulesResourceResultData()), TEXT_HTML);
 //        addCORSOrigin(servletContext, responseBuilder, headers);
         return responseBuilder.build();
     }

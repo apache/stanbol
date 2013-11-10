@@ -56,7 +56,10 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.clerezza.jaxrs.utils.form.MultiPartBody;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.owl.transformation.OWLAPIToClerezzaConverter;
 //import org.apache.stanbol.commons.web.base.ContextHelper;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
@@ -87,6 +90,9 @@ import org.slf4j.LoggerFactory;
  * 
  */
 
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Path("/refactor")
 //@ImplicitProduces(MediaType.TEXT_HTML + ";qs=2")
 public class RefactorResource extends BaseStanbolResource {
