@@ -21,13 +21,13 @@
   <parent>
     <artifactId>stanbol-parent</artifactId>
     <groupId>org.apache.stanbol</groupId>
-    <version>3</version>
+    <version>5-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>    
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.reasoners.services-tests</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <name>Tests for the Stanbol Reasoners REST services</name>
   
   <properties>
@@ -62,7 +62,7 @@
             </goals>
             <phase>process-resources</phase>
             <configuration>
-              <includeArtifactIds>org.apache.stanbol.launchers.kres</includeArtifactIds>
+              <includeArtifactIds>org.apache.stanbol.launchers.full</includeArtifactIds>
               <excludeTransitive>true</excludeTransitive>
               <overWriteReleases>false</overWriteReleases>
               <overWriteSnapshots>false</overWriteSnapshots>
@@ -98,7 +98,7 @@
             <jar.executor.server.port>${http.port}</jar.executor.server.port>
             <jar.executor.vm.options>${jar.executor.vm.options}</jar.executor.vm.options>
             <jar.executor.jar.folder>${project.basedir}/target/dependency</jar.executor.jar.folder>
-            <jar.executor.jar.name.regexp>org.apache.stanbol.*kres.*jar$</jar.executor.jar.name.regexp>
+            <jar.executor.jar.name.regexp>org.apache.stanbol.*full.*jar$</jar.executor.jar.name.regexp>
             <jar.executor.workingdirectory>${project.build.directory}/launchdir</jar.executor.workingdirectory>
             <keepJarRunning>${keepJarRunning}</keepJarRunning>
             <server.ready.timeout.seconds>180</server.ready.timeout.seconds>
@@ -116,28 +116,28 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.launchers.kres</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <artifactId>org.apache.stanbol.launchers.full</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>0.11.0</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.testing.http</artifactId>
-      <version>0.11.0</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
-      <version>0.11.0</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.reasoners.test</artifactId>
-      <version>0.9.0-incubating</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     
     <dependency>
@@ -148,18 +148,18 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
-    <dependency>
+    <!--dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.ldviewable</artifactId>
-    </dependency>
-    <dependency>
+    </dependency-->
+    <!-- dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
     </dependency>
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>
-    </dependency>
+    </dependency -->
     <dependency>
       <groupId>org.codehaus.jettison</groupId>
       <artifactId>jettison</artifactId>
