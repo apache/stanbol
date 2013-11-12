@@ -63,6 +63,7 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.tdb.store.DatasetGraphTDB;
@@ -435,6 +436,13 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
             log.debug("No Statements found for id {} (Node: {})!",id,resource);
             return null;
         }
+    }
+    /**
+     * Getter for the Jena TDB {@link DatasetGraph} used as source
+     * @return the indexingDataset
+     */
+    public final DatasetGraphTDB getIndexingDataset() {
+        return indexingDataset;
     }
 
     /**

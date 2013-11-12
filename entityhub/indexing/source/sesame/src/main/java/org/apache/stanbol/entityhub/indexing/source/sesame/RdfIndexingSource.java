@@ -2,12 +2,10 @@ package org.apache.stanbol.entityhub.indexing.source.sesame;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -19,23 +17,23 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataIterable;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataIterator;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataProvider;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
+import org.apache.stanbol.entityhub.indexing.core.source.ResourceLoader;
+import org.apache.stanbol.entityhub.indexing.core.source.ResourceState;
 import org.apache.stanbol.entityhub.model.sesame.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.sesame.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.openrdf.model.BNode;
-import org.openrdf.model.Graph;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.TreeModel;
-import org.openrdf.model.util.ModelUtil;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -48,9 +46,7 @@ import org.openrdf.repository.config.RepositoryRegistry;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
-import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
-import org.openrdf.sail.SailConnection;
 import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,13 +57,45 @@ public class RdfIndexingSource extends AbstractSesameBackend implements EntityDa
 
     private final Logger log = LoggerFactory.getLogger(RdfIndexingSource.class);
     
-    public static final String PARAM_REPOSITORY_CONFIG = "config";
+    public static final String PARAM_REPOSITORY_CONFIG = "repo";
     
     public static final String DEFAULT_REPOSITORY_CONFIG = "repository.ttl";
     
+    /**
+     * The Parameter used to configure the source folder(s) relative to the
+     * {@link IndexingConfig#getSourceFolder()}. The ',' (comma) is used as
+     * separator to parsed multiple sources.
+     */
+    public static final String PARAM_SOURCE_FILE_OR_FOLDER = "source";
+    /**
+     * The default directory name used to search for RDF files to be imported
+     */
+    public static final String DEFAULT_SOURCE_FOLDER_NAME = "rdfdata";
+
+    /**
+     * The Parameter that can be used to deactivate the importing of sources.
+     * If this parameter is set to <code>false</code> the values configured for
+     * {@link #PARAM_IMPORT_SOURCE} are ignored. The default value is
+     * <code>true</code>
+     */
+    public static final String PARAM_IMPORT_SOURCE = "import";
+    
+    /**
+     * The directory where successfully imported files are copied to
+     */
+    public static final String PARAM_IMPORTED_FOLDER = "imported";
+    /**
+     * The default directory bane where successfully imported files are copied to
+     */
+    public static final String DEFAULT_IMPORTED_FOLDER_NAME = "imported";
+
+    public static final Object PARAM_BASE_URI = "baseUri";
+    
+    public static final String DEFAULT_BASE_URI = "http://www.fake-base-uri.org/base-uri/";
+
     protected ValueFactory sesameFactory;
     
-    protected RdfValueFactory vf;
+    protected RdfValueFactory vf = RdfValueFactory.getInstance();
     
     Repository repository;
     //protected RepositoryConnection connection;
@@ -95,25 +123,109 @@ public class RdfIndexingSource extends AbstractSesameBackend implements EntityDa
      * to this indexing source will also call close to all iterators in this list
      */
     protected final List<EntityDataIterator> entityDataIterators = new CopyOnWriteArrayList<EntityDataIterator>();
+
+    private IndexingConfig indexingConfig;
+
+    private ResourceLoader loader;
+
+    private String baseUri;
     
     @Override
     public void setConfiguration(Map<String,Object> config) {
-        IndexingConfig indexingConfig = (IndexingConfig)config.get(IndexingConfig.KEY_INDEXING_CONFIG);
-        File repoConfigFile;
-        Object value = config.get(PARAM_REPOSITORY_CONFIG);
-        if(value != null){
-            repoConfigFile = new File(indexingConfig.getConfigFolder(),value.toString());
-        } else {
-            repoConfigFile = new File(indexingConfig.getConfigFolder(),DEFAULT_REPOSITORY_CONFIG);
-        }
+        indexingConfig = (IndexingConfig)config.get(IndexingConfig.KEY_INDEXING_CONFIG);
+        //(0) parse the baseUri
+        Object value = config.get(PARAM_BASE_URI);
+        baseUri = value == null ? DEFAULT_BASE_URI : value.toString();
+        //(1) init the Sesame Repository from the RDF config
+        value = config.get(PARAM_REPOSITORY_CONFIG);
+        File repoConfigFile = indexingConfig.getConfigFile(
+            value != null ? value.toString() : DEFAULT_REPOSITORY_CONFIG);
         if(repoConfigFile.isFile()){ //read the config (an RDF file)
-            
             this.repoConfig = loadRepositoryConfig(repoConfigFile);
         } else {
-            throw new IllegalArgumentException("The configured Sesame Repository configuration fiel "
+            throw new IllegalArgumentException("The configured Sesame Repository configuration file "
                 + repoConfigFile +" is missing. Please use the '"+PARAM_REPOSITORY_CONFIG 
                 + "' paramteter to configure the actual configuration file (relative "
                 + "to the config '"+indexingConfig.getConfigFolder()+"'folder)");
+        }
+        RepositoryFactory factory = RepositoryRegistry.getInstance().get(
+            repoConfig.getRepositoryImplConfig().getType());
+        if(factory == null){
+            throw new IllegalStateException("Unable to initialise Repository (id: "
+                + repoConfig.getID()+ ", title: "+repoConfig.getTitle() + ", impl: "
+                + repoConfig.getRepositoryImplConfig().getType()+") because no "
+                + "RepositoryFactory is present for the specified implementation!");
+        }
+        try {
+            repository = factory.getRepository(repoConfig.getRepositoryImplConfig());
+            sesameFactory = repository.getValueFactory();
+            repository.initialize();
+        } catch (RepositoryConfigException e) {
+            throw new IllegalStateException("Unable to initialise Repository (id: "
+                + repoConfig.getID()+ ", title: "+repoConfig.getTitle() + ", impl: "
+                + repoConfig.getRepositoryImplConfig().getType()+")!", e);
+        } catch (RepositoryException e) {
+            throw new IllegalStateException("Unable to initialise Repository (id: "
+                    + repoConfig.getID()+ ", title: "+repoConfig.getTitle() + ", impl: "
+                    + repoConfig.getRepositoryImplConfig().getType()+")!", e);
+        }
+        //(2) init the resourceLoader
+        loader = new ResourceLoader(new RdfResourceImporter(repository, baseUri), 
+            indexingConfig.isFailOnError());
+        value = config.get(PARAM_IMPORTED_FOLDER);
+        //set the folder for imported files
+        String importedFolderName;
+        if(value != null && !value.toString().isEmpty()){
+            importedFolderName = value.toString();
+        } else {
+            importedFolderName = DEFAULT_IMPORTED_FOLDER_NAME;
+        }
+        File importedFolder = new File(indexingConfig.getSourceFolder(),importedFolderName);
+        log.info("Imported RDF File Folder: {}",importedFolder);
+        this.loader.setImportedDir(importedFolder);
+        //check if importing is deactivated
+        boolean importSource = true; //default is true
+        value = config.get(PARAM_IMPORT_SOURCE);
+        if(value != null){
+            importSource = Boolean.parseBoolean(value.toString());
+        }
+        if(importSource){ // if we need to import ... check the source config
+            log.info("Importing RDF data from:");
+            value = config.get(PARAM_SOURCE_FILE_OR_FOLDER);
+            if(value == null){ //if not set use the default
+                value = DEFAULT_SOURCE_FOLDER_NAME;
+            }
+            for(String source : value.toString().split(",")){
+                File sourceFileOrDirectory = indexingConfig.getSourceFile(source);
+                if(sourceFileOrDirectory.exists()){
+                    //register the configured source with the ResourceLoader
+                    this.loader.addResource(sourceFileOrDirectory);
+                } else {
+                    if(FilenameUtils.getExtension(source).isEmpty()){
+                        //non existent directory -> create
+                        //This is typically the case if this method is called to
+                        //initialise the default configuration. So we will try
+                        //to create the directory users need to copy the source
+                        //RDF files.
+                        if(!sourceFileOrDirectory.mkdirs()){
+                            log.warn("Unable to create directory {} configured to improt RDF data from. " +
+                                    "You will need to create this directory manually before copying the" +
+                                    "RDF files into it.",sourceFileOrDirectory);
+                            this.loader.addResource(sourceFileOrDirectory);
+                        }
+                    } else {
+                        log.warn("Unable to find RDF source {} within the indexing Source folder {}",
+                            source, indexingConfig.getSourceFolder());
+                    }
+                }
+            }
+            if(log.isInfoEnabled()){
+                for(String registeredSource : loader.getResources(ResourceState.REGISTERED)){
+                    log.info(" > "+registeredSource);
+                }
+            }
+        } else {
+            log.info("Importing RDF data deactivated by parameer {}={}"+PARAM_IMPORT_SOURCE,value);
         }
     }
 
@@ -125,12 +237,16 @@ public class RdfIndexingSource extends AbstractSesameBackend implements EntityDa
         Repository configRepo = new SailRepository(new MemoryStore());
         RepositoryConnection con = null;
         try {
+            configRepo.initialize();
             con = configRepo.getConnection();
+            //We need to load the configuration into a context
+            org.openrdf.model.URI configContext = con.getValueFactory().createURI(
+                "urn:stanbol.entityhub:indexing.source.sesame:config.context");
             RDFFormat format = Rio.getParserFormatForFileName(repoConfigFile.getName());
             try {
                 con.add(new InputStreamReader(
                     new FileInputStream(repoConfigFile),Charset.forName("UTF-8")), 
-                    null, format);
+                    baseUri, format,configContext);
             } catch (RDFParseException e) {
                 throw new IllegalArgumentException("Unable to parsed '"
                     + repoConfigFile+ "' using RDF format '"+ format +"'!", e);
@@ -183,27 +299,13 @@ public class RdfIndexingSource extends AbstractSesameBackend implements EntityDa
 
     @Override
     public boolean needsInitialisation() {
-        return true;
+        //check if we need to load resources
+        return !loader.getResources(ResourceState.REGISTERED).isEmpty();
     }
 
     @Override
     public void initialise() {
-        // TODO create the Sesame Connection
-        RepositoryFactory factory = RepositoryRegistry.getInstance().get(
-            repoConfig.getRepositoryImplConfig().getType());
-        if(factory == null){
-            throw new IllegalStateException("Unable to initialise Repository (id: "
-                + repoConfig.getID()+ ", title: "+repoConfig.getTitle() + ", impl: "
-                + repoConfig.getRepositoryImplConfig().getType()+") because no "
-                + "RepositoryFactory is present for the specified implementation!");
-        }
-        try {
-            repository = factory.getRepository(repoConfig.getRepositoryImplConfig());
-        } catch (RepositoryConfigException e) {
-            throw new IllegalStateException("Unable to initialise Repository (id: "
-                + repoConfig.getID()+ ", title: "+repoConfig.getTitle() + ", impl: "
-                + repoConfig.getRepositoryImplConfig().getType()+")!", e);
-        }
+        loader.loadResources();
     }
 
     @Override
@@ -280,7 +382,8 @@ public class RdfIndexingSource extends AbstractSesameBackend implements EntityDa
                 return true;
             }
             try {
-                while(stdItr.hasNext() && !(currentStd.getSubject() instanceof org.openrdf.model.URI)){
+                while(stdItr.hasNext() && (currentStd == null || 
+                        !(currentStd.getSubject() instanceof org.openrdf.model.URI))){
                     currentStd = stdItr.next();
                 }
                 if(stdItr.hasNext()){
@@ -491,14 +594,18 @@ public class RdfIndexingSource extends AbstractSesameBackend implements EntityDa
     }
 
     protected void ungetLdPathConnection() {
-        ldpathConnectionLock.lock();
-        try {
-            ldpathConnection.close();
-            ldpathConnection = null;
-        } catch (RepositoryException e1) { /* ignore */
-            
-        } finally {
-            ldpathConnectionLock.unlock();
+        if(ldpathConnection != null){
+            ldpathConnectionLock.lock();
+            try {
+                if(ldpathConnection != null){
+                    ldpathConnection.close();
+                    ldpathConnection = null;
+                }
+            } catch (RepositoryException e1) { 
+                /* ignore */
+            } finally {
+                ldpathConnectionLock.unlock();
+            }
         }
     }
     
@@ -517,14 +624,18 @@ public class RdfIndexingSource extends AbstractSesameBackend implements EntityDa
     }
 
     protected void ungetEntityDataProviderConnection() {
-        entityDataProviderConnectionLock.lock();
-        try {
-            entityDataProviderConnection.close();
-            entityDataProviderConnection = null;
-        } catch (RepositoryException e1) { /* ignore */
-            
-        } finally {
-            entityDataProviderConnectionLock.unlock();
+        if(entityDataProviderConnection != null){
+            entityDataProviderConnectionLock.lock();
+            try {
+                if(entityDataProviderConnection != null){
+                    entityDataProviderConnection.close();
+                    entityDataProviderConnection = null;
+                }
+            } catch (RepositoryException e1) { /* ignore */
+                
+            } finally {
+                entityDataProviderConnectionLock.unlock();
+            }
         }
     }
 

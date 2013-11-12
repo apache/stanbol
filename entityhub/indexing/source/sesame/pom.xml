@@ -121,6 +121,10 @@
       <groupId>org.openrdf.sesame</groupId>
       <artifactId>sesame-repository-sail</artifactId>
     </dependency>
+    <dependency> <!-- for parsing the repository configuration -->
+      <groupId>org.openrdf.sesame</groupId>
+      <artifactId>sesame-rio-turtle</artifactId>
+    </dependency>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
@@ -130,6 +134,11 @@
       <artifactId>commons-compress</artifactId>
     </dependency>
     <!-- dependencies for testing -->
+      <dependency> <!-- the test data are RDF/XML -->
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-rio-rdfxml</artifactId>
+        <scope>test</scope>
+      </dependency>
     <dependency>  <!-- used for debug level logging during tests -->
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>

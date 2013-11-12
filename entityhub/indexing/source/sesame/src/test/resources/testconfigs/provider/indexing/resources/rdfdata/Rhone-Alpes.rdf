@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<rdf:RDF xmlns:cc="http://creativecommons.org/ns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:gn="http://www.geonames.org/ontology#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:wgs84_pos="http://www.w3.org/2003/01/geo/wgs84_pos#">
+<gn:Feature rdf:about="http://sws.geonames.org/2983751/">
+<rdfs:isDefinedBy>http://sws.geonames.org/2983751/about.rdf</rdfs:isDefinedBy>
+<gn:name>Rhône-Alpes</gn:name>
+<gn:alternateName xml:lang="ko">론알프</gn:alternateName>
+<gn:alternateName xml:lang="cs">Rhône-Alpes</gn:alternateName>
+<gn:alternateName xml:lang="da">Rhône-Alpes</gn:alternateName>
+<gn:alternateName xml:lang="de">Rhône-Alpes</gn:alternateName>
+<gn:alternateName xml:lang="en">Rhône-Alpes</gn:alternateName>
+<gn:alternateName xml:lang="et">Rhône-Alpes</gn:alternateName>
+<gn:alternateName xml:lang="fi">Rhône-Alpes</gn:alternateName>
+<gn:alternateName xml:lang="fr">Rhône-Alpes</gn:alternateName>
+<gn:alternateName xml:lang="hu">Rhône-Alpes</gn:alternateName>
+<gn:alternateName xml:lang="id">Rhône-Alpes</gn:alternateName>
+<gn:alternateName xml:lang="lad">Rhône-Alpes</gn:alternateName>
+<gn:alternateName xml:lang="nl">Rhône-Alpes</gn:alternateName>
+<gn:alternateName xml:lang="nn">Rhône-Alpes</gn:alternateName>
+<gn:alternateName xml:lang="no">Rhône-Alpes</gn:alternateName>
+<gn:alternateName xml:lang="sk">Rhône-Alpes</gn:alternateName>
+<gn:alternateName xml:lang="sv">Rhône-Alpes</gn:alternateName>
+<gn:alternateName xml:lang="tr">Rhône-Alpes</gn:alternateName>
+<gn:officialName>Rhône-Alpes</gn:officialName>
+<gn:alternateName xml:lang="pl">Rodan-Alpy</gn:alternateName>
+<gn:alternateName xml:lang="eu">Rodano-Alpeak</gn:alternateName>
+<gn:alternateName xml:lang="es">Ródano-Alpes</gn:alternateName>
+<gn:alternateName xml:lang="gl">Ródano-Alpes</gn:alternateName>
+<gn:alternateName xml:lang="pt">Ródano-Alpes</gn:alternateName>
+<gn:alternateName xml:lang="io">Rodano Alpi</gn:alternateName>
+<gn:alternateName xml:lang="it">Rodano-Alpi</gn:alternateName>
+<gn:alternateName xml:lang="eo">Rodano-Alpoj</gn:alternateName>
+<gn:alternateName xml:lang="an">Roine-Alpes</gn:alternateName>
+<gn:alternateName xml:lang="ca">Roine-Alps</gn:alternateName>
+<gn:alternateName xml:lang="hr">Rona-Alpe</gn:alternateName>
+<gn:alternateName xml:lang="sl">Rona-Alpe</gn:alternateName>
+<gn:alternateName xml:lang="lt">Rona-Alpės</gn:alternateName>
+<gn:alternateName xml:lang="ro">Ron-Alpi</gn:alternateName>
+<gn:alternateName xml:lang="frp">Rôno-Arpes</gn:alternateName>
+<gn:alternateName xml:lang="oc">Ròse Aups</gn:alternateName>
+<gn:alternateName xml:lang="he">רון-אלפ</gn:alternateName>
+<gn:alternateName xml:lang="he">רון-אלפס</gn:alternateName>
+<gn:alternateName xml:lang="sr">Рона-Алпи</gn:alternateName>
+<gn:alternateName xml:lang="ru">Рона — Альпы</gn:alternateName>
+<gn:alternateName xml:lang="ka">რონა-ალპები</gn:alternateName>
+<gn:alternateName xml:lang="ja">ローヌ＝アルプ地域圏</gn:alternateName>
+<gn:alternateName xml:lang="zh">罗纳-阿尔卑斯</gn:alternateName>
+<gn:featureClass rdf:resource="http://www.geonames.org/ontology#A"/>
+<gn:featureCode rdf:resource="http://www.geonames.org/ontology#A.ADM1"/>
+<gn:countryCode>FR</gn:countryCode>
+<gn:population>6065959</gn:population>
+<wgs84_pos:lat>45.5</wgs84_pos:lat>
+<wgs84_pos:long>5.33333</wgs84_pos:long>
+<gn:parentFeature rdf:resource="http://sws.geonames.org/3017382/"/>
+<gn:parentCountry rdf:resource="http://sws.geonames.org/3017382/"/>
+<gn:parentADM1 rdf:resource="http://sws.geonames.org/2983751/"/>
+<gn:childrenFeatures rdf:resource="http://sws.geonames.org/2983751/contains.rdf"/>
+<gn:locationMap rdf:resource="http://www.geonames.org/2983751/region-rhone-alpes.html"/>
+<gn:wikipediaArticle rdf:resource="http://af.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://an.wikipedia.org/wiki/Roine-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://bg.wikipedia.org/wiki/%D0%A0%D0%BE%D0%BD%D0%B0-%D0%90%D0%BB%D0%BF%D0%B8"/>
+<gn:wikipediaArticle rdf:resource="http://ca.wikipedia.org/wiki/Roine-Alps"/>
+<gn:wikipediaArticle rdf:resource="http://ceb.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://cs.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://da.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://de.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://en.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<owl:sameAs rdf:resource="http://dbpedia.org/resource/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://eo.wikipedia.org/wiki/Rodano-Alpoj"/>
+<gn:wikipediaArticle rdf:resource="http://es.wikipedia.org/wiki/R%C3%B3dano-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://et.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://eu.wikipedia.org/wiki/Rodano-Alpeak"/>
+<gn:wikipediaArticle rdf:resource="http://fi.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://fr.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://frp.wikipedia.org/wiki/R%C3%B4no-Arpes"/>
+<gn:wikipediaArticle rdf:resource="http://gl.wikipedia.org/wiki/R%C3%B3dano-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://gv.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://he.wikipedia.org/wiki/%D7%A8%D7%95%D7%9F-%D7%90%D7%9C%D7%A4"/>
+<gn:wikipediaArticle rdf:resource="http://hr.wikipedia.org/wiki/Rona-Alpe"/>
+<gn:wikipediaArticle rdf:resource="http://hu.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://id.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://io.wikipedia.org/wiki/Rodano_Alpi"/>
+<gn:wikipediaArticle rdf:resource="http://it.wikipedia.org/wiki/Rodano-Alpi"/>
+<gn:wikipediaArticle rdf:resource="http://ja.wikipedia.org/wiki/%E3%83%AD%E3%83%BC%E3%83%8C%EF%BC%9D%E3%82%A2%E3%83%AB%E3%83%97%E5%9C%B0%E5%9F%9F%E5%9C%8F"/>
+<gn:wikipediaArticle rdf:resource="http://jv.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://ka.wikipedia.org/wiki/%E1%83%A0%E1%83%9D%E1%83%9C%E1%83%90-%E1%83%90%E1%83%9A%E1%83%9E%E1%83%94%E1%83%91%E1%83%98"/>
+<gn:wikipediaArticle rdf:resource="http://ko.wikipedia.org/wiki/%EB%A1%A0%EC%95%8C%ED%94%84"/>
+<gn:wikipediaArticle rdf:resource="http://ku.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://la.wikipedia.org/wiki/Rhodanus_et_Alpis"/>
+<gn:wikipediaArticle rdf:resource="http://lad.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://lb.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://lt.wikipedia.org/wiki/Rona-Alp%C4%97s"/>
+<gn:wikipediaArticle rdf:resource="http://nl.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://nn.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://no.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://oc.wikipedia.org/wiki/R%C3%B2se-Aups"/>
+<gn:wikipediaArticle rdf:resource="http://pam.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://pl.wikipedia.org/wiki/Rodan-Alpy"/>
+<gn:wikipediaArticle rdf:resource="http://pt.wikipedia.org/wiki/R%C3%B3dano-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://qu.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://ro.wikipedia.org/wiki/Ron-Alpi"/>
+<gn:wikipediaArticle rdf:resource="http://ru.wikipedia.org/wiki/%D0%A0%D0%BE%D0%BD%D0%B0_%E2%80%94_%D0%90%D0%BB%D1%8C%D0%BF%D1%8B"/>
+<gn:wikipediaArticle rdf:resource="http://sk.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://sl.wikipedia.org/wiki/Rona-Alpe"/>
+<gn:wikipediaArticle rdf:resource="http://sr.wikipedia.org/wiki/%D0%A0%D0%BE%D0%BD%D0%B0-%D0%90%D0%BB%D0%BF%D0%B8"/>
+<gn:wikipediaArticle rdf:resource="http://sv.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://tr.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://uk.wikipedia.org/wiki/%D0%A0%D0%BE%D0%BD%D0%B0_%E2%80%94_%D0%90%D0%BB%D1%8C%D0%BF%D0%B8"/>
+<gn:wikipediaArticle rdf:resource="http://vec.wikipedia.org/wiki/Rodano-Alpi"/>
+<gn:wikipediaArticle rdf:resource="http://vi.wikipedia.org/wiki/Rh%C3%B4ne-Alpes"/>
+<gn:wikipediaArticle rdf:resource="http://zh.wikipedia.org/wiki/%E7%BD%97%E7%BA%B3-%E9%98%BF%E5%B0%94%E5%8D%91%E6%96%AF"/>
+<owl:sameAs rdf:resource="http://rdf.insee.fr/geo/REG_82"/>
+</gn:Feature>
+</rdf:RDF>
