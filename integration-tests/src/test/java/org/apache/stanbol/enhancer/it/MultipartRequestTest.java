@@ -26,6 +26,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.clerezza.rdf.core.BNode;
 import org.apache.clerezza.rdf.core.MGraph;
@@ -38,11 +41,13 @@ import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
 import org.apache.clerezza.rdf.ontologies.RDF;
-import org.apache.http.entity.mime.FormBodyPart;
-import org.apache.http.entity.mime.HttpMultipart;
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MIME;
-import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.AbstractContentBody;
+import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.ContentDescriptor;
 import org.apache.http.entity.mime.content.StringBody;
@@ -167,19 +172,19 @@ public class MultipartRequestTest extends EnhancerTestBase {
         .assertStatus(200)
         .assertContentContains(
             "--contentItem",
-            "--contentItem--",
             "Content-Disposition: form-data; name=\"content\"",
-            "Content-Type: multipart/alternate; boundary=contentParts; charset=UTF-8",
+            "Content-Type: multipart/alternate; boundary=contentParts-",
             "Content-Type: text/plain; charset=UTF-8",
             "Content-Type: text/html",
-            "--contentParts",
-            "--contentParts--")
+            "--contentParts")
         .assertContentContains(TEXT_CONTENT_LINES)
         .assertContentContains(HTML_CONTENT_LINES) //line by line the HTML content
         .assertContentRegexp(
             "Content-Disposition: form-data; name=\"metadata\"; filename=.*",
             "Content-Disposition: form-data; name=\"urn:tika:text:.*",
             "Content-Disposition: form-data; name=\"urn:content-item-sha1-.*",
+            "--contentItem-.*--",
+            "--contentParts-.*--",
             //and the expected enhancements in the metadata
             "http://purl.org/dc/terms/creator.*LanguageDetectionEnhancementEngine",
             "http://purl.org/dc/terms/language.*en",
@@ -205,16 +210,16 @@ public class MultipartRequestTest extends EnhancerTestBase {
         .assertStatus(200)
         .assertContentContains(
             "--contentItem",
-            "--contentItem--",
             "Content-Disposition: form-data; name=\"content\"",
-            "Content-Type: multipart/alternate; boundary=contentParts; charset=UTF-8",
+            "Content-Type: multipart/alternate; boundary=contentParts-",
             "Content-Type: text/plain; charset=UTF-8",
             "Content-Type: text/html",
-            "--contentParts",
-            "--contentParts--")
+            "--contentParts")
         .assertContentContains(TEXT_CONTENT_LINES)
         .assertContentContains(HTML_CONTENT_LINES) //line by line the HTML content
         .assertContentRegexp( //MUST contain
+            "--contentItem-.*--",
+            "--contentParts-.*--",
             "Content-Disposition: form-data; name=\"urn:tika:text:.*",
             "Content-Disposition: form-data; name=\"urn:content-item-sha1-.*")
         .assertContentRegexp(false, //MUST NOT contain
@@ -244,14 +249,14 @@ public class MultipartRequestTest extends EnhancerTestBase {
         .assertStatus(200)
         .assertContentContains(
             "--contentItem",
-            "--contentItem--",
             "Content-Disposition: form-data; name=\"content\"",
-            "Content-Type: multipart/alternate; boundary=contentParts; charset=UTF-8",
+            "Content-Type: multipart/alternate; boundary=contentParts-",
             "Content-Type: text/plain; charset=UTF-8",
-            "--contentParts",
-            "--contentParts--")
+            "--contentParts")
         .assertContentContains(TEXT_CONTENT_LINES)
         .assertContentRegexp(
+            "--contentItem-.*--",
+            "--contentParts-.*--",
             "Content-Disposition: form-data; name=\"metadata\"; filename=.*",
             "Content-Disposition: form-data; name=\"urn:tika:text:.*",
             //and the expected enhancements in the metadata
@@ -280,14 +285,14 @@ public class MultipartRequestTest extends EnhancerTestBase {
         .assertStatus(200)
         .assertContentContains(
              "--contentItem",
-             "--contentItem--",
              "Content-Disposition: form-data; name=\"content\"",
-             "Content-Type: multipart/alternate; boundary=contentParts; charset=UTF-8",
+             "Content-Type: multipart/alternate; boundary=contentParts-",
              "Content-Type: text/plain; charset=UTF-8",
-             "--contentParts",
-             "--contentParts--")
+             "--contentParts")
          .assertContentContains(TEXT_CONTENT_LINES)
          .assertContentRegexp(
+             "--contentItem-.*--",
+             "--contentParts-.*--",
              "Content-Disposition: form-data; name=\"metadata\"; filename=.*",
              "Content-Disposition: form-data; name=\"urn:tika:text:.*",
              //and the expected enhancements in the metadata
@@ -314,14 +319,14 @@ public class MultipartRequestTest extends EnhancerTestBase {
         .assertStatus(200)
         .assertContentContains(
              "--contentItem",
-             "--contentItem--",
              "Content-Disposition: form-data; name=\"http://stanbol.apache.org/ontology/enhancer/executionmetadata#ChainExecution\"",
              "Content-Type: application/rdf+xml; charset=UTF-8",
              "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/executionplan#ExecutionPlan\"/>",
              "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/executionplan#ExecutionNode\"/>",
              "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/executionmetadata#EngineExecution\"/>",
              "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/executionmetadata#ChainExecution\"/>")
-         .getContent();
+        .assertContentRegexp("--contentItem-.*--")
+        .getContent();
         log.debug("Content:\n{}\n",content);
     }
     /**
@@ -341,29 +346,24 @@ public class MultipartRequestTest extends EnhancerTestBase {
         //It is a secret, that Berlin is the capital of Germany
         String extraTextConent = TEXT_CONTENT + 
                 "\nIt is a secret, that the city of Berlin is the capital of Germany since 1990.";
-        
-        //The multipart entity for the contentItem
-        MultipartEntity contentItem = new MultipartEntity(null, null ,UTF8);
-        //The multipart/alternate mime part for the parsed content versions
-        HttpMultipart content = new HttpMultipart("alternate", UTF8 ,"contentParts");
-        //add the content part to the contentItem
-        contentItem.addPart(
-            "content", //the name MUST BE "content"
-            new MultipartContentBody(content));
-        //now add the content (ordering is important, because the first
-        //part will be assumed the original document and all following are
-        //assumed alternate - transformed - versions
-        content.addBodyPart(new FormBodyPart(
-            "http://www.example.com/test.html", //the id of the content
-            new StringBody(HTML_CONTENT, "text/html", UTF8)));
-        content.addBodyPart(new FormBodyPart(
-            "http://www.example.com/test.txt",
-            new StringBody(extraTextConent, "text/plain", UTF8)));
+        //The multipartBuilder used to construct the contentItem for the contentItem
+        MultipartEntityBuilder ciBuilder = MultipartEntityBuilder.create();
+        String boundary = "contentItem-47jjksnbue73fnis";
+        ciBuilder.setBoundary(boundary);
+        //use a small extension to deal with multipart/alternate
+        Map<String, ContentBody> alternates = new LinkedHashMap<String,ContentBody>();
+        alternates.put("http://www.example.com/test.html", 
+            new StringBody(HTML_CONTENT, ContentType.TEXT_HTML.withCharset(UTF8)));
+        alternates.put("http://www.example.com/test.txt", 
+            new StringBody(extraTextConent, ContentType.TEXT_PLAIN.withCharset(UTF8)));
+        ciBuilder.addPart("content", 
+            new MultipartContentBody(alternates, "contentParts", 
+                ContentType.create("multipart/alternate")));
         
         String receivedContent = executor.execute(
             builder.buildPostRequest(getEndpoint())
             .withHeader("Accept","text/rdf+nt")
-            .withEntity(contentItem)
+            .withEntity(ciBuilder.build())
         )
         .assertStatus(200)
         .assertContentRegexp(
@@ -387,20 +387,13 @@ public class MultipartRequestTest extends EnhancerTestBase {
         final UriRef contentItemId = new UriRef("http://www.example.com/test.html");
         String rdfContentType = SupportedFormat.RDF_XML;
         String rdfContent = getDummyRdfMetadata(contentItemId, rdfContentType);
-        MultipartEntity contentItem = new MultipartEntity(null, null ,UTF8);
-        //first the content -> illegal
-        contentItem.addPart(
-            "content", //the name MUST BE "content"
-            new StringBody(HTML_CONTENT,"text/html",UTF8));
-        //after that the metadata
-        contentItem.addPart(
-            "metadata", //the name MUST BE "metadata" 
-            new StringBody(rdfContent,rdfContentType,UTF8));
-
+        MultipartEntityBuilder ciBuilder = MultipartEntityBuilder.create();
+        ciBuilder.addTextBody("content",HTML_CONTENT,ContentType.TEXT_HTML.withCharset(UTF8));
+        ciBuilder.addTextBody("metadata", rdfContent, ContentType.create(rdfContentType,UTF8));
         String receivedContent = executor.execute(
             builder.buildPostRequest(getEndpoint())
             .withHeader("Accept","text/rdf+nt")
-            .withEntity(contentItem)
+            .withEntity(ciBuilder.build())
         )
         .assertStatus(400) //BAD request
         .getContent();
@@ -414,16 +407,13 @@ public class MultipartRequestTest extends EnhancerTestBase {
         final UriRef contentItemId = new UriRef("http://www.example.com/test.html");
         String rdfContentType = SupportedFormat.RDF_XML;
         String rdfContent = getDummyRdfMetadata(contentItemId, rdfContentType);
-        MultipartEntity contentItem = new MultipartEntity(null, null ,UTF8);
-        //after that the metadata
-        contentItem.addPart(
-            "metadata", //the name MUST BE "metadata" 
-            new StringBody(rdfContent,rdfContentType,UTF8));
+        MultipartEntityBuilder ciBuilder = MultipartEntityBuilder.create();
+        ciBuilder.addTextBody("metadata", rdfContent, ContentType.create(rdfContentType,UTF8));
 
         String receivedContent = executor.execute(
             builder.buildPostRequest(getEndpoint())
             .withHeader("Accept","text/rdf+nt")
-            .withEntity(contentItem)
+            .withEntity(ciBuilder.build())
         )
         .assertStatus(400) //BAD request
         .getContent();
@@ -467,13 +457,14 @@ public class MultipartRequestTest extends EnhancerTestBase {
         addTagAsTextAnnotation(metadata, contentItemId, 
             "Silvio Berlusconi",DBPEDIA_PERSON, user);
         
+        String rdfContentType = SupportedFormat.RDF_XML;
+        
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        serializer.serialize(out, metadata, SupportedFormat.RDF_XML);
+        serializer.serialize(out, metadata, rdfContentType);
         String rdfContent = new String(out.toByteArray(),UTF8);
         
-        //The multipart entity for the contentItem
-        MultipartEntity contentItem = new MultipartEntity(null, null ,UTF8);
-        //the "metadata" MUST BE the first element
+        MultipartEntityBuilder ciBuilder = MultipartEntityBuilder.create();
+        //add the metadata
         /*
          * NOTE: We need here to override the getFilename, because this MUST
          *       BE the URI of the ContentItem. This is important, because the
@@ -482,29 +473,20 @@ public class MultipartRequestTest extends EnhancerTestBase {
          *       the Stanbol Enhancer is the same of as the URI used in the
          *       Metadata!
          */
-        contentItem.addPart(
-            "metadata", //the name MUST BE "metadata" 
-            new StringBody(rdfContent,SupportedFormat.RDF_XML,UTF8){
-                @Override
-                public String getFilename() { //The filename MUST BE the
-                    return contentItemId.getUnicodeString(); //uri of the ContentItem
-                }
-            });
-        //Add the Content
-        /*
-         * NOTE: If we only parse a single content than we can also directly
-         *       add it with the name "content". This means that the useage of
-         *       a "multipart/alternate" container is in such cases optional.
-         */
-        contentItem.addPart(
-            "content", //the name MUST BE "content"
-            new StringBody(HTML_CONTENT,"text/html",UTF8));
-        
+        ciBuilder.addPart("metadata", 
+            new StringBody(rdfContent, ContentType.create(rdfContentType).withCharset(UTF8)){
+            @Override
+            public String getFilename() { //The filename MUST BE the
+                return contentItemId.getUnicodeString(); //uri of the ContentItem
+            }
+        });
+        //add the content
+        ciBuilder.addTextBody("content", HTML_CONTENT, ContentType.TEXT_HTML.withCharset(UTF8));        
         //send the request
         String receivedContent = executor.execute(
             builder.buildPostRequest(getEndpoint())
             .withHeader("Accept","text/rdf+nt")
-            .withEntity(contentItem)
+            .withEntity(ciBuilder.build())
         )
         .assertStatus(200)
         .assertContentRegexp(
@@ -555,25 +537,28 @@ public class MultipartRequestTest extends EnhancerTestBase {
     }    
     /**
      * Supports sending multipart mime as {@link ContentBody}.
-     * TODO: maybe move such utilities to an own Multipart ContentItem
-     * utility module
      * @author Rupert Westenthaler
      *
      */
-    private static class MultipartContentBody extends AbstractContentBody implements ContentBody,ContentDescriptor {
+    private class MultipartContentBody extends AbstractContentBody implements ContentBody,ContentDescriptor {
 
-        private HttpMultipart multipart;
+        private Map<String,ContentBody> parts;
+        private String boundary;
 
-        public MultipartContentBody(HttpMultipart multipart){
-            super(String.format("multipart/%s; boundary=%s",
-                multipart.getSubType(), multipart.getBoundary()));
-            this.multipart = multipart;
+        public MultipartContentBody(Map<String,ContentBody> parts, String boundary, ContentType contentType){
+            super(contentType);
+            this.parts = parts;
+            this.boundary = boundary;
         }
         @Override
         public String getCharset() {
-            return multipart.getCharset().toString();
+            return UTF8.toString(); //no charset for multipart parts
         }
-
+        @Override
+        public String getMimeType() {
+            return new StringBuilder(super.getMimeType()).append("; boundary=")
+                    .append(boundary).toString();
+        }
         @Override
         public String getTransferEncoding() {
             return MIME.ENC_8BIT;
@@ -581,7 +566,9 @@ public class MultipartRequestTest extends EnhancerTestBase {
 
         @Override
         public long getContentLength() {
-            return multipart.getTotalLength();
+            //not known as we would need to count the content length AND
+            //the length of the different mime headers.
+            return -1; 
         }
 
         @Override
@@ -591,7 +578,13 @@ public class MultipartRequestTest extends EnhancerTestBase {
 
         @Override
         public void writeTo(OutputStream out) throws IOException {
-            multipart.writeTo(out);
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            builder.setBoundary(boundary);
+            for(Entry<String,ContentBody> part : parts.entrySet()){
+                builder.addPart(part.getKey(), part.getValue());
+            }
+            HttpEntity entity = builder.build();
+            entity.writeTo(out);
         }
         
     }

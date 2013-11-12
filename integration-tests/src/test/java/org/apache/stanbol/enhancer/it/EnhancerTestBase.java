@@ -149,9 +149,10 @@ public class EnhancerTestBase extends StanbolTestBase {
     }
     @Before
     public void checkEnginesReady() throws Exception {
-    
+        log.debug("before {}#checkEngineReady", getClass().getSimpleName());
         // Check only once per test run
         if(enginesReady) {
+            log.debug("   ... engines already marked as ready");
             return;
         }
         
@@ -166,6 +167,7 @@ public class EnhancerTestBase extends StanbolTestBase {
             
             @Override
             public boolean isTrue() throws Exception {
+                log.debug("> checking for Enhancer services: ");
                 executor.execute(
                     builder.buildGetRequest(endpoint)
                     .withHeader("Accept", "text/html")
@@ -173,7 +175,7 @@ public class EnhancerTestBase extends StanbolTestBase {
                 .assertStatus(200)
                 .assertContentType("text/html")
                 .assertContentRegexp(assertEngines);
-                
+                log.info("  ... enpoint '{}' is ready", endpoint);
                 /*  List of expected referencedSites could also be made 
                  *  configurable via system properties, but we don't expect it 
                  *  to change often. 
@@ -187,6 +189,7 @@ public class EnhancerTestBase extends StanbolTestBase {
                 .assertContentRegexp(
                     "http:\\\\/\\\\/.*\\\\/entityhub\\\\/site\\\\/dbpedia\\\\/"
                 );
+                log.debug("  ... entityhub DBpedia referencedSite is ready", endpoint);
                 //also assert that the SolrYard for the dbpedia site is fully
                 //initialized
                 //No longer needed with STANBOL-996
