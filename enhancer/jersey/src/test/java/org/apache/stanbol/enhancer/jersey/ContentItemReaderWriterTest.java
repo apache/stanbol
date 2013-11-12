@@ -164,41 +164,41 @@ public class ContentItemReaderWriterTest {
         MediaType contentType = serializeContentItem(out);
         assertTrue(MediaType.MULTIPART_FORM_DATA_TYPE.isCompatible(contentType));
         assertNotNull(contentType.getParameters().get("boundary"));
-        assertEquals(contentType.getParameters().get("boundary"),"contentItem");
+        assertEquals(contentType.getParameters().get("boundary"),ContentItemWriter.CONTENT_ITEM_BOUNDARY);
         assertNotNull(contentType.getParameters().get("charset"));
         assertEquals(contentType.getParameters().get("charset"),"UTF-8");
         //check the serialised multipart MIME
         String multipartMime = new String(out.toByteArray(),Charset.forName(contentType.getParameters().get("charset")));
         log.info("Multipart MIME content:\n{}\n",multipartMime);
         String[] tests = new String[]{
-            "--"+contentType.getParameters().get("boundary"),
+            "--"+ContentItemWriter.CONTENT_ITEM_BOUNDARY,
             "Content-Disposition: form-data; name=\"metadata\"; filename=\"urn:test\"",
             "Content-Type: application/rdf+xml; charset=UTF-8",
             "<rdf:type rdf:resource=\"urn:types:Document\"/>",
-            "--"+contentType.getParameters().get("boundary"),
+            "--"+ContentItemWriter.CONTENT_ITEM_BOUNDARY,
             "Content-Disposition: form-data; name=\"content\"",
-            "Content-Type: multipart/alternate; boundary=contentParts; charset=UTF-8",
-            "--contentParts",
+            "Content-Type: multipart/alternate; boundary=contentParts",
+            "--"+ContentItemWriter.CONTENT_PARTS_BOUNDERY,
             "Content-Disposition: form-data; name=\"urn:test_main\"",
             "Content-Type: text/html; charset=UTF-8",
             "This is a <b>ContentItem</b> to <i>Mime Multipart</i> test!",
-            "--contentParts",
+            "--"+ContentItemWriter.CONTENT_PARTS_BOUNDERY,
             "Content-Disposition: form-data; name=\"run:text:text\"",
             "Content-Type: text/plain; charset=UTF-8",
             "This is a ContentItem to Mime Multipart test!",
-            "--contentParts--",
-            "--"+contentType.getParameters().get("boundary"),
+            "--"+ContentItemWriter.CONTENT_PARTS_BOUNDERY+"--",
+            "--"+ContentItemWriter.CONTENT_ITEM_BOUNDARY,
             "Content-Disposition: form-data; name=\""+ENHANCEMENT_PROPERTIES_URI.getUnicodeString()+"\"",
             "Content-Type: application/json; charset=UTF-8",
-            "--"+contentType.getParameters().get("boundary"),
+            "--"+ContentItemWriter.CONTENT_ITEM_BOUNDARY,
             "Content-Disposition: form-data; name=\""+CHAIN_EXECUTION.getUnicodeString()+"\"",
             "Content-Type: application/rdf+xml; charset=UTF-8",
             "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/executionplan#ExecutionNode\"/>",
-            "--"+contentType.getParameters().get("boundary")+"--"
+            "--"+ContentItemWriter.CONTENT_ITEM_BOUNDARY+"--"
         };
         for(String test : tests){
             int index = multipartMime.indexOf(test);
-            assertTrue(index >=0);
+            assertTrue("content does not contain '" + test + "'!",index >=0);
             multipartMime = multipartMime.substring(index);
         }
     }
@@ -218,8 +218,8 @@ public class ContentItemReaderWriterTest {
         assertTrue(copy.isEmpty());
         //assert Blob
         assertEquals(contentItem.getBlob().getMimeType(), ci.getBlob().getMimeType());
-        String content = IOUtils.toString(contentItem.getStream(),"UTF-8");
-        String readContent = IOUtils.toString(ci.getStream(), "UTF-8");
+        String content = IOUtils.toString(contentItem.getBlob().getStream(),"UTF-8");
+        String readContent = IOUtils.toString(ci.getBlob().getStream(), "UTF-8");
         assertEquals(content, readContent);
         Iterator<Entry<UriRef,Blob>> contentItemBlobsIt = ContentItemHelper.getContentParts(contentItem, Blob.class).entrySet().iterator();
         Iterator<Entry<UriRef,Blob>> ciBlobsIt = ContentItemHelper.getContentParts(ci, Blob.class).entrySet().iterator();

@@ -45,9 +45,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 
 import javax.ws.rs.WebApplicationException;
@@ -61,20 +63,21 @@ import javax.ws.rs.ext.Provider;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
-import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedSerializationFormatException;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.http.entity.mime.FormBodyPart;
-import org.apache.http.entity.mime.HttpMultipart;
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MIME;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.AbstractContentBody;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.ContentDescriptor;
-import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -90,13 +93,32 @@ import org.slf4j.LoggerFactory;
 @Provider
 public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
 
+    public static final String CONTENT_ITEM_BOUNDARY;
+    public static final String CONTENT_PARTS_BOUNDERY;;
+    /**
+     * The pool of ASCII chars to be used for generating a multipart boundary.
+     */
+    private final static char[] MULTIPART_CHARS =
+            "-_1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                    .toCharArray();
+    static {
+        final Random rand = new Random();
+        final int count = rand.nextInt(11) + 10; // a random size from 10 to 20
+        StringBuilder randomString = new StringBuilder(count);
+        for (int i = 0; i < count; i++) {
+            randomString.append(MULTIPART_CHARS[rand.nextInt(MULTIPART_CHARS.length)]);
+        }
+        CONTENT_ITEM_BOUNDARY = "contentItem-"+randomString;
+        CONTENT_PARTS_BOUNDERY = "contentParts-"+randomString;
+    }
+    private static final ContentType MULTIPART_ALTERNATE = ContentType.create("multipart/alternate");
+
     Logger log = LoggerFactory.getLogger(ContentItemWriter.class);
     
     /**
      * The "multipart/*" wilrcard
      */
     private static final MediaType MULTIPART = MediaType.valueOf(MULTIPART_FORM_DATA_TYPE.getType()+"/*");
-    private static final String CONTENT_ITEM_BOUNDARY = "contentItem";
     private static final Charset UTF8 = Charset.forName("UTF-8");
     private static final MediaType DEFAULT_RDF_FORMAT = new MediaType(
         APPLICATION_JSON_TYPE.getType(),
@@ -214,25 +236,36 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
             String contentType = String.format("%s/%s; charset=%s; boundary=%s",
                 mediaType.getType(),mediaType.getSubtype(),charset.toString(),CONTENT_ITEM_BOUNDARY);
             httpHeaders.putSingle(HttpHeaders.CONTENT_TYPE,contentType);
-            HttpMultipart entity = new HttpMultipart("from-data", charset ,CONTENT_ITEM_BOUNDARY);
+            MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+            entityBuilder.setBoundary(CONTENT_ITEM_BOUNDARY);
+            //HttpMultipart entity = new HttpMultipart("from-data", charset ,CONTENT_ITEM_BOUNDARY);
             //(2) serialising the metadata
             if(!isOmitMetadata(properties)){
-                entity.addBodyPart(new FormBodyPart("metadata", new ClerezzaContentBody(
-                    ci.getUri().getUnicodeString(), ci.getMetadata(),
-                    rdfFormat)));
+                entityBuilder.addPart("metadata", new ClerezzaContentBody(
+                    ci.getUri().getUnicodeString(), ci.getMetadata(), rdfFormat));
+//                entity.addBodyPart(new FormBodyPart("metadata", new ClerezzaContentBody(
+//                    ci.getUri().getUnicodeString(), ci.getMetadata(),
+//                    rdfFormat)));
             }
             //(3) serialising the Content (Bloby)
             //(3.a) Filter based on parameter
             List<Entry<UriRef,Blob>> includedBlobs = filterBlobs(ci, properties);
             //(3.b) Serialise the filtered
             if(!includedBlobs.isEmpty()) {
-                HttpMultipart content = new HttpMultipart("alternate", UTF8 ,"contentParts");
+                Map<String,ContentBody> contentParts = new LinkedHashMap<String,ContentBody>();
                 for(Entry<UriRef,Blob> entry : includedBlobs){
-                    content.addBodyPart(new FormBodyPart(entry.getKey().getUnicodeString(), 
-                        new BlobContentBody(entry.getValue()))); //no file name
+                    Blob blob = entry.getValue();
+                    ContentType ct = ContentType.create(blob.getMimeType());
+                    String cs = blob.getParameter().get("charset");
+                    if(StringUtils.isNotBlank(cs)){
+                        ct = ct.withCharset(cs);
+                    }
+                    contentParts.put(entry.getKey().getUnicodeString(), 
+                        new InputStreamBody(blob.getStream(),ct));
                 }
                 //add all the blobs
-                entity.addBodyPart(new FormBodyPart("content",new MultipartContentBody(content, null)));
+                entityBuilder.addPart("content", new MultipartContentBody(contentParts,
+                    CONTENT_PARTS_BOUNDERY, MULTIPART_ALTERNATE));
             } //else no content to include
             Set<String> includeContentParts = getIncludedContentPartURIs(properties);
             if(includeContentParts != null){
@@ -248,21 +281,21 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
                         log.error(message,e);
                         throw new WebApplicationException(message, Response.Status.INTERNAL_SERVER_ERROR);
                     }
-                    entity.addBodyPart(new FormBodyPart(
-                        ENHANCEMENT_PROPERTIES_URI.getUnicodeString(), 
-                        new StringBody(object.toString(),MediaType.APPLICATION_JSON,UTF8)));
+                    entityBuilder.addTextBody(
+                        ENHANCEMENT_PROPERTIES_URI.getUnicodeString(), object.toString(),
+                         ContentType.APPLICATION_JSON.withCharset(UTF8));
                 }
                 //(5) additional RDF metadata stored in contentParts
                 for(Entry<UriRef,TripleCollection> entry : getContentParts(ci, TripleCollection.class).entrySet()){
                     if(includeContentParts.isEmpty() || includeContentParts.contains(
                         entry.getKey())){
-                        entity.addBodyPart(new FormBodyPart(entry.getKey().getUnicodeString(), 
+                        entityBuilder.addPart(entry.getKey().getUnicodeString(), 
                             new ClerezzaContentBody(null, //no file name
-                                entry.getValue(),rdfFormat)));
+                                entry.getValue(),rdfFormat));
                     } // else ignore this content part
                 }
             }
-            entity.writeTo(entityStream);
+            entityBuilder.build().writeTo(entityStream);
         }   
             
     }
@@ -398,20 +431,27 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
      */
     private class MultipartContentBody extends AbstractContentBody implements ContentBody,ContentDescriptor {
 
-        private HttpMultipart multipart;
-        private String name;
+        private Map<String,ContentBody> parts;
+        private String boundary;
 
-        public MultipartContentBody(HttpMultipart multipart,String name){
-            super(String.format("multipart/%s; boundary=%s",
-                multipart.getSubType(), multipart.getBoundary()));
-            this.name = name;
-            this.multipart = multipart;
+        public MultipartContentBody(Map<String,ContentBody> parts, String boundary, ContentType contentType){
+            super(contentType);
+            this.parts = parts;
+            this.boundary = boundary;
         }
         @Override
         public String getCharset() {
-            return multipart.getCharset().toString();
+            return null; //no charset for multipart parts
         }
-
+        @Override
+        public String getMimeType() {
+            return new StringBuilder(super.getMimeType()).append("; boundary=")
+                    .append(boundary).toString();
+        }
+        @Override
+        public ContentType getContentType() {
+            return super.getContentType();
+        }
         @Override
         public String getTransferEncoding() {
             return MIME.ENC_8BIT;
@@ -419,17 +459,25 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
 
         @Override
         public long getContentLength() {
-            return multipart.getTotalLength();
+            //not known as we would need to count the content length AND
+            //the length of the different mime headers.
+            return -1;
         }
 
         @Override
         public String getFilename() {
-            return name;
+            return null;
         }
 
         @Override
         public void writeTo(OutputStream out) throws IOException {
-            multipart.writeTo(out);
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            builder.setBoundary(boundary);
+            for(Entry<String,ContentBody> part : parts.entrySet()){
+                builder.addPart(part.getKey(), part.getValue());
+            }
+            HttpEntity entity = builder.build();
+            entity.writeTo(out);
         }
         
     }
@@ -445,7 +493,8 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
         private String name;
 
         protected ClerezzaContentBody(String name, TripleCollection graph, MediaType mimeType){
-            super(mimeType.getType()+'/'+mimeType.getSubtype());
+            super(ContentType.create(new StringBuilder(mimeType.getType())
+            .append('/').append(mimeType.getSubtype()).toString(), UTF8));
             charset = mimeType.getParameters().get("charset");
             if(charset == null || charset.isEmpty()){
                 charset = UTF8.toString();
@@ -478,44 +527,6 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
         public void writeTo(OutputStream out) throws IOException {
             getSerializer().serialize(out, graph, getMediaType()+'/'+getSubType());
         }
-    }
-    private class BlobContentBody extends AbstractContentBody {
-        
-        private Blob blob;
-
-        public BlobContentBody(Blob blob) {
-            super(blob.getMimeType());
-            this.blob = blob;
-        }
-
-        @Override
-        public String getFilename() {
-            return null;
-        }
-
-        @Override
-        public void writeTo(OutputStream out) throws IOException {
-            InputStream in = blob.getStream();
-            IOUtils.copy(in, out);
-            IOUtils.closeQuietly(in);
-        }
-
-        @Override
-        public String getCharset() {
-            return blob.getParameter().get("charset");
-        }
-
-        @Override
-        public String getTransferEncoding() {
-            return blob.getParameter().get("charset") == null ?
-                    MIME.ENC_BINARY : MIME.ENC_8BIT;
-        }
-
-        @Override
-        public long getContentLength() {
-            return -1;
-        }
-        
     }
     
 }

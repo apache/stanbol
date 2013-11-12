@@ -22,6 +22,7 @@ import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelp
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.getEnhancementProperties;
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.randomUUID;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -30,14 +31,15 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.ws.rs.WebApplicationException;
@@ -119,8 +121,23 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
         //boolean withMetadata = withMetadata(httpHeaders);
         ContentItem contentItem = null;
         UriRef contentItemId = getContentItemId();
+        if(log.isTraceEnabled()){
+            //NOTE: enabling TRACE level logging will copy the parsed content
+            //      into a BYTE array
+            log.trace("Parse ContentItem from");
+            log.trace("  - MediaType: {}",mediaType);
+            log.trace("  - Headers:");
+            for(Entry<String,List<String>> header : httpHeaders.entrySet()){
+                log.trace("      {}: {}", header.getKey(), header.getValue());
+            }
+            byte[] content = IOUtils.toByteArray(entityStream);
+            log.trace("content: \n{}", new String(content,"UTF-8"));
+            IOUtils.closeQuietly(entityStream);
+            entityStream = new ByteArrayInputStream(content);
+        }
         Set<String> parsedContentIds = new HashSet<String>();
         if(mediaType.isCompatible(MULTIPART)){
+            log.debug(" - parse Multipart MIME ContentItem");
             //try to read ContentItem from "multipart/from-data"
             MGraph metadata = null;
             FileItemIterator fileItemIterator;
@@ -308,13 +325,14 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
      * @throws IOException on any error while accessing the contents of the parsed
      * {@link FileItemStream}
      * @throws FileUploadException if the parsed contents are not correctly
-     * encoded Multipoart MIME
+     * encoded Multipart MIME
      */
     private ContentItem createContentItem(UriRef id, MGraph metadata, FileItemStream content,Set<String> parsedContentParts) throws IOException, FileUploadException {
         MediaType partContentType = MediaType.valueOf(content.getContentType());
         ContentItem contentItem = null;
         ContentItemFactory ciFactory = getContentItemFactory();
         if(MULTIPART.isCompatible(partContentType)){
+            log.debug("  - multiple (alternate) ContentParts"); 
             //multiple contentParts are parsed
             FileItemIterator contentPartIterator = fu.getItemIterator(
                 new MessageBodyReaderContext(
@@ -322,12 +340,13 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
             while(contentPartIterator.hasNext()){
                 FileItemStream fis = contentPartIterator.next();
                 if(contentItem == null){
-                    log.debug("create ContentItem {} for content (type:{})",
-                        id,content.getContentType());
+                    log.debug("  - create ContentItem {} for content (type:{})",
+                        id,fis.getContentType());
                     contentItem = ciFactory.createContentItem(id,
                         new StreamSource(fis.openStream(),fis.getContentType()), 
                         metadata);
                 } else {
+                    log.debug("  - create Blob for content (type:{})", fis.getContentType());
                     Blob blob = ciFactory.createBlob(new StreamSource(fis.openStream(), fis.getContentType()));
                     UriRef contentPartId = null;
                     if(fis.getFieldName() != null && !fis.getFieldName().isEmpty()){
@@ -337,14 +356,14 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
                         //TODO maybe we should throw an exception instead
                         contentPartId = new UriRef("urn:contentpart:"+ randomUUID());
                     }
-                    log.debug("  ... add Blob {} to ContentItem {} with content (type:{})",
+                    log.debug("    ... add Blob {} to ContentItem {} with content (type:{})",
                         new Object[]{contentPartId, id, fis.getContentType()});
                     contentItem.addPart(contentPartId, blob);
                     parsedContentParts.add(contentPartId.getUnicodeString());
                 }
             }
         } else {
-            log.debug("create ContentItem {} for content (type:{})",
+            log.debug("  - create ContentItem {} for content (type:{})",
                 id,content.getContentType());
             contentItem = ciFactory.createContentItem(id,
                 new StreamSource(content.openStream(),content.getContentType()), 
