@@ -181,7 +181,7 @@
     <bundle>
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
-      <version>1.2.2</version>
+      <version>1.3</version>
     </bundle>
   </startLevel>
 </bundles>
