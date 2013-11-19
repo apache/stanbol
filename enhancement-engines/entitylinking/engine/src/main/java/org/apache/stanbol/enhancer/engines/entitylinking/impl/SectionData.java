@@ -162,6 +162,17 @@ public class SectionData {
                     } else if(tokenData.isMatchable){
                         activeChunk.matchableCount++;
                     }
+                    if(tokenData.isMatchable){ //for matchable tokens
+                        //update the matchable span within the active chunk
+                        if(activeChunk.matchableStart < 0){
+                            activeChunk.matchableStart = tokenData.index;
+                            activeChunk.matchableStartCharIndex = tokenData.token.getStart();
+                        }
+                        if(activeChunk.matchableStart >= 0){ //if start is set also set end
+                            activeChunk.matchableEnd = tokenData.index;
+                            activeChunk.matchableEndCharIndex = tokenData.token.getEnd();
+                        }
+                    }
                     if (span.getEnd() >= activeChunk.getEndChar()){
                         //this is the last token in the current chunk
                         activeChunk.endToken = tokens.size()-1;

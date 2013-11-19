@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
@@ -35,6 +36,7 @@ import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.commons.lang.LocaleUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
@@ -162,24 +164,19 @@ public class EntityLinker {
             //Determine the range we are allowed to search for tokens
             final int minIncludeIndex;
             final int maxIndcludeIndex;
+            int consumedIndex = state.getConsumedIndex();
             //NOTE: testing has shown that using Chunks to restrict search for
             //      additional matchable tokens does have an negative impact on
             //      recall. Because of that this restriction is for now deactivated
-           //TODO: maybe make configurable via an own property
-            boolean restrirctContextByChunks = textProcessingConfig.isIgnoreChunks();
-            int consumedIndex = state.getConsumedIndex();
-            if(token.inChunk != null && !textProcessingConfig.isIgnoreChunks() &&
-                    restrirctContextByChunks){
-                minIncludeIndex = token.inChunk.getStartTokenIndex();
-//                minIncludeIndex = Math.max(
-//                    state.getConsumedIndex()+1, 
-//                    token.inChunk.getStartTokenIndex());
-                maxIndcludeIndex = token.inChunk.getEndTokenIndex();
-            } else {
+//            if(token.inChunk != null && !textProcessingConfig.isIgnoreChunks()){
+//                minIncludeIndex = token.inChunk.getStartTokenIndex();
+//                maxIndcludeIndex = token.inChunk.getEndTokenIndex();
+//                log.debug("  - restrict context to chunk[{}, {}]",
+//                    minIncludeIndex, maxIndcludeIndex);
+//            } else {
                 maxIndcludeIndex = state.getTokens().size() - 1;
-//                minIncludeIndex = state.getConsumedIndex() + 1;
                 minIncludeIndex = 0;
-            }
+//            }
             int prevIndex = token.index;
             int pastIndex = token.index;
             int pastNonMatchable = 0;
@@ -766,12 +763,19 @@ public class EntityLinker {
             PlainLiteral label = labels.next();
             numLabels++;
             String lang = label.getLanguage() != null ? label.getLanguage().toString() : null;
+            String text = label.getLexicalForm();
+            //if case-insensitive matching ... compare lower case versions
+            if(!linkerConfig.isCaseSensitiveMatching()){
+                text = text.toLowerCase(Locale.ROOT);
+            }
             if((lang == null && curLang == null) ||
                     (lang != null && curLang != null && lang.equalsIgnoreCase(curLang))){
-                if(!matchedLabels.contains(label.getLexicalForm())){
+                if(!matchedLabels.contains(text)){
                     matchLabel(searchTokens, match, label);
-                    matchedLabels.add(label.getLexicalForm());
+                    matchedLabels.add(text);
                     matchedLangLabel = true;
+                } else if(!matchedLangLabel){
+                    matchedLangLabel = true; //found a equivalent label in the matchlang
                 }
             } else if((lang == null && mainLang == null) ||
                     (lang != null && mainLang != null && lang.equalsIgnoreCase(mainLang))){
@@ -1043,6 +1047,43 @@ public class EntityLinker {
             final LabelMatch labelMatch;
             int coveredTokens = lastFoundIndex-firstFoundIndex+1;
             int coveredProcessableTokens = lastProcessableFoundIndex-firstProcessableFoundIndex+1;
+            //check if we lookup Entities within a processable chunk
+            final float chunkMatchScore;
+            if(!textProcessingConfig.isIgnoreChunks() &&
+                    state.getToken().inChunk != null &&  //there is a chunk
+                    state.getToken().inChunk.isProcessable){ //the chunk is processable
+                ChunkData cd = state.getToken().inChunk;
+                List<TokenData> tokens = state.getTokens();
+                if(log.isTraceEnabled()){
+                    log.trace("  ... checking match with chunk {}: {}", 
+                        cd.chunk, cd.chunk.getSpan());
+                }
+                int cstart = cd.getMatchableStart() >= 0 ? cd.getMatchableStart() :
+                    firstProcessableFoundIndex;
+                int cend = cd.getMatchableEndChar();
+                //if the match does not cover the whole chunk
+                if(cstart < firstProcessableFoundIndex || cend > lastProcessableFoundIndex){ 
+                    int foundInChunk = 0;
+                    int numInChunk = 0;
+                    for(int i = cd.matchableStart; i <= cd.matchableEnd ; i++){
+                        TokenData td = tokens.get(i);
+                        if(td.isMatchable){
+                            numInChunk++;
+                            if(i >= firstProcessableFoundIndex &&
+                                    i <= lastProcessableFoundIndex){
+                                foundInChunk++;
+                            }
+                        }
+                    }
+                    chunkMatchScore = (float) foundInChunk / (float) numInChunk;
+                    log.trace("  ... label matches {} of {} matchable token in Chunk", 
+                        foundInChunk, numInChunk);
+                } else { //matches the whole chunk
+                    chunkMatchScore = 1f;
+                }
+            } else { //no chunk (or ignoreChuncks == true) .. set chunkMatchScore to 1f
+                chunkMatchScore = 1f;
+            }
             //matched tokens only within the span of the first/last processable token
             //Matching rules
             // - if less than config#minTokenFound() than accept only EXACT
@@ -1050,10 +1091,12 @@ public class EntityLinker {
             //   foundTokens of the PARTIAL match is > than of the FULL/EXACT
             //   match (this will be very rare
             String currentText = state.getTokenText(firstFoundIndex,coveredTokens);
-            if(linkerConfig.isCaseSensitiveMatching() ? currentText.equals(text) : currentText.equalsIgnoreCase(text)){ 
+            if(chunkMatchScore == 1f && //the whole chunk matches
+                    (linkerConfig.isCaseSensitiveMatching() ? currentText.equals(text) : currentText.equalsIgnoreCase(text))){ 
                 labelMatch = new LabelMatch(firstFoundIndex, coveredTokens, label);
-            } else {
-                int coveredLabelTokens = matchedLabelTokens.lastKey().intValue()-matchedLabelTokens.firstKey().intValue()+1;
+            } else if(chunkMatchScore >= linkerConfig.getMinChunkMatchScore()){
+                int coveredLabelTokens = matchedLabelTokens.lastKey().intValue() -
+                        matchedLabelTokens.firstKey().intValue() + 1;
                 if(foundTokens == labelTokens.length && foundTokens == coveredTokens){
                     //if all token matched set found to covered: May be lower because only
                     //processable tokens are counted, but FULL also checks
@@ -1064,10 +1107,30 @@ public class EntityLinker {
                 labelMatch = new LabelMatch(firstProcessableFoundIndex, coveredProcessableTokens, 
                     foundProcessableTokens,foundTokensWithinCoveredProcessableTokens,
                     foundTokenMatch/(float)foundTokens,label,labelTokens.length, coveredLabelTokens);
+            } else {
+                if(log.isTraceEnabled()){ //trace level logging for STANBOL-1211
+                    List<TokenData> tokens = state.getTokens();
+                    int start = tokens.get(firstProcessableFoundIndex).token.getStart();
+                    int end = tokens.get(lastProcessableFoundIndex).token.getEnd();
+                    CharSequence content = state.getToken().token.getContext().getText();
+                    CharSequence match = content.subSequence(start, end);
+                    ChunkData cd = state.getToken().inChunk;
+                    int cStart = tokens.get(cd.matchableStart).token.getStart();
+                    int cEnd = tokens.get(cd.matchableEnd).token.getEnd();
+                    CharSequence context = content.subSequence(cStart, cEnd);
+                    log.trace(" - filter match '{}'@[{},{}] because it does only match "
+                            + "{}% (min: {}%) of the matchable Tokens in Chunk '{}'@[{},{}]",
+                            new Object[]{match, start, end, Math.round(chunkMatchScore*100),
+                                    Math.round(linkerConfig.getMinChunkMatchScore()*100),
+                                    context, cStart, cEnd});
+                }
+                labelMatch = null;
             }
-            if(labelMatch.getLabelScore() >= linkerConfig.getMinLabelScore() && 
+            if(labelMatch != null &&
+                    labelMatch.getLabelScore() >= linkerConfig.getMinLabelScore() && 
                     labelMatch.getTextScore() >= linkerConfig.getMinTextScore() && 
                     labelMatch.getMatchScore() >= linkerConfig.getMinMatchScore()){
+                log.trace(" + add suggestion {}", labelMatch);
                 suggestion.addLabelMatch(labelMatch);
             }
         } //else NO tokens found -> nothing to do

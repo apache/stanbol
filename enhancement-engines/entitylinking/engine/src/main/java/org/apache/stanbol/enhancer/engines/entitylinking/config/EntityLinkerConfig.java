@@ -37,6 +37,7 @@ import org.apache.stanbol.enhancer.engines.entitylinking.impl.EntityLinker;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.Suggestion;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.Suggestion.MATCH;
 import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
+import org.apache.stanbol.enhancer.nlp.model.Chunk;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.nlp.morpho.MorphoFeatures;
 import org.apache.stanbol.enhancer.nlp.pos.Pos;
@@ -168,6 +169,14 @@ public class EntityLinkerConfig {
      */
     public static final String MIN_MATCH_FACTOR = "enhancer.engines.linking.minMatchScore";
     /**
+     * The minimum score an Entity must match matchable {@link Token}s within a processable
+     * {@link Chunk}. By {@link #DEFAULT_MIN_CHUNK_MATCH_SCORE default} this is
+     * set to <code>51%</code> to filter Entities that do only match a single token
+     * within a NounPhrase of two words. This feature was introduced with
+     * <a href="https://issues.apache.org/jira/browse/STANBOL-1211">STANBOL-1211</a>
+     */
+    public static final String MIN_CHUNK_MATCH_SCORE = "enhancer.engines.linking.minChunkMatchScore";
+    /**
      * The maximum number of {@link Token} used as search terms with the 
      * {@link EntitySearcher#lookup(String, Set, java.util.List, String[], Integer)}
      * method
@@ -262,6 +271,13 @@ public class EntityLinkerConfig {
     public static final double DEFAULT_MIN_LABEL_SCORE = 0.75;
     public static final double DEFAULT_MIN_TEXT_SCORE = 0.4;
     public static final double DEFAULT_MIN_MATCH_SCORE = 0.3;
+    /**
+     * By default more as 50% of the matchable tokens of a processable chunk
+     * need to match so that a Entity is considered to be mentioned in the text
+     * (STANBOL-1211)
+     */
+    public static final double DEFAULT_MIN_CHUNK_MATCH_SCORE = 0.51;
+    
     /**
      * Default mapping for Concept types to dc:type values added for
      * TextAnnotations.
@@ -449,6 +465,11 @@ public class EntityLinkerConfig {
     private double minLabelScore = DEFAULT_MIN_LABEL_SCORE;
     private double minTextScore = DEFAULT_MIN_TEXT_SCORE;
     private double minMatchScore = DEFAULT_MIN_MATCH_SCORE;
+    /**
+     * The minimum score an entity needs to match matchable tokens within a
+     * chunk so that is is considered as a mentions (STANBOL-1211)
+     */
+    private double minChunkMatchScore = DEFAULT_MIN_CHUNK_MATCH_SCORE;
 
     private boolean rankEqualScoresBasedOnEntityRankings = DEFAULT_RANK_EQUAL_SCORES_BASED_ON_ENTITY_RANKINGS;
 
@@ -632,7 +653,25 @@ public class EntityLinkerConfig {
         } catch (IllegalArgumentException e){
             throw new ConfigurationException(MIN_MATCH_FACTOR, e.getMessage());
         }
-                
+        
+        value = configuration.get(MIN_CHUNK_MATCH_SCORE);
+        Double minChunkMatchScore = null;
+        if(value instanceof Number){
+            minChunkMatchScore = Double.valueOf(((Number)value).doubleValue());
+        } else if(value != null){
+            try {
+                minChunkMatchScore = Double.valueOf(value.toString());
+            } catch (NumberFormatException e) {
+                throw new ConfigurationException(MIN_CHUNK_MATCH_SCORE, "Parsed value '"
+                        +value+"' is not an valid double!");
+            }
+        }
+        try {
+            linkerConfig.setMinChunkMatchScore(minChunkMatchScore);
+        } catch (IllegalArgumentException e){
+            throw new ConfigurationException(MIN_CHUNK_MATCH_SCORE, e.getMessage());
+        }
+        
         //init LEMMA_MATCHING_STATE
         value = configuration.get(LEMMA_MATCHING_STATE);
         if(value instanceof Boolean){
@@ -1085,14 +1124,15 @@ public class EntityLinkerConfig {
      */
     public UriRef setTypeMapping(String conceptType, UriRef dcType){
         if(dcType == null) {
-            throw new IllegalArgumentException("The parsed dc:type URI MUST NOT be NULL!");
+            return typeMappings.remove(conceptType == null ? null : new UriRef(conceptType));
+        } else {
+            if(conceptType == null){ //handle setting of the default dc:type value
+                UriRef oldDefault = getDefaultDcType();
+                setDefaultDcType(dcType);
+                return oldDefault;
+            }
+            return typeMappings.put(new UriRef(conceptType), dcType);
         }
-        if(conceptType == null){ //handle setting of the default dc:type value
-            UriRef oldDefault = getDefaultDcType();
-            setDefaultDcType(dcType);
-            return oldDefault;
-        }
-        return typeMappings.put(new UriRef(conceptType), dcType);
     }
     
     /**
@@ -1306,7 +1346,35 @@ public class EntityLinkerConfig {
         } else {
             minTextScore = score;
         }
-    }    
+    }
+    /**
+     * Getter for the minimum amount of matchable {@link Token}s an Entity must match
+     * within an {@link Chunk} to be considered (see STANBOL-1211).<p>
+     * The default is <code>&gt;0.5</code> to omit matches for a single token
+     * in a chunk - typically a noun phrase - including two words.
+     * @return the minimum chunk match score.
+     */
+    public double getMinChunkMatchScore() {
+        return minChunkMatchScore;
+    }
+    /**
+     * Setter for the minimum amount of matchable {@link Token}s an Entity must match
+     * within an {@link Chunk} to be considered (see STANBOL-1211).<p>
+     * The default is <code>&gt;0.5</code> to omit matches for a single token
+     * in a chunk - typically a noun phrase - including two words.
+     * @param minChunkMatchScore the minimum chunk match score or <code>null</code>
+     * to reset to the default value
+     */
+    public void setMinChunkMatchScore(Double minChunkMatchScore) {
+        if(minChunkMatchScore == null){
+            this.minChunkMatchScore = DEFAULT_MIN_CHUNK_MATCH_SCORE;
+        } else if(minChunkMatchScore < 0.0 || minChunkMatchScore > 1.0){
+            throw new IllegalArgumentException("The minChunkMatchScore MUST BE "
+                + "in the range [0..1] (parsed: "+minChunkMatchScore+")!");
+        } else {
+            this.minChunkMatchScore = minChunkMatchScore;
+        }
+    }
     /**
      * Getter for the minimum match Score of Entity labels against the
      * Text.<p>

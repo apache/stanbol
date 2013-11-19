@@ -20,12 +20,14 @@ import org.junit.Test;
 
 public class FstLinkingTest extends EnhancerTestBase {
 
-    
+    //NOTE: adapted text as part of STANBOL-1211 to avoid a single noun phrase 
+    //"SPD candidate Peer Steinbrueck" avoiding the linking of SPD in this
+    //Text.
     public static final String TEST_TEXT = "There has been a worried response in "
             + "Greece to the Sunday's election in Germany. The win of Chancellor "
             + "Angela Merkel means that there will not be a radical change in "
-            + "European policy. Greeks would have preferred SPD candidate Peer "
-            + "Steinbrueck, whose party lost Sunday.";
+            + "European policy. Greeks would have preferred Peer Steinbrueck the"
+            + "candidate of the SPD, whose party lost Sunday.";
     
     /**
      * 
@@ -54,17 +56,20 @@ public class FstLinkingTest extends EnhancerTestBase {
                 //and the entityLinkingEngine
                 "http://purl.org/dc/terms/creator.*FstLinkingEngine",
                 //needs to suggest the following Entities
-                "http://fise.iks-project.eu/ontology/entity-reference.*http://dbpedia.org/resource/Chancellor",
                 "http://fise.iks-project.eu/ontology/entity-reference.*http://dbpedia.org/resource/Angela_Merkel",
                 "http://fise.iks-project.eu/ontology/entity-reference.*http://dbpedia.org/resource/Greece",
                 "http://fise.iks-project.eu/ontology/entity-reference.*http://dbpedia.org/resource/Germany",
                 "http://fise.iks-project.eu/ontology/entity-reference.*http://dbpedia.org/resource/Social_Democratic_Party_of_Germany",
                 //for the following sections within the text
-                "http://fise.iks-project.eu/ontology/selected-text.*Chancellor",
                 "http://fise.iks-project.eu/ontology/selected-text.*Angela Merkel",
                 "http://fise.iks-project.eu/ontology/selected-text.*Greece",
                 "http://fise.iks-project.eu/ontology/selected-text.*Germany",
-                "http://fise.iks-project.eu/ontology/selected-text.*SPD");
+                "http://fise.iks-project.eu/ontology/selected-text.*SPD")
+         //with STANBOL-1211 Chancellor MUST NOT be found as "Chancellor" does not
+         //select more as 50% of the tokens of the chunk "Chancellor Angela Merkel"
+         .assertContentRegexp(false, 
+                 "http://fise.iks-project.eu/ontology/entity-reference.*http://dbpedia.org/resource/Chancellor",
+                 "http://fise.iks-project.eu/ontology/selected-text.*Chancellor");
     }
 
     

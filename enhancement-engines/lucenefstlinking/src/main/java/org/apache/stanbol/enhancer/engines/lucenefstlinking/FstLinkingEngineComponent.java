@@ -55,6 +55,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.FieldInfo;
@@ -222,7 +223,7 @@ public class FstLinkingEngineComponent {
     /**
      * used to resolve '{prefix}:{local-name}' used within the engines configuration
      */
-    @Reference
+    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
     protected NamespacePrefixService prefixService;    
 
     /**
