@@ -155,7 +155,7 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
      * the {@link #reduce(TagLL[])} method to check if {@link TagLL tags} 
      * do overlap with any linkable token.
      */
-    private final List<TokenData> linkableTokens = new LinkedList<TokenData>();
+    private final List<LinkableTokenContext> linkableTokens = new LinkedList<LinkableTokenContext>();
     /**
      * The minimum score a tag needs to match processable tokens within a
      * {@link Chunk} so that is is not omitted. 
@@ -328,11 +328,12 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
         tokens.add(token);
         if(token.isLinkable){
             //add to the list of linkable for #reduce(TagLL[])
-            linkableTokens.add(token);
-        } else if(token.isMatchable && !lpc.isIgnoreChunks() //matchable token
-                && token.inChunk != null && //in chunks with two ore more
+            linkableTokens.add(new LinkableTokenContext(token,sectionData.getTokens()));
+        } else if(token.isMatchable && !lpc.isIgnoreChunks() &&//matchable token
+                token.inChunk != null && //in processable chunks with more
+                token.inChunk.isProcessable && //as two matchable tokens
                 token.inChunk.getMatchableCount() > 1){ //matchable tokens
-            linkableTokens.add(token);
+            linkableTokens.add(new LinkableTokenContext(token, sectionData.getTokens()));
         }
     }
     /**
@@ -342,19 +343,18 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
     private TokenData getToken(){
         return tokens.isEmpty() ? null : tokens.get(tokensCursor);
     }
-
     @Override
     public void reduce(TagLL[] head) {
-        TokenData linkableToken;
+        LinkableTokenContext linkableTokenContext;
         for(TagLL tag = head[0]; tag != null; tag = tag.getNextTag()) {
             int start = tag.getStartOffset();
             int end = tag.getEndOffset();
-            linkableToken = linkableTokens.isEmpty() ? null : linkableTokens.get(0);
-            while(linkableToken != null && linkableToken.token.getEnd() <= start){
+            linkableTokenContext = linkableTokens.isEmpty() ? null : linkableTokens.get(0);
+            while(linkableTokenContext != null && linkableTokenContext.linkableToken.token.getEnd() <= start){
                 linkableTokens.remove(0);
-                linkableToken = linkableTokens.isEmpty() ? null : linkableTokens.get(0);
+                linkableTokenContext = linkableTokens.isEmpty() ? null : linkableTokens.get(0);
             }
-            if(linkableToken == null || linkableToken.token.getStart() >= end){
+            if(linkableTokenContext == null || linkableTokenContext.linkableToken.token.getStart() >= end){
                 //does not overlap any linkable token
                 tag.removeLL(); //remove the tag from the cluster
                 if(log.isTraceEnabled()){
@@ -362,6 +362,8 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
                     log.trace(" > reduce tag {}", tagSequence);
                 }
             } else { //if the tag overlaps a linkable token 
+                TokenData linkableToken = linkableTokenContext.linkableToken;
+                List<TokenData> tokens = linkableTokenContext.context;
                 ChunkData cd = linkableToken.inChunk; //check if it maches > 50% of the chunk
                 if(!lpc.isIgnoreChunks() && cd != null &&
                         cd.isProcessable){
@@ -371,7 +373,6 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
                     if(cstart < start || cend > end){ //if the tag does not cover the whole chunk
                         int num = 0;
                         int match = 0;
-                        List<TokenData> tokens = sectionData.getTokens();
                         for(int i = cd.getMatchableStart(); i <= cd.getMatchableEnd(); i++){
                             TokenData td = tokens.get(i);
                             if(td.isMatchable){
@@ -386,34 +387,54 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
                         //tokens in the Chunk are matched!
                         if(((float)match/(float)num) < minChunkMatchScore){
                             tag.removeLL(); //ignore
-                            if(log.isDebugEnabled()){
+                            if(log.isTraceEnabled()){
                                 CharSequence text = at.getText();
-                                log.debug(" - reduce tag {}[{},{}] because it does only match "
+                                log.trace(" - reduce tag {}[{},{}] because it does only match "
                                     + "{} of {} of matchable Chunk {}[{},{}]", 
                                     new Object[]{text.subSequence(start, end), start, end, match,  
                                             num, text.subSequence(cstart, cend), cstart, cend});
                             }
-                        } else if(log.isDebugEnabled()){
+                        } else if(log.isTraceEnabled()){
                             CharSequence text = at.getText();
-                            log.debug(" + keep tag {}[{},{}] matching {} of {} "
+                            log.trace(" + keep tag {}[{},{}] matching {} of {} "
                                 + "matchable Tokens for matchable Chunk {}[{},{}]", 
                                 new Object[]{text.subSequence(start, end), start, end, match,
                                         num, text.subSequence(cstart, cend), cstart, cend});
                         }
-                    } else if(log.isDebugEnabled()){
+                    } else if(log.isTraceEnabled()){
                         CharSequence text = at.getText();
-                        log.debug(" + keep tag {}[{},{}] for matchable Chunk {}[{},{}]", 
+                        log.trace(" + keep tag {}[{},{}] for matchable Chunk {}[{},{}]", 
                             new Object[]{text.subSequence(start, end), start, end, 
                                  text.subSequence(cstart, cend), cstart, cend});
                     }
                 }
-                if(log.isDebugEnabled()){
+                if(log.isTraceEnabled()){
                     CharSequence tagSequence = at.getText().subSequence(start, end);
-                    log.debug(" + keep tag {}", tagSequence);
+                    log.trace(" + keep tag {}", tagSequence);
                 }
             }
         }
         
+    }
+    /**
+     * Holds the context for a linkable {@link Token}s. This ensures that the
+     * list of Tokens of the current {@link Section} (typically a {@link Sentence}) 
+     * is still available even if the {@link LinkableTokenFilter#sectionData} does hold
+     * already tokens for the next section.<p>
+     * This is necessary as {@link LinkableTokenFilter#reduce(TagLL[])} can
+     * be called for the previous sentence in cases where a Tag cluster includes
+     * the last {@link Token} of a {@link Section}.
+     * @author Rupert Westenthaler
+     *
+     */
+    private static class LinkableTokenContext {
+        final TokenData linkableToken;
+        final List<TokenData> context;
+        
+        LinkableTokenContext(TokenData linkableToken, List<TokenData> context){
+            this.linkableToken = linkableToken;
+            this.context = context;
+        }
     }
     
 }
