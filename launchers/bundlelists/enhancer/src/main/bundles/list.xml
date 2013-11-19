@@ -70,6 +70,11 @@
       <artifactId>org.apache.stanbol.enhancer.nlp.json</artifactId>
       <version>0.11.0-SNAPSHOT</version>
     </bundle>
+    <bundle> <!-- API for Topic Classification Engines -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engine.topic.api</artifactId>
+      <version>0.10.1-SNAPSHOT</version>
+    </bundle>
   </startLevel>
   <!-- LDPath -->
   <startLevel level="30">
@@ -219,6 +224,17 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.sentiment.summarization</artifactId>
+      <version>0.10.1-SNAPSHOT</version>
+    </bundle>
+    <!-- Solr based Topic Engine (see also the topic.api bundle above -->
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engine.topic</artifactId>
+      <version>0.10.1-SNAPSHOT</version>
+    </bundle>
+    <bundle> <!-- The RESTful services used to train the engine -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engine.topic.web</artifactId>
       <version>0.10.1-SNAPSHOT</version>
     </bundle>
     
