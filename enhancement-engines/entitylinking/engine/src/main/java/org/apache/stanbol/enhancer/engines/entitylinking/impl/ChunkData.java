@@ -63,6 +63,23 @@ public class ChunkData {
      */
     int matchableCount;
     /**
+     * The start position of the first matchable {@link Token} within this
+     * chunk
+     */
+    int matchableStart = -1;
+    /**
+     * The start char offset of the first matchable {@link Token} within this chunk
+     */
+    int matchableStartCharIndex = -1;
+    /**
+     * The end position of the last matchable {@link Token} within this chunk
+     */
+    int matchableEnd = -1;
+    /**
+     * The end char offset of the last matchable {@link Token} within this chunk
+     */
+    int matchableEndCharIndex = -1;
+    /**
      * constructs and initializes the meta data for the parsed {@link Chunk}
      * @param chunk
      */
@@ -121,4 +138,37 @@ public class ChunkData {
     public int getEndTokenIndex() {
         return endToken;
     }
+    /**
+     * The index of the first matchable Token within the {@link Chunk} or
+     * <code>-1</code> if none
+     * @return
+     */
+    public int getMatchableStart() {
+        return matchableStart;
+    }
+    /**
+     * The index of the last matchable Token within the {@link Chunk} or
+     * <code>-1</code> if none
+     * @return
+     */
+    public int getMatchableEnd() {
+        return matchableEnd;
+    }
+    /**
+     * The char index of the start character of the first matchable {@link Token}
+     * within the {@link Chunk} or <code>-1</code> if none.
+     * @return
+     */
+    public int getMatchableStartChar() {
+        return matchableStartCharIndex;
+    }
+    /**
+     * the char indes of the end character of the last matchable {@link Token}
+     * within the {@link Chunk} or <code>-1</code> if none
+     * @return
+     */
+    public int getMatchableEndChar() {
+        return matchableEndCharIndex;
+    }
+    
 }

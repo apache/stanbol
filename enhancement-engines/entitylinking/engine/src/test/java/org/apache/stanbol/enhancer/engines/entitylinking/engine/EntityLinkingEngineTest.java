@@ -295,6 +295,7 @@ public class EntityLinkingEngineTest {
         LanguageProcessingConfig tpc = new LanguageProcessingConfig();
         tpc.setLinkedLexicalCategories(LanguageProcessingConfig.DEFAULT_LINKED_LEXICAL_CATEGORIES);
         tpc.setLinkedPos(Collections.EMPTY_SET);
+        tpc.setIgnoreChunksState(true); //to emulate pre STANBOL-1211
         EntityLinkerConfig config = new EntityLinkerConfig();
         config.setMinFoundTokens(2);//this is assumed by this test
         config.setRedirectProcessingMode(RedirectProcessingMode.FOLLOW);
