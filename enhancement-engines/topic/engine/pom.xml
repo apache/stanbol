@@ -63,12 +63,14 @@
             <Import-Package>
               org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.11,1.1)",
               org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.11,1.1)",
-              org.apache.stanbol.enhancer.topic.api.*,
+              org.apache.stanbol.enhancer.topic.api.*; provide:=true; version="[0.10.1,1.1)",
               *
             </Import-Package>
             <Export-Package></Export-Package>
             <Private-Package>
-              org.apache.stanbol.enhancer.engine.topic
+              org.apache.stanbol.enhancer.topic,
+              org.apache.stanbol.enhancer.engine.topic,
+              org.apache.stanbol.enhancer.topic.training
             </Private-Package>
             <!--  Install-Path>install-config</Install-Path -->
             <Data-Files>data-files</Data-Files>
