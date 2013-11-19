@@ -70,6 +70,11 @@
       <artifactId>org.apache.stanbol.enhancer.nlp.json</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </bundle>
+    <bundle> <!-- API for Topic Classification Engines -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engine.topic.api</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </bundle>
   </startLevel>
   <!-- LDPath -->
   <startLevel level="30">
@@ -222,6 +227,18 @@
       <version>1.0.0-SNAPSHOT</version>
     </bundle>
     
+    <!-- Solr based Topic Engine (see also the topic.api bundle above -->
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engine.topic</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </bundle>
+    <bundle> <!-- The RESTful services used to train the engine -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engine.topic.web</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </bundle>
+
     <!-- Entity Extraction/Linking -->
     <bundle><!-- NER linking (depends on the Entityhub) -->
       <groupId>org.apache.stanbol</groupId>
