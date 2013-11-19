@@ -36,10 +36,12 @@ import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.LanguageProcessingConfig;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig;
 import org.apache.stanbol.enhancer.engines.entitylinking.engine.EntityLinkingEngine;
+import org.apache.stanbol.enhancer.engines.entitylinking.impl.ChunkData;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.ProcessingState;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.SectionData;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.TokenData;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
+import org.apache.stanbol.enhancer.nlp.model.Chunk;
 import org.apache.stanbol.enhancer.nlp.model.Section;
 import org.apache.stanbol.enhancer.nlp.model.Sentence;
 import org.apache.stanbol.enhancer.nlp.model.SpanTypeEnum;
@@ -153,10 +155,15 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
      * the {@link #reduce(TagLL[])} method to check if {@link TagLL tags} 
      * do overlap with any linkable token.
      */
-    private final List<Token> linkableTokens = new LinkedList<Token>();
+    private final List<TokenData> linkableTokens = new LinkedList<TokenData>();
+    /**
+     * The minimum score a tag needs to match processable tokens within a
+     * {@link Chunk} so that is is not omitted. 
+     */
+    private double minChunkMatchScore;
     
     protected LinkableTokenFilter(TokenStream input, AnalysedText at, 
-            String lang, LanguageProcessingConfig lpc) {
+            String lang, LanguageProcessingConfig lpc, double minChunkMatchScore) {
         super(input);
         //STANBOL-1177: add attributes in doPrivileged to avoid 
         //AccessControlException: access denied ("java.lang.RuntimePermission" "getClassLoader")
@@ -177,6 +184,7 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
         this.lpc = lpc;
         this.isUnicaseLanguage = lang != null && !lang.isEmpty() &&
                 UNICASE_SCRIPT_LANUAGES.contains(lang);
+        this.minChunkMatchScore = minChunkMatchScore;
     }
 
     @Override
@@ -312,11 +320,19 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
             return true;
         }
     }
+    /**
+     * Adds a token. Also cares about adding tokens to {@link #linkableTokens}
+     * @param token the tokens - MUST NOT be NULL.
+     */
     private void addToken(TokenData token){
         tokens.add(token);
         if(token.isLinkable){
             //add to the list of linkable for #reduce(TagLL[])
-            linkableTokens.add(token.token);
+            linkableTokens.add(token);
+        } else if(token.isMatchable && !lpc.isIgnoreChunks() //matchable token
+                && token.inChunk != null && //in chunks with two ore more
+                token.inChunk.getMatchableCount() > 1){ //matchable tokens
+            linkableTokens.add(token);
         }
     }
     /**
@@ -329,26 +345,71 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
 
     @Override
     public void reduce(TagLL[] head) {
-        Token linkableToken;
+        TokenData linkableToken;
         for(TagLL tag = head[0]; tag != null; tag = tag.getNextTag()) {
             int start = tag.getStartOffset();
             int end = tag.getEndOffset();
             linkableToken = linkableTokens.isEmpty() ? null : linkableTokens.get(0);
-            while(linkableToken != null && linkableToken.getEnd() <= start){
+            while(linkableToken != null && linkableToken.token.getEnd() <= start){
                 linkableTokens.remove(0);
                 linkableToken = linkableTokens.isEmpty() ? null : linkableTokens.get(0);
             }
-            if(linkableToken == null || linkableToken.getStart() >= end){
+            if(linkableToken == null || linkableToken.token.getStart() >= end){
                 //does not overlap any linkable token
                 tag.removeLL(); //remove the tag from the cluster
                 if(log.isTraceEnabled()){
                     CharSequence tagSequence = at.getText().subSequence(start, end);
                     log.trace(" > reduce tag {}", tagSequence);
                 }
-            } else {
-                if(log.isTraceEnabled()){
+            } else { //if the tag overlaps a linkable token 
+                ChunkData cd = linkableToken.inChunk; //check if it maches > 50% of the chunk
+                if(!lpc.isIgnoreChunks() && cd != null &&
+                        cd.isProcessable){
+                    int cstart = cd.getMatchableStartChar() >= 0 ? cd.getMatchableStartChar() :
+                        start;
+                    int cend = cd.getMatchableEndChar();
+                    if(cstart < start || cend > end){ //if the tag does not cover the whole chunk
+                        int num = 0;
+                        int match = 0;
+                        List<TokenData> tokens = sectionData.getTokens();
+                        for(int i = cd.getMatchableStart(); i <= cd.getMatchableEnd(); i++){
+                            TokenData td = tokens.get(i);
+                            if(td.isMatchable){
+                                num++;
+                                if(match < 1 && td.token.getStart() >= start ||
+                                        match > 0 && td.token.getEnd() <= end){
+                                    match++;
+                                }
+                            }
+                        }
+                        //only accept tags with more as half of the matchable
+                        //tokens in the Chunk are matched!
+                        if(((float)match/(float)num) < minChunkMatchScore){
+                            tag.removeLL(); //ignore
+                            if(log.isDebugEnabled()){
+                                CharSequence text = at.getText();
+                                log.debug(" - reduce tag {}[{},{}] because it does only match "
+                                    + "{} of {} of matchable Chunk {}[{},{}]", 
+                                    new Object[]{text.subSequence(start, end), start, end, match,  
+                                            num, text.subSequence(cstart, cend), cstart, cend});
+                            }
+                        } else if(log.isDebugEnabled()){
+                            CharSequence text = at.getText();
+                            log.debug(" + keep tag {}[{},{}] matching {} of {} "
+                                + "matchable Tokens for matchable Chunk {}[{},{}]", 
+                                new Object[]{text.subSequence(start, end), start, end, match,
+                                        num, text.subSequence(cstart, cend), cstart, cend});
+                        }
+                    } else if(log.isDebugEnabled()){
+                        CharSequence text = at.getText();
+                        log.debug(" + keep tag {}[{},{}] for matchable Chunk {}[{},{}]", 
+                            new Object[]{text.subSequence(start, end), start, end, 
+                                 text.subSequence(cstart, cend), cstart, cend});
+                    }
+                }
+                if(log.isDebugEnabled()){
                     CharSequence tagSequence = at.getText().subSequence(start, end);
-                    log.trace(" > keep tag {}", tagSequence);
+                    log.debug(" + keep tag {}", tagSequence);
                 }
             }
         }

@@ -269,9 +269,14 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                         double length = Math.max(alength, matchLabel.getLexicalForm().length());
                         match.setMatch(1d - ((double)distance/length),matchLabel);
                     }
-                    log.trace(" ... add suggestion: label: '{}'; conf: {}", 
+                    if(match.getScore() >= elConfig.getMinMatchScore()){
+                        log.trace(" ... add suggestion: label: '{}'; conf: {}", 
                             matchLabel, match.getScore());
-                    suggestions.add(match);
+                        suggestions.add(match);
+                    } else {
+                        log.trace(" ... filtered because match score < {}", 
+                            elConfig.getMinMatchScore());
+                    }
                 } else { //the type of the current Entity is blacklisted
                     log.trace("  ... filtered because of entity types");
                 }
@@ -356,7 +361,8 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
         TokenStream baseTokenStream = corpus.getTaggingAnalyzer().tokenStream("", 
             new CharSequenceReader(at.getText()));
         LinkableTokenFilter linkableTokenFilter = new LinkableTokenFilter(baseTokenStream, 
-            at, session.getLanguage(), tpConfig.getConfiguration(session.getLanguage()));
+            at, session.getLanguage(), tpConfig.getConfiguration(session.getLanguage()),
+            elConfig.getMinChunkMatchScore());
         //we use two TagClusterReducer implementations.
         // (1) the linkableTokenFilter filters all tags that do not overlap any
         //     linkable Token
