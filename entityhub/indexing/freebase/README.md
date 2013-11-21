@@ -87,21 +87,25 @@ folder.
 
 The Entityhub Indexing tool supports the use of index time boosts. Those
 boosts can be set based on the number of referenced an Entity has within the
-freebase knowledge base by calling 
+freebase knowledge base by using one of the following scripts:
 
-    gunzip -c ${FB_DUMP} \
-        | grep "^ns:m\..*\t.*\tns:m\." \
-        | cut -f 3 | sed 's/.$//' \
-        | sort -S $MAX_SORT_MEM \
-        | uniq -c  \
-        | sort -nr -S $MAX_SORT_MEM > $INCOMING_FILE
+1. [fbrankings.sh](fbranlings.sh): intended for freebase dumps that do use 
+namespace prefix mappings.
+2. [fbrankings-uri.sh](fbrankings-uri.sh): intended for freebase dumps that
+do use full qualified URIs.calling 
 
-NOTE: Ubuntu requires a different syntax for grep e.g.
+
+NOTE: Ubuntu requires a different syntax for grep e.g. of the `fbrankings.sh`
+instead of
+
+    grep "^ns:m\..*\t.*\tns:m\."
+
+you will need to use
 
     grep $'^ns:m\..*\t.*\tns:m\.'
 
-See also the [fbranking.sh] script in the same directory. The $INCOMING_FILE
-needs to be copied to 'indexing/resource/incoming_lings.txt'.
+The resulting $INCOMING_FILE needs to be copied to 'indexing/resource/incoming_lings.txt'.
+The file will have a size of about 1.5GByte
 
 ### (4) Dealing with corrupted RDF
 
