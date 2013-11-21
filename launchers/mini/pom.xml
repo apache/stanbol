@@ -82,7 +82,9 @@
               <jarWebSupport>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.http.jetty</artifactId>
-                <version>2.2.0</version>
+                <!-- depends on OSGI framework (startLevel=2) and is required
+                     by felix.http.whiteboard (startLevel=4) -->
+                <startLevel>3</startLevel>
               </jarWebSupport>
             </configuration>
           </execution>
@@ -104,7 +106,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>1.7.1</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -112,6 +113,7 @@
               <goal>shade</goal>
             </goals>
             <configuration>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
               <artifactSet>
               <!-- Use this to in/exclude only specific dependencies -->
                 <includes>
