@@ -105,7 +105,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>1.7.1</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -113,6 +112,7 @@
               <goal>shade</goal>
             </goals>
             <configuration>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
               <artifactSet>
               <!-- Use this to in/exclude only specific dependencies -->
                 <includes>
