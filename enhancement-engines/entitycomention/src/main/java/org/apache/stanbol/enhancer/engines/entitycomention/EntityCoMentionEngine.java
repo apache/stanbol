@@ -146,7 +146,10 @@ import org.slf4j.LoggerFactory;
 @Service(value=EnhancementEngine.class)
 public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException> implements ServiceProperties {
 
-    private static final Integer ENGINE_ORDERING = ServiceProperties.ORDERING_POST_PROCESSING + 90;
+    /**
+     * first of the post processing engines (note STANBOL-1218)
+     */
+    private static final Integer ENGINE_ORDERING = ServiceProperties.ORDERING_POST_PROCESSING + 80;
     private static final Map<String,Object> SERVICE_PROPERTIES = 
             Collections.unmodifiableMap(Collections.singletonMap(
                 ServiceProperties.ENHANCEMENT_ENGINE_ORDERING, 
