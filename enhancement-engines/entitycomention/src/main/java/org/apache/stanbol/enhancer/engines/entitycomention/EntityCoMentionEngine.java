@@ -140,13 +140,26 @@ import org.slf4j.LoggerFactory;
                "de;uc=MATCH", //in German all Nouns are upper case
                "es;lc=Noun", //the OpenNLP POS tagger for Spanish does not support ProperNouns
                "nl;lc=Noun"}), //same for Dutch 
-    //@Property(name=DEFAULT_MATCHING_LANGUAGE,value=""), //will only be used when adding alt label support
+    @Property(name=EntityCoMentionEngine.ADJUST_EXISTING_SUGGESTION_CONFIDENCE,
+    	doubleValue=EntityCoMentionEngine.DEFAULT_CONFIDENCE_ADJUSTEMENT), 
     @Property(name=SERVICE_RANKING,intValue=0)
 })
 @Service(value=EnhancementEngine.class)
 public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException> implements ServiceProperties {
 
+	/**
+	 * Property used to configure if/how confidence values of existing suggestions
+	 * are modified if a co-mention is detected for a fise:TextAnnotation.<p>
+	 * Values MUST be in the range [0..1) the 
+	 * {@link #DEFAULT_CONFIDENCE_ADJUSTEMENT default} is <code>0.33</code> <p>
+	 * Added with <a href="https://issues.apache.org/jira/browse/STANBOL-1219">STANBOL-1219</a>
+	 */
+	public static final String ADJUST_EXISTING_SUGGESTION_CONFIDENCE = "enhancer.engines.comention.adjustExistingConfidence";
     /**
+     * Default value for {@link #ADJUST_EXISTING_SUGGESTION_CONFIDENCE}
+     */
+	public static final double DEFAULT_CONFIDENCE_ADJUSTEMENT = 0.33;
+	/**
      * first of the post processing engines (note STANBOL-1218)
      */
     private static final Integer ENGINE_ORDERING = ServiceProperties.ORDERING_POST_PROCESSING + 80;
@@ -166,6 +179,8 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
     @Reference 
     protected LabelTokenizer labelTokenizer; 
 
+    private double confidenceAdjustmentFactor;
+    
 //    private BundleContext bundleContext;
     /**
      * EntityLinking configuration used for Co-Mention extractions
@@ -208,6 +223,29 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
         for(UriRef mappedUri : mappedUris){
             linkerConfig.setTypeMapping(mappedUri.getUnicodeString(), null);
         }
+        //parse confidence adjustment value (STANBOL-1219)
+        Object value = properties.get(ADJUST_EXISTING_SUGGESTION_CONFIDENCE);
+        final double confidenceAdjustment;
+        if(value == null){
+        	confidenceAdjustment = DEFAULT_CONFIDENCE_ADJUSTEMENT;
+        } else if(value instanceof Number){
+        	confidenceAdjustment = ((Number)value).doubleValue();
+        } else {
+        	try {
+        		confidenceAdjustment = Double.parseDouble(value.toString());
+        	} catch (NumberFormatException e){
+        		throw new ConfigurationException(ADJUST_EXISTING_SUGGESTION_CONFIDENCE, 
+        				"The confidence adjustement value for existing suggestions "
+        				+ "MUST BE a double value in the range [0..1)", e);
+        	}
+        }
+        if(confidenceAdjustment < 0 || confidenceAdjustment >= 1){
+    		throw new ConfigurationException(ADJUST_EXISTING_SUGGESTION_CONFIDENCE, 
+    				"The confidence adjustement value for existing suggestions "
+    				+ "MUST BE a double value in the range [0..1) (parsed: "
+    				+ confidenceAdjustment +")!");
+        }
+        confidenceAdjustmentFactor = 1 - confidenceAdjustment;
         //get the metadata later set to the enhancement engine
     }
     /**
@@ -330,6 +368,7 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                 if(!ignore){
                     //collect confidence values of co-mentions
                     Double maxConfidence = null;
+                    Double maxExistingConfidence = null;
                     if(textAnnotation == null){ //not found ... create a new TextAnnotation for the co-mention
                         textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
                         metadata.add(new TripleImpl(textAnnotation, 
@@ -369,6 +408,26 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                                 maxConfidence = confidnece;
                             }
                         }
+                        Map<NonLiteral, Double> existingSuggestions = new HashMap<NonLiteral,Double>();
+                    	if(maxConfidence != null && confidenceAdjustmentFactor < 1){
+                    		//adapt confidence of existing annotations
+	                        for(Iterator<Triple> esIt = metadata.filter(null, DC_RELATION, textAnnotation);esIt.hasNext();){
+	                        	NonLiteral existingSuggestion = esIt.next().getSubject();
+	                        	existingSuggestions.put(existingSuggestion,
+	                        			EnhancementEngineHelper.get(metadata, existingSuggestion, 
+	                        					ENHANCER_CONFIDENCE, Double.class, literalFactory));
+	                        }
+	                        for(Entry<NonLiteral,Double> entry : existingSuggestions.entrySet()){
+	                        	if(entry.getValue() != null){
+	                        		double adjustedConfidence = entry.getValue() * confidenceAdjustmentFactor;
+	                        		if(maxExistingConfidence == null || adjustedConfidence > maxExistingConfidence){
+	                        			maxExistingConfidence = adjustedConfidence;
+	                        		}
+	                        		EnhancementEngineHelper.set(metadata, entry.getKey(), 
+	                        				ENHANCER_CONFIDENCE, adjustedConfidence, literalFactory);
+	                        	}
+	                        }
+                    	}
                         //add the suggestions of the initial mention to this one
                         Set<Resource> values = new HashSet<Resource>();
                         for(Iterator<Triple> suggestions = metadata.filter(null, DC_RELATION, initialMention); suggestions.hasNext();){
@@ -382,13 +441,29 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                         metadata.add(new TripleImpl(textAnnotation, DC_RELATION, initialMention));
                         //metadata.add(new TripleImpl(initialMention, DC_RELATION, textAnnotation));
                     }
-                    //finally add the collected dc:types of initial mentions to the textAnnotation
+                    // Adapt the dc:type values of the fise:TextAnnotation
+                    // - if Suggestions added by this engine do have the max confidence
+                    //   use the dc:type values of the initial mention
+                    // - if the original suggestions do have a higher confidence keep the
+                    //   existing
+                    // - in case both do have the same confidence we add all dc:types
+                    boolean removeExistingDcTypes = maxConfidence != null && (maxExistingConfidence == null || 
+                    		maxConfidence.compareTo(maxExistingConfidence) >= 0);
+                    boolean addCoMentionDcTypes = maxExistingConfidence == null ||
+                    		(maxConfidence != null && maxConfidence.compareTo(maxExistingConfidence) >= 1);
                     Iterator<UriRef> existingDcTypesIt = getReferences(metadata, textAnnotation, DC_TYPE);
                     while(existingDcTypesIt.hasNext()){ //do not add existing
-                        dcTypes.remove(existingDcTypesIt.next());
+                    	//remove dc:type triples if they are not re-added later and
+                    	//removeExistingDcTypes == true
+                        if((!dcTypes.remove(existingDcTypesIt.next()) || !addCoMentionDcTypes )
+                        	&& removeExistingDcTypes){
+                        	existingDcTypesIt.remove(); //remove the dcType
+                        }
                     }
-                    for(UriRef dcType : dcTypes){ //add missing
-                        metadata.add(new TripleImpl(textAnnotation, DC_TYPE, dcType));
+                    if(addCoMentionDcTypes){
+	                    for(UriRef dcType : dcTypes){ //add missing
+	                        metadata.add(new TripleImpl(textAnnotation, DC_TYPE, dcType));
+	                    }
                     }
                     //TODO: support also Entities
                     if(maxConfidence != null){ //set the confidence value (if known)
