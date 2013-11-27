@@ -51,7 +51,7 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EntityDereferenceEngine implements EnhancementEngine, ServiceProperties {
+public class EntityDereferenceEngine implements EnhancementEngine, ServiceProperties, DereferenceConstants {
 
     private final Logger log = LoggerFactory.getLogger(EntityDereferenceEngine.class);
     
@@ -88,6 +88,8 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
             throw new IllegalArgumentException("The parsed EntityDereferencer MUST NOT be NULL!");
         }
         this.dereferencer = dereferencer;
+        //init the defautl ordering
+        setEngineOrdering(DEFAULT_ENGINE_ORDERING);
     }
     
     /**

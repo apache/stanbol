@@ -25,5 +25,9 @@ public class DereferenceException extends Exception {
     public DereferenceException(UriRef entity, Throwable t){
         super("Unable to dereference Entity " + entity+ "!", t);
     }
-    
+    public DereferenceException(UriRef entity, String reason){
+        super("Unable to dereference Entity " + entity + 
+            (reason != null ? ": "+ reason : "") + "!");
+    }
+
 }
