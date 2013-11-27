@@ -16,12 +16,8 @@
 */
 package org.apache.stanbol.enhancer.engines.dereference.entityhub;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.enhancer.engines.dereference.DereferenceException;
 import org.apache.stanbol.enhancer.engines.dereference.EntityDereferencer;
 import org.apache.stanbol.entityhub.ldpath.backend.EntityhubBackend;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;

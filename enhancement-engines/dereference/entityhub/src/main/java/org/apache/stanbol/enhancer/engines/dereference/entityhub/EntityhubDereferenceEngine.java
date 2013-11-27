@@ -32,7 +32,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
-import org.apache.stanbol.enhancer.engines.dereference.DereferenceConstants;
 import org.apache.stanbol.enhancer.engines.dereference.DereferenceUtils;
 import org.apache.stanbol.enhancer.engines.dereference.EntityDereferenceEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;

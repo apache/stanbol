@@ -19,10 +19,7 @@ package org.apache.stanbol.enhancer.engines.dereference.entityhub;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.enhancer.engines.dereference.DereferenceException;
 import org.apache.stanbol.entityhub.ldpath.backend.SiteBackend;
-import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
