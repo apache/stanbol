@@ -28,12 +28,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.enhancer.engines.entitycomention.CoMentionConstants;
 import org.apache.stanbol.enhancer.engines.entitylinking.LabelTokenizer;
@@ -50,51 +53,36 @@ public class ContentItemMentionBuilder extends InMemoryEntityIndex implements Li
     private static final Logger log = LoggerFactory.getLogger(ContentItemMentionBuilder.class);
     private static final LiteralFactory lf = LiteralFactory.getInstance();
     
-    private ContentItem ci;
     /**
      * The last index notified via {@link #startToken(Token)}
      */
     private Integer lastIndex = 0; 
     
     private SortedMap<Integer,Collection<EntityMention>> mentionIndex = new TreeMap<Integer,Collection<EntityMention>>();
-
     
-    public ContentItemMentionBuilder(ContentItem ci, LabelTokenizer labelTokenizer,
-            String...languages){
+    public ContentItemMentionBuilder(LabelTokenizer labelTokenizer, String...languages){
         super(labelTokenizer,CoMentionConstants.CO_MENTION_LABEL_FIELD, languages);
-        this.ci = ci;
-        ci.getLock().readLock().lock();
-        try {
-            initContext();
-        } finally {
-            ci.getLock().readLock().unlock();
-        }
     }
 
-
-    private void initContext() {
-        MGraph m = ci.getMetadata();
-        for(Iterator<Triple> it = m.filter(null, RDF_TYPE, ENHANCER_TEXTANNOTATION); it.hasNext();){
-            UriRef ta = (UriRef)it.next().getSubject();
-            String selectedText = EnhancementEngineHelper.getString(m, ta, ENHANCER_SELECTED_TEXT);
-            if(selectedText != null){
-                //NOTE: Typically it is not possible to find co-mentions for Entities with a
-                //      single Token, so can ignore those.
-                //      The only exception would be to use proper-nouns for initial linking and
-                //      Nouns for the co-mention resolution. In such cases this might result
-                //      in additional extractions.
-                String[] tokens = tokenizer.tokenize(selectedText, language);
-                if(tokens.length > 1){ //TODO make configurable
-                    Double confidence = EnhancementEngineHelper.get(m,ta,ENHANCER_CONFIDENCE,Double.class,lf);
-                    if(confidence == null || confidence > 0.85){ //TODO make configurable
-                        Integer start = EnhancementEngineHelper.get(m,ta,ENHANCER_START,Integer.class,lf);
-                        Integer end = EnhancementEngineHelper.get(m,ta,ENHANCER_END,Integer.class,lf);
-                        registerMention(new EntityMention(ta,m, ENHANCER_SELECTED_TEXT, DC_TYPE, 
-                            start != null && end != null ? new Integer[]{start,end} : null));
-                    } // else confidence to low
-                } //else ignore Tokens with a single token
-            } // else no selected text
-        }
+    public void registerTextAnnotation(UriRef textAnnotation, TripleCollection metadata){
+        String selectedText = EnhancementEngineHelper.getString(metadata, textAnnotation, ENHANCER_SELECTED_TEXT);
+        if(selectedText != null){
+            //NOTE: Typically it is not possible to find co-mentions for Entities with a
+            //      single Token, so can ignore those.
+            //      The only exception would be to use proper-nouns for initial linking and
+            //      Nouns for the co-mention resolution. In such cases this might result
+            //      in additional extractions.
+            String[] tokens = tokenizer.tokenize(selectedText, language);
+            if(tokens.length > 1){ //TODO make configurable
+                Double confidence = EnhancementEngineHelper.get(metadata,textAnnotation,ENHANCER_CONFIDENCE,Double.class,lf);
+                if(confidence == null || confidence > 0.85){ //TODO make configurable
+                    Integer start = EnhancementEngineHelper.get(metadata,textAnnotation,ENHANCER_START,Integer.class,lf);
+                    Integer end = EnhancementEngineHelper.get(metadata,textAnnotation,ENHANCER_END,Integer.class,lf);
+                    registerMention(new EntityMention(textAnnotation,metadata, ENHANCER_SELECTED_TEXT, DC_TYPE, 
+                        start != null && end != null ? new Integer[]{start,end} : null));
+                } // else confidence to low
+            } //else ignore Tokens with a single token
+        } // else no selected text
     }
 
     private void registerMention(EntityMention entityMention){
