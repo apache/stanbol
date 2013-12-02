@@ -106,6 +106,7 @@
     
     <!-- Entity Dereference (STANBOL-336) -->
     <module>dereference/core</module>
+    <module>dereference/entityhub</module> <!-- STANBOL-1223 -->
     
     <!-- Enhancement Engines using external services -->
     <module>celi</module> <!-- http://linguagrid.org -->
