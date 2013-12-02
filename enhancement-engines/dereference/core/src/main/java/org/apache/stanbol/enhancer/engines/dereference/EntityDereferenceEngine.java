@@ -262,7 +262,7 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
                 new Object[] {failedEntities.size(),referencedEntities.size(), 
                     ci.getUri()});
         }
-        if(log.isDebugEnabled()){
+        if(log.isDebugEnabled() && dereferencedCount > 0){
             log.debug(" - dereferenced {} of {} Entities in {}ms ({}ms/dereferenced)", 
                 new Object[]{dereferencedCount, referencedEntities.size(),
                     duration, (duration*100/dereferencedCount)/100.0f});
