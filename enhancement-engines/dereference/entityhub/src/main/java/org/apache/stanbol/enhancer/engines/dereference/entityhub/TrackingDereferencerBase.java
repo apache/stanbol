@@ -20,6 +20,8 @@ import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -28,12 +30,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
+import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.enhancer.engines.dereference.DereferenceConstants;
+import org.apache.stanbol.enhancer.engines.dereference.DereferenceContext;
 import org.apache.stanbol.enhancer.engines.dereference.DereferenceException;
 import org.apache.stanbol.enhancer.engines.dereference.EntityDereferencer;
 import org.apache.stanbol.entityhub.core.mapping.DefaultFieldMapperImpl;
@@ -48,9 +52,11 @@ import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapper;
 import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
+import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
+import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
@@ -252,7 +258,7 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
     }
     
     @Override
-    public final boolean dereference(UriRef uri, MGraph graph, boolean offlineMode, Lock writeLock) throws DereferenceException {
+    public final boolean dereference(UriRef uri, MGraph graph, Lock writeLock, DereferenceContext derefContext) throws DereferenceException {
         T service = getService();
         if(service == null){
             throw new DereferenceException(uri, serviceClass.getClass().getSimpleName() 
@@ -260,19 +266,24 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
         }
         Representation rep;
         try {
-            rep = getRepresentation(service, uri.getUnicodeString(), offlineMode);
+            rep = getRepresentation(service, uri.getUnicodeString(), derefContext.isOfflineMode());
         } catch(EntityhubException e){
             throw new DereferenceException(uri,e);
         }
+        //we need the languages as strings
+        final Set<String> langs = derefContext.getLanguages();
+        
         if(rep != null){
-            if(fieldMapper == null && ldpathProgram == null){
+            if(fieldMapper == null && ldpathProgram == null && langs.isEmpty()){
                 copyAll(uri, rep, graph, writeLock);
-            } else {
-                if(fieldMapper != null){
-                    copyMapped(uri, rep, graph, writeLock);
+            } else { //we need to apply some filters while dereferencing
+                if(fieldMapper != null || !langs.isEmpty()){
+                    //this considers speficied fields and included languages
+                    copyMapped(uri, rep, langs, graph, writeLock);
                 }
                 if(ldpathProgram != null){
-                    copyLdPath(uri, getRdfBackend(service), graph, writeLock);
+                    //this executes LDPath statements
+                    copyLdPath(uri, getRdfBackend(service), langs, graph, writeLock);
                 }
             }
             return true;
@@ -285,13 +296,14 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
      * writes the the results to the parsed Graph
      * @param uri the context
      * @param rdfBackend the RdfBackend the LDPath program is executed on
+     * @param langs the set of languages to dereference
      * @param graph the graph to store the results
      * @param writeLock the write lock for the graph
      * @throws DereferenceException on any {@link EntityhubException} while
      * executing the LDPath program
      */
-    protected void copyLdPath(UriRef uri, RDFBackend<Object> rdfBackend, 
-            MGraph graph, Lock writeLock) throws DereferenceException {
+    private void copyLdPath(UriRef uri, RDFBackend<Object> rdfBackend, 
+            Set<String> langs, MGraph graph, Lock writeLock) throws DereferenceException {
         //A RdfReference needs to be used as context
         RdfReference context = valueFactory.createReference(uri);
         //create the representation that stores results in an intermediate
@@ -303,13 +315,23 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
             for(at.newmedialab.ldpath.model.fields.FieldMapping<?,Object> mapping : ldpathProgram.getFields()) {
                 Collection<?> values = mapping.getValues(rdfBackend, context);
                 if(values != null && !values.isEmpty()){
-                    result.add(mapping.getFieldName(),values);
+                    String fieldName = mapping.getFieldName();
+                    if(langs.isEmpty()){
+                        result.add(fieldName,values);
+                    } else { //filter for languages
+                        for(Object value : values){
+                            if((!(value instanceof Text)) || 
+                                    langs.contains(((Text)value).getLanguage())){
+                                result.add(fieldName, value);
+                            } //else text with filtered language ... do not add
+                        }
+                    }
                 }
             }
         } catch (EntityhubException e){
             throw new DereferenceException(uri, e);
         }
-        if(!ldPathResults.isEmpty()){ //copy the resutls
+        if(!ldPathResults.isEmpty()){ //copy the results
             writeLock.lock();
             try {
                 graph.addAll(ldPathResults);
@@ -340,10 +362,27 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
      * in the graph
      * @param uri the uri of the entity to dereference
      * @param rep the data for the entity as in the entityhub
+     * @param langs the set of languages to dereference
      * @param graph the graph to store the mapping results
      * @param writeLock the write lock for the graph
      */
-    private void copyMapped(UriRef uri, Representation rep, MGraph graph, Lock writeLock) {
+    private void copyMapped(UriRef uri, Representation rep, Set<String> langs, 
+            MGraph graph, Lock writeLock) {
+        //init the fieldMapper
+        FieldMapper fieldMapper;
+        if(!langs.isEmpty()){ //if we need to filter for specific languages
+            //we need to modify the field and add a global filter for the
+            //languages. NOTE that the field might be null. In that case we
+            //need just filter literals by language
+            //TODO: maybe cache fieldMappers for sets of languages
+            fieldMapper = this.fieldMapper != null ? this.fieldMapper.clone() :
+                new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
+            fieldMapper.addMapping(new FieldMapping(new TextConstraint(
+                (String)null, langs.toArray(new String[graph.size()]))));
+        } else { //just use the fieldMapper as parsed in the config
+            fieldMapper = this.fieldMapper;
+        }
+        //execute the field mappings
         writeLock.lock();
         try {
             RdfRepresentation clerezzaRep = valueFactory.createRdfRepresentation(uri, graph);

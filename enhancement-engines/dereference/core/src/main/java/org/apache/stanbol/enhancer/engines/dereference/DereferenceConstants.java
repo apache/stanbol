@@ -16,12 +16,52 @@
  */
 package org.apache.stanbol.enhancer.engines.dereference;
 
+import org.apache.clerezza.rdf.core.Language;
+import org.apache.clerezza.rdf.core.PlainLiteral;
+import org.apache.clerezza.rdf.core.Triple;
+
 /**
  * Define configuration parameters for Dereference engines
  * @author Rupert Westenthaler
  *
  */
 public interface DereferenceConstants {
+    
+    /**
+     * Property that allows to enable/disable the filtering of {@link Triple}s
+     * with {@link PlainLiteral} {@link Triple#getObject() objects} based on
+     * their {@link Language}. Languages that need to be dereferenced are
+     * parsed to the {@link EntityDereferencer} via the
+     * {@link DereferenceContext#getContentLanguages()}. If empty no languages
+     * MUST BE filtered. <p>
+     * If both this and {@link #FILTER_ACCEPT_LANGUAGES} are enabled the filter
+     * should use the union of the two sets available via 
+     * {@link DereferenceContext#getLanguages()}.
+     */
+    String FILTER_CONTENT_LANGUAGES = "enhancer.engine.dereference.filterContentlanguages";
+    /**
+     * By default {@link #FILTER_CONTENT_LANGUAGES} is deactivated
+     */
+    boolean DEFAULT_FILTER_CONTENT_LANGUAGES = false;
+    
+    /**
+     * Property that allows to enable/disable the filtering of {@link Triple}s
+     * with {@link PlainLiteral} {@link Triple#getObject() objects} based on
+     * their {@link Language}. Languages that need to be dereferenced are
+     * parsed to the {@link EntityDereferencer} via the
+     * {@link DereferenceContext#getAcceptLanguages()}. If empty no languages
+     * MUST BE filtered.<p>
+     * If both this and {@link #FILTER_CONTENT_LANGUAGES} are enabled the filter
+     * should use the union of the two sets available via 
+     * {@link DereferenceContext#getLanguages()}.
+     */
+    String FILTER_ACCEPT_LANGUAGES = "enhancer.engine.dereference.filterAcceptlanguages";
+    
+    /**
+     * By default {@link #FILTER_ACCEPT_LANGUAGES} is activated
+     */
+    boolean DEFAULT_FILTER_ACCEPT_LANGUAGES = true;
+    
     /**
      * Property used to configure the fields that should be dereferenced.<p>
      * DereferenceEngines need to support a list of URIs but may also support more

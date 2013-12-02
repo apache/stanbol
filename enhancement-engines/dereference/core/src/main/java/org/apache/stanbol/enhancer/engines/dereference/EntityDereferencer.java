@@ -47,7 +47,7 @@ public interface EntityDereferencer {
     
     /**
      * EntityDereferencer can optionally provide an ExecutorService used to
-     * dereference Entities. 
+     * dereference Entities.
      * @return the {@link ExecutorService} or <code>null</code> if not used
      * by this implementation
      */
@@ -58,8 +58,6 @@ public interface EntityDereferencer {
      * data to the parsed graph
      * @param graph the graph to add the dereferenced entity 
      * @param entity the uri of the Entity to dereference
-     * @param offlineMode <code>true</code> if {@link OfflineMode} is active.
-     * Otherwise <code>false</code>
      * @param writeLock The writeLock for the graph. Dereferences MUST require
      * a <code>{@link Lock#lock() writeLock#lock()}</code>  before adding 
      * dereferenced data to the parsed graph. This is essential for using multiple 
@@ -67,11 +65,14 @@ public interface EntityDereferencer {
      * {@link ConcurrentModificationException}s in this implementations or
      * other components (typically other {@link EnhancementEngine}s) accessing the
      * same graph.
+     * @param dereferenceContext Context information for the {@link EntityDereferencer}
+     * such as the {@link OfflineMode} state, possible languages of the content and
+     * requested languages in the Enhancement request.
      * @return if the entity was dereferenced
      * @throws DereferenceException on any error while dereferencing the
      * requested Entity
      */
-    boolean dereference(UriRef entity, MGraph graph, boolean offlineMode, 
-            Lock writeLock) throws DereferenceException;
+    boolean dereference(UriRef entity, MGraph graph, Lock writeLock, 
+            DereferenceContext dereferenceContext) throws DereferenceException;
         
 }

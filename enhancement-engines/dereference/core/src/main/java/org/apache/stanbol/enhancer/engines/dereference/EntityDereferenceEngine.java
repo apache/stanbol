@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.enhancer.engines.dereference;
 
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
 
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 
+import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Resource;
@@ -43,6 +45,8 @@ import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +66,13 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
     
     protected final EntityDereferencer dereferencer;
     
+    protected final DereferenceEngineConfig config;
+    
     protected final String name;
+    
+    protected final boolean filterContentLanguages;
+    
+    protected final boolean filterAcceptLanguages;
     
     /**
      * The Map holding the {@link #serviceProperties} for this engine.
@@ -74,11 +84,14 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
      */
     private final Map<String,Object> unmodServiceProperties = Collections.unmodifiableMap(serviceProperties);
     
-    public EntityDereferenceEngine(String name, EntityDereferencer dereferencer){
-        if(StringUtils.isBlank(name)){
-            throw new IllegalArgumentException("The parsed EnhancementEngine name MUST NOT be NULL nor empty!");
+    public EntityDereferenceEngine(EntityDereferencer dereferencer, DereferenceEngineConfig config){
+        if(config == null){
+            throw new IllegalArgumentException("The parsed DereferenceEngineConfig MUST NOT be NULL!");
         }
-        this.name = name;
+        this.config = config;
+        this.name = config.getEngineName();
+        this.filterContentLanguages = config.isFilterContentLanguages();
+        this.filterAcceptLanguages = config.isFilterAcceptLanguages();
         if(dereferencer == null){
             throw new IllegalArgumentException("The parsed EntityDereferencer MUST NOT be NULL!");
         }
@@ -114,6 +127,14 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
     public Integer getEngineOrdering(){
         return (Integer)serviceProperties.get(ENHANCEMENT_ENGINE_ORDERING);
     }
+
+    /**
+     * Getter for the config of this engine
+     * @return the Dereference Engine Configuration
+     */
+    public DereferenceEngineConfig getConfig() {
+        return config;
+    }
     
     @Override
     public Map<String,Object> getServiceProperties() {
@@ -136,11 +157,21 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
             return;
         }
         log.debug("> dereference Entities for ContentItem {}", ci.getUri());
+        final DereferenceContext derefContext = new DereferenceContext(offline);
+        Set<String> includedLangs = new HashSet<String>();
+        //TODO: parse accept languages as soon as Enhancement properties are implemented
         final MGraph metadata = ci.getMetadata();
         Set<UriRef> referencedEntities = new HashSet<UriRef>();
         //(1) read all Entities we need to dereference from the parsed contentItem
         ci.getLock().readLock().lock();
         try {
+            //parse the languages detected for the content
+            if(filterContentLanguages){
+                for(NonLiteral langAnno : EnhancementEngineHelper.getLanguageAnnotations(metadata)){
+                    includedLangs.add(EnhancementEngineHelper.getString(metadata, langAnno, DC_LANGUAGE));
+                }
+            } //no content language filtering - leave contentLanguages empty
+            //parse the referenced entities from the graph
             Iterator<Triple> entityReferences = metadata.filter(null, ENHANCER_ENTITY_REFERENCE, null);
             while(entityReferences.hasNext()){
                 Triple triple = entityReferences.next();
@@ -162,18 +193,27 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
         } finally {
             ci.getLock().readLock().unlock();
         }
+        if(!includedLangs.isEmpty()){
+            includedLangs.add(null); //also include literals without language
+            //and set the list to the dereference context
+            derefContext.setLanguages(includedLangs);
+        } //else no filterLanguages set ... nothing to do
+
         final Lock writeLock = ci.getLock().writeLock();
-        log.trace(" - scheduled {} Entities for dereferencing", referencedEntities.size());
+        log.trace(" - scheduled {} Entities for dereferencing", 
+            referencedEntities.size());
         //(2) dereference the Entities
         ExecutorService executor = dereferencer.getExecutor();
         long start = System.currentTimeMillis();
         Set<UriRef> failedEntities = new HashSet<UriRef>();
         int dereferencedCount = 0;
-        List<DereferenceJob> dereferenceJobs = new ArrayList<DereferenceJob>(referencedEntities.size());
+        List<DereferenceJob> dereferenceJobs = new ArrayList<DereferenceJob>(
+                referencedEntities.size());
         if(executor != null && !executor.isShutdown()){ //dereference using executor
             //schedule all entities to dereference
             for(final UriRef entity : referencedEntities){
-                DereferenceJob dereferenceJob = new DereferenceJob(entity, metadata, writeLock);
+                DereferenceJob dereferenceJob = new DereferenceJob(entity, 
+                    metadata, writeLock, derefContext);
                 dereferenceJob.setFuture(executor.submit(dereferenceJob));
                 dereferenceJobs.add(dereferenceJob);
             }
@@ -195,7 +235,8 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
                             + dereferenceJob.entity + "!", e);
                     } else { //unknown error
                         throw new EngineException(this,ci, "Unchecked Error while "
-                            + "dereferencing Entity " + dereferenceJob.entity +"!", e);
+                            + "dereferencing Entity " + dereferenceJob.entity
+                            + "!", e);
                     }
                 }
             }
@@ -203,7 +244,7 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
             for(UriRef entity : referencedEntities){
                 try {
                     log.trace("  ... dereference {}", entity);
-                    if(dereferencer.dereference(entity, metadata, offline, writeLock)){
+                    if(dereferencer.dereference(entity, metadata, writeLock, derefContext)){
                         dereferencedCount++;
                         log.trace("    + success");
                     } else {
@@ -245,19 +286,22 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
         final UriRef entity;
         final MGraph metadata;
         final Lock writeLock;
+        final DereferenceContext derefContext;
 
         private Future<Boolean> future;
         
-        DereferenceJob(UriRef entity, MGraph metadata, Lock writeLock){
+        DereferenceJob(UriRef entity, MGraph metadata, Lock writeLock, 
+            DereferenceContext derefContext){
             this.entity = entity;
             this.metadata = metadata;
             this.writeLock = writeLock;
+            this.derefContext = derefContext;
         }
         
         @Override
         public Boolean call() throws DereferenceException {
             log.trace("  ... dereference {}", entity);
-            boolean state = dereferencer.dereference(entity, metadata, offline, writeLock);
+            boolean state = dereferencer.dereference(entity, metadata, writeLock, derefContext);
             if(state){
                 log.trace("    + success");
             } else {

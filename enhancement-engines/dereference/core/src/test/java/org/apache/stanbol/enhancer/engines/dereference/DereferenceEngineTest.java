@@ -140,7 +140,8 @@ public class DereferenceEngineTest {
                 return false;
             }  
         };
-        EntityDereferenceEngine engine = new EntityDereferenceEngine("online", onlineDereferencer);
+        EntityDereferenceEngine engine = new EntityDereferenceEngine(onlineDereferencer,
+            new DereferenceEngineConfig("online", false, false));
         //engine in online mode
         Assert.assertNotEquals(engine.canEnhance(ci), EnhancementEngine.CANNOT_ENHANCE);
         //set engine in offline mode
@@ -151,7 +152,8 @@ public class DereferenceEngineTest {
     @Test
     public void testSyncDereferencing() throws Exception {
         ContentItem ci = getContentItem("urn:test:testSyncDereferencing");
-        EntityDereferenceEngine engine = new EntityDereferenceEngine("sync", syncDereferencer);
+        EntityDereferenceEngine engine = new EntityDereferenceEngine(syncDereferencer,
+            new DereferenceEngineConfig("sync", false, false));
         Assert.assertNotEquals(engine.canEnhance(ci), EnhancementEngine.CANNOT_ENHANCE);
         engine.computeEnhancements(ci);
         validateDereferencedEntities(ci.getMetadata());
@@ -160,7 +162,8 @@ public class DereferenceEngineTest {
     @Test
     public void testAsyncDereferencing() throws Exception {
         ContentItem ci = getContentItem("urn:test:testSyncDereferencing");
-        EntityDereferenceEngine engine = new EntityDereferenceEngine("sync", asyncDereferencer);
+        EntityDereferenceEngine engine = new EntityDereferenceEngine(asyncDereferencer,
+            new DereferenceEngineConfig("async", false, false));
         Assert.assertNotEquals(engine.canEnhance(ci), EnhancementEngine.CANNOT_ENHANCE);
         engine.computeEnhancements(ci);
         validateDereferencedEntities(ci.getMetadata());
@@ -201,7 +204,7 @@ public class DereferenceEngineTest {
         }
 
         @Override
-        public boolean dereference(UriRef entity, MGraph graph, boolean offlineMode, Lock writeLock) throws DereferenceException {
+        public boolean dereference(UriRef entity, MGraph graph, Lock writeLock, DereferenceContext context) throws DereferenceException {
             Iterator<Triple> entityTriples = testData.filter(entity, null, null);
             if(entityTriples.hasNext()){
                 writeLock.lock();

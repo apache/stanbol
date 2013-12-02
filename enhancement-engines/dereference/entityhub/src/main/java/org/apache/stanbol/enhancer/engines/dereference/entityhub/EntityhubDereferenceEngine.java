@@ -22,7 +22,6 @@ import static org.apache.stanbol.enhancer.servicesapi.EnhancementEngine.PROPERTY
 import static org.osgi.framework.Constants.SERVICE_RANKING;
 
 import java.util.Dictionary;
-import java.util.Hashtable;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -32,13 +31,13 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
-import org.apache.stanbol.enhancer.engines.dereference.DereferenceUtils;
+import org.apache.stanbol.enhancer.engines.dereference.DereferenceConstants;
+import org.apache.stanbol.enhancer.engines.dereference.DereferenceEngineConfig;
 import org.apache.stanbol.enhancer.engines.dereference.EntityDereferenceEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
@@ -64,6 +63,8 @@ import org.slf4j.LoggerFactory;
 @org.apache.felix.scr.annotations.Properties(value={
     @Property(name=PROPERTY_NAME),
     @Property(name=EntityhubDereferenceEngine.SITE_ID),
+    @Property(name=DereferenceConstants.FILTER_CONTENT_LANGUAGES, 
+    boolValue=DereferenceConstants.DEFAULT_FILTER_CONTENT_LANGUAGES),
     @Property(name=DEREFERENCE_ENTITIES_FIELDS,cardinality=Integer.MAX_VALUE,
     	value={"rdfs:comment","geo:lat","geo:long","foaf:depiction","dbp-ont:thumbnail"}),
     @Property(name=DEREFERENCE_ENTITIES_LDPATH, cardinality=Integer.MAX_VALUE),
@@ -120,35 +121,10 @@ public class EntityhubDereferenceEngine implements ServiceTrackerCustomizer {
         bundleContext = ctx.getBundleContext();
         log.info("> activate {}",getClass().getSimpleName());
         //get the metadata later set to the enhancement engine
-        String engineName;
-        engineMetadata = new Hashtable<String,Object>();
-        Object value = properties.get(PROPERTY_NAME);
-        if(value == null || value.toString().isEmpty()){
-            throw new ConfigurationException(PROPERTY_NAME, "The EnhancementEngine name MUST BE configured!");
-        } else {
-            engineName = value.toString().trim();
-        }
-        log.debug(" - engineName: {}",engineName);
-        engineMetadata.put(PROPERTY_NAME, engineName);
-        value = properties.get(SERVICE_RANKING);
-        Integer serviceRanking = null;
-        if(value instanceof Number){
-            serviceRanking = ((Number)value).intValue();
-        } else if(value != null){
-            try {
-                serviceRanking = Integer.parseInt(value.toString());
-            } catch(NumberFormatException e){
-                throw new ConfigurationException(SERVICE_RANKING, "Parsed service ranking '"
-                        + value + "' (type: " + value.getClass().getName()
-                        + "' can not be converted to an integer value!", e);
-            }
-        } //else not defined
-        if(serviceRanking != null){
-            log.debug(" - service.ranking: {}", serviceRanking);
-            engineMetadata.put(Constants.SERVICE_RANKING, serviceRanking);
-        }
+        DereferenceEngineConfig engineConfig = new DereferenceEngineConfig(properties);
+        log.debug(" - engineName: {}", engineConfig.getEngineName());
         //parse the Entityhub Site used for dereferencing
-        value = properties.get(SITE_ID);
+        Object value = properties.get(SITE_ID);
         //init the EntitySource
         if (value == null) {
             siteName = "*"; //all referenced sites
@@ -174,12 +150,9 @@ public class EntityhubDereferenceEngine implements ServiceTrackerCustomizer {
         //set the namespace prefix service to the dereferencer
         entityDereferencer.setNsPrefixService(prefixService);
         //now parse dereference field config
-        entityDereferencer.setDereferencedFields(
-            DereferenceUtils.parseDereferencedFieldsConfig(properties));
-        //create the engine
-        entityDereferencer.setLdPath(
-            DereferenceUtils.parseLdPathConfig(properties));
-        entityDereferenceEngine = new EntityDereferenceEngine(engineName, entityDereferencer);
+        entityDereferencer.setDereferencedFields(engineConfig.getDereferenceFields());
+        entityDereferencer.setLdPath(engineConfig.getLdPathProgram());
+        entityDereferenceEngine = new EntityDereferenceEngine(entityDereferencer, engineConfig);
         //NOTE: registration of this instance as OSGI service is done as soon as the
         //      entityhub service backing the entityDereferencer is available.
         
@@ -217,7 +190,7 @@ public class EntityhubDereferenceEngine implements ServiceTrackerCustomizer {
                         new String[]{EnhancementEngine.class.getName(),
                                      ServiceProperties.class.getName()},
                     entityDereferenceEngine,
-                    engineMetadata);
+                    entityDereferenceEngine.getConfig().getDict());
                     
                 }
                 trackedServiceCount++;
