@@ -98,6 +98,11 @@
     <module>uima</module>
     
     <!-- Post-Processing-->
+
+    <!-- Entity Dereference (STANBOL-336) -->
+    <module>dereference/core</module>
+    <module>dereference/entityhub</module>
+
     <!-- converts TextAnnotations to the STANBOL-987 model -->
     <module>textannotationnewmodel</module> 
     <!-- finds co-mentions of Entities earlier mentioned on the Text (STANBOL-1070)  -->

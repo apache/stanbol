@@ -75,6 +75,11 @@
       <artifactId>org.apache.stanbol.enhancer.engine.topic.api</artifactId>
       <version>0.10.1-SNAPSHOT</version>
     </bundle>
+    <bundle> <!-- Core Module for Dereference Engines -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.dereference.core</artifactId>
+      <version>0.10.1-SNAPSHOT</version>
+    </bundle>
   </startLevel>
   <!-- LDPath -->
   <startLevel level="30">
@@ -291,6 +296,12 @@
     <bundle> <!-- finds co-mentions of Entities earlier mentioned on the Text (STANBOL-1070)-->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.entitycomention</artifactId>
+      <version>0.10.1-SNAPSHOT</version>
+    </bundle>
+    <!-- Dereference Engine for the Entityhub (STANBOL-1223) -->
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.dereference.entityhub</artifactId>
       <version>0.10.1-SNAPSHOT</version>
     </bundle>
     <bundle> <!-- Refactor Enhancement Engine -->
