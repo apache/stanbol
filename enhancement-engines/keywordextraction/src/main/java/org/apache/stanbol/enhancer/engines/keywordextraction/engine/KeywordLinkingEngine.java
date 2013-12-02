@@ -168,15 +168,18 @@ public class KeywordLinkingEngine
 //  public static final String ENABLE_CHUNKER = "org.apache.stanbol.enhancer.engines.keywordextraction.enableChunker";
     /**
      * Adds the dereference feature (STANBOL-333) also to this engine.
-     * This will be replaced by STANBOL-336. 
+     * @deprecated Use a Dereference Engine instead (STANBOL-336)
      */
     public static final String DEREFERENCE_ENTITIES = "org.apache.stanbol.enhancer.engines.keywordextraction.dereference";
     /**
-     * The default state to dereference entities set to <code>true</code>.
+     * The default state to dereference entities set to <code>false</code> as
+     * this is now a deprecated feature.
+     * @deprecated Use a Dereference Engine instead (STANBOL-336)
      */
-    public static final boolean DEFAULT_DEREFERENCE_ENTITIES_STATE = true;
+    public static final boolean DEFAULT_DEREFERENCE_ENTITIES_STATE = false;
     /**
      * Allows to add a list of fields that are included when dereferencing Entities
+     * @deprecated Use a Dereference Engine instead (STANBOL-336)
      */
     public static final String DEREFERENCE_ENTITIES_FIELDS = "org.apache.stanbol.enhancer.engines.keywordextraction.dereferenceFields";
     /**
@@ -564,6 +567,10 @@ public class KeywordLinkingEngine
             dereferenceEntitiesState = Boolean.parseBoolean(value.toString());
         } else {
             dereferenceEntitiesState = DEFAULT_DEREFERENCE_ENTITIES_STATE;
+        }
+        if(dereferenceEntitiesState){
+            log.warn("DereferenceEntities is deprecated. Please use the Entityhub"
+                + "DereferenceEngine instead (see STANBOL-1223 for details)");
         }
         if(dereferenceEntitiesState){
             value = properties.get(DEREFERENCE_ENTITIES_FIELDS);

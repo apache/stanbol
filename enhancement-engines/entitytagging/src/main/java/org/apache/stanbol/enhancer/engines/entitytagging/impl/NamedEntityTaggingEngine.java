@@ -123,8 +123,10 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
 
     /**
      * Use the RDFS label as default
+     * @deprecated Use a dereference engine instead (STANBOL-336)
      */
-    @Property(boolValue = true)
+    @Deprecated
+    @Property(boolValue = false) //changed default to false
     public static final String DEREFERENCE_ENTITIES = "org.apache.stanbol.enhancer.engines.entitytagging.dereference";
 
     @Property(intValue = 0)
@@ -206,8 +208,11 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
      * The number of Suggestions to be added
      */
     protected Integer numSuggestions = 3;
-
-    protected boolean dereferenceEntities = true;
+    /**
+     * Changed default to <code>false</code> now that this feature is deprecated
+     * (STANBOL-336).
+     */
+    protected boolean dereferenceEntities = false;
 
     /**
      * The {@link OfflineMode} is used by Stanbol to indicate that no external service should be referenced.
@@ -289,6 +294,10 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
         Object dereferenceEntities = config.get(DEREFERENCE_ENTITIES);
         this.dereferenceEntities = state == null ? true : Boolean
                 .parseBoolean(dereferenceEntities.toString());
+        if(this.dereferenceEntities){
+            log.warn("DereferenceEntities is deprecated for this Enigne. Please use "
+                + "the EntityhubDereferenceEngine instead (see STANBOL-1223 for details)");
+        }
     }
 
     @Deactivate

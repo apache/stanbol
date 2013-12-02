@@ -197,12 +197,15 @@ public class EntityLinkerConfig {
     public static final String MAX_SEARCH_TOKEN_DISTANCE = "enhancer.engines.linking.maxSearchTokenDistance";
     /**
      * Adds the dereference feature (STANBOL-333) also to this engine.
-     * This will be replaced by STANBOL-336. 
+     * @deprecated Use a Dereference Engine instead (STANBOL-336)
      */
+    @Deprecated
     public static final String DEREFERENCE_ENTITIES = "enhancer.engines.linking.dereference";
     /**
      * Allows to add a list of fields that are included when dereferencing Entities
+     * @deprecated Use a Dereference Engine instead (STANBOL-336)
      */
+    @Deprecated
     public static final String DEREFERENCE_ENTITIES_FIELDS = "enhancer.engines.linking.dereferenceFields";
     /**
      * Allows to enable/disable sorting of suggestion that have the same score
@@ -439,9 +442,12 @@ public class EntityLinkerConfig {
     public final static float DEFAULT_MIN_TOKEN_SCORE = 0.7f;
 
     /**
-     * By default Entities are dereferenced
+     * By default Entities are dereferenced. Default chanted to <code>false</code>
+     * as this is now deprecated
+     * @deprecated Use a Dereference Engine instead (STANBOL-336)
      */
-    public static final boolean DEFAULT_DEREFERENCE_ENTITIES_STATE = true;
+    @Deprecated
+    public static final boolean DEFAULT_DEREFERENCE_ENTITIES_STATE = false;
 
     /**
      * The default value for the state if entities that would have the same score
@@ -837,6 +843,10 @@ public class EntityLinkerConfig {
             linkerConfig.setDereferenceEntitiesState(((Boolean)value).booleanValue());
         } else if(value != null && !value.toString().isEmpty()){
             linkerConfig.setDereferenceEntitiesState(Boolean.parseBoolean(value.toString()));
+        }
+        if(linkerConfig.isDereferenceEntitiesEnabled()){
+            log.warn("DereferenceEntities is deprecated for the Engine. Please use the "
+                + "EntityhubDereferenceEngine instead (see STANBOL-1223 for details)");
         }
         if(linkerConfig.isDereferenceEntitiesEnabled()){
             value = configuration.get(DEREFERENCE_ENTITIES_FIELDS);
@@ -1406,6 +1416,7 @@ public class EntityLinkerConfig {
      * Setter for the dereference entities state.
      * @param state the state or <code>null</code> to set the
      * default.
+     * @deprecated Use a Dereference Engine instead (STANBOL-336)
      */
     public void setDereferenceEntitiesState(Boolean state) {
         if(state == null){
@@ -1418,6 +1429,7 @@ public class EntityLinkerConfig {
     /**
      * Getter for the dereference entities state
      * @return <code>true</code> if enabled otherwise <code>false</code>
+     * @deprecated Use a Dereference Engine instead (STANBOL-336)
      */
     public boolean isDereferenceEntitiesEnabled(){
         return dereferenceEntitiesState;
@@ -1433,6 +1445,7 @@ public class EntityLinkerConfig {
      * <li> {@link #getDereferencedFields()} if {@link #isDereferenceEntitiesEnabled()}
      * </ul>
      * @return the selected fields for queries against the linked vocabulary.
+     * @deprecated Use a Dereference Engine instead (STANBOL-336)
      */
     public Set<UriRef> getSelectedFields() {
         if(__selectedFields == null){
