@@ -23,7 +23,7 @@
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines</artifactId>
     <version>0.10.1-SNAPSHOT</version>
-    <relativePath>..</relativePath>
+    <relativePath>../..</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
