@@ -71,6 +71,7 @@ import org.slf4j.LoggerFactory;
  * </pre></code>
  */
 @Component(immediate = true, metatype = true, 
+    configurationFactory = true, //allow multiple instances
     policy = ConfigurationPolicy.OPTIONAL) //create a default instance with the default configuration
 @Service
 @Properties(value={

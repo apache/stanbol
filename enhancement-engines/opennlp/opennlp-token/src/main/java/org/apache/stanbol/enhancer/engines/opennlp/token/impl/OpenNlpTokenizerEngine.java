@@ -69,10 +69,11 @@ import org.slf4j.LoggerFactory;
  */
 
 @Component(immediate = true, metatype = true, 
+    configurationFactory = true, //allow multiple instances
     policy = ConfigurationPolicy.OPTIONAL) //create a default instance with the default configuration
 @Service
 @Properties(value={
-        @Property(name= EnhancementEngine.PROPERTY_NAME,value="opennlp-token"),
+        @Property(name=EnhancementEngine.PROPERTY_NAME,value="opennlp-token"),
         @Property(name=OpenNlpTokenizerEngine.CONFIG_LANGUAGES, value = {"*"},cardinality=Integer.MAX_VALUE),
         @Property(name=Constants.SERVICE_RANKING,intValue=-100) //give the default instance a ranking < 0
 })
