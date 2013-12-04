@@ -36,7 +36,6 @@ import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.commons.lang.LocaleUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
@@ -78,7 +77,7 @@ public class EntityLinker {
 
     private LinkingStateAware linkingStateAware;
 
-    private int minSearchResults;
+    final int minSearchResults;
     
     //Language configuration
     final String documentLang;
@@ -87,14 +86,17 @@ public class EntityLinker {
     
     private Statistic textProcessingStats = new Statistic("Text Processing");
     private Statistic lookupStats = new Statistic("Vocabulary Lookup");
+    private int cacheHits = 0;
     private int numQueryResults = 0;
     private int numFilteredResults = 0;
     private Statistic matchingStats = new Statistic("Label Matching");
     private Statistic rankingStats = new Statistic("Suggestion Ranking");
 //    private Statistic test = new Statistic("test1");
 //    private Statistic test2_ = new Statistic("test2");
-    private int numLabels = 0;
+//    private int numLabels = 0;
     private long processingTime = -1;
+
+    private HashMap<List<String>,List<Entity>> lookupCache;
 
 
     public EntityLinker(AnalysedText analysedText, String language,
@@ -110,6 +112,7 @@ public class EntityLinker {
                 EntityLinkerConfig linkerConfig,
                 LabelTokenizer labelTokenizer, LinkingStateAware linkingStateAware) {
         //this.analysedText = analysedText;
+        this.lookupCache = new HashMap<List<String>,List<Entity>>();
         this.entitySearcher = entitySearcher;
         this.linkerConfig = linkerConfig;
         this.textProcessingConfig = textProcessingConfig;
@@ -584,19 +587,44 @@ public class EntityLinker {
         }
         String[] languageArray = languages.toArray(new String[languages.size()]);
         List<Suggestion> suggestions = new ArrayList<Suggestion>();
-        //perform the lookup with the parsed parameter
-        int numResults = performLookup(searchStrings, languageArray, suggestions, searchTokens);
-        //if no match where found in the result .. fallback to a search for the
-        //current token
-        if(suggestions.isEmpty() && numResults > 0 && searchStrings.size() > 1){
-            //there where results, but no one matched ...
-            //   ... it is most likely a case where the used search terms are
-            //       not releated. So try to query for the active token only
-            searchTokens = Collections.singletonList(state.getToken());
-            log.debug("   > No match for '{}' searchStrings ... ", searchStrings);
-            searchStrings = Collections.singletonList(state.getToken().token.getSpan());
-            log.debug("     ... fallback to search for active token '{}' ...",searchStrings);
-            performLookup(searchStrings, languageArray, suggestions, searchTokens);
+        //check if we have the search strings in the cache
+        List<Entity> results = lookupCache.get(searchStrings);
+        if(results != null){ //query is cached
+            cacheHits++;
+            //match the cached results
+            for(Entity result : results){
+                processLookupResult(searchTokens, result, suggestions);
+            }
+        } else { // we need to perform a new query
+            results = new ArrayList<Entity>();
+            //perform the lookup with the parsed parameter
+            int numResults = performLookup(searchStrings, languageArray, suggestions, searchTokens, results);
+            //cache the results
+            lookupCache.put(searchStrings, results);
+            //if no match where found in the result .. fallback to a search for the
+            //current token
+            if(suggestions.isEmpty() && numResults > 0 && searchStrings.size() > 1){
+                //there where results, but no one matched ...
+                //   ... it is most likely a case where the used search terms are
+                //       not releated. So try to query for the active token only
+                log.debug("   > No match for '{}' searchStrings ... ", searchStrings);
+                searchStrings = Collections.singletonList(getSearchString(state.getToken()));
+                searchTokens = Collections.singletonList(state.getToken());
+                results = lookupCache.get(searchStrings);
+                if(results != null){ //query is cached
+                    cacheHits++;
+                    //match the cached results
+                    for(Entity result : results){
+                        processLookupResult(searchTokens, result, suggestions);
+                    }
+                } else {
+                    results = new ArrayList<Entity>();
+                    log.debug("     ... fallback to search for active token '{}' ...",searchStrings);
+                    performLookup(searchStrings, languageArray, suggestions, searchTokens, results);
+                    //cache the results of the fall-back query
+                    lookupCache.put(searchStrings, results);
+                }
+            }
         }
         //sort the suggestions
         if(suggestions.size()>1){
@@ -609,11 +637,16 @@ public class EntityLinker {
      * @param languageArray
      * @param suggestions
      * @param searchTokens
+     * @param queryResults the unprocessed results of the query for the parsed
+     * parameters. This is used to cache results of queries. This avoid issuing
+     * the same query twice for a analysed document.
+     * string.
      * @return
      * @throws EntitySearcherException
      */
     private int performLookup(List<String> searchStrings, String[] languageArray,
-            List<Suggestion> suggestions, List<TokenData> searchTokens) throws EntitySearcherException {
+            List<Suggestion> suggestions, List<TokenData> searchTokens, 
+            List<Entity> queryResults) throws EntitySearcherException {
         int minProcessedResults = linkerConfig.getMaxSuggestions()*3;
         int lookupLimit = Math.max(MIN_SEARCH_LIMIT, linkerConfig.getMaxSuggestions()*2*searchTokens.size());
         int maxResults = lookupLimit*2;
@@ -647,7 +680,23 @@ public class EntityLinker {
             numResults = numResults + results.size();
             offset = numResults;
             matchingStats.begin();
-            numFiltered = numFiltered + processLookupResults(searchTokens, results, suggestions);
+            for(Entity result : results){ 
+                if(log.isDebugEnabled()){
+                    log.debug("    > {} (ranking: {})",result.getId(),result.getEntityRanking());
+                }
+                numQueryResults++;
+                //white/black list based entity type filtering (STANBOL-1111)
+                if(!linkerConfig.isEntityTypeFilteringActive() || 
+                        !filterEntity(result.getReferences(linkerConfig.getTypeField()))){
+                    //a valid query result
+                    queryResults.add(result);
+                    //now match the result against the current position in the text
+                    processLookupResult(searchTokens, result, suggestions);
+                } else { //do not process Entities with a filtered type
+                    numFilteredResults++; //global statistics
+                    numFiltered++;
+                }
+            }
             matchingStats.complete();
             //sort the suggestions
         }
@@ -656,38 +705,20 @@ public class EntityLinker {
     /**
      * Processes the parsed entity lookup results and adds suggestions to the
      * parsed suggestion list
-     * @param results the results
+     * @param result the result to process
      * @param suggestions the suggestions
      * @return the number of filtered results
      */
-    private int processLookupResults(List<TokenData> searchTokens, Collection<? extends Entity> results, List<Suggestion> suggestions) {
-        int numFiltered = 0;
-        for(Entity result : results){ 
+    private void processLookupResult(List<TokenData> searchTokens, Entity result, List<Suggestion> suggestions) {
+        Suggestion suggestion = matchLabels(searchTokens, result);
+        if(suggestion.getMatch() != MATCH.NONE){
             if(log.isDebugEnabled()){
-                log.debug("    > {} (ranking: {})",result.getId(),result.getEntityRanking());
+                log.debug("      + {}",suggestion);
             }
-            numQueryResults++;
-            //white/black list based entity type filtering (STANBOL-1111)
-            boolean filtered = false;
-            if(linkerConfig.isEntityTypeFilteringActive()){
-                filtered = filterEntity(result.getReferences(linkerConfig.getTypeField()));
-            }
-            if(!filtered){
-                Suggestion suggestion = matchLabels(searchTokens, result);
-                if(suggestion.getMatch() != MATCH.NONE){
-                    if(log.isDebugEnabled()){
-                        log.debug("      + {}",suggestion);
-                    }
-                    suggestions.add(suggestion);
-                } else {
-                    log.debug("      - no match");
-                }
-            } else {//do not process Entities with a filtered type
-                numFilteredResults++; //global statistics
-                numFiltered++;
-            }
+            suggestions.add(suggestion);
+        } else {
+            log.debug("      - no match");
         }
-        return numFiltered;
     }
     
     public boolean filterEntity(Iterator<UriRef> entityTypes){
@@ -761,7 +792,7 @@ public class EntityLinker {
         Set<String> matchedLabels = new HashSet<String>();
         while(labels.hasNext()){
             PlainLiteral label = labels.next();
-            numLabels++;
+            //numLabels++;
             String lang = label.getLanguage() != null ? label.getLanguage().toString() : null;
             String text = label.getLexicalForm();
             //if case-insensitive matching ... compare lower case versions
@@ -1245,6 +1276,9 @@ public class EntityLinker {
         });
         textProcessingStats.printStatistics(log);
         lookupStats.printStatistics(log);
+        float cacheHitPercentage = lookupStats.count > 0 ? //avoid division by zero
+                cacheHits*100f/(float)lookupStats.count : Float.NaN;
+        log.info("    - cache hits: {} ({}%)",cacheHits,cacheHitPercentage);
         log.info("      - {} query results ({} filtered - {}%)",
             new Object[]{numQueryResults,numFilteredResults, 
                 numFilteredResults*100f/(float)numQueryResults});
