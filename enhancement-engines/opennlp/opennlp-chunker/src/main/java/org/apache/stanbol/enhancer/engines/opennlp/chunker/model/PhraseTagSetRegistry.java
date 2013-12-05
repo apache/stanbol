@@ -24,6 +24,7 @@ import opennlp.tools.chunker.Chunker;
 import org.apache.stanbol.enhancer.nlp.model.tag.TagSet;
 import org.apache.stanbol.enhancer.nlp.phrase.PhraseTag;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
+import org.apache.stanbol.enhancer.nlp.pos.Pos;
 
 /**
  * Registry for {@link PhraseTag} {@link TagSet}s used by OpenNLP
@@ -74,5 +75,23 @@ public class PhraseTagSetRegistry {
         DEFAULT.addTag(new PhraseTag("VP",LexicalCategory.Verb));
         DEFAULT.addTag(new PhraseTag("PP", LexicalCategory.PronounOrDeterminer));
         getInstance().add(DEFAULT);
+    }
+
+    public static final TagSet<PhraseTag> FRENCH = new TagSet<PhraseTag>(
+            "French Treebank+ Phrase TagSet", "fr");
+    
+    static {
+        FRENCH.addTag(new PhraseTag("AP", LexicalCategory.Adjective));
+        FRENCH.addTag(new PhraseTag("AdP",LexicalCategory.Adverb));
+        FRENCH.addTag(new PhraseTag("COORD",LexicalCategory.Conjuction));
+        FRENCH.addTag(new PhraseTag("NP",LexicalCategory.Noun));
+        FRENCH.addTag(new PhraseTag("PP", LexicalCategory.PronounOrDeterminer));
+        FRENCH.addTag(new PhraseTag("VN",LexicalCategory.Verb));
+        FRENCH.addTag(new PhraseTag("VPinf",LexicalCategory.Verb));
+        FRENCH.addTag(new PhraseTag("VPpart",LexicalCategory.Verb));
+        FRENCH.addTag(new PhraseTag("Ssub"));
+        FRENCH.addTag(new PhraseTag("Srel"));
+        FRENCH.addTag(new PhraseTag("Sint"));
+        getInstance().add(FRENCH);
     }
 }

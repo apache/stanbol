@@ -228,11 +228,11 @@ public final class PosTagSetRegistry {
         SWEDISH.addTag(new PosTag("HV",LexicalCategory.Verb)); //"ha(va)" (have)
         SWEDISH.addTag(new PosTag("WV",LexicalCategory.Verb)); //"vilja" (want)
         SWEDISH.addTag(new PosTag("QV",LexicalCategory.Verb)); //"kunna" (can)
-        SWEDISH.addTag(new PosTag("MV",LexicalCategory.Verb)); //"måste" (must)
+        SWEDISH.addTag(new PosTag("MV",LexicalCategory.Verb)); //"m��ste" (must)
         SWEDISH.addTag(new PosTag("KV",LexicalCategory.Verb)); // locution "komma att" (periphrastic future)
         SWEDISH.addTag(new PosTag("SV",LexicalCategory.Verb)); //"skola" (will, shall)
-        SWEDISH.addTag(new PosTag("GV",LexicalCategory.Verb)); //"göra" (do, make)
-        SWEDISH.addTag(new PosTag("FV",LexicalCategory.Verb)); //få" (get)
+        SWEDISH.addTag(new PosTag("GV",LexicalCategory.Verb)); //"g��ra" (do, make)
+        SWEDISH.addTag(new PosTag("FV",LexicalCategory.Verb)); //f��" (get)
         SWEDISH.addTag(new PosTag("VV",LexicalCategory.Verb)); //all other verbs
         SWEDISH.addTag(new PosTag("TP",Pos.PastParticiple)); //PerfectParticle
         SWEDISH.addTag(new PosTag("SP",Pos.PresentParticiple));
@@ -257,5 +257,56 @@ public final class PosTagSetRegistry {
         SWEDISH.addTag(new PosTag("XX"));
         getInstance().add(SWEDISH);
     }
-
+    /**
+     * POS tags used by the French Treebank as described in 
+     * <a href="http://alpage.inria.fr/statgram/frdep/Publications/crabbecandi-taln2008-final.pdf">
+     * Expériences d’analyse syntaxique statistique du français</a> page 8.<p>
+     * Note that this Tagset was originally introduced by Crabb ́e & Candito, 2008
+     * but the linked paper contains a nice tabular overview of it.
+     */
+    public static final TagSet<PosTag> FRENCH = new TagSet<PosTag>("Treebank+ French","fr");
+    
+    static {
+        //Cat C
+        FRENCH.addTag(new PosTag("CS",Pos.SubordinatingConjunction));
+        FRENCH.addTag(new PosTag("CC",Pos.CoordinatingConjunction));
+        //Cat CL
+        FRENCH.addTag(new PosTag("CLO", Pos.PersonalPronoun)); //Clitic
+        FRENCH.addTag(new PosTag("CLS", Pos.PersonalPronoun)); //Clitic
+        FRENCH.addTag(new PosTag("CLR", Pos.PersonalPronoun)); //Clitic
+        //Cat P
+        FRENCH.addTag(new PosTag("P",Pos.Preposition));
+        FRENCH.addTag(new PosTag("P+D")); //no cat
+        FRENCH.addTag(new PosTag("P+PRO")); //no cat
+        //Cat I
+        FRENCH.addTag(new PosTag("I", LexicalCategory.Interjection)); //no cat
+        //Cat PONCT
+        FRENCH.addTag(new PosTag("PONCT",LexicalCategory.Punctuation));
+        //Cat ET
+        FRENCH.addTag(new PosTag("ET", Pos.Foreign));
+        //Cat A
+        FRENCH.addTag(new PosTag("ADJ",LexicalCategory.Adjective));
+        FRENCH.addTag(new PosTag("ADJWH",LexicalCategory.Adjective));
+        //Cat ADV
+        FRENCH.addTag(new PosTag("ADV",LexicalCategory.Adverb));
+        FRENCH.addTag(new PosTag("ADVWH",LexicalCategory.Adverb));
+        //Cat PRO
+        FRENCH.addTag(new PosTag("PRO",Pos.StrongPersonalPronoun)); //Strong Pronoun
+        FRENCH.addTag(new PosTag("PROWH",Pos.StrongPersonalPronoun)); //Strong Pronoun
+        FRENCH.addTag(new PosTag("PROREL",Pos.StrongPersonalPronoun)); //Strong Pronoun
+        //Cat D
+        FRENCH.addTag(new PosTag("DET",Pos.Determiner));
+        FRENCH.addTag(new PosTag("DETWH",Pos.Determiner));
+        //Cat N
+        FRENCH.addTag(new PosTag("NC", Pos.CommonNoun));
+        FRENCH.addTag(new PosTag("NPP", Pos.ProperNoun));
+        //Cat V
+        FRENCH.addTag(new PosTag("V",Pos.IndicativeVerb));
+        FRENCH.addTag(new PosTag("VIMP",Pos.ImperativeVerb));
+        FRENCH.addTag(new PosTag("VINF",Pos.Infinitive));
+        FRENCH.addTag(new PosTag("VS",Pos.SubjunctiveVerb));
+        FRENCH.addTag(new PosTag("VPP",Pos.PastParticiple));
+        FRENCH.addTag(new PosTag("VPR", Pos.PresentParticiple)); //Verb Present?
+        getInstance().add(FRENCH);
+    }
 }
