@@ -547,9 +547,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
      * @param lines the single FST configurations
      */
     public void setFstConfig(Collection<String> lines) {
-        List<FstConfig> fstConfigs = new ArrayList<FstConfig>();
-        parseFstConfig(lines);
-        this.fstConfigs = Collections.unmodifiableList(fstConfigs);
+        this.fstConfigs = Collections.unmodifiableList(parseFstConfig(lines));
     }
     /**
      * Getter for the FST models that are created in the {@link #finalise()}
@@ -562,7 +560,8 @@ public class SolrYardIndexingDestination implements IndexingDestination {
     /**
      * @param lines
      */
-    private void parseFstConfig(Collection<String> lines) {
+    private List<FstConfig> parseFstConfig(Collection<String> lines) {
+        List<FstConfig> fstConfigs = new ArrayList<FstConfig>();
         for(String line : lines){
             line = line.trim();
             if(!line.isEmpty() && line.charAt(0) != '#'){
@@ -586,6 +585,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
                 fstConfigs.add(new FstConfig(fields[0], fields[1]));
             }
         }
+        return fstConfigs;
     }
     /**
      * Creates a {@link SolrYardConfig} and initialised it to used single Yard
