@@ -637,6 +637,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
                 solrServerRef,solrYardConfig.getIndexConfigurationName());
             if(server != null){
                 log.info("   ... initialised SolrCore with default configuration");
+                this.core = server.getCoreContainer().getCore(solrServerRef.getIndex());
             } else if(solrServerRef.isPath() && new File(solrServerRef.getIndex()).isAbsolute()){
                 //the parsed absolute path is not within the managed SolrServer
                 //so we need to create some CoreContainer and init/register
@@ -650,7 +651,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
                 CoreContainer cc = s.getCoreContainer();
                 CoreDescriptor cd = new CoreDescriptor(cc, "dummy", 
                     solrServerRef.getIndex());
-                SolrCore core = cc.create(cd);
+                this.core = cc.create(cd);
                 cc.register(core, false);
                 server = new EmbeddedSolrServer(cc, "dummy");
                 log.info("   ... initialised existing SolrCore at {}",solrServerRef.getIndex());
@@ -660,7 +661,6 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         }
         log.info("   ... create SolrYard");
         this.solrYard = new SolrYard(server,solrYardConfig, namespacePrefixService);
-        this.core = server.getCoreContainer().getCore(solrServerRef.getIndex());
     }
 
     @Override
