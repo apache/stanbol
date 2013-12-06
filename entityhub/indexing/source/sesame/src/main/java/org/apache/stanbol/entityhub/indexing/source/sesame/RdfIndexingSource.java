@@ -98,6 +98,7 @@ public class RdfIndexingSource extends AbstractSesameBackend implements EntityDa
     protected RdfValueFactory vf = RdfValueFactory.getInstance();
     
     Repository repository;
+    boolean shutdownRepository = false; //if we need to shutdown the repo
     //protected RepositoryConnection connection;
 
     /**
@@ -107,7 +108,8 @@ public class RdfIndexingSource extends AbstractSesameBackend implements EntityDa
     public RdfIndexingSource() {}
     
     /**
-     * 
+     * Constructs a {@link RdfIndexingSource} for the parsed parameters. This
+     * expects that {@link #setConfiguration(Map)} is not called
      * @param repository
      * @param contexts
      */
@@ -116,11 +118,7 @@ public class RdfIndexingSource extends AbstractSesameBackend implements EntityDa
             throw new IllegalArgumentException("The parsed Repository MUST NOT be NULL!");
         }
         if(!repository.isInitialized()){
-            try {
-                repository.initialize();
-            } catch (RepositoryException e) {
-                throw new IllegalStateException("Unable to Initialise the parsed Repository",e);
-            }
+            throw new IllegalStateException("Parsed Repository is not initialized");
         }
         this.repository = repository;
         this.sesameFactory = repository.getValueFactory();
@@ -183,6 +181,7 @@ public class RdfIndexingSource extends AbstractSesameBackend implements EntityDa
             repository = factory.getRepository(repoConfig.getRepositoryImplConfig());
             sesameFactory = repository.getValueFactory();
             repository.initialize();
+            shutdownRepository = true; //we created it, so we do shut it down
         } catch (RepositoryConfigException e) {
             throw new IllegalStateException("Unable to initialise Repository (id: "
                 + repoConfig.getID()+ ", title: "+repoConfig.getTitle() + ", impl: "
@@ -343,11 +342,29 @@ public class RdfIndexingSource extends AbstractSesameBackend implements EntityDa
         ungetLdPathConnection();
         ungetEntityDataProviderConnection();
         //finally shutdown the repository
-        try {
-            repository.shutDown();
-        } catch (RepositoryException e) {
-            log.warn("Error while closing Sesame Connection", e);
+        if(shutdownRepository){
+            try {
+                repository.shutDown();
+            } catch (RepositoryException e) {
+                log.warn("Error while closing Sesame Connection", e);
+            }
         }
+    }
+
+    public final boolean isFollowBNodeState() {
+        return followBNodeState;
+    }
+
+    public final void setFollowBNodeState(boolean followBNodeState) {
+        this.followBNodeState = followBNodeState;
+    }
+
+    public final boolean isIncludeInferred() {
+        return includeInferred;
+    }
+
+    public final void setIncludeInferred(boolean includeInferred) {
+        this.includeInferred = includeInferred;
     }
 
     @Override

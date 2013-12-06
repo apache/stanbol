@@ -489,7 +489,11 @@ public class IndexerImpl implements Indexer {
             errorEntityQueue, log));
         //start post-processing and wait until it has finished
         startAndWait(activeIndexingDeamons);        
-        
+        //close all post processors
+        for(EntityProcessor ep : entityPostProcessors){
+            ep.close();
+        }
+
         
         setState(State.POSTPROCESSED);
     }
@@ -550,8 +554,22 @@ public class IndexerImpl implements Indexer {
             log.info("finalisation started ...");
         }
         indexingDestination.finalise();
+        //close the source and the destination
+        if(entityIterator != null){
+            entityIterator.close();
+        }
+        if(dataIterable != null){
+            dataIterable.close();
+        }
+        if(dataProvider != null){
+            dataProvider.close();
+        }
+        if(scoreProvider != null){
+            scoreProvider.close();
+        }
         setState(State.FINISHED);
     }
+
     @Override
     public void skipIndexEntities() {
         synchronized (stateSync) { //ensure that two threads do not start the
@@ -651,6 +669,10 @@ public class IndexerImpl implements Indexer {
         startAndWait(activeIndexingDeamons);
         //close the stream with IDs
         IOUtils.closeQuietly(indexedEntityIdOutputStream);
+        //call close on all indexing components
+        for(EntityProcessor ep : entityProcessors){
+            ep.close();
+        }
         //set the new state to INDEXED
         setState(State.INDEXED);
     }
