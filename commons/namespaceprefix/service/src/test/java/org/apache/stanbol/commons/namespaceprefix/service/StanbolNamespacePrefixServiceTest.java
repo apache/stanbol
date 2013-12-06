@@ -16,10 +16,12 @@
 */
 package org.apache.stanbol.commons.namespaceprefix.service;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
@@ -46,7 +48,17 @@ public class StanbolNamespacePrefixServiceTest {
         Assert.assertTrue(mappingFile.isFile());
         service = new StanbolNamespacePrefixService(mappingFile);
     }
-
+    @Test
+    public void testInitialisationWithoutLocalMappingFIle() throws IOException {
+        StanbolNamespacePrefixService service = new StanbolNamespacePrefixService(null);
+        service.setPrefix("dummy", "http://www.dummy.org/dummy#");
+        Assert.assertEquals("http://www.dummy.org/dummy#", service.getNamespace("dummy"));
+        service.importPrefixMappings(new ByteArrayInputStream(
+            "dummy2\thttp://www.dummy.org/dummy2#".getBytes(Charset.forName("UTF-8"))));
+        Assert.assertEquals("http://www.dummy.org/dummy2#", service.getNamespace("dummy2"));
+        
+    }
+    
     @Test
     public void testInitialisation(){
         //this tests the namespaces defined in namespaceprefix.mappings file

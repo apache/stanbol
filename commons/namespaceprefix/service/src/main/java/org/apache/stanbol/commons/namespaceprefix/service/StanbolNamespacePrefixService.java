@@ -81,6 +81,8 @@ public class StanbolNamespacePrefixService implements NamespacePrefixService, Na
     private ReadWriteLock mappingsLock = new ReentrantReadWriteLock();
     private SortedMap<String,String> prefixMap = new TreeMap<String,String>();
     private SortedMap<String,List<String>> namespaceMap = new TreeMap<String,List<String>>();
+
+    private BundleContext bundleContext;
     
     /**
      * OSGI constructor <b> DO NOT USE</b> outside of an OSGI environment as this
@@ -94,7 +96,7 @@ public class StanbolNamespacePrefixService implements NamespacePrefixService, Na
      * {@link NamespacePrefixProvider} implementations using the
      * Java {@link ServiceLoader} utility.
      * @param mappingFile the mapping file used to manage local mappings. If
-     * <code>null</code> no local mappings are supported.
+     * <code>null</code> no president local mappings are supported.
      * @throws IOException
      */
     public StanbolNamespacePrefixService(File mappingFile) throws IOException {
@@ -104,6 +106,14 @@ public class StanbolNamespacePrefixService implements NamespacePrefixService, Na
         } //else no mappings yet ... nothing todo
         loader = ServiceLoader.load(NamespacePrefixProvider.class);
         
+    }
+    /**
+     * Imports tab separated prefix mappings from the parsed Stream
+     * @param in
+     * @throws IOException
+     */
+    public void importPrefixMappings(InputStream in) throws IOException {
+        readPrefixMappings(in);
     }
     
     public static NamespacePrefixService getInstance(){
@@ -119,18 +129,24 @@ public class StanbolNamespacePrefixService implements NamespacePrefixService, Na
     
     @Activate
     protected void activate(ComponentContext ctx) throws FileNotFoundException, IOException{
-        final BundleContext bc = ctx.getBundleContext();
+        bundleContext = ctx.getBundleContext();
         //(1) read the mappings
-        mappingsFile = bc.getDataFile(PREFIX_MAPPINGS);
+        mappingsFile = bundleContext.getDataFile(PREFIX_MAPPINGS);
         if(mappingsFile.isFile()){
             readPrefixMappings(new FileInputStream(mappingsFile));
         } //else no mappings yet ... nothing todo
-        providersTracker = new ServiceTracker(ctx.getBundleContext(), NamespacePrefixProvider.class.getName(),
+    }
+
+    /**
+     * 
+     */
+    private void openTracker() {
+        providersTracker = new ServiceTracker(bundleContext, NamespacePrefixProvider.class.getName(),
             new ServiceTrackerCustomizer() {
             
             @Override
             public void removedService(ServiceReference reference, Object service) {
-                bc.ungetService(reference);
+                bundleContext.ungetService(reference);
                 __sortedProviderRef = null;
             }
             
@@ -141,9 +157,9 @@ public class StanbolNamespacePrefixService implements NamespacePrefixService, Na
             
             @Override
             public Object addingService(ServiceReference reference) {
-                Object service = bc.getService(reference);
+                Object service = bundleContext.getService(reference);
                 if(StanbolNamespacePrefixService.this.equals(service)){//we need not to track this instance
-                    bc.ungetService(reference);
+                    bundleContext.ungetService(reference);
                     return null;
                 }
                 __sortedProviderRef = null;
@@ -151,7 +167,6 @@ public class StanbolNamespacePrefixService implements NamespacePrefixService, Na
             }
         });
         providersTracker.open();
-        ctx.getBundleContext().getDataFile(PREFIX_MAPPINGS);
     }
     /**
      * Expected to be called only during activation
@@ -208,10 +223,12 @@ public class StanbolNamespacePrefixService implements NamespacePrefixService, Na
                 try {
                     //(1) persist the mapping
                     if(store){
-                        if(!mappingsFile.isFile()){
-                            mappingsFile.createNewFile();
-                        }
                         if(mappingsFile != null){
+                            if(!mappingsFile.isFile()){
+                                if(!mappingsFile.createNewFile()){
+                                    throw new IOException("Unable to create mapping file "+mappingsFile);
+                                }
+                            }
                             writePrefixMappings(new FileOutputStream(mappingsFile, false));
                         } //else do not persist mappings
                     }
@@ -251,7 +268,14 @@ public class StanbolNamespacePrefixService implements NamespacePrefixService, Na
     }
     private ServiceReference[] getSortedProviderReferences(){
         ServiceReference[] refs = __sortedProviderRef;
-        if(providersTracker != null){ //OSGI variant
+        if(bundleContext != null){ //OSGI variant
+            if(providersTracker == null){ //lazy initialisation of the service tracker
+                synchronized (this) {
+                    if(providersTracker == null && bundleContext != null){
+                        openTracker();
+                    }
+                }
+            }
             //the check for the size ensures that registered/unregistered services
             //are not overlooked when that happens during this method is executed
             //by an other thread.
@@ -285,6 +309,7 @@ public class StanbolNamespacePrefixService implements NamespacePrefixService, Na
     
     @Deactivate
     protected void deactivate(ComponentContext ctx) {
+        bundleContext = null;
         if(providersTracker != null) {
             providersTracker.close();
             providersTracker = null;
