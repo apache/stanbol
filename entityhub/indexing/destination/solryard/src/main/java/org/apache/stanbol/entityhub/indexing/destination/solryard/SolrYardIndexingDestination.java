@@ -244,7 +244,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
      * The number of threads used to build FST models. 
      * Set in {@link #setConfiguration(Map)}
      */
-    private int fstThreads;
+    private int fstThreads = DEFAULT_FST_THREADS;
 
     private NamespacePrefixService  namespacePrefixService;
     
@@ -548,6 +548,20 @@ public class SolrYardIndexingDestination implements IndexingDestination {
      */
     public void setFstConfig(Collection<String> lines) {
         this.fstConfigs = Collections.unmodifiableList(parseFstConfig(lines));
+    }
+    /**
+     * Setter for the ThreadPool used to create FST models
+     * @param size
+     */
+    public void setFstThreads(int size){
+        if(size < 1){
+            this.fstThreads = DEFAULT_FST_THREADS;
+        } else {
+            this.fstThreads = size;
+        }
+    }
+    public int getFstThreads() {
+        return fstThreads;
     }
     /**
      * Getter for the FST models that are created in the {@link #finalise()}
