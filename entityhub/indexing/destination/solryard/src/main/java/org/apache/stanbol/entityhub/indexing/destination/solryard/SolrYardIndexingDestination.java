@@ -28,6 +28,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -50,6 +51,8 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.core.CoreContainer;
+import org.apache.solr.core.CoreDescriptor;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.dataimport.SolrWriter;
 import org.apache.solr.schema.IndexSchema;
@@ -68,11 +71,14 @@ import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.SolrConstants;
 import org.apache.stanbol.commons.solr.managed.ManagedIndexConstants;
 import org.apache.stanbol.commons.solr.managed.ManagedSolrServer;
+import org.apache.stanbol.commons.solr.managed.standalone.DefaultStandaloneManagedSolrServerWrapper;
 import org.apache.stanbol.commons.solr.managed.standalone.StandaloneEmbeddedSolrServerProvider;
+import org.apache.stanbol.commons.solr.managed.standalone.StandaloneManagedSolrServer;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYard;
 import org.apache.stanbol.entityhub.yard.solr.impl.SolrYardConfig;
 import org.slf4j.Logger;
@@ -239,6 +245,8 @@ public class SolrYardIndexingDestination implements IndexingDestination {
      * Set in {@link #setConfiguration(Map)}
      */
     private int fstThreads;
+
+    private NamespacePrefixService  namespacePrefixService;
     
     /**
      * This Constructor relays on a subsequent call to 
@@ -252,8 +260,9 @@ public class SolrYardIndexingDestination implements IndexingDestination {
      * @param yardName the name of the SolrYard
      * @param solrLocation the location of the SolrYard
      */
-    public SolrYardIndexingDestination(String yardName,String solrLocation){
-        this(yardName,solrLocation,null,null,null);
+    public SolrYardIndexingDestination(String yardName,String solrLocation, 
+            NamespacePrefixService namespacePrefixService){
+        this(yardName,solrLocation,null,null,null,namespacePrefixService);
     }
     /**
      * Constructs an SolrYard based IndexingTarget based on the parsed parameters
@@ -269,20 +278,22 @@ public class SolrYardIndexingDestination implements IndexingDestination {
                                        final String parsedSolrLocation,
                                        final String solrConfig,
                                        Collection<FieldMapping> indexFieldConfig,
-                                       Map<String,Float> fieldBoostMap){
+                                       Map<String,Float> fieldBoostMap,
+                                       NamespacePrefixService namespacePrefixService){
         if(yardName == null || yardName.isEmpty()){
             throw new IllegalArgumentException("Tha name of the Yard MUST NOT be NULL nor empty!");
         }
         if(parsedSolrLocation == null || parsedSolrLocation.isEmpty()){
             throw new IllegalArgumentException("Tha parsed Solr location MUST NOT be NULL nor empty!");
         }
+        if(namespacePrefixService == null){
+            throw new IllegalArgumentException("The parsed NamespacePrefixService MUST NOT be NULL!");
+        }
         this.indexFieldConfiguration = indexFieldConfig;
         this.solrYardConfig = createSolrYardConfig(yardName, parsedSolrLocation);
         //init the manages solr directory relative to the working directory
-        File managedDirectory = new File(
-            System.getProperty("user.dir"),DEFAULT_SOLR_INDEX_DIRECTORY);
-        File distDirectory = new File(
-        System.getProperty("user.dir"),"dist");
+        File managedDirectory = new File(System.getProperty("user.dir"), DEFAULT_SOLR_INDEX_DIRECTORY);
+        File distDirectory = new File(System.getProperty("user.dir"),"dist");
         //init the solr directory and validate the parsed values
         File[] solrDirectories = initSolrDirectories(parsedSolrLocation, solrConfig, 
             managedDirectory,distDirectory);
@@ -348,7 +359,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
             solrIndexArchiveRef = null;
         } else { // local Directory
             File parsedSolrLocationFile = new File(parsedSolrLocation);
-            if(parsedSolrLocationFile.isAbsolute()){ //if not absolute 
+            if(parsedSolrLocationFile.isAbsolute()){ //if absolute 
                 //-> assume an already configured Solr index
                 if(distDirectory == null){ //check that a dist dir is configured
                     throw new IllegalStateException("In case the Solr index location"+
@@ -389,7 +400,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
                 }
             }
             //for all local indexes configure the distribution file names
-            if(!distDirectory.isDirectory()){
+            if(distDirectory != null && !distDirectory.isDirectory()){
                 if(!distDirectory.mkdirs()){
                     throw new IllegalStateException("Unable to create distribution "+
                         "Directory"+distDirectory.getAbsolutePath());
@@ -405,6 +416,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
     @Override
     public void setConfiguration(Map<String,Object> config) {
         indexingConfig = (IndexingConfig)config.get(IndexingConfig.KEY_INDEXING_CONFIG);
+        namespacePrefixService = indexingConfig.getNamespacePrefixService();
         String yardName;
         //read the Yard name configuration
         Object value = config.get(PARAM_YARD_NAME);
@@ -510,30 +522,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
                     "Unable to read FST configuration file %s",
                     fstConfigFile),e);
             }
-            fstConfigs = new ArrayList<FstConfig>();
-            for(String line : lines){
-                line = line.trim();
-                if(!line.isEmpty() && line.charAt(0) != '#'){
-                    String[] fields = new String[] {null,null};
-                    int index = -1;
-                    for(String part : line.split("=|;")){
-                        if(index >= 0){
-                            fields[index] = part;
-                            index = -1;
-                        } else if("index".equalsIgnoreCase(part)){
-                            index = 0;
-                        } else if("store".equalsIgnoreCase(part)){
-                            index = 1;
-                        }
-                    }
-                    if(fields[0] == null){
-                        throw new IllegalArgumentException("Invalid FST configuration "
-                            + "line: "+line +". Param 'index={field}' is required "
-                            + "(syntax: 'index={field};store={field}', 'store is optional'')!");
-                    }
-                    fstConfigs.add(new FstConfig(fields[0], fields[1]));
-                }
-            }
+            setFstConfig(lines);
         }
         value = config.get(FST_THREADS);
         if(value instanceof Number){
@@ -550,6 +539,53 @@ public class SolrYardIndexingDestination implements IndexingDestination {
             fstThreads = DEFAULT_FST_THREADS;
         }
         
+    }
+    /**
+     * Setter for the FST configurations using the same format as defined by the
+     * configuration file. This defines the FST models create in the
+     * {@link #finalise()} phase of the indexing process
+     * @param lines the single FST configurations
+     */
+    public void setFstConfig(Collection<String> lines) {
+        List<FstConfig> fstConfigs = new ArrayList<FstConfig>();
+        parseFstConfig(lines);
+        this.fstConfigs = Collections.unmodifiableList(fstConfigs);
+    }
+    /**
+     * Getter for the FST models that are created in the {@link #finalise()}
+     * phase
+     * @return the FST c
+     */
+    public List<FstConfig> getFstConfig(){
+        return fstConfigs;
+    }
+    /**
+     * @param lines
+     */
+    private void parseFstConfig(Collection<String> lines) {
+        for(String line : lines){
+            line = line.trim();
+            if(!line.isEmpty() && line.charAt(0) != '#'){
+                String[] fields = new String[] {null,null};
+                int index = -1;
+                for(String part : line.split("=|;")){
+                    if(index >= 0){
+                        fields[index] = part;
+                        index = -1;
+                    } else if("index".equalsIgnoreCase(part)){
+                        index = 0;
+                    } else if("store".equalsIgnoreCase(part)){
+                        index = 1;
+                    }
+                }
+                if(fields[0] == null){
+                    throw new IllegalArgumentException("Invalid FST configuration "
+                        + "line: "+line +". Param 'index={field}' is required "
+                        + "(syntax: 'index={field};store={field}', 'store is optional'')!");
+                }
+                fstConfigs.add(new FstConfig(fields[0], fields[1]));
+            }
+        }
     }
     /**
      * Creates a {@link SolrYardConfig} and initialised it to used single Yard
@@ -595,13 +631,35 @@ public class SolrYardIndexingDestination implements IndexingDestination {
                 solrServerRef,solrServerRef.getIndex());
         } else {
             //allow the default initialisation
-            log.info("   ... use default Solr Configuration");
             solrYardConfig.setAllowInitialisation(Boolean.TRUE);
+            StandaloneEmbeddedSolrServerProvider.getInstance();
             server = StandaloneEmbeddedSolrServerProvider.getInstance().getSolrServer(
                 solrServerRef,solrYardConfig.getIndexConfigurationName());
+            if(server != null){
+                log.info("   ... initialised SolrCore with default configuration");
+            } else if(solrServerRef.isPath() && new File(solrServerRef.getIndex()).isAbsolute()){
+                //the parsed absolute path is not within the managed SolrServer
+                //so we need to create some CoreContainer and init/register
+                //the core at the parsed location
+                StandaloneManagedSolrServer s;
+                if(solrServerRef.getServer() == null){
+                    s = StandaloneManagedSolrServer.getManagedServer();
+                } else {
+                    s = StandaloneManagedSolrServer.getManagedServer(solrServerRef.getServer());
+                }
+                CoreContainer cc = s.getCoreContainer();
+                CoreDescriptor cd = new CoreDescriptor(cc, "dummy", 
+                    solrServerRef.getIndex());
+                SolrCore core = cc.create(cd);
+                cc.register(core, false);
+                server = new EmbeddedSolrServer(cc, "dummy");
+                log.info("   ... initialised existing SolrCore at {}",solrServerRef.getIndex());
+            } else {
+                throw new IllegalStateException("Unable to initialise SolrCore "+solrServerRef);
+            }
         }
         log.info("   ... create SolrYard");
-        this.solrYard = new SolrYard(server,solrYardConfig,indexingConfig.getNamespacePrefixService());
+        this.solrYard = new SolrYard(server,solrYardConfig, namespacePrefixService);
         this.core = server.getCoreContainer().getCore(solrServerRef.getIndex());
     }
 
@@ -617,11 +675,13 @@ public class SolrYardIndexingDestination implements IndexingDestination {
     @Override
     public void finalise() {
         //write the indexing configuration
-        FieldMapper mapper = FieldMappingUtils.createDefaultFieldMapper(indexFieldConfiguration);
-        try {
-            CacheUtils.storeBaseMappingsConfiguration(solrYard, mapper);
-        } catch (YardException e) {
-            log.error("Unable to store FieldMapperConfiguration to the Store!",e);
+        if(indexFieldConfiguration != null){
+            FieldMapper mapper = FieldMappingUtils.createDefaultFieldMapper(indexFieldConfiguration);
+            try {
+                CacheUtils.storeBaseMappingsConfiguration(solrYard, mapper);
+            } catch (YardException e) {
+                log.error("Unable to store FieldMapperConfiguration to the Store!",e);
+            }
         }
         log.info(" ... optimize SolrCore");
         try {
@@ -696,52 +756,55 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         log.info(" ... close SolrCore");
         solrYard.close();
         
-        //zip the index and copy it over to distribution
-        log.info(" ... build Solr index archive");
-        if(solrArchive != null){
-            try {
-                writeSolrIndexArchive();
-            }catch (IOException e) {
-                log.error("Error while creating Solr Archive "+solrArchive.getAbsolutePath()+
-                    "! The archive will not be created!",e);
-                log.error("As a Workaround you can manually create the Solr Archive " +
-                        "by creating a ZIP archive with the contents of the Folder " +
-                        solrIndexLocation+"!");
+        //if a indexing config is present we need to create the distribution files
+        if(indexingConfig != null){
+            //zip the index and copy it over to distribution
+            log.info(" ... build Solr index archive");
+            if(solrArchive != null){
+                try {
+                    writeSolrIndexArchive(indexingConfig);
+                }catch (IOException e) {
+                    log.error("Error while creating Solr Archive "+solrArchive.getAbsolutePath()+
+                        "! The archive will not be created!",e);
+                    log.error("As a Workaround you can manually create the Solr Archive " +
+                            "by creating a ZIP archive with the contents of the Folder " +
+                            solrIndexLocation+"!");
+                }
             }
-        }
-        if(solrArchiveRef != null){
+            if(solrArchiveRef != null){
+                try {
+                    writeSolrIndexReference(indexingConfig);
+                } catch (IOException e) {
+                    log.error("Error while creating Solr Archive Reference "+
+                        solrArchiveRef.getAbsolutePath()+
+                        "! The file will not be created!",e);
+                }
+            }
+            //finally create the Osgi Configuration
             try {
-                writeSolrIndexReference();
+                OsgiConfigurationUtil.writeSiteConfiguration(indexingConfig);
             } catch (IOException e) {
-                log.error("Error while creating Solr Archive Reference "+
-                    solrArchiveRef.getAbsolutePath()+
-                    "! The file will not be created!",e);
+                log.error("Unable to write OSGI configuration file for the referenced site",e);
             }
+            try {
+                OsgiConfigurationUtil.writeCacheConfiguration(indexingConfig);
+            } catch (IOException e) {
+                log.error("Unable to write OSGI configuration file for the Cache",e);
+            }
+            //create the SolrYard configuration
+            try {
+                writeSolrYardConfiguration(indexingConfig);
+            } catch (IOException e) {
+                log.error("Unable to write OSGI configuration file for the SolrYard",e);
+            }
+            //create the bundle
+            OsgiConfigurationUtil.createBundle(indexingConfig);
         }
-        //finally create the Osgi Configuration
-        try {
-            OsgiConfigurationUtil.writeSiteConfiguration(indexingConfig);
-        } catch (IOException e) {
-            log.error("Unable to write OSGI configuration file for the referenced site",e);
-        }
-        try {
-            OsgiConfigurationUtil.writeCacheConfiguration(indexingConfig);
-        } catch (IOException e) {
-            log.error("Unable to write OSGI configuration file for the Cache",e);
-        }
-        //create the SolrYard configuration
-        try {
-            writeSolrYardConfiguration();
-        } catch (IOException e) {
-            log.error("Unable to write OSGI configuration file for the SolrYard",e);
-        }
-        //create the bundle
-        OsgiConfigurationUtil.createBundle(indexingConfig);
     }
     /**
      * 
      */
-    private void writeSolrIndexReference() throws IOException {
+    private void writeSolrIndexReference(IndexingConfig indexingConfig) throws IOException {
         Properties properties = new Properties();
         properties.setProperty("Index-Archive", solrArchive.getName());
         properties.setProperty("Name", solrYardConfig.getName());
@@ -763,7 +826,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
     /**
      * 
      */
-    private void writeSolrIndexArchive() throws IOException{
+    private void writeSolrIndexArchive(IndexingConfig indexingConfig) throws IOException{
         //we need to get the length of the parent to calc the entry names for
         //the archvie
         //Note that the Archive need to include the name of the index,
@@ -798,7 +861,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
      * @throws IOException 
      * 
      */
-    private void writeSolrYardConfiguration() throws IOException {
+    private void writeSolrYardConfiguration(IndexingConfig indexingConfig) throws IOException {
         Dictionary<String,Object> yardConfig = OsgiConfigurationUtil.createYardConfig(indexingConfig);
         //we need now add the solrYard specific parameters
         String fieldBoostName = solrYardConfig.getDocumentBoostFieldName();
