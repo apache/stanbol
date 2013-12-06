@@ -108,7 +108,7 @@ public class StandaloneEmbeddedSolrServerProvider {
         } else {
             coreName = indexRef.getIndex();
         } 
-        if(!server.isManagedIndex(coreName)){
+        if(coreName != null && !server.isManagedIndex(coreName)){
             if(configName != null){
                 try {
                     server.createSolrIndex(coreName, configName, null);
