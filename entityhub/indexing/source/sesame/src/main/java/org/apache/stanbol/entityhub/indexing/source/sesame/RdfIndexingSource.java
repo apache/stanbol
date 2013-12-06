@@ -100,7 +100,32 @@ public class RdfIndexingSource extends AbstractSesameBackend implements EntityDa
     Repository repository;
     //protected RepositoryConnection connection;
 
+    /**
+     * Default Constructor. Expects that the config is parsed by calling
+     * {@link #setConfiguration(Map)}
+     */
+    public RdfIndexingSource() {}
     
+    /**
+     * 
+     * @param repository
+     * @param contexts
+     */
+    public RdfIndexingSource(Repository repository, Resource...contexts){
+        if(repository == null){
+            throw new IllegalArgumentException("The parsed Repository MUST NOT be NULL!");
+        }
+        if(!repository.isInitialized()){
+            try {
+                repository.initialize();
+            } catch (RepositoryException e) {
+                throw new IllegalStateException("Unable to Initialise the parsed Repository",e);
+            }
+        }
+        this.repository = repository;
+        this.sesameFactory = repository.getValueFactory();
+        this.contexts = contexts;
+    }
     
     /**
      * If {@link BNode} being values of outgoing triples should be followed.
@@ -124,15 +149,13 @@ public class RdfIndexingSource extends AbstractSesameBackend implements EntityDa
      */
     protected final List<EntityDataIterator> entityDataIterators = new CopyOnWriteArrayList<EntityDataIterator>();
 
-    private IndexingConfig indexingConfig;
-
     private ResourceLoader loader;
 
     private String baseUri;
     
     @Override
     public void setConfiguration(Map<String,Object> config) {
-        indexingConfig = (IndexingConfig)config.get(IndexingConfig.KEY_INDEXING_CONFIG);
+        IndexingConfig indexingConfig = (IndexingConfig)config.get(IndexingConfig.KEY_INDEXING_CONFIG);
         //(0) parse the baseUri
         Object value = config.get(PARAM_BASE_URI);
         baseUri = value == null ? DEFAULT_BASE_URI : value.toString();
@@ -300,12 +323,14 @@ public class RdfIndexingSource extends AbstractSesameBackend implements EntityDa
     @Override
     public boolean needsInitialisation() {
         //check if we need to load resources
-        return !loader.getResources(ResourceState.REGISTERED).isEmpty();
+        return loader != null && !loader.getResources(ResourceState.REGISTERED).isEmpty();
     }
 
     @Override
     public void initialise() {
-        loader.loadResources();
+        if(loader != null){
+            loader.loadResources();
+        }
     }
 
     @Override
@@ -483,6 +508,8 @@ public class RdfIndexingSource extends AbstractSesameBackend implements EntityDa
         }
         
     }
+    
+    
     
     /**
      * Extracts the triples that belong to the {@link Representation} with the
