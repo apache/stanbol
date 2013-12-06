@@ -46,23 +46,24 @@ public class FiledMapperProcessor implements EntityProcessor{
      * afterwards!
      */
     public FiledMapperProcessor(){
-        this(null);
+        this(null,null);
     }
     /**
      * Internally used to initialise the {@link ValueFactory}
      * @param vf the value factory or <code>null</code> to use the {@link InMemoryValueFactory}.
      */
-    private FiledMapperProcessor(ValueFactory vf){
+    private FiledMapperProcessor(NamespacePrefixService nps, ValueFactory vf){
         setValueFactory(vf);
+        this.nsPrefixService = nps;
     }
-    public FiledMapperProcessor(FieldMapper mapper, ValueFactory vf){
-        this(vf);
+    public FiledMapperProcessor(FieldMapper mapper, NamespacePrefixService nps, ValueFactory vf){
+        this(nps,vf);
         if(mapper == null){
             throw new IllegalArgumentException("The parsed FieldMapper MUST NOT be NULL!");
         }
     }
-    public FiledMapperProcessor(Iterator<String> mappings,ValueFactory vf){
-        this(vf);
+    public FiledMapperProcessor(Iterator<String> mappings, NamespacePrefixService nps, ValueFactory vf){
+        this(nps, vf);
         if(mappings == null){
             throw new IllegalArgumentException("The parsed field mappings MUST NOT be NULL!");
         }
@@ -71,8 +72,8 @@ public class FiledMapperProcessor implements EntityProcessor{
             throw new IllegalStateException("The parsed field mappings MUST contain at least a single valid mapping!");
         }
     }
-    public FiledMapperProcessor(InputStream mappings, ValueFactory vf) throws IOException{
-        this(vf);
+    public FiledMapperProcessor(InputStream mappings, NamespacePrefixService nps, ValueFactory vf) throws IOException{
+        this(nps, vf);
         if(mappings == null){
             throw new IllegalArgumentException("The parsed field mappings MUST NOT be NULL!");
         }
