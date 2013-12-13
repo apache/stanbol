@@ -535,6 +535,7 @@ public class FstLinkingEngineComponent {
      * @param server the SolrServer (or <code>null</code>
      */
     protected void updateEngineRegistration(ServiceReference reference, SolrServer server) {
+        log.info(" ... updateEngineRegistration for {}: {}",getClass().getSimpleName(), engineName);
         if(reference != null && server == null){
             server = solrServerTracker.getService(reference);
         }
@@ -545,7 +546,7 @@ public class FstLinkingEngineComponent {
         synchronized (this) { //init one after the other in case of multiple calls
             SolrCore core;
             IndexConfiguration indexConfig; // the indexConfig build by this call
-            try {
+            try { //try to init - finally unregisterEngine
                 if(bundleContext == null){ //already deactivated
                     return; //NOTE: unregistering is done in finally block
                 }
@@ -560,6 +561,7 @@ public class FstLinkingEngineComponent {
                     core = null;
                 }
                 if(core == null){ //no SolrCore
+                    log.info("   - SolrCore not yet present");
                     return; //NOTE: unregistering is done in finally block
                 } //else - we do have a SolrCore
                 //File fstDir = new File(dataDir,"fst");
@@ -580,18 +582,15 @@ public class FstLinkingEngineComponent {
                     indexConfig.setSkipAltTokens(skipAltTokensConfig);
                 }
                 //create a new searcher for creating FSTs
-                boolean foundCorpus;
-                try {
-                    foundCorpus = indexConfig.activate();
-                }catch (RuntimeException e) { //in case of any excpetion
+                if(!indexConfig.activate()){
                     unregisterEngine(); //unregister current engine and clean up
-                    throw e; //re-throw 
-                }
-                if(!foundCorpus){
-                    unregisterEngine(); //unregister current engine and clean up
-                    throw new IllegalStateException("Processing of the FST configuration " +
-                    		"was not successfull for any language. See WARN level loggings " +
-                    		"for more details!");
+                    log.error("Processing of the FST configuration was not successfull "
+                        + "for any language. See WARN level loggings for more details!");
+                    log.error("  ... FstLinkingEnigne wiht name {} will not be registered!"
+                        + "Please check the FST config of the engine corresponds with "
+                        + "available fields in the configured SolrCore {} (dir: {})", 
+                        new Object []{engineName, core.getName(), 
+                                core.getCoreDescriptor().getInstanceDir()});
                 } else { //some FST corpora initialised
                     if(log.isInfoEnabled()){ //log the initialised languages
                         Set<String> langSet = new HashSet<String>(indexConfig.getCorpusLanguages());
@@ -606,7 +605,7 @@ public class FstLinkingEngineComponent {
                 }
             } finally {
                 //in any case (even an Exception) ensure that the current
-                //engine registration is unregistered and the currentyl used
+                //engine registration is unregistered and the currently used
                 //SolrCore is unregistered!
                 unregisterEngine();
             }
@@ -633,6 +632,7 @@ public class FstLinkingEngineComponent {
             String[] services = new String [] {
                     EnhancementEngine.class.getName(),
                     ServiceProperties.class.getName()};
+            log.info(" ... register {}: {}", engine.getClass().getSimpleName(),engineName);
             this.engineRegistration = bundleContext.registerService(services,engine, engineMetadata);
             this.solrServerReference = reference;
             this.solrCore = core;
@@ -680,6 +680,7 @@ public class FstLinkingEngineComponent {
         //use local copies for method calls to avoid concurrency issues
         ServiceRegistration engineRegistration = this.engineRegistration;
         if(engineRegistration != null){
+            log.info(" ... unregister Lucene FSTLinkingEngine {}",engineName);
             engineRegistration.unregister();
             this.engineRegistration = null; //reset the field
         }
@@ -737,6 +738,7 @@ public class FstLinkingEngineComponent {
      */
     @Deactivate
     protected void deactivate(ComponentContext ctx) {
+        log.info(" ... deactivate {}: {}",getClass().getSimpleName(), engineName);
         if(solrServerTracker != null){
             //closing the tracker will also cause registered engines to be
             //unregistered as service (see #updateEngineRegistration())

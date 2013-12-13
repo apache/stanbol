@@ -399,7 +399,7 @@ public class IndexConfiguration {
         if(fstDirectory == null){
             fstDirectory = new File(index.getDataDir(),"fst");
         }
-        log.info("> process FST config for {} (FST dir: {})", index.getName(),
+        log.debug("> process FST config for {} (FST dir: {})", index.getName(),
             fstDirectory.getAbsolutePath());
         //init the fstDirectory
         if(fstDirectory.isFile()){
@@ -411,7 +411,7 @@ public class IndexConfiguration {
         IndexSchema schema = index.getLatestSchema();
         boolean foundCorpus = false;
         //(0) get basic parameters of the default configuration
-        log.info(" - default config");
+        log.debug(" - default config");
         Map<String,String> defaultParams = fstConfig.getDefaultParameters();
         String fstName = defaultParams.get(IndexConfiguration.PARAM_FST);
         String indexField = defaultParams.get(IndexConfiguration.PARAM_FIELD);
