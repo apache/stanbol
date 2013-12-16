@@ -189,7 +189,7 @@ public class SiteManagerRootResource extends BaseStanbolResource {
             for (String site : referencedSiteManager.getSiteIds()) {
                 referencedSites.put(String.format("%sentityhub/site/%s/", uriInfo.getBaseUri(), site));
             }
-            ResponseBuilder rb =  Response.ok(referencedSites);
+            ResponseBuilder rb =  Response.ok(referencedSites.toString());
             rb.header(HttpHeaders.CONTENT_TYPE, acceptable+"; charset=utf-8");
             //addCORSOrigin(servletContext, rb, headers);
             return rb.build();
