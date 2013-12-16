@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.entityhub.yard.sesame;
 
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;

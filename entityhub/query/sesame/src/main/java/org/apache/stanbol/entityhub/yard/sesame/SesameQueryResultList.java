@@ -29,7 +29,7 @@ import org.openrdf.model.Model;
 
 /**
  * {@link QueryResultList} implementation for Sesame. This provides
- * access to the Sesame {@link Model} holding the dat. Mainly for the use of
+ * access to the Sesame {@link Model} holding the data. Mainly for the use of
  * Sesame specific RDF serializer.
  * 
  * @author Rupert Westenthaler

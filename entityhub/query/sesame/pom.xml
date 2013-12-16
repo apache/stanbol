@@ -26,12 +26,12 @@
     <relativePath>../..</relativePath>
   </parent>
 
-  <artifactId>org.apache.stanbol.entityhub.yard.sesame</artifactId>
+  <artifactId>org.apache.stanbol.entityhub.query.sesame</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Entityhub Yard based on Sesame Sail</name>
-  <description>This bundle provides implementation of the Entityhub Yard interface(s)
-    based on a Sesame Repository.
+  <name>Apache Stanbol Entityhub Query Model for Sesame</name>
+  <description>
+    This bundle provides QueryResultList implementation for Sesame
   </description>
 
   <inceptionYear>2013</inceptionYear>
@@ -46,10 +46,10 @@
   
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/yard/sesame
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/query/sesame
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/yard/sesame
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/query/sesame
     </developerConnection>
     <url>http://stanbol.apache.org</url>
   </scm>
@@ -63,12 +63,12 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.apache.stanbol.entityhub.servicesapi.yard; provide:=true; version="[0.11,1.1)",
+              org.apache.stanbol.entityhub.servicesapi.*; provide:=true; version="[0.11,1.1)",
               *
             </Import-Package>
-            <Private-Package>
-              org.apache.stanbol.entityhub.yard.sesame.impl;version=${project.version}
-            </Private-Package>
+            <Export-Package>
+              org.apache.stanbol.entityhub.query.sesame;version=${project.version}
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>
@@ -83,51 +83,16 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.model.sesame</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.query.sesame</artifactId>
+      <artifactId>org.apache.stanbol.entityhub.query.sparql</artifactId>
       <version>1.0.0-SNAPSHOT</version>
-    </dependency>
-    <dependency> <!-- the sesame repository API -->
-      <groupId>org.openrdf.sesame</groupId>
-      <artifactId>sesame-repository-api</artifactId>
     </dependency>
 
-    <!-- for tests -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.test</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openrdf.sesame</groupId>
-      <artifactId>sesame-sail-memory</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openrdf.sesame</groupId>
-      <artifactId>sesame-repository-sail</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>  <!-- used for debug level logging during tests -->
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <scope>test</scope>
-    </dependency>
+    <!-- no tests (tested by the SesameYard tests) -->
   </dependencies>
 
 </project>
