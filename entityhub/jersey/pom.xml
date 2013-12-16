@@ -65,6 +65,7 @@
               org.apache.stanbol.entityhub.jersey.*; version=${project.version},
               org.apache.stanbol.entityhub.web.impl; version=${project.version},
               org.apache.stanbol.entityhub.web.writer; version=${project.version},
+              org.apache.stanbol.entityhub.web.reader; version=${project.version}
             </Private-Package>
           </instructions>
         </configuration>

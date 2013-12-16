@@ -61,10 +61,14 @@ public class EntityWriter implements MessageBodyWriter<Entity> {
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        if(mediaType.isWildcardType() && mediaType.isWildcardSubtype()){
-            mediaType = ModelWriter.DEFAULT_MEDIA_TYPE;
+        if(Entity.class.isAssignableFrom(type)){
+            if(mediaType.isWildcardType() && mediaType.isWildcardSubtype()){
+                mediaType = ModelWriter.DEFAULT_MEDIA_TYPE;
+            }
+            return writerRegistry.isWriteable(getMatchType(mediaType), null);
+        } else {
+            return false;
         }
-        return writerRegistry.isWriteable(getMatchType(mediaType), null);
     }
 
     @Override
