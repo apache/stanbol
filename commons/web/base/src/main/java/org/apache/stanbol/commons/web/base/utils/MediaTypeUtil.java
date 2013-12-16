@@ -39,11 +39,16 @@ public final class MediaTypeUtil {
     private MediaTypeUtil(){}
     
     /**
+     * JSON-LD now uses <code>application/ld+json</code>
+     */
+    public static final String JSON_LD = "application/ld+json";
+    
+    /**
      * Unmodifiable Set with the Media Types supported RDF serializations
      */
     public static final Set<String> SUPPORTED_RDF_TYPES = 
         Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-            APPLICATION_JSON,RDF_XML,N3,TURTLE,X_TURTLE,RDF_JSON,N_TRIPLE)));
+            APPLICATION_JSON, JSON_LD, RDF_XML, N3, TURTLE, X_TURTLE, RDF_JSON, N_TRIPLE)));
     /**
      * THe default RDF Type {@link MediaType#APPLICATION_JSON_TYPE} for JSON-LD
      */

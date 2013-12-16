@@ -55,10 +55,10 @@ import org.slf4j.LoggerFactory;
 //TODO this seems to be in the wron project as it is not web-specific
 @Component
 @Service(SerializingProvider.class)
-@SupportedFormat(JsonLdSerializerProvider.SUPPORTED_FORMAT)
+@SupportedFormat({JsonLdSerializerProvider.JSON_LD, APPLICATION_JSON})
 public class JsonLdSerializerProvider implements SerializingProvider {
 
-    public static final String SUPPORTED_FORMAT = APPLICATION_JSON;
+    public static final String JSON_LD = "application/ld+json";
 
     private static final String RDF_NS_TYPE="http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 
@@ -79,7 +79,8 @@ public class JsonLdSerializerProvider implements SerializingProvider {
         } else {
             deParameterizedIdentifier = formatIdentifier;
         }
-        if (!deParameterizedIdentifier.equalsIgnoreCase(SUPPORTED_FORMAT)) {
+        if (!deParameterizedIdentifier.equalsIgnoreCase(JSON_LD) &&
+                !deParameterizedIdentifier.equalsIgnoreCase(APPLICATION_JSON)) {
             logger.info("serialize() the format '" + deParameterizedIdentifier + "' is not supported by this implementation");
             return;
         }
