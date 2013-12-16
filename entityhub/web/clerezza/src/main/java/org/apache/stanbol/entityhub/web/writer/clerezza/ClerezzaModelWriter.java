@@ -73,11 +73,13 @@ public class ClerezzaModelWriter implements ModelWriter {
      * {@link MediaType} instance for {@link SupportedFormat#X_TURTLE}
      */
     public static final MediaType X_TURTLE_TYPE = MediaType.valueOf(SupportedFormat.X_TURTLE);
+    
+    public static final MediaType N_TRIPLE_TYPE = MediaType.valueOf(SupportedFormat.N_TRIPLE);
     /**
      * Read-only list of the supported RDF formats
      */
     public static final List<MediaType> SUPPORTED_RDF_TYPES = Collections.unmodifiableList(
-        Arrays.asList(TURTLE_TYPE, JSONLD_TYPE, N3_TYPE, RDF_JSON_TYPE, RDF_XML_TYPE, X_TURTLE_TYPE));
+        Arrays.asList(TURTLE_TYPE, JSONLD_TYPE, N3_TYPE, N_TRIPLE_TYPE, RDF_JSON_TYPE, RDF_XML_TYPE, X_TURTLE_TYPE));
 
     //some Concepts and Relations we use to represent Entities
     private final static UriRef FOAF_DOCUMENT = new UriRef(NamespaceEnum.foaf+"Document");

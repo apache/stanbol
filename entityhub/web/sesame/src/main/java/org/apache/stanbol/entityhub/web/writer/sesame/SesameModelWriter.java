@@ -2,14 +2,19 @@ package org.apache.stanbol.entityhub.web.writer.sesame;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
@@ -36,6 +41,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.Rio;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,19 +49,8 @@ import org.slf4j.LoggerFactory;
 @Service
 public class SesameModelWriter implements ModelWriter {
     
-    private final Logger log = LoggerFactory.getLogger(SesameModelWriter.class);
+    private static final Logger log = LoggerFactory.getLogger(SesameModelWriter.class);
     
-    public static final MediaType TURTLE = MediaType.valueOf("text/turtle");
-    public static final MediaType JSONLD = MediaType.valueOf("application/ld+json");
-    public static final MediaType N3 = MediaType.valueOf("text/rdf+n3");
-    public static final MediaType N_TRIPLE = MediaType.valueOf("text/rdf+nt");
-    public static final MediaType RDF_JSON = MediaType.valueOf("application/rdf+json");
-    public static final MediaType RDF_XML = MediaType.valueOf("application/rdf+xml");
-    public static final MediaType X_TURTLE = MediaType.valueOf("application/x-turtle");
-
-    public static final List<MediaType> SUPPORTED_RDF_TYPES = Collections.unmodifiableList(
-        Arrays.asList(TURTLE, JSONLD, N3, N_TRIPLE, RDF_JSON, RDF_XML, X_TURTLE));
-
     private final static RdfValueFactory valueFactory = RdfValueFactory.getInstance();
     private final static ValueFactory sesameFactory = ValueFactoryImpl.getInstance();
 
@@ -82,6 +77,37 @@ public class SesameModelWriter implements ModelWriter {
     @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
     NamespacePrefixService nsPrefixService;
     
+    /**
+     * The list with the supported {@link MediaType}s as provided by the
+     * Sesame {@link RDFFormat} class
+     */
+    private List<MediaType> supportedRrfFormats;
+
+    
+    @Activate
+    protected void activate(ComponentContext ctx){
+        //parse the supported RDF formats
+        Collection<String> mts = new LinkedHashSet<String>();
+        for(RDFFormat format : RDFFormat.values()){
+            mts.addAll(format.getMIMETypes());
+        }
+        List<MediaType> formats = new ArrayList<MediaType>(mts.size());
+        for(String format : mts){
+            try {
+                formats.add(MediaType.valueOf(format));
+            } catch (IllegalArgumentException e){
+                log.error("Unable to parse MediaType for Sesame RDF format '"
+                        + format + "'!",e);
+            }
+        }
+        supportedRrfFormats = Collections.unmodifiableList(formats);
+    }
+    
+    @Deactivate
+    protected void deactivate(ComponentContext ctx){
+        supportedRrfFormats = null;
+    }
+    
     @Override
     public Class<? extends Representation> getNativeType() {
         return RdfRepresentation.class;
@@ -89,12 +115,12 @@ public class SesameModelWriter implements ModelWriter {
 
     @Override
     public List<MediaType> supportedMediaTypes() {
-        return SUPPORTED_RDF_TYPES;
+        return supportedRrfFormats;
     }
 
     @Override
     public MediaType getBestMediaType(MediaType mediaType) {
-        for(MediaType supported : SUPPORTED_RDF_TYPES){
+        for(MediaType supported : supportedRrfFormats){
             if(supported.isCompatible(mediaType)){
                 return supported;
             }

@@ -24,8 +24,12 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ModelWriterTracker extends ServiceTracker {
+    
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * Holds the config
@@ -105,6 +109,9 @@ public class ModelWriterTracker extends ServiceTracker {
     private void addModelWriter(Class<? extends Representation> nativeType, 
             MediaType mediaType, ServiceReference reference) {
         //we want to have all ModelWriters under the null key
+        log.debug(" > add ModelWriter format: {}, bundle: {}, nativeType: {}",
+            new Object[]{mediaType, reference.getBundle(),
+                nativeType != null ? nativeType.getName() : "none"});
         Map<MediaType,List<ServiceReference>> typeWriters = writers.get(null);
         addTypeWriter(typeWriters, mediaType, reference);
         if(nativeType != null){ //register also as native type writers
@@ -141,6 +148,9 @@ public class ModelWriterTracker extends ServiceTracker {
      */
     private void removeModelWriter(Class<? extends Representation> nativeType, 
             MediaType mediaType, ServiceReference reference) {
+        log.debug(" > remove ModelWriter format: {}, service: {}, nativeType: {}",
+            new Object[]{mediaType, reference,
+                nativeType != null ? nativeType.getClass().getName() : "none"});
         Map<MediaType,List<ServiceReference>> typeWriters = writers.get(null);
         removeTypeWriter(typeWriters, mediaType, reference);
         if(nativeType != null){
@@ -175,6 +185,9 @@ public class ModelWriterTracker extends ServiceTracker {
      */
     private void updateModelWriter(Class<? extends Representation> nativeType, 
             MediaType mediaType, ServiceReference reference) {
+        log.debug(" > update ModelWriter format: {}, service: {}, nativeType: {}",
+            new Object[]{mediaType, reference,
+                nativeType != null ? nativeType.getClass().getName() : "none"});
         Map<MediaType,List<ServiceReference>> typeWriters = writers.get(null);
         updateTypeWriter(typeWriters, mediaType, reference);
         if(nativeType != null){
