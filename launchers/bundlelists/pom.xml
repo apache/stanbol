@@ -68,7 +68,10 @@
 
     <!-- Components -->
     <module>enhancer</module>
-    <module>entityhub</module>
+    <!-- entityhub -->
+    <module>entityhub/core</module>
+    <module>entityhub/clerezza</module>
+    <module>entityhub/sesame</module>
  <!--   <module>cmsadapter</module>
     <module>contenthub</module> -->
     <module>ontologymanager</module>

@@ -64,12 +64,15 @@
     <module>model/sesame</module>
     <module>query/sparql</module>
     <module>query/clerezza</module>
+    <module>query/sesame</module>
     <module>site/linkeddata</module>
     <module>site/managed</module>
     <module>yard/clerezza</module>
     <module>yard/solr</module>
     <module>yard/sesame</module>
     <module>jersey</module>
+    <module>web/clerezza</module>
+    <module>web/sesame</module>
     <module>ldpath</module>
 
     <!-- Utils for creating local caches (indexing utils) -->

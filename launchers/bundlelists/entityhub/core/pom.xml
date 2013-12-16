@@ -17,10 +17,10 @@
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-bundlelists</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <relativePath>..</relativePath>
+    <relativePath>../..</relativePath>
   </parent>
 
-  <artifactId>org.apache.stanbol.launchers.bundlelists.entityhub</artifactId>
+  <artifactId>org.apache.stanbol.launchers.bundlelists.entityhub.core</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>partialbundlelist</packaging>
   
