@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.entityhub.jersey.writers;
+package org.apache.stanbol.entityhub.web.fieldquery;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -27,23 +28,56 @@ import org.apache.stanbol.entityhub.ldpath.query.LDPathSelect;
 import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
+import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.query.RangeConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.ReferenceConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.SimilarityConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint;
+import org.apache.stanbol.entityhub.web.ModelWriter;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class FieldQueryToJSON {
+/**
+ * Utility that converts {@link FieldQuery} instances to JSON. This is likely to
+ * be used by different {@link ModelWriter} implementations as the JSON
+ * serialized FieldQuery needs to be attached to {@link QueryResultList}s
+ * serialized to different formats.
+ * @author Rupert Westenthaler
+ *
+ */
+public final class FieldQueryToJsonUtils {
 
-    private FieldQueryToJSON() { /* do not create instances of utility classes */}
+    private FieldQueryToJsonUtils() { /* do not create instances of utility classes */}
 
-    private static Logger log = LoggerFactory.getLogger(FieldQueryToJSON.class);
+    private static Logger log = LoggerFactory.getLogger(FieldQueryToJsonUtils.class);
 
+    /**
+     * Converts the parsed {@link FieldQuery} to a JSON formatted String
+     * @param query the query
+     * @param ident the ident. Values < 1 will deactivate pretty formatting
+     * @param nsPrefixService optionally a {@link NamespacePrefixService} to
+     * support qNames
+     * @return the serialized field query
+     * @throws IOException if the parsed query could not be serialized to JSON
+     */
+    public static String toJsonString(FieldQuery query, int ident, 
+            NamespacePrefixService nsPrefixService) throws IOException {
+        try {
+            JSONObject jQuery = toJSON(query, nsPrefixService);
+            if(ident > 0){
+                return jQuery.toString(ident);
+            } else {
+                return jQuery.toString();
+            }
+        } catch (JSONException e) {
+            throw new IOException(e.getMessage());
+        }
+    }
+    
     /**
      * Converts a {@link FieldQuery} to it's JSON representation
      *
@@ -51,7 +85,7 @@ final class FieldQueryToJSON {
      * @return the {@link JSONObject}
      * @throws JSONException
      */
-    static JSONObject toJSON(FieldQuery query,NamespacePrefixService nsPrefixService) throws JSONException {
+    public static JSONObject toJSON(FieldQuery query,NamespacePrefixService nsPrefixService) throws JSONException {
         JSONObject jQuery = new JSONObject();
         jQuery.put("selected", new JSONArray(query.getSelectedFields()));
         JSONArray constraints = new JSONArray();

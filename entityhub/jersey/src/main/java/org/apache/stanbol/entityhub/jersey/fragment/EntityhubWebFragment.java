@@ -30,7 +30,7 @@ import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
-import org.apache.stanbol.entityhub.jersey.writers.JettisonWriter;
+//import org.apache.stanbol.entityhub.jersey.writers.JettisonWriter;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
@@ -78,7 +78,7 @@ public class EntityhubWebFragment implements WebFragment {
         //     and Java type class org.codehaus.jettison.json.JSONArray, and MIME media
         //     type application/json was not found
         //     As a workaround I have implemented this small workaround!
-        classes.add(JettisonWriter.class);
+        //classes.add(JettisonWriter.class);
         
         return classes;
     }
@@ -103,7 +103,9 @@ public class EntityhubWebFragment implements WebFragment {
     @Override
     public List<NavigationLink> getNavigationLinks() {
         List<NavigationLink> navList = new ArrayList<NavigationLink>();
-        navList.add(new NavigationLink("entityhub", "/entityhub", null, 30));
+        navList.add(new NavigationLink("entityhub", "/entityhub", 
+            "The Entityhub allows to manage controlled vocabularies (e.g. used "
+            + "for EntityLinking by the Stanbol Enhancer Component)", 30));
         return navList;
     }
     

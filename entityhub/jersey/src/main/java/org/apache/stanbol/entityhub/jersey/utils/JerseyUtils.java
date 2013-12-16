@@ -48,6 +48,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
 import org.apache.stanbol.entityhub.ldpath.query.LDPathFieldQueryImpl;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
@@ -74,7 +75,8 @@ public final class JerseyUtils {
      */
     public static final Set<String> REPRESENTATION_SUPPORTED_MEDIA_TYPES = 
         Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-            APPLICATION_JSON,RDF_XML,N3,TURTLE,X_TURTLE,RDF_JSON,N_TRIPLE)));
+            APPLICATION_JSON,RDF_XML,N3,TURTLE,X_TURTLE,RDF_JSON,N_TRIPLE, 
+            MediaTypeUtil.JSON_LD)));
     /**
      * Unmodifiable Set with the Media Types supported for {@link Entity}
      */

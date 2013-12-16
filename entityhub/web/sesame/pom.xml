@@ -17,14 +17,14 @@
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-entityhub</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <relativePath>..</relativePath>
+    <relativePath>../..</relativePath>
   </parent>
 
-  <artifactId>org.apache.stanbol.entityhub.jersey</artifactId>
+  <artifactId>org.apache.stanbol.entityhub.web.sesame</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Stanbol Entityhub Web Jersey HTTP Endpoint</name>
-  <description>HTTP endpoint of the Entityhub.</description>
+  <name>Apache Stanbol Entityhub Web: Sesame Model Serializer</name>
+  <description>Provides RDF serializers based on the Sesame Model implementation</description>
   
   <licenses>
     <license>
@@ -37,10 +37,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/jersey
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/web/sesame
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/jersey
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/web/sesame
     </developerConnection>
     <url>http://stanbol.apache.org</url>
   </scm>
@@ -54,17 +54,11 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>
-              org.apache.stanbol.entityhub.web; version=${project.version},
-              org.apache.stanbol.entityhub.web.fieldquery; version=${project.version}
-            </Export-Package>
             <Import-Package>
               *
             </Import-Package>
             <Private-Package>
-              org.apache.stanbol.entityhub.jersey.*; version=${project.version},
-              org.apache.stanbol.entityhub.web.impl; version=${project.version},
-              org.apache.stanbol.entityhub.web.writer; version=${project.version},
+              org.apache.stanbol.entityhub.web.writer.sesame; version=${project.version}
             </Private-Package>
           </instructions>
         </configuration>
@@ -79,27 +73,6 @@
   <dependencies>
 
     <!-- dependencies on other Stanbol modules -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.namespaceprefix.service</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
-    </dependency>
-    <!-- Jersey and Freemarker -->
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
-      <version>1.0.0-SNAPSHOT</version>      
-    </dependency>
 
     <!-- dependencies on other Entityhub modules -->
     <dependency>
@@ -109,17 +82,12 @@
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
+      <artifactId>org.apache.stanbol.entityhub.model.sesame</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.query.clerezza</artifactId>
+      <artifactId>org.apache.stanbol.entityhub.query.sesame</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -127,29 +95,24 @@
       <artifactId>org.apache.stanbol.entityhub.ldpath</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
-
-    <!-- LD Path -->
-    <!--  imported via entityhub.ldpath
     <dependency>
-      <groupId>at.newmedialab.ldpath</groupId>
-      <artifactId>ldpath-api</artifactId>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.jersey</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
+    
+
+    <!-- Sesame IO -->
     <dependency>
-      <groupId>at.newmedialab.ldpath</groupId>
-      <artifactId>ldpath-core-bundle</artifactId>
-    </dependency>  -->
-        
+      <groupId>org.openrdf.sesame</groupId>
+      <artifactId>sesame-rio-api</artifactId>
+    </dependency>
+    
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
 
-    <!-- jersey-multipart now uses an other lib to read multipart/mime 
-         however the MessagebodyReaderUtils still use this lib -->    
-    <dependency>
-      <groupId>javax.mail</groupId>
-      <artifactId>mail</artifactId>
-    </dependency>
 
     <!-- Servlet API for handling ServletContext -->
     <dependency>
