@@ -136,10 +136,18 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
     public int canEnhance(ContentItem ci) throws EngineException {
         log.trace("canEnhancer {}", ci.getUri());
         String language = getLanguage(this, ci, false);
+        //(1) check if the language is enabled by the config
         if (language == null || !indexConfig.getFstConfig().isLanguage(language)) {
             log.debug("Engine {} ignores ContentItem {} becuase language {} is not condigured.",
                 new Object[] {getName(), ci.getUri(), language});
             return CANNOT_ENHANCE;
+        }
+        //(2) check if we have a FST model for the language
+        if(indexConfig.getCorpus(language) == null &&  //for the language
+        		indexConfig.getDefaultCorpus() == null){ //a default model
+            log.debug("Engine {} ignores ContentItem {} becuase no FST modles for language {} "
+            		+ "are available", new Object[] {getName(), ci.getUri(), language});
+                return CANNOT_ENHANCE;
         }
         // we need a detected language, the AnalyzedText contentPart with
         // Tokens.
