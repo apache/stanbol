@@ -132,6 +132,11 @@
       <artifactId>rdf.simple.storage</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency> <!--  needed by the field query tests -->
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.jena.sparql</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
