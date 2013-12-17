@@ -26,15 +26,37 @@ import static org.apache.stanbol.entityhub.test.Utils.asCollection;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
+import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
+import org.apache.stanbol.entityhub.servicesapi.model.Text;
+import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
+import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
+import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
+import org.apache.stanbol.entityhub.servicesapi.query.RangeConstraint;
+import org.apache.stanbol.entityhub.servicesapi.query.ReferenceConstraint;
+import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
+import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint.PatternType;
+import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint;
+import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 import org.apache.stanbol.entityhub.servicesapi.yard.YardException;
+import org.junit.Assert;
 import org.junit.Test;
 
 public abstract class YardTest {
+
+    /**
+     * used for {@link FieldQuery} tests added by STANBOL-1202 
+     */
+    private FieldQueryTestData fieldQueryTestData;
 
     /**
      * Getter for the {@link Yard} instance to be tested
@@ -591,5 +613,559 @@ public abstract class YardTest {
         assertTrue(values.remove(testValue2)); // test that it contains the 2nd value
         assertTrue(values.isEmpty()); // and that there are only these two values
         values = null;
+    }
+    /*
+     * All the follow up tests where added as part of STANBOL-1202
+     */
+    /**
+     * Simple test for the QueryFactory
+     */
+    @Test
+    public void testQeuryFactory(){
+        FieldQueryFactory qf = getYard().getQueryFactory();
+        Assert.assertNotNull("The getter for the FieldQueryFactory MUST NOT return NULL!", qf);
+        FieldQuery query = qf.createFieldQuery();
+        Assert.assertNotNull("The FieldQueryFactory returned NULL as query", query);
+    }
+    /**
+     * Test a simple {@link TextConstraint} for any language
+     */
+    @Test
+    public void testFindText(){
+        //init the test data
+        FieldQueryTestData data = getFieldQueryTestData();
+        //query for all languages and value1
+        FieldQuery query = getYard().getQueryFactory().createFieldQuery();
+        query.setConstraint(data.textField, new TextConstraint(data.textValue1.getText()));
+        query.addSelectedField(data.textField);
+        query.addSelectedField(data.refField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList( data.r1.getId(), data.r1en.getId(), data.r1de.getId()), 
+                Arrays.asList(data.textField, data.refField));
+        
+        //same for value2
+        query = getYard().getQueryFactory().createFieldQuery();
+        query.setConstraint(data.textField, new TextConstraint(data.textValue2.getText()));
+        query.addSelectedField(data.textField);
+        query.addSelectedField(data.refField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList( data.r2.getId(), data.r2en.getId(), data.r2de.getId()), 
+                Arrays.asList(data.textField, data.refField));
+    }
+    /**
+     * Same as {@link #testFindText()} but using 
+     * {@link Yard#findRepresentation(FieldQuery)} to execute the queries
+     */
+    @Test
+    public void testFindRepresentationText(){
+        //init the test data
+        FieldQueryTestData data = getFieldQueryTestData();
+        //query for all languages and value1
+        FieldQuery query = getYard().getQueryFactory().createFieldQuery();
+        query.setConstraint(data.textField, new TextConstraint(data.textValue1.getText()));
+        validateQueryResults(query, getYard().findRepresentation(query), 
+                Arrays.asList( data.r1.getId(), data.r1en.getId(), data.r1de.getId()), 
+                Arrays.asList(data.textField, data.refField, data.intField));
+        
+        //same for value2
+        query = getYard().getQueryFactory().createFieldQuery();
+        query.setConstraint(data.textField, new TextConstraint(data.textValue2.getText()));
+        validateQueryResults(query, getYard().findRepresentation(query), 
+                Arrays.asList( data.r2.getId(), data.r2en.getId(), data.r2de.getId()), 
+                Arrays.asList(data.textField, data.refField, data.intField));
+    }
+    /**
+     * Same as {@link #testFindText()} but using 
+     * {@link Yard#findReferences(FieldQuery)} to execute the queries
+     */
+    @Test
+    public void testFindReferencesText(){
+        //init the test data
+        FieldQueryTestData data = getFieldQueryTestData();
+        //query for all languages and value1
+        FieldQuery query = getYard().getQueryFactory().createFieldQuery();
+        query.setConstraint(data.textField, new TextConstraint(data.textValue1.getText()));
+        validateQueryResults(query, getYard().findReferences(query), 
+                Arrays.asList(data.r1.getId(), data.r1en.getId(), data.r1de.getId()));
+        
+        //same for value2
+        query = getYard().getQueryFactory().createFieldQuery();
+        query.setConstraint(data.textField, new TextConstraint(data.textValue2.getText()));
+        validateQueryResults(query, getYard().findReferences(query),
+                Arrays.asList( data.r2.getId(), data.r2en.getId(), data.r2de.getId()));
+    }
+
+    /**
+     * Test a simple {@link TextConstraint} for any language
+     */
+    @Test
+    public void testFindTextOfLanguage(){
+        //init the test data
+        FieldQueryTestData data = getFieldQueryTestData();
+        //value1@en
+        FieldQuery query = getYard().getQueryFactory().createFieldQuery();
+        query.setConstraint(data.textField, new TextConstraint(
+                data.textValue1.getText(), "en"));
+        query.addSelectedField(data.textField);
+        query.addSelectedField(data.refField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList(data.r1en.getId()), 
+                Arrays.asList(data.textField, data.refField));
+        
+        //value2@de
+        query = getYard().getQueryFactory().createFieldQuery();
+        query.setConstraint(data.textField, new TextConstraint(
+                data.textValue2.getText(), "de"));
+        query.addSelectedField(data.textField);
+        query.addSelectedField(data.refField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList(data.r2de.getId()), 
+                Arrays.asList(data.textField, data.refField));
+
+        //value1@null
+        query = getYard().getQueryFactory().createFieldQuery();
+        query.setConstraint(data.textField, new TextConstraint(
+                data.textValue1.getText(), (String)null));
+        query.addSelectedField(data.textField);
+        query.addSelectedField(data.refField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList(data.r1.getId()), 
+                Arrays.asList(data.textField, data.refField));
+
+        //value1@null,en
+        query = getYard().getQueryFactory().createFieldQuery();
+        query.setConstraint(data.textField, new TextConstraint(
+                data.textValue1.getText(), (String)null, "en"));
+        query.addSelectedField(data.textField);
+        query.addSelectedField(data.refField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList(data.r1.getId(),data.r1en.getId()), 
+                Arrays.asList(data.textField, data.refField));
+
+        //value1@en,de
+        query = getYard().getQueryFactory().createFieldQuery();
+        query.setConstraint(data.textField, new TextConstraint(
+                data.textValue1.getText(), "en", "de"));
+        query.addSelectedField(data.textField);
+        query.addSelectedField(data.refField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList(data.r1en.getId(),data.r1de.getId()), 
+                Arrays.asList(data.textField, data.refField));
+    }
+    
+    @Test
+    public void testFindTextWildcards(){
+        //init the test data
+        FieldQueryTestData data = getFieldQueryTestData();
+        //prefix search with *
+        FieldQuery query = getYard().getQueryFactory().createFieldQuery();
+        String wildcard = data.textValue1.getText();
+        wildcard = wildcard.substring(0, wildcard.length()-1) + "*";
+        query.setConstraint(data.textField, new TextConstraint(wildcard,PatternType.wildcard,false, "en"));
+        query.addSelectedField(data.refField);
+        query.addSelectedField(data.textField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList(data.r1en.getId(), data.r2en.getId()), 
+                Arrays.asList(data.refField, data.textField));
+        
+        //wildcard with ?
+        query = getYard().getQueryFactory().createFieldQuery();
+        //selects r1en and r2en
+        wildcard = data.textValue1.getText();
+        wildcard = wildcard.substring(0, wildcard.length()-1) + "?";
+        query.setConstraint(data.textField, new TextConstraint(wildcard,PatternType.wildcard,false, "de"));
+        query.addSelectedField(data.refField);
+        query.addSelectedField(data.textField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList(data.r1de.getId(), data.r2de.getId()), 
+                Arrays.asList(data.refField, data.textField));
+    }
+    
+    /**
+     * Tests a TextConstraint with multiple optional values
+     */
+    @Test
+    public void testfindOptionalTexts(){
+        //init the test data
+        FieldQueryTestData data = getFieldQueryTestData();
+        //value1@en || value2@en
+        FieldQuery query = getYard().getQueryFactory().createFieldQuery();
+        query.setConstraint(data.textField, new TextConstraint(
+                Arrays.asList(data.textValue1.getText(), data.textValue2.getText()),
+                "en"));
+        query.addSelectedField(data.textField);
+        query.addSelectedField(data.refField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList(data.r1en.getId(),data.r2en.getId()), 
+                Arrays.asList(data.textField, data.refField));
+        
+        //value1@en,de || value2@en,de
+        query = getYard().getQueryFactory().createFieldQuery();
+        query.setConstraint(data.textField, new TextConstraint(
+                Arrays.asList(data.textValue1.getText(), data.textValue2.getText()),
+                "en", "de"));
+        query.addSelectedField(data.textField);
+        query.addSelectedField(data.refField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList(data.r1en.getId(),data.r1de.getId(), 
+                        data.r2en.getId(), data.r2de.getId()), 
+                Arrays.asList(data.textField, data.refField));
+    }
+    
+    /**
+     * Test a {@link ReferenceConstraint}
+     */
+    @Test
+    public void testFindReference(){
+        //init the test data
+        FieldQueryTestData data = getFieldQueryTestData();
+        //query for all languages and value1
+        FieldQuery query = getYard().getQueryFactory().createFieldQuery();
+        query.setConstraint(data.refField, new ReferenceConstraint(data.refValue1.getReference()));
+        query.addSelectedField(data.intField);
+        query.addSelectedField(data.refField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList(data.r1.getId(), data.r1en.getId(), data.r1de.getId(), data.r5.getId()), 
+                Arrays.asList(data.intField, data.refField));
+        
+        //same for value2
+        query = getYard().getQueryFactory().createFieldQuery();
+        query.setConstraint(data.refField, new ReferenceConstraint(data.refValue2.getReference()));
+        query.addSelectedField(data.intField);
+        query.addSelectedField(data.refField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList(data.r2.getId(), data.r2en.getId(), data.r2de.getId(), data.r10.getId()), 
+                Arrays.asList(data.intField, data.refField));
+    }
+    
+    /**
+     * Tests simple {@link ValueConstraint}s
+     */
+    @Test
+    public void testFindValues(){
+        //init the test data
+        FieldQueryTestData data = getFieldQueryTestData();
+        //query for all languages and value1
+        FieldQuery query = getYard().getQueryFactory().createFieldQuery();
+        query.setConstraint(data.intField, new ValueConstraint(data.intValue1));
+        query.addSelectedField(data.intField);
+        query.addSelectedField(data.textField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList(data.r1.getId(), data.r1en.getId(), data.r1de.getId()), 
+                Arrays.asList(data.intField, data.textField));
+        
+        //same for value2
+        query = getYard().getQueryFactory().createFieldQuery();
+        query.setConstraint(data.intField, new ValueConstraint(data.intValue2));
+        query.addSelectedField(data.intField);
+        query.addSelectedField(data.textField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList(data.r2.getId(), data.r2en.getId(), data.r2de.getId()), 
+                Arrays.asList(data.intField, data.textField));
+        
+    }
+    /**
+     * Tests simple {@link RangeConstraint}
+     */
+    @Test
+    public void testFindRange(){
+        //init the test data
+        FieldQueryTestData data = getFieldQueryTestData();
+        //query for all languages and value1
+        FieldQuery query = getYard().getQueryFactory().createFieldQuery();
+        query.setConstraint(data.intField, new RangeConstraint(data.intValue2,data.intValue5,true));
+        query.addSelectedField(data.intField);
+        query.addSelectedField(data.refField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList(data.r2.getId(), data.r2en.getId(), data.r2de.getId(), data.r5.getId()), 
+                Arrays.asList(data.intField, data.refField));
+        
+        //same for value2
+        query = getYard().getQueryFactory().createFieldQuery();
+        query.setConstraint(data.intField, new RangeConstraint(data.intValue2,data.intValue10,false));
+        query.addSelectedField(data.intField);
+        query.addSelectedField(data.textField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList(data.r5.getId()), 
+                Arrays.asList(data.intField, data.textField));
+    }
+    /**
+     * Tests simple {@link RangeConstraint}
+     */
+    @Test
+    public void testFindMultipleConstraints(){
+        //init the test data
+        FieldQueryTestData data = getFieldQueryTestData();
+        //Integer Range and reference query
+        FieldQuery query = getYard().getQueryFactory().createFieldQuery();
+        //selects r2, r2en, r2de, r5
+        query.setConstraint(data.intField, new RangeConstraint(data.intValue2,data.intValue5, true));
+        //selects r1, r1en, r1de, r5
+        query.setConstraint(data.refField, new ReferenceConstraint(data.refValue1.getReference()));
+        query.addSelectedField(data.intField);
+        query.addSelectedField(data.refField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList(data.r5.getId()), 
+                Arrays.asList(data.intField, data.refField));
+        
+        //text and reference
+        query = getYard().getQueryFactory().createFieldQuery();
+        //selects r1en and r2en
+        String wildcard = data.textValue1.getText();
+        wildcard = wildcard.substring(0, wildcard.length()-1) + "*";
+        query.setConstraint(data.textField, new TextConstraint(wildcard,PatternType.wildcard,false, "en"));
+        //selects r1, r1en, r1de, r5
+        query.setConstraint(data.refField, new ReferenceConstraint(data.refValue1.getReference()));
+        query.addSelectedField(data.refField);
+        query.addSelectedField(data.textField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList(data.r1en.getId()), 
+                Arrays.asList(data.refField, data.textField));
+        
+        //text and value
+        query = getYard().getQueryFactory().createFieldQuery();
+        //selects r1de and r2de
+        query.setConstraint(data.textField, new TextConstraint(wildcard,PatternType.wildcard,false, "de"));
+        //selects r2, r2en, r2de
+        query.setConstraint(data.intField, new ValueConstraint(data.intValue2));
+        query.addSelectedField(data.refField);
+        query.addSelectedField(data.textField);
+        validateQueryResults(query, getYard().find(query), 
+                Arrays.asList(data.r2de.getId()), 
+                Arrays.asList(data.refField, data.textField));
+    }
+
+    /**
+     * Used to validate the results of the query against expected results. 
+     * Supports also the validation of selected fields
+     * @param query the query
+     * @param results the results of the query
+     * @param parsedExpectedResults read-only list of expected results
+     * @param parsedExpectedFields read-only list of expected selected fields or
+     * <code>null</code> to deactivate validation of fields
+     */
+    protected final void validateQueryResults(FieldQuery query, 
+            QueryResultList<Representation> results,
+            Collection<String> parsedExpectedResults, 
+            Collection<String> parsedExpectedFields) {
+        Set<String> expectedResults = parsedExpectedResults == null ?
+                new HashSet<String>() : new HashSet<String>(parsedExpectedResults);
+        Set<String> expectedFields = parsedExpectedFields == null ? null : 
+            new HashSet<String>(parsedExpectedFields);
+        FieldQueryTestData data = getFieldQueryTestData();
+        Assert.assertNotNull("NULL result for query "+query+"!", results);
+        for(Representation result : results){
+            Assert.assertTrue("Result '"+ result.getId() + "' is missing for Query "
+                    + query +"!", expectedResults.remove(result.getId()));
+            if(expectedFields != null){ //validate fields
+                for(String field : expectedFields){
+                    Set<Object> expectedFieldValues = ModelUtils.asSet(
+                            data.representations.get(result.getId()).get(field));
+                    Iterator<Object> fieldValues = result.get(field);
+                    while(fieldValues.hasNext()){
+                        Object fieldValue = fieldValues.next();
+                        Assert.assertTrue("Unexpected value '" + fieldValue
+                                + " of selected field '" + field + "' of result "
+                                + result.getId(),expectedFieldValues.remove(fieldValue));
+                    }
+                    Assert.assertTrue("Missing expected value(s) "+ expectedFieldValues
+                            + " of selected field '" + field + "' of result "
+                            + result.getId(), expectedFieldValues.isEmpty());
+                }
+            }
+        }
+        Assert.assertTrue("Missing expected result(s) " + expectedResults
+                + "for query" + query +"!", expectedResults.isEmpty());
+    }
+    
+    /**
+     * Used to validate {@link Yard#findReferences(FieldQuery)} results
+     * @param query the query
+     * @param results the results
+     * @param parsedExpectedResults the expected results
+     */
+    protected final void validateQueryResults(FieldQuery query, 
+            QueryResultList<String> results,
+            Collection<String> parsedExpectedResults) {
+        Set<String> expectedResults = parsedExpectedResults == null ?
+                new HashSet<String>() : new HashSet<String>(parsedExpectedResults);
+        Assert.assertNotNull("NULL result for query "+query+"!", results);
+        for(String id : results){
+            Assert.assertTrue("Result "+ id + "is missing for Query "
+                    + query +"!", expectedResults.remove(id));
+        }
+        Assert.assertTrue("Missing expected result(s) " + expectedResults
+                + "for query" + query +"!", expectedResults.isEmpty());
+    }       
+
+    /**
+     * Class representing the test data for the {@link FieldQuery} tests added
+     * by STANBOL-1202
+     * 
+     * @author Rupert Westenthaler
+     *
+     */
+    protected class FieldQueryTestData {
+        /**
+         * The field used for {@link Text} values
+         */
+        protected final String textField;
+        protected final Text textValue1;
+        protected final Text textValue1en;
+        protected final Text textValue1de;
+        protected final Text textValue2;
+        protected final Text textValue2en;
+        protected final Text textValue2de;
+        /**
+         * The field used for {@link Reference} values
+         */
+        protected final String refField;
+        protected final Reference refValue1;
+        protected final Reference refValue2;
+        /**
+         * The field used for {@link Integer} values
+         */
+        protected final String intField;
+        protected final Integer intValue1;
+        protected final Integer intValue2;
+        protected final Integer intValue5;
+        protected final Integer intValue10;
+        /*
+         * The Entities created by the test
+         */
+        /**
+         * Entity with {@link #textValue1}, {@link #refValue1} and
+         * {@link #intValue1}
+         */
+        protected final Representation r1;
+        /**
+         * Entity with {@link #textValue1en}, {@link #refValue1} and
+         * {@link #intValue1}
+         */
+        protected final Representation r1en;
+        /**
+         * Entity with {@link #textValue1de}, {@link #refValue1} and
+         * {@link #intValue1}
+         */
+        protected final Representation r1de;
+        /**
+         * Entity with {@link #textValue2}, {@link #refValue2} and
+         * {@link #intValue2}
+         */
+        protected final Representation r2;
+        /**
+         * Entity with {@link #textValue2en}, {@link #refValue2} and
+         * {@link #intValue2}
+         */
+        protected final Representation r2en;
+        /**
+         * Entity with {@link #textValue2de}, {@link #refValue2} and
+         * {@link #intValue2}
+         */
+        protected final Representation r2de;
+        /**
+         * Entity with {@link #intValue5} and {@link #refValue1}
+         */
+        protected final Representation r5;
+        /**
+         * Entity with {@link #intValue10} and {@link #refValue2}
+         */
+        protected final Representation r10;
+        /**
+         * Read-only {@link Map} allowing to lookup {@link Representation}s
+         * used by this Test by {@link Representation#getId() ID}.
+         */
+        protected final Map<String,Representation> representations;
+        
+        /**
+         * Creates and initializes the query test data for the tested
+         * {@link YardTest#getYard() Yard}.
+         */
+        private FieldQueryTestData(){
+            textField = "urn:yard.test:find:field.text";
+            textValue1 = getYard().getValueFactory().createText("value1", null);
+            textValue1en = getYard().getValueFactory().createText("value1", "en");
+            textValue1de = getYard().getValueFactory().createText("value1", "de");
+            textValue2 = getYard().getValueFactory().createText("value2", null);
+            textValue2en = getYard().getValueFactory().createText("value2", "en");
+            textValue2de = getYard().getValueFactory().createText("value2", "de");
+
+            refField = "urn:yard.test:find:field.reference";
+            refValue1 = getYard().getValueFactory().createReference("urn:yard.test:find:reference1");
+            refValue2 = getYard().getValueFactory().createReference("urn:yard.test:find:reference2");
+
+            intField = "urn:yard.test:find:field.integer";
+            intValue1 = 1;
+            intValue2 = 2;
+            intValue5 = 5;
+            intValue10 = 10;
+            
+            //and some Representations with a different set of values
+            Map<String,Representation> representations = new HashMap<String, Representation>();
+            r1 = create("urn:yard.test:find:entity.r1", false);
+            r1.add(textField, textValue1);
+            r1.add(intField, intValue1);
+            r1.add(refField, refValue1);
+            getYard().store(r1);
+            representations.put(r1.getId(), r1);
+            r1en = create("urn:yard.test:find:entity.r1en", false);
+            r1en.add(textField, textValue1en);
+            r1en.add(intField, intValue1);
+            r1en.add(refField, refValue1);
+            getYard().store(r1en);
+            representations.put(r1en.getId(), r1en);
+            r1de = create("urn:yard.test:find:entity.r1de", false);
+            r1de.add(textField, textValue1de);
+            r1de.add(intField, intValue1);
+            r1de.add(refField, refValue1);
+            getYard().store(r1de);
+            representations.put(r1de.getId(), r1de);
+            
+            r2 = create("urn:yard.test:find:entity.r2", false);
+            r2.add(textField, textValue2);
+            r2.add(intField, intValue2);
+            r2.add(refField, refValue2);
+            getYard().store(r2);
+            representations.put(r2.getId(), r2);
+            r2en = create("urn:yard.test:find:entity.r2en", false);
+            r2en.add(textField, textValue2en);
+            r2en.add(intField, intValue2);
+            r2en.add(refField, refValue2);
+            getYard().store(r2en);
+            representations.put(r2en.getId(), r2en);
+            r2de = create("urn:yard.test:find:entity.r2de", false);
+            r2de.add(textField, textValue2de);
+            r2de.add(intField, intValue2);
+            r2de.add(refField, refValue2);
+            getYard().store(r2de);
+            representations.put(r2de.getId(), r2de);
+            
+            r5 = create("urn:yard.test:find:entity.r5", false);
+            r5.add(intField, intValue5);
+            r5.add(refField, refValue1);
+            getYard().store(r5);
+            representations.put(r5.getId(), r5);
+
+            r10 = create("urn:yard.test:find:entity.r10", false);
+            r10.add(intField, intValue10);
+            r10.add(refField, refValue2);
+            getYard().store(r10);           
+            representations.put(r10.getId(), r10);
+            this.representations = Collections.unmodifiableMap(representations);
+        }
+    }
+    
+    /**
+     * Getter for the {@link FieldQueryTestData}. This will also initialize
+     * the data for the tested {@link Yard}
+     * @return the {@link FieldQueryTestData}
+     */
+    protected final FieldQueryTestData getFieldQueryTestData() {
+        if(fieldQueryTestData == null){ //if not yet initialized for this test
+            //create (and add) the test data for this test
+            fieldQueryTestData = new FieldQueryTestData(); 
+        }
+        return fieldQueryTestData;
+
     }
 }
