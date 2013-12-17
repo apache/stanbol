@@ -493,6 +493,7 @@ public class FstLinkingEngineComponent {
                 
                 @Override
                 public void removedService(ServiceReference reference, Object service) {
+                    log.info(" ... SolrCore for {} was removed!", indexReference);
                     updateEngineRegistration(solrServerTracker.getServiceReference(), null); 
                     super.removedService(reference, service);
                 }
@@ -500,6 +501,7 @@ public class FstLinkingEngineComponent {
 
                 @Override
                 public void modifiedService(ServiceReference reference, Object service) {
+                    log.info(" ... SolrCore for {} was updated!", indexReference);
                     updateEngineRegistration(solrServerTracker.getServiceReference(), null); 
                     super.modifiedService(reference, service);
                 }
@@ -511,6 +513,7 @@ public class FstLinkingEngineComponent {
                         log.warn("Multiple SolrServer for IndexLocation {} available!",
                             indexReference);
                     } else {
+                        log.info(" ... SolrCore for {} becomes available!", indexReference);
                         updateEngineRegistration(reference, server);
                     }
                     return server;
@@ -535,6 +538,7 @@ public class FstLinkingEngineComponent {
      * @param server the SolrServer (or <code>null</code>
      */
     protected void updateEngineRegistration(ServiceReference reference, SolrServer server) {
+        log.info(" ... updateEngineRegistration for {}: {}",getClass().getSimpleName(), engineName);
         if(reference != null && server == null){
             server = solrServerTracker.getService(reference);
         }
@@ -545,7 +549,7 @@ public class FstLinkingEngineComponent {
         synchronized (this) { //init one after the other in case of multiple calls
             SolrCore core;
             IndexConfiguration indexConfig; // the indexConfig build by this call
-            try {
+            try { //try to init - finally unregisterEngine
                 if(bundleContext == null){ //already deactivated
                     return; //NOTE: unregistering is done in finally block
                 }
@@ -560,6 +564,8 @@ public class FstLinkingEngineComponent {
                     core = null;
                 }
                 if(core == null){ //no SolrCore
+                    log.info("   - SolrCore {} present", this.solrCore == null ?
+                    		"not yet" : "no longer");
                     return; //NOTE: unregistering is done in finally block
                 } //else - we do have a SolrCore
                 //File fstDir = new File(dataDir,"fst");
@@ -580,18 +586,14 @@ public class FstLinkingEngineComponent {
                     indexConfig.setSkipAltTokens(skipAltTokensConfig);
                 }
                 //create a new searcher for creating FSTs
-                boolean foundCorpus;
-                try {
-                    foundCorpus = indexConfig.activate();
-                }catch (RuntimeException e) { //in case of any excpetion
-                    unregisterEngine(); //unregister current engine and clean up
-                    throw e; //re-throw 
-                }
-                if(!foundCorpus){
-                    unregisterEngine(); //unregister current engine and clean up
-                    throw new IllegalStateException("Processing of the FST configuration " +
-                    		"was not successfull for any language. See WARN level loggings " +
-                    		"for more details!");
+                if(!indexConfig.activate()){
+                    log.warn("Processing of the FST configuration was not successfull "
+                        + "for any language. See WARN level loggings for more details!");
+                    log.warn("  ... FstLinkingEnigne wiht name {} will be registered but"
+                        + "be inactive as there seam to be no data for linking available" 
+                        + "in the SolrCore {} (dir: {})", 
+                        new Object []{engineName, core.getName(), 
+                                core.getCoreDescriptor().getInstanceDir()});
                 } else { //some FST corpora initialised
                     if(log.isInfoEnabled()){ //log the initialised languages
                         Set<String> langSet = new HashSet<String>(indexConfig.getCorpusLanguages());
@@ -606,7 +608,7 @@ public class FstLinkingEngineComponent {
                 }
             } finally {
                 //in any case (even an Exception) ensure that the current
-                //engine registration is unregistered and the currentyl used
+                //engine registration is unregistered and the currently used
                 //SolrCore is unregistered!
                 unregisterEngine();
             }
@@ -624,8 +626,12 @@ public class FstLinkingEngineComponent {
                 defaultLanguage = ""; //FST uses an empty string for the default
             }
             CorpusInfo defaultCoprous = indexConfig.getCorpus(defaultLanguage);
-            log.info(" ... set '{}' as default FST Corpus: {}", defaultCoprous.language, defaultCoprous);
-            indexConfig.setDefaultCorpus(defaultCoprous);
+            if(defaultCoprous != null){
+	            log.info(" ... set '{}' as default FST Corpus: {}", defaultCoprous.language, defaultCoprous);
+	            indexConfig.setDefaultCorpus(defaultCoprous);
+            } else {
+            	log.info("  ... no corpus for default language {} available", defaultCoprous);
+            }
             //set the index configuration to the field;
             this.indexConfig = indexConfig;
             FstLinkingEngine engine = new FstLinkingEngine(engineName, indexConfig,
@@ -633,6 +639,7 @@ public class FstLinkingEngineComponent {
             String[] services = new String [] {
                     EnhancementEngine.class.getName(),
                     ServiceProperties.class.getName()};
+            log.info(" ... register {}: {}", engine.getClass().getSimpleName(),engineName);
             this.engineRegistration = bundleContext.registerService(services,engine, engineMetadata);
             this.solrServerReference = reference;
             this.solrCore = core;
@@ -680,6 +687,7 @@ public class FstLinkingEngineComponent {
         //use local copies for method calls to avoid concurrency issues
         ServiceRegistration engineRegistration = this.engineRegistration;
         if(engineRegistration != null){
+            log.info(" ... unregister Lucene FSTLinkingEngine {}",engineName);
             engineRegistration.unregister();
             this.engineRegistration = null; //reset the field
         }
@@ -737,6 +745,7 @@ public class FstLinkingEngineComponent {
      */
     @Deactivate
     protected void deactivate(ComponentContext ctx) {
+        log.info(" ... deactivate {}: {}",getClass().getSimpleName(), engineName);
         if(solrServerTracker != null){
             //closing the tracker will also cause registered engines to be
             //unregistered as service (see #updateEngineRegistration())
