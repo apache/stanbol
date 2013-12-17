@@ -79,7 +79,6 @@ public class AllActiveEnginesChain implements ServiceTrackerCustomizer, Chain {
         this.tracker = new EnginesTracker(context, 
             trackAll, //empty set to track all engines
             this);
-        this.tracker.open();
     }
         
     /**
