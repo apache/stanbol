@@ -42,6 +42,7 @@ public class ChainManagerImpl extends ChainsTracker implements ChainManager {
     @Activate
     public void activate(ComponentContext ctx){
         initChainTracker(ctx.getBundleContext(), null, null);
+        open();
     }
     @Deactivate
     public void deactivate(ComponentContext ctx){

@@ -114,6 +114,7 @@ public class ChainsRootResource extends BaseStanbolResource {
                     }
                 }
             });
+        chainTracker.open();
     }
     
     @Deactivate

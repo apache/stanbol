@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class NameBasedServiceTrackingState extends ServiceTracker implements ServiceTrackerCustomizer {
-
+    
     private final Logger log = LoggerFactory.getLogger(NameBasedServiceTrackingState.class);
     
 //    /**
@@ -154,13 +154,20 @@ public class NameBasedServiceTrackingState extends ServiceTracker implements Ser
         } finally {
             lock.writeLock().unlock();
         }
-        final Object service;
-        log.info(" ... adding service {}",reference);
-        if(customizer != null){
-            service =  customizer.addingService(reference);
-        } else {
-            service =  context.getService(reference);
-        }
+        Object service;
+        log.debug(" ... adding service {}",reference);
+        //try { //NOT sure if we should catch exceptions here
+            if(customizer != null){
+                service =  customizer.addingService(reference);
+            } else {
+                service =  context.getService(reference);
+            }
+        //} catch(RuntimeException e){
+        //    log.warn(" ... unable to get Service for Reference: " + reference 
+        //        + " because a " + e.getClass().getSimpleName() + " with message: "
+        //        + e.getMessage());
+        //    return null;
+        //}
         return service;
     }
     @Override

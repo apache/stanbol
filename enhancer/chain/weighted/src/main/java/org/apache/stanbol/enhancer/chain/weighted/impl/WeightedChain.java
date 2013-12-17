@@ -140,6 +140,7 @@ public class WeightedChain extends AbstractChain implements Chain, ServiceTracke
         }
         //start tracking the engines of the configured chain
         tracker = new EnginesTracker(ctx.getBundleContext(), chain.keySet(),this);
+        tracker.open();
     }
 
     @Override

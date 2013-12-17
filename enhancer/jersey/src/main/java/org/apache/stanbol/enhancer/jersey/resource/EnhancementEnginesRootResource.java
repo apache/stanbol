@@ -131,6 +131,7 @@ public class EnhancementEnginesRootResource extends BaseStanbolResource {
                 }
                 
             });
+        engineTracker.open();
     }
 
     @Deactivate

@@ -64,10 +64,6 @@ public class ChainsTracker implements ChainManager{
     private Set<String> trackedChains;
 
     private NameBasedServiceTrackingState nameTracker;
-
-    private boolean initialised;
-
-    private boolean open;
     /**
      * Protected constructor intended to be used by subclasses that do not want
      * to compete the initialisation as part of construction(e.g.
@@ -150,7 +146,7 @@ public class ChainsTracker implements ChainManager{
      */
     protected void initChainTracker(BundleContext context, Set<String> chainNames, ServiceTrackerCustomizer customiser) {
         if(nameTracker != null){ //if we re-initialise
-            close(); //call close first
+            nameTracker.close(); //try to close the current ServiceTracker
         }
         if(context == null){
             throw new IllegalStateException("Unable to initialise tracking if NULL is parsed as Bundle Context!");
@@ -199,31 +195,17 @@ public class ChainsTracker implements ChainManager{
                         "parsed chain names "+trackedChains,e);
             }
         }
-        initialised = true;
     }
     /**
-     * getter for the NameTracker. Starts tracking on the first call
+     * Starts tracking based on the configuration parsed in the constructor
      */
-    private NameBasedServiceTrackingState getNameTracker(){
-        if(!initialised){
-            throw new IllegalStateException("ChainTracker is not initialised or already closed!");
-        }
-        if(!open){
-            synchronized (this) {
-                if(!open){
-                    nameTracker.open();
-                    open = true;
-                }
-            }
-        }
-        return nameTracker;
+    public void open(){
+        nameTracker.open();
     }
     /**
      * Closes this tracker
      */
     public void close(){
-        open = false;
-        initialised = false;
         nameTracker.close();
         nameTracker = null;
     }
@@ -249,7 +231,7 @@ public class ChainsTracker implements ChainManager{
             throw new IllegalArgumentException("The parsed name MUST NOT be NULL or empty");
         }
         if(trackedChains.isEmpty() || trackedChains.contains(name)){
-            return getNameTracker().getReference(name);
+            return nameTracker.getReference(name);
         } else {
             throw new IllegalArgumentException("The Chain with the parsed name '"+
                 name+"' is not tracked (tracked: "+trackedChains+")!");
@@ -264,7 +246,7 @@ public class ChainsTracker implements ChainManager{
         if(name == null || name.isEmpty()){
             throw new IllegalArgumentException("The parsed name MUST NOT be NULL or empty");
         }
-        return getNameTracker().getReference(name) != null;
+        return nameTracker.getReference(name) != null;
     }
     /*
      * (non-Javadoc)
@@ -276,7 +258,7 @@ public class ChainsTracker implements ChainManager{
             throw new IllegalArgumentException("The parsed name MUST NOT be NULL or empty");
         }
         if(trackedChains.isEmpty() || trackedChains.contains(name)){
-            List<ServiceReference> refs = getNameTracker().getReferences(name);
+            List<ServiceReference> refs = nameTracker.getReferences(name);
             if(refs == null){
                 refs = Collections.emptyList();
             }
@@ -292,7 +274,7 @@ public class ChainsTracker implements ChainManager{
      */
     @Override
     public Set<String> getActiveChainNames(){
-        return getNameTracker().getNames();
+        return nameTracker.getNames();
     }
     /**
      * Getter for the map with the names and the {@link ServiceReference} of the 
@@ -301,7 +283,7 @@ public class ChainsTracker implements ChainManager{
      * currently active and tracked chains
      */
     public Map<String,ServiceReference> getActiveChainReferences(){
-        return getNameTracker().getActive();
+        return nameTracker.getActive();
     }
     /*
      * (non-Javadoc)
@@ -310,14 +292,14 @@ public class ChainsTracker implements ChainManager{
     @Override
     public Chain getChain(String name){
         ServiceReference ref = getReference(name);
-        return ref == null ? null : (Chain)getNameTracker().getService(ref);
+        return ref == null ? null : (Chain)nameTracker.getService(ref);
     }
     /*
      * (non-Javadoc)
      * @see org.apache.stanbol.enhancer.servicesapi.ChainManager#getChain(org.osgi.framework.ServiceReference)
      */
     public Chain getChain(ServiceReference chainReference){
-        return (Chain)getNameTracker().getService(chainReference);
+        return (Chain)nameTracker.getService(chainReference);
     }
 
     /*
@@ -328,7 +310,7 @@ public class ChainsTracker implements ChainManager{
     public Chain getDefault() {
         Chain chain = getChain(DEFAULT_CHAIN_NAME);
         if(chain == null){
-            chain = (Chain)getNameTracker().getService();
+            chain = (Chain)nameTracker.getService();
         }
         return chain;
     }
@@ -340,6 +322,6 @@ public class ChainsTracker implements ChainManager{
      * @return the chain tracking state
      */
     protected final NameBasedServiceTrackingState getChainTrackingState() {
-        return getNameTracker();
+        return nameTracker;
     }
 }
