@@ -97,15 +97,18 @@ public abstract class EntityhubTestBase extends StanbolTestBase{
                             referencedSite));
                     }
                 }
-                //this ensures that all sites are initialized
-                //No longer needed with STANBOL-996
-//                for(String referencedSite : referencedSites){
-//	                re = executor.execute(
-//	                        builder.buildGetRequest("/entityhub/site/"+referencedSite +
-//	                        		"/entity?id=urn:does:not:exist:f82js95xsig39s.23987")
-//	                        .withHeader("Accept", "application/json"));
-//	                re.assertStatus(404);
-//                }
+                //this ensures that JSON and RDF serializer services are up and running
+                for(String referencedSite : referencedSites){
+	                re = executor.execute(
+	                        builder.buildGetRequest("/entityhub/site/"+referencedSite)
+	                        .withHeader("Accept", "application/json")); //check JSON serializer
+	                re.assertStatus(200);
+	                re.assertContentType("application/json");
+	                re = executor.execute(builder.buildGetRequest("/entityhub/site/"+referencedSite)
+                            .withHeader("Accept", "application/rdf+xml"));//check RDF serializer
+                    re.assertStatus(200);
+                    re.assertContentType("application/rdf+xml");
+                }
                 log.info("Entityhub services checked, all present");
                 return true;
             }
