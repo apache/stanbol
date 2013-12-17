@@ -50,7 +50,11 @@
             <!-- NOTE: define servicesapi package as provide:=true, because of the
                  included abstract implementations of some of those interfaces -->
             <Export-Package>
-              org.apache.stanbol.enhancer.servicesapi.*;version=${project.version}
+              org.apache.stanbol.enhancer.servicesapi;version=${project.version},
+              org.apache.stanbol.enhancer.servicesapi.helper;version=${project.version},
+              org.apache.stanbol.enhancer.servicesapi.helper.execution;version=${project.version},
+              org.apache.stanbol.enhancer.servicesapi.impl;version=${project.version},
+              org.apache.stanbol.enhancer.servicesapi.rdf;version=${project.version}
             </Export-Package>
             <Import-Package>
               org.apache.commons.io;version="[1.4.0,3)",
