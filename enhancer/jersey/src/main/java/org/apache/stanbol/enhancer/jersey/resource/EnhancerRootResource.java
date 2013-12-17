@@ -26,8 +26,12 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JS
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
+import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.JSON_LD;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.addActiveChains;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.addActiveEngines;
+
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -60,7 +64,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Enhancer;
-
 import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.resource.LayoutConfiguration;
@@ -118,7 +121,7 @@ public final class EnhancerRootResource extends BaseStanbolResource {
         }
 
         @GET
-        @Produces(value = {APPLICATION_JSON, N3, N_TRIPLE, RDF_JSON, RDF_XML, TURTLE, X_TURTLE})
+        @Produces(value = {JSON_LD, APPLICATION_JSON, N3, N_TRIPLE, RDF_JSON, RDF_XML, TURTLE, X_TURTLE})
         public Response getEngines(@Context HttpHeaders headers) {
             MGraph graph = getEnhancerConfigGraph();
             ResponseBuilder res = Response.ok(graph);
@@ -150,14 +153,18 @@ public final class EnhancerRootResource extends BaseStanbolResource {
             if (sparqlQuery == null) {
                 return Response.ok(new Viewable("sparql", EnhancerRootResource.this), TEXT_HTML).build();
             }
-            Query query = QueryParser.getInstance().parse(sparqlQuery);
+            final Query query = QueryParser.getInstance().parse(sparqlQuery);
             String mediaType = "application/sparql-results+xml";
             if (query instanceof DescribeQuery || query instanceof ConstructQuery) {
                 mediaType = "application/rdf+xml";
             }
             ResponseBuilder responseBuilder;
             if (queryEngine != null) {
-                Object result = queryEngine.execute(null, getEnhancerConfigGraph(), query);
+                Object result = AccessController.doPrivileged(new PrivilegedAction<Object>() {
+                    public Object run() {
+                        return queryEngine.execute(null, getEnhancerConfigGraph(), query);
+                    }
+                });
                 responseBuilder = Response.ok(result, mediaType);
             } else {
                 responseBuilder = Response.status(Status.SERVICE_UNAVAILABLE)

@@ -24,6 +24,7 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JS
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
+import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.JSON_LD;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.INCLUDE_EXECUTION_METADATA;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.OMIT_METADATA;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.OMIT_PARSED_CONTENT;
@@ -136,7 +137,7 @@ public abstract class AbstractEnhancerResource extends TemplateLayoutConfigurati
 
     @GET
     @Path("/ep")
-    @Produces(value = {APPLICATION_JSON, N3, N_TRIPLE, RDF_JSON, RDF_XML, TURTLE, X_TURTLE})
+    @Produces(value = {JSON_LD, APPLICATION_JSON, N3, N_TRIPLE, RDF_JSON, RDF_XML, TURTLE, X_TURTLE})
     public Response getExecutionPlan(@Context HttpHeaders headers) {
         ResponseBuilder res;
         Chain chain = null;
