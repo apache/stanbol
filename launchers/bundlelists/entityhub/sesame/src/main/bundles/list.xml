@@ -17,6 +17,43 @@
 -->
 
 <bundles>
+  <!-- logback logging is used by Sesame -->
+  <startLevel level="10">
+    <bundle>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <version>0.9.30</version> <!-- sesame expects version < 1.0.0 -->
+    </bundle>
+    <bundle>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>0.9.30</version> <!-- sesame expects version < 1.0.0 -->
+    </bundle>
+  </startLevel>
+  
+  <!-- additional commons libs required by Sesmae -->
+  <startLevel>
+    <bundle> <!-- opencsv version 2.1 -->
+      <groupId>org.ow2.bundles</groupId>
+      <artifactId>ow2-bundles-externals-opencsv</artifactId>
+      <version>1.0.36</version>
+    </bundle>
+    <bundle>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.3.0</version>
+    </bundle>
+  </startLevel>
+  
+  <!-- Sesame OSGI environment -->
+  <startLevel level="26">
+    <bundle>
+      <groupId>org.openrdf.sesame</groupId>
+      <artifactId>sesame-runtime-osgi</artifactId>
+      <version>2.7.8</version>
+    </bundle>
+  </startLevel>
+
   <!-- Stanbol Entityhub infrastructure and required libraries-->
   <startLevel level="30">
     <bundle>
