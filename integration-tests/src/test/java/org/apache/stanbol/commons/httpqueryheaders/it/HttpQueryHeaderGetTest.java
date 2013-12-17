@@ -61,7 +61,7 @@ public class HttpQueryHeaderGetTest extends EntityhubTestBase {
         re.assertContentType("application/rdf+xml");
         re.assertContentContains(
             "<rdf:Description rdf:about=\"http://dbpedia.org/resource/Paris\">",
-            "<rdfs:label xml:lang=\"en\">Paris</rdfs:label>");
+            "<rdf:type rdf:resource=\"http://dbpedia.org/ontology/Place\"/>");
         //now test the default Accept
         re = executor.execute(
             builder.buildGetRequest(DBPEDIA_SITE_PATH+"/entity",
