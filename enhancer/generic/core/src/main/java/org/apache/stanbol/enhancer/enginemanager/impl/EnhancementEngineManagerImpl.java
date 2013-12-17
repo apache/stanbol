@@ -42,7 +42,6 @@ public class EnhancementEngineManagerImpl extends EnginesTracker implements Enha
     @Activate
     public void activate(ComponentContext ctx){
         initEngineTracker(ctx.getBundleContext(), null, null);
-        open();
     }
     @Deactivate
     public void deactivate(ComponentContext ctx){
