@@ -23,6 +23,7 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JS
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
+import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.JSON_LD;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.addActiveEngines;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.buildEnginesMap;
 
@@ -42,7 +43,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
+
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
+
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -51,6 +54,7 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -64,10 +68,13 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.impl.EnginesTracker;
 import org.apache.stanbol.enhancer.servicesapi.impl.SingleEngineChain;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 
 @Component
@@ -79,20 +86,91 @@ public class EnhancementEnginesRootResource extends BaseStanbolResource {
     @Reference
     private EnhancementJobManager jobManager;
     @Reference
-    private EnhancementEngineManager engineManager;
-    @Reference
     private ChainManager chainManager;
     @Reference
     private ContentItemFactory ciFactory;
 
+    /**
+     * Read-only list of active engines. Do not access directly as this is
+     * lazy initialised after any change in the list of active {@link EnhancementEngine}. 
+     * Use {@link #getActiveEngine(String)} and {@link #getActiveEngines()} instead. 
+     */
+    protected Map<String, Entry<ServiceReference,EnhancementEngine>> _enginesCache;
     
-    private Map<String, Entry<ServiceReference,EnhancementEngine>> engines;
-
+    /**
+     * Tracks available EnhancementEngines
+     */
+    private EnginesTracker engineTracker;
+    
     @Activate
-    public void activate(ComponentContext ctx) {
-        engines = buildEnginesMap(engineManager);
+    protected void activate(ComponentContext ctx) {
+        final BundleContext bc = ctx.getBundleContext();
+        engineTracker = new EnginesTracker(bc, Collections.<String>emptySet(), 
+            new ServiceTrackerCustomizer() {
+                
+                @Override
+                public Object addingService(ServiceReference reference) {
+                    Object service = bc.getService(reference);
+                    if(service != null){
+                        _enginesCache = null; //rebuild the cache on the next call
+                    }
+                    return service;
+                }
+
+                @Override
+                public void modifiedService(ServiceReference reference, Object service) {
+                    _enginesCache = null; //rebuild the cache on the next call
+                }
+
+                @Override
+                public void removedService(ServiceReference reference, Object service) {
+                    if(reference != null){
+                        bc.ungetService(reference);
+                        _enginesCache = null; //rebuild the cache on the next call
+                    }
+                }
+                
+            });
     }
 
+    @Deactivate
+    protected void deactivate(ComponentContext ctx){
+        if(engineTracker != null){
+            engineTracker.close();
+            engineTracker = null;
+        }
+    }
+    /**
+     * Getter for the list of active EnhancementEngines
+     * @return the list of active EnhancementEngines (both {@link ServiceReference}
+     * and service).
+     */
+    protected Collection<Entry<ServiceReference,EnhancementEngine>> getActiveEngines(){
+        Map<String,Entry<ServiceReference,EnhancementEngine>> engines = getEnginesMap();
+        return engines.values();
+    }
+
+    /**
+     * Getter for an active engine by name
+     * @param name the name of the engine
+     * @return the active EnhancementEngine (both {@link ServiceReference}
+     * and service) or <code>null<code> if none is active with this name
+     */
+    protected Entry<ServiceReference,EnhancementEngine> getActiveEngine(String name){
+        return getEnginesMap().get(name);
+    }
+    /**
+     * @return
+     */
+    private Map<String,Entry<ServiceReference,EnhancementEngine>> getEnginesMap() {
+        Map<String, Entry<ServiceReference,EnhancementEngine>> engines = _enginesCache;
+        if(engines == null){
+            engines = buildEnginesMap(engineTracker);
+            this._enginesCache = Collections.unmodifiableMap(engines);
+        }
+        return engines;
+    }
+    
    /* @OPTIONS
     public Response handleCorsPreflight(@Context HttpHeaders headers){
         ResponseBuilder res = Response.ok();
@@ -109,11 +187,11 @@ public class EnhancementEnginesRootResource extends BaseStanbolResource {
     }
 
     @GET
-    @Produces(value={APPLICATION_JSON,N3,N_TRIPLE,RDF_JSON,RDF_XML,TURTLE,X_TURTLE})
+    @Produces(value={JSON_LD, APPLICATION_JSON,N3,N_TRIPLE,RDF_JSON,RDF_XML,TURTLE,X_TURTLE})
     public Response getEngines(@Context HttpHeaders headers){
         String rootUrl = uriInfo.getBaseUriBuilder().path(getRootUrl()).build().toString();
         MGraph graph = new SimpleMGraph();
-        addActiveEngines(engines.values(), graph, rootUrl);
+        addActiveEngines(getActiveEngines(), graph, rootUrl);
         ResponseBuilder res = Response.ok(graph);
    //     addCORSOrigin(servletContext,res, headers);
         return res.build();
@@ -121,7 +199,7 @@ public class EnhancementEnginesRootResource extends BaseStanbolResource {
 
     public Collection<EnhancementEngine> getEngines(){
         List<EnhancementEngine> engines = new ArrayList<EnhancementEngine>();
-        for(Entry<ServiceReference,EnhancementEngine> entry : this.engines.values()){
+        for(Entry<ServiceReference,EnhancementEngine> entry : getActiveEngines()){
             engines.add(entry.getValue());
         }
         Collections.sort(engines, new Comparator<EnhancementEngine>() {
@@ -133,7 +211,7 @@ public class EnhancementEnginesRootResource extends BaseStanbolResource {
         return engines;
     }
     public String getServicePid(String name){
-        Entry<ServiceReference,EnhancementEngine> entry = engines.get(name);
+        Entry<ServiceReference,EnhancementEngine> entry = getActiveEngine(name);
         if(entry != null){
             return (String)entry.getKey().getProperty(Constants.SERVICE_PID);
         } else {
@@ -141,7 +219,7 @@ public class EnhancementEnginesRootResource extends BaseStanbolResource {
         }
     }
     public Integer getServiceRanking(String name){
-        Entry<ServiceReference,EnhancementEngine> entry = engines.get(name);
+        Entry<ServiceReference,EnhancementEngine> entry = getActiveEngine(name);
         Integer ranking = null;
         if(entry != null){
             ranking = (Integer)entry.getKey().getProperty(Constants.SERVICE_RANKING);
@@ -153,7 +231,7 @@ public class EnhancementEnginesRootResource extends BaseStanbolResource {
         }
     }
     public Long getServiceId(String name){
-        Entry<ServiceReference,EnhancementEngine> entry = engines.get(name);
+        Entry<ServiceReference,EnhancementEngine> entry = getActiveEngine(name);
         if(entry != null){
             return (Long)entry.getKey().getProperty(Constants.SERVICE_ID);
         } else {
@@ -163,7 +241,7 @@ public class EnhancementEnginesRootResource extends BaseStanbolResource {
     
     @Path("{engineName}")
     public EngineResource getEngine(@PathParam(value = "engineName") String name) {
-        return new EngineResource(name, jobManager, engineManager, chainManager, 
+        return new EngineResource(name, jobManager, engineTracker, chainManager, 
                 ciFactory, getLayoutConfiguration(), getUriInfo());
     }
 

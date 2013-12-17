@@ -24,6 +24,7 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JS
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
+import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.JSON_LD;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.addActiveChains;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.buildChainsMap;
 
@@ -49,19 +50,22 @@ import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.web.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
-import org.apache.stanbol.enhancer.servicesapi.ChainManager;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
+import org.apache.stanbol.enhancer.servicesapi.impl.ChainsTracker;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 
 @Component
@@ -75,22 +79,85 @@ public class ChainsRootResource extends BaseStanbolResource {
     @Reference
     private EnhancementEngineManager engineManager;
     @Reference
-    private ChainManager chainManager;
-    @Reference
     private ContentItemFactory ciFactory;
     @Reference
     private Serializer serializer;
     
+    protected Map<String,Map.Entry<ServiceReference,Chain>> _chainCache;
+    protected ChainsTracker chainTracker;
     
     @Activate
     public void activate(ComponentContext ctx) {
+        final BundleContext bc = ctx.getBundleContext();
+        chainTracker = new ChainsTracker(ctx.getBundleContext(), Collections.<String>emptySet(), 
+            new ServiceTrackerCustomizer() {
+                
+                @Override
+                public Object addingService(ServiceReference reference) {
+                    Object service = bc.getService(reference);
+                    if(service != null){
+                        _chainCache = null; //rebuild the cache on the next call
+                    }
+                    return service;
+                }
+    
+                @Override
+                public void modifiedService(ServiceReference reference, Object service) {
+                    _chainCache = null; //rebuild the cache on the next call
+                }
+    
+                @Override
+                public void removedService(ServiceReference reference, Object service) {
+                    if(reference != null){
+                        bc.ungetService(reference);
+                        _chainCache = null; //rebuild the cache on the next call
+                    }
+                }
+            });
     }
     
+    @Deactivate
+    protected void deactivate(ComponentContext ctx){
+        if(chainTracker != null){
+            chainTracker.close();
+            chainTracker = null;
+        }
+    }
     
+    /**
+     * Getter for the list of active chain
+     * @return the list of active chain (both {@link ServiceReference}
+     * and service).
+     */
+    protected Collection<Entry<ServiceReference,Chain>> getActiveChains(){
+        return getChainsMap().values();
+    }
+
+    /**
+     * Getter for an active chain by name
+     * @param name the name of the chain
+     * @return the active {@link Chain} (both {@link ServiceReference}
+     * and service) or <code>null<code> if none is active with this name
+     */
+    protected Entry<ServiceReference,Chain> getActiveChains(String name){
+        return getChainsMap().get(name);
+    }
+    /**
+     * @return
+     */
+    private Map<String,Entry<ServiceReference,Chain>> getChainsMap() {
+        Map<String, Entry<ServiceReference,Chain>> chains = _chainCache;
+        if(chains == null){
+            chains = buildChainsMap(chainTracker);
+            this._chainCache = Collections.unmodifiableMap(chains);
+        }
+        return chains;
+    }
+
     @Path("{chain}")
     public GenericEnhancerUiResource get(@PathParam(value = "chain") String chain) {
         return new GenericEnhancerUiResource(chain, jobManager, 
-                engineManager, chainManager, ciFactory, serializer, 
+                engineManager, chainTracker, ciFactory, serializer, 
                 getLayoutConfiguration(), getUriInfo());
     }
 
@@ -109,11 +176,11 @@ public class ChainsRootResource extends BaseStanbolResource {
         return res.build();
     }
     @GET
-    @Produces(value={APPLICATION_JSON,N3,N_TRIPLE,RDF_JSON,RDF_XML,TURTLE,X_TURTLE})
+    @Produces(value={JSON_LD, APPLICATION_JSON,N3,N_TRIPLE,RDF_JSON,RDF_XML,TURTLE,X_TURTLE})
     public Response getEngines(@Context HttpHeaders headers){
         String rootUrl = uriInfo.getBaseUriBuilder().path(getRootUrl()).build().toString();
         MGraph graph = new SimpleMGraph();
-        addActiveChains(buildChainsMap(chainManager).values(),chainManager.getDefault(),graph,rootUrl);
+        addActiveChains(getActiveChains(), chainTracker.getDefault(),graph,rootUrl);
         ResponseBuilder res = Response.ok(graph);
         //addCORSOrigin(servletContext,res, headers);
         return res.build();
@@ -122,7 +189,7 @@ public class ChainsRootResource extends BaseStanbolResource {
 
     public Collection<Chain> getChains(){
         List<Chain> chains = new ArrayList<Chain>();
-        for(Entry<ServiceReference,Chain> entry : buildChainsMap(chainManager).values()){
+        for(Entry<ServiceReference,Chain> entry : getActiveChains()){
             chains.add(entry.getValue());
         }
         Collections.sort(chains, new Comparator<Chain>() {
@@ -134,7 +201,7 @@ public class ChainsRootResource extends BaseStanbolResource {
         return chains;
     }
     public String getServicePid(String name){
-        Entry<ServiceReference,Chain> entry = buildChainsMap(chainManager).get(name);
+        Entry<ServiceReference,Chain> entry = getActiveChains(name);
         if(entry != null){
             return (String)entry.getKey().getProperty(Constants.SERVICE_PID);
         } else {
@@ -142,7 +209,7 @@ public class ChainsRootResource extends BaseStanbolResource {
         }
     }
     public Integer getServiceRanking(String name){
-        Entry<ServiceReference,Chain> entry = buildChainsMap(chainManager).get(name);
+        Entry<ServiceReference,Chain> entry = getActiveChains(name);
         Integer ranking = null;
         if(entry != null){
             ranking = (Integer)entry.getKey().getProperty(Constants.SERVICE_RANKING);
@@ -154,7 +221,7 @@ public class ChainsRootResource extends BaseStanbolResource {
         }
     }
     public Long getServiceId(String name){
-        Entry<ServiceReference,Chain> entry = buildChainsMap(chainManager).get(name);
+        Entry<ServiceReference,Chain> entry = getActiveChains(name);
         if(entry != null){
             return (Long)entry.getKey().getProperty(Constants.SERVICE_ID);
         } else {
@@ -162,10 +229,10 @@ public class ChainsRootResource extends BaseStanbolResource {
         }
     }
     public Chain getDefaultChain(){
-        return chainManager.getDefault();
+        return chainTracker.getDefault();
     }
     public boolean isDefault(String name){
-        return chainManager.getDefault().getName().equals(name);
+        return chainTracker.getDefault().getName().equals(name);
     }
     
     
