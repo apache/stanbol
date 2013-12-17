@@ -35,6 +35,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Used to manage the state of ServiceReferences for services that are 
@@ -48,6 +50,9 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  *
  */
 public class NameBasedServiceTrackingState extends ServiceTracker implements ServiceTrackerCustomizer {
+
+    private final Logger log = LoggerFactory.getLogger(NameBasedServiceTrackingState.class);
+    
 //    /**
 //     * Allows to forward to an other customiser after this class has finished
 //     * his work
@@ -150,6 +155,7 @@ public class NameBasedServiceTrackingState extends ServiceTracker implements Ser
             lock.writeLock().unlock();
         }
         final Object service;
+        log.info(" ... adding service {}",reference);
         if(customizer != null){
             service =  customizer.addingService(reference);
         } else {

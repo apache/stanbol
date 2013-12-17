@@ -74,6 +74,10 @@ public class EnginesTracker implements EnhancementEngineManager{
     private Set<String> trackedEngines;
 
     private NameBasedServiceTrackingState nameTracker;
+
+    private boolean initialised;
+
+    private boolean open;
     /**
      * Protected constructor intended to be used by subclasses that do not want
      * to compete the initialisation as part of construction(e.g.
@@ -156,7 +160,7 @@ public class EnginesTracker implements EnhancementEngineManager{
      */
     protected void initEngineTracker(BundleContext context, Set<String> engineNames, ServiceTrackerCustomizer customiser) {
         if(nameTracker != null){ //if this is a re-initialisation
-            nameTracker.close(); //try to close the existing service tracker instance
+            close(); //try to close the existing service tracker instance
         }
         if(context == null){
             throw new IllegalStateException("Unable to initialise tracking if NULL is parsed as Bundle Context!");
@@ -204,17 +208,32 @@ public class EnginesTracker implements EnhancementEngineManager{
                         "parsed Engine names "+trackedEngines,e);
             }
         }
+        initialised = true;
     }
     /**
      * Starts tracking based on the configuration parsed in the constructor
+     * @return 
      */
-    public void open(){
-        nameTracker.open();
+    public NameBasedServiceTrackingState getNameTracker(){
+        if(!initialised){
+            throw new IllegalStateException("EngiensTracker was not initialised or is already closed!");
+        }
+        if(!open){
+            synchronized (this) {
+                if(!open){
+                    nameTracker.open();
+                    open = true;
+                }
+            }
+        }
+        return nameTracker;
     }
     /**
      * Closes this tracker
      */
     public void close(){
+        open = false;
+        initialised = false;
         nameTracker.close();
         nameTracker = null;
     }
@@ -240,7 +259,7 @@ public class EnginesTracker implements EnhancementEngineManager{
             throw new IllegalArgumentException("The parsed name MUST NOT be NULL or empty");
         }
         if(trackedEngines.isEmpty() || trackedEngines.contains(name)){
-            return nameTracker.getReference(name);
+            return getNameTracker().getReference(name);
         } else {
             throw new IllegalArgumentException("The Engine with the parsed name '"+
                 name+"' is not tracked (tracked: "+trackedEngines+")!");
@@ -251,7 +270,7 @@ public class EnginesTracker implements EnhancementEngineManager{
         if(name == null || name.isEmpty()){
             throw new IllegalArgumentException("The parsed name MUST NOT be NULL or empty");
         }
-        return nameTracker.getReference(name) != null;
+        return getNameTracker().getReference(name) != null;
     }
     /*
      * (non-Javadoc)
@@ -263,7 +282,7 @@ public class EnginesTracker implements EnhancementEngineManager{
             throw new IllegalArgumentException("The parsed name MUST NOT be NULL or empty");
         }
         if(trackedEngines.isEmpty() || trackedEngines.contains(name)){
-            List<ServiceReference> refs = nameTracker.getReferences(name);
+            List<ServiceReference> refs = getNameTracker().getReferences(name);
             if(refs == null){
                 refs = Collections.emptyList();
             }
@@ -279,7 +298,7 @@ public class EnginesTracker implements EnhancementEngineManager{
      */
     @Override
     public Set<String> getActiveEngineNames(){
-        return nameTracker.getNames();
+        return getNameTracker().getNames();
     }
     /**
      * Getter for the map with the names and the {@link ServiceReference} of the 
@@ -288,7 +307,7 @@ public class EnginesTracker implements EnhancementEngineManager{
      * currently active and tracked engines
      */
     public Map<String,ServiceReference> getActiveEngineReferences(){
-        return nameTracker.getActive();
+        return getNameTracker().getActive();
     }
     /*
      * (non-Javadoc)
@@ -297,14 +316,14 @@ public class EnginesTracker implements EnhancementEngineManager{
     @Override
     public EnhancementEngine getEngine(String name){
         ServiceReference ref = getReference(name);
-        return ref == null ? null : (EnhancementEngine)nameTracker.getService(ref);
+        return ref == null ? null : (EnhancementEngine)getNameTracker().getService(ref);
     }
     /*
      * (non-Javadoc)
      * @see org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager#getEngine(org.osgi.framework.ServiceReference)
      */
     public EnhancementEngine getEngine(ServiceReference engineReference){
-        return (EnhancementEngine)nameTracker.getService(engineReference);
+        return (EnhancementEngine)getNameTracker().getService(engineReference);
     }
     /**
      * Getter for the name based service tracker. {@link ServiceReference}s
@@ -314,6 +333,6 @@ public class EnginesTracker implements EnhancementEngineManager{
      * @return the engine tracking state
      */
     protected final NameBasedServiceTrackingState getEngineTrackingState() {
-        return nameTracker;
+        return getNameTracker();
     }
 }
