@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory;
  * Naive EnhancementJobManager implementation that keeps its request queue in
  * memory.
  *
+ * @deprecated Deprecated as it does not support Enhancement Chains. Use the 
+ * EventJobmanager instead.
  * @scr.component immediate="true"
  * @scr.service
  * @scr.reference name="EnhancementEngine"
@@ -50,6 +52,7 @@ import org.slf4j.LoggerFactory;
  *               value="-1000"
  *               type="Integer"
  */
+@Deprecated
 public class WeightedJobManager implements EnhancementJobManager {
     private static final Logger log = LoggerFactory.getLogger(WeightedJobManager.class);
     // handle thread safety efficiently when traversals (e.g. when calling
