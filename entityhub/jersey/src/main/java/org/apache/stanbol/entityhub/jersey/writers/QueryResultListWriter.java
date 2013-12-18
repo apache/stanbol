@@ -24,6 +24,7 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JS
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
+import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.JSON_LD;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -47,6 +48,7 @@ import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.codehaus.jettison.json.JSONException;
@@ -66,6 +68,7 @@ public class QueryResultListWriter implements MessageBodyWriter<QueryResultList<
     static {
         Set<String> p = new HashSet<String>();
         p.add(APPLICATION_JSON);
+        p.add(JSON_LD);
         p.add(N3);
         p.add(N_TRIPLE);
         p.add(RDF_XML);

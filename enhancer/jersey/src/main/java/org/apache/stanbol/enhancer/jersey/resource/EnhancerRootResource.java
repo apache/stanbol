@@ -27,6 +27,7 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XM
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
+import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.JSON_LD;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.addActiveChains;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.addActiveEngines;
 
@@ -55,7 +56,6 @@ import org.apache.clerezza.rdf.core.sparql.query.DescribeQuery;
 import org.apache.clerezza.rdf.core.sparql.query.Query;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Enhancer;
-
 import org.apache.stanbol.commons.viewable.Viewable;
 
 
@@ -74,7 +74,7 @@ public final class EnhancerRootResource extends AbstractEnhancerUiResource {
     }
     
     @GET
-    @Produces(value={APPLICATION_JSON,N3,N_TRIPLE,RDF_JSON,RDF_XML,TURTLE,X_TURTLE})
+    @Produces(value={JSON_LD, APPLICATION_JSON,N3,N_TRIPLE,RDF_JSON,RDF_XML,TURTLE,X_TURTLE})
     public Response getEngines(@Context HttpHeaders headers){
         MGraph graph = getEnhancerConfigGraph();
         ResponseBuilder res = Response.ok(graph);

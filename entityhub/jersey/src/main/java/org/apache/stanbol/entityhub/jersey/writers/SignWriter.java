@@ -37,6 +37,7 @@ import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.web.base.ContextHelper;
+import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.codehaus.jettison.json.JSONException;
 
@@ -57,6 +58,7 @@ public class SignWriter implements MessageBodyWriter<Entity> {
     static {
         Set<String> types = new HashSet<String>();
         types.add(MediaType.APPLICATION_JSON);
+        types.add(MediaTypeUtil.JSON_LD);
         types.add(SupportedFormat.N3);
         types.add(SupportedFormat.N_TRIPLE);
         types.add(SupportedFormat.RDF_JSON);

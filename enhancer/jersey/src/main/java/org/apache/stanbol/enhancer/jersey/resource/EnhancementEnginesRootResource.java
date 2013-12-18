@@ -26,6 +26,7 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
+import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.JSON_LD;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.addActiveEngines;
 import static org.apache.stanbol.enhancer.jersey.utils.EnhancerUtils.buildEnginesMap;
 
@@ -91,7 +92,7 @@ public class EnhancementEnginesRootResource extends BaseStanbolResource {
     }
 
     @GET
-    @Produces(value={APPLICATION_JSON,N3,N_TRIPLE,RDF_JSON,RDF_XML,TURTLE,X_TURTLE})
+    @Produces(value={JSON_LD, APPLICATION_JSON,N3,N_TRIPLE,RDF_JSON,RDF_XML,TURTLE,X_TURTLE})
     public Response getEngines(@Context HttpHeaders headers){
         String rootUrl = uriInfo.getBaseUriBuilder().path(getRootUrl()).build().toString();
         MGraph graph = new SimpleMGraph();
