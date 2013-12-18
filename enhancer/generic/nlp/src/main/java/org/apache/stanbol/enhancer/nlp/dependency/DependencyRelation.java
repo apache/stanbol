@@ -62,6 +62,10 @@ public class DependencyRelation {
 		return this.partner;
 	}
 
+	public void setPartner(Span partner) {
+        this.partner = partner;
+    }
+	
     @Override
     public int hashCode() {
         final int prime = 31;
