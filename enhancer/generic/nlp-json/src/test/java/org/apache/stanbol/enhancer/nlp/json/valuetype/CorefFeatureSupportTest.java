@@ -22,34 +22,34 @@ public class CorefFeatureSupportTest extends ValueTypeSupportTest {
 	private static final String sentenceText2 = " He met with the Chinese prime-minister.";
 	private static final String text = sentenceText1 + sentenceText2;
 	
-	private static final String jsonCorefCheckObama = "{\n"
-	    + "    \"type\" : \"Token\",\n"
-	    + "    \"start\" : 0,\n"
-	    + "    \"end\" : 5,\n"
-	    + "    \"stanbol.enhancer.nlp.coref\" : {\n"
-	    + "      \"isRepresentative\" : true,\n"
-	    + "      \"mentions\" : [ {\n"
-	    + "        \"type\" : \"Token\",\n"
-	    + "        \"start\" : 21,\n"
-	    + "        \"end\" : 23\n"
-	    + "      } ],\n"
-	    + "      \"class\" : \"org.apache.stanbol.enhancer.nlp.coref.CorefFeature\"\n"
-	    + "    }\n"
+	private static final String jsonCorefCheckObama = "{" + LINE_SEPARATOR
+	    + "    \"type\" : \"Token\"," + LINE_SEPARATOR
+	    + "    \"start\" : 0," + LINE_SEPARATOR
+	    + "    \"end\" : 5," + LINE_SEPARATOR
+	    + "    \"stanbol.enhancer.nlp.coref\" : {" + LINE_SEPARATOR
+	    + "      \"isRepresentative\" : true," + LINE_SEPARATOR
+	    + "      \"mentions\" : [ {" + LINE_SEPARATOR
+	    + "        \"type\" : \"Token\"," + LINE_SEPARATOR
+	    + "        \"start\" : 21," + LINE_SEPARATOR
+	    + "        \"end\" : 23" + LINE_SEPARATOR
+	    + "      } ]," + LINE_SEPARATOR
+	    + "      \"class\" : \"org.apache.stanbol.enhancer.nlp.coref.CorefFeature\"" + LINE_SEPARATOR
+	    + "    }" + LINE_SEPARATOR
 		+ "  }";
 	
-	private static final String jsonCorefCheckHe = "{\n"
-	    + "    \"type\" : \"Token\",\n"
-	    + "    \"start\" : 21,\n"
-	    + "    \"end\" : 23,\n"
-	    + "    \"stanbol.enhancer.nlp.coref\" : {\n"
-	    + "      \"isRepresentative\" : false,\n"
-	    + "      \"mentions\" : [ {\n"
-	    + "        \"type\" : \"Token\",\n"
-	    + "        \"start\" : 0,\n"
-	    + "        \"end\" : 5\n"
-	    + "      } ],\n"
-	    + "      \"class\" : \"org.apache.stanbol.enhancer.nlp.coref.CorefFeature\"\n"
-	    + "    }\n"
+	private static final String jsonCorefCheckHe = "{" + LINE_SEPARATOR
+	    + "    \"type\" : \"Token\"," + LINE_SEPARATOR
+	    + "    \"start\" : 21," + LINE_SEPARATOR
+	    + "    \"end\" : 23," + LINE_SEPARATOR
+	    + "    \"stanbol.enhancer.nlp.coref\" : {" + LINE_SEPARATOR
+	    + "      \"isRepresentative\" : false," + LINE_SEPARATOR
+	    + "      \"mentions\" : [ {" + LINE_SEPARATOR
+	    + "        \"type\" : \"Token\"," + LINE_SEPARATOR
+	    + "        \"start\" : 0," + LINE_SEPARATOR
+	    + "        \"end\" : 5" + LINE_SEPARATOR
+	    + "      } ]," + LINE_SEPARATOR
+	    + "      \"class\" : \"org.apache.stanbol.enhancer.nlp.coref.CorefFeature\"" + LINE_SEPARATOR
+	    + "    }" + LINE_SEPARATOR
 	    + "  }";
 	
 	@BeforeClass

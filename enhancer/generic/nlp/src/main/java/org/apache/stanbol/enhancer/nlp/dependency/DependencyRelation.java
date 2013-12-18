@@ -62,21 +62,38 @@ public class DependencyRelation {
 		return this.partner;
 	}
 
-	public int hashCode() {
-		return grammaticalRelationTag.hashCode()
-				+ ((partner != null) ? partner.hashCode() : 0)
-				+ +(isDependent ? 1 : 0);
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((grammaticalRelationTag == null) ? 0
+                        : grammaticalRelationTag.hashCode());
+        result = prime * result + (isDependent ? 1231 : 1237);
+        result = prime * result + ((partner == null) ? 0 : partner.hashCode());
+        return result;
+    }
 
-	public boolean equals(Object obj) {
-		return (obj instanceof DependencyRelation)
-				&& (this.grammaticalRelationTag
-						.equals(((DependencyRelation) obj)
-								.getGrammaticalRelationTag()))
-				&& (this.isDependent == ((DependencyRelation) obj)
-						.isDependent())
-				&& (this.partner == null
-						&& ((DependencyRelation) obj).getPartner() == null || this.partner
-							.equals(((DependencyRelation) obj).getPartner()));
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DependencyRelation other = (DependencyRelation) obj;
+        if (grammaticalRelationTag == null) {
+            if (other.grammaticalRelationTag != null)
+                return false;
+        } else if (!grammaticalRelationTag.equals(other.grammaticalRelationTag))
+            return false;
+        if (isDependent != other.isDependent)
+            return false;
+        if (partner == null) {
+            if (other.partner != null)
+                return false;
+        } else if (!partner.equals(other.partner))
+            return false;
+        return true;
+    }
 }
