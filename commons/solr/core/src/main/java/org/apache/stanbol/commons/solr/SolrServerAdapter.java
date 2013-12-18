@@ -339,7 +339,6 @@ public class SolrServerAdapter {
         registerCoreService(name,null);
         //update the OSGI service for the CoreContainer
         updateServerRegistration();
-
     }
     /**
      * Sets the {@link ClassLoader} of the {@link Thread#currentThread()} to the
@@ -385,6 +384,11 @@ public class SolrServerAdapter {
             new Object[]{core1,core2, serverProperties.getServerName()});
         //swap the cores
         server.swap(core1, core2);
+        //if succeeded (re-)register the cores
+        registerCoreService(core1,null);
+        registerCoreService(core2,null);
+        //update the OSGI service for the CoreContainer
+        updateServerRegistration();
     }
     
     /**
@@ -487,16 +491,31 @@ public class SolrServerAdapter {
      * {@link SolrCore#getOpenCount()}.
      */
     protected ServiceReference registerCoreService(String name,SolrCore core) {
-        //first create the new and only than unregister the old (to ensure that 
-        //the reference count of the SolrCore does not reach 0)
-        CoreRegistration current = new CoreRegistration(name,core);
-        CoreRegistration old = registrations.put(name,current);
-        log.info("added Registration for SolrCore {}",name);
-        if(old != null){
-            log.info("  ... unregister old registration {}", old);
-            old.unregister();
+        //STANBOL-1235: we want to unregister the old before registering the new
+        //   but we do not want all solrCores to be closed as otherwise the
+        //   SolrCore would be deactivated/activated. So if we find a old
+        //   registration we will acquire a 2nd reference to the same core
+        //   for the time of the re-registration
+        SolrCore sameCore = null;
+        try {
+            CoreRegistration current;
+            synchronized (registrations) {
+                CoreRegistration old = registrations.remove(name);
+                if(old != null){
+                    sameCore = this.server.getCore(name); //2nd reference to the core
+                    log.info("  ... unregister old registration {}", old);
+                    old.unregister();
+                }
+                current = new CoreRegistration(name,core);
+                log.info("   ... register {}",current);
+                registrations.put(name,current);
+            }
+            return current.getServiceReference();
+        } finally {
+            if(sameCore != null){ //clean up the 2nd reference
+                sameCore.close();
+            }
         }
-        return current.getServiceReference();
     }
     
     /**
