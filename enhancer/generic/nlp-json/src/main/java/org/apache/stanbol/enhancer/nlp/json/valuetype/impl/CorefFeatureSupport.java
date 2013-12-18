@@ -16,13 +16,14 @@
  */package org.apache.stanbol.enhancer.nlp.json.valuetype.impl;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.enhancer.nlp.coref.CorefTag;
+import org.apache.stanbol.enhancer.nlp.coref.CorefFeature;
 import org.apache.stanbol.enhancer.nlp.json.valuetype.ValueTypeParser;
 import org.apache.stanbol.enhancer.nlp.json.valuetype.ValueTypeSerializer;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
@@ -35,10 +36,10 @@ import org.codehaus.jackson.node.ObjectNode;
 
 @Component(immediate=true,policy=ConfigurationPolicy.IGNORE)
 @Service(value={ValueTypeParser.class,ValueTypeSerializer.class})
-@Property(name=ValueTypeParser.PROPERTY_TYPE, value=CorefTagSupport.TYPE_VALUE)
-public class CorefTagSupport implements ValueTypeParser<CorefTag>, ValueTypeSerializer<CorefTag> {
+@Property(name=ValueTypeParser.PROPERTY_TYPE, value=CorefFeatureSupport.TYPE_VALUE)
+public class CorefFeatureSupport implements ValueTypeParser<CorefFeature>, ValueTypeSerializer<CorefFeature> {
 	
-	public static final String TYPE_VALUE = "org.apache.stanbol.enhancer.nlp.coref.CorefTag";
+	public static final String TYPE_VALUE = "org.apache.stanbol.enhancer.nlp.coref.CorefFeature";
 	
 	private static final String IS_REPRESENTATIVE_TAG = "isRepresentative";
 	private static final String MENTIONS_TAG = "mentions";
@@ -47,7 +48,7 @@ public class CorefTagSupport implements ValueTypeParser<CorefTag>, ValueTypeSeri
 	private static final String MENTION_END_TAG = "end";
 	
 	@Override
-	public ObjectNode serialize(ObjectMapper mapper, CorefTag coref) {
+	public ObjectNode serialize(ObjectMapper mapper, CorefFeature coref) {
 		ObjectNode jCoref = mapper.createObjectNode();
 		
 		jCoref.put(IS_REPRESENTATIVE_TAG, coref.isRepresentative());
@@ -74,12 +75,12 @@ public class CorefTagSupport implements ValueTypeParser<CorefTag>, ValueTypeSeri
 	}
 
 	@Override
-	public Class<CorefTag> getType() {
-		return CorefTag.class;
+	public Class<CorefFeature> getType() {
+		return CorefFeature.class;
 	}
 
 	@Override
-	public CorefTag parse(ObjectNode jCoref, AnalysedText at) {
+	public CorefFeature parse(ObjectNode jCoref, AnalysedText at) {
 		JsonNode jIsRepresentative = jCoref.path(IS_REPRESENTATIVE_TAG);
 		
 		if (!jIsRepresentative.isBoolean()) {
@@ -87,7 +88,7 @@ public class CorefTagSupport implements ValueTypeParser<CorefTag>, ValueTypeSeri
 		}
 		
 		JsonNode node = jCoref.path(MENTIONS_TAG);
-		Set<Span> mentions = Collections.<Span> emptySet();
+		Set<Span> mentions = new HashSet<Span>();
 		
 		if(node.isArray()) {
             ArrayNode jMentions = (ArrayNode)node;
@@ -121,6 +122,6 @@ public class CorefTagSupport implements ValueTypeParser<CorefTag>, ValueTypeSeri
             }
 		}    
                 
-		return new CorefTag(jIsRepresentative.asBoolean(), Collections.unmodifiableSet(mentions));
+		return new CorefFeature(jIsRepresentative.asBoolean(), Collections.unmodifiableSet(mentions));
 	}	
 }

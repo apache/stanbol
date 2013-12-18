@@ -20,53 +20,45 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.apache.stanbol.enhancer.nlp.model.Span;
-import org.apache.stanbol.enhancer.nlp.model.tag.Tag;
 
 /**
- * Represents a coreference resolution tag attached to a {@link Token}. It
+ * Represents a coreference resolution feature attached to a {@link Token}. It
  * contains information about other {@link Token}s which refer to the
  * aforementioned {@link Token}.
  * 
  * @author Cristian Petroaca
  * 
  */
-public class CorefTag extends Tag<CorefTag> {
-
+public class CorefFeature {
 	/**
-	 * Shows whether the {@link Token} to which this tag is attached is the
-	 * representative metion in the chain.
+	 * Shows whether the {@link Token} to which this object is attached is the
+	 * representative mention in the chain.
 	 */
 	private boolean isRepresentative;
 
 	/**
 	 * A set of {@link Token}s representing metions of the {@link Token} to
-	 * which this tag is attached.
+	 * which this object is attached.
 	 */
 	private Set<Span> mentions;
 
-	public CorefTag() {
-		this(null, false, Collections.unmodifiableSet(Collections
+	public CorefFeature() {
+		this(false, Collections.unmodifiableSet(Collections
 				.<Span> emptySet()));
 	}
 
-	public CorefTag(boolean isRepresentative) {
-		this(null, isRepresentative, Collections.unmodifiableSet(Collections
+	public CorefFeature(boolean isRepresentative) {
+		this(isRepresentative, Collections.unmodifiableSet(Collections
 				.<Span> emptySet()));
 	}
-	
-	public CorefTag(boolean isRepresentative, Set<Span> mentions) {
-		this(null, isRepresentative, mentions);
-	}
 
-	public CorefTag(String tag, boolean isRepresentative, Set<Span> mentions) {
-		super(tag);
-
+	public CorefFeature(boolean isRepresentative, Set<Span> mentions) {
 		this.isRepresentative = isRepresentative;
 		this.mentions = mentions;
 	}
 
 	/**
-	 * Getter whether the {@link Token} to which this tag is attached is the
+	 * Getter whether the {@link Token} to which this object is attached is the
 	 * representative mention in the chain.
 	 * 
 	 * @return the representative state
@@ -77,7 +69,7 @@ public class CorefTag extends Tag<CorefTag> {
 
 	/**
 	 * Getter for the set of {@link Token}s representing mentions of the
-	 * {@link Token} to which this tag is attached.
+	 * {@link Token} to which this object is attached.
 	 * 
 	 * @return
 	 */
@@ -86,12 +78,11 @@ public class CorefTag extends Tag<CorefTag> {
 	}
 
 	public int hashCode() {
-		return super.hashCode()
-				+ ((this.mentions != null) ? this.mentions.hashCode() : 0);
+		return (this.mentions != null) ? this.mentions.hashCode() : 0;
 	}
 
 	public boolean equals(Object obj) {
-		return super.equals(obj) && (obj instanceof CorefTag)
-				&& (this.mentions.equals(((CorefTag) obj).getMentions()));
+		return (obj instanceof CorefFeature)
+				&& (this.mentions.equals(((CorefFeature) obj).getMentions()));
 	}
 }

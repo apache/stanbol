@@ -3,4 +3,4 @@ org.apache.stanbol.enhancer.nlp.json.valuetype.impl.NerTagSupport
 org.apache.stanbol.enhancer.nlp.json.valuetype.impl.MorphoFeaturesSupport
 org.apache.stanbol.enhancer.nlp.json.valuetype.impl.PhraseTagSupport
 org.apache.stanbol.enhancer.nlp.json.valuetype.impl.DependencyRelationSupport
-org.apache.stanbol.enhancer.nlp.json.valuetype.impl.CorefTagSupport
+org.apache.stanbol.enhancer.nlp.json.valuetype.impl.CorefFeatureSupport

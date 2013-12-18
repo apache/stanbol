@@ -54,7 +54,7 @@ public class DependencyRelationSupport implements ValueTypeParser<DependencyRela
         GrammaticalRelationTag gramRelTag = relation.getGrammaticalRelationTag();
         jDependencyRelation.put(RELATION_TYPE_TAG, gramRelTag.getTag());
         jDependencyRelation.put(RELATION_STANBOL_TYPE_TAG, gramRelTag.getGrammaticalRelation().ordinal());
-        jDependencyRelation.put(RELATION_IS_DEPENDEE_TAG, (relation.isDependent() ? "true" : "false"));
+        jDependencyRelation.put(RELATION_IS_DEPENDEE_TAG, (relation.isDependent()));
 
         Span partner = relation.getPartner();
         if (partner != null) {
