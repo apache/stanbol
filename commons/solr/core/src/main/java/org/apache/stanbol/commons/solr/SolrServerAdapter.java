@@ -54,18 +54,26 @@ import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.hadoop.hdfs.protocol.UnregisteredNodeException;
+import org.apache.solr.cloud.ZkController;
+import org.apache.solr.cloud.ZkSolrResourceLoader;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
+import org.apache.solr.common.cloud.ZooKeeperException;
 import org.apache.solr.core.CloseHook;
 import org.apache.solr.core.ConfigSolr;
+import org.apache.solr.core.ConfigSolrXml;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.CoreDescriptor;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.core.SolrResourceLoader;
+import org.apache.solr.core.ZkContainer;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.IndexSchemaFactory;
 import org.apache.stanbol.commons.solr.impl.OsgiSolrResourceLoader;
+import org.apache.stanbol.commons.solr.impl.OsgiZkSolrResourceLoader;
+import org.apache.zookeeper.KeeperException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
@@ -328,6 +336,7 @@ public class SolrServerAdapter {
     public void reloadCore(String name) throws ParserConfigurationException, IOException, SAXException {
         //try to reload
         log.info("Reload Core {} on CoreContainer {}",name,serverProperties.getServerName());
+        
         ClassLoader classLoader = updateContextClassLoader();
         try {
             //TODO: what happens if the core with 'name' is no longer present?
@@ -385,6 +394,11 @@ public class SolrServerAdapter {
             new Object[]{core1,core2, serverProperties.getServerName()});
         //swap the cores
         server.swap(core1, core2);
+        //if succeeded (re-)register the swapped core
+        registerCoreService(core1,null);
+        registerCoreService(core2,null);
+        //update the OSGI service for the CoreContainer
+        updateServerRegistration();
     }
     
     /**
@@ -487,16 +501,31 @@ public class SolrServerAdapter {
      * {@link SolrCore#getOpenCount()}.
      */
     protected ServiceReference registerCoreService(String name,SolrCore core) {
-        //first create the new and only than unregister the old (to ensure that 
-        //the reference count of the SolrCore does not reach 0)
-        CoreRegistration current = new CoreRegistration(name,core);
-        CoreRegistration old = registrations.put(name,current);
-        log.info("added Registration for SolrCore {}",name);
-        if(old != null){
-            log.info("  ... unregister old registration {}", old);
-            old.unregister();
+        //STANBOL-1235: we want to unregister the old before registering the new
+        //   but we do not want all solrCores to be closed as otherwise the
+        //   SolrCore would be deactivated/activated. So if we find a old
+        //   registration we will acquire a 2nd reference to the same core
+        //   for the time of the re-registration
+        SolrCore sameCore = null;
+        try {
+            CoreRegistration current;
+            synchronized (registrations) {
+                CoreRegistration old = registrations.remove(name);
+                if(old != null){
+                    sameCore = this.server.getCore(name); //2nd reference to the core
+                    log.info("  ... unregister old registration {}", old);
+                    old.unregister();
+                }
+                current = new CoreRegistration(name,core);
+                registrations.put(name,current);
+            }
+            log.info("   ... register {}",current);
+            return current.getServiceReference();
+        } finally {
+            if(sameCore != null){ //clean up the 2nd reference
+                sameCore.close();
+            }
         }
-        return current.getServiceReference();
     }
     
     /**
@@ -628,58 +657,107 @@ public class SolrServerAdapter {
                 throw new SolrException(ErrorCode.SERVICE_UNAVAILABLE, "Solr has shutdown.");
             }
             log.info(" .... createCore {}:{}",serverProperties.getServerName(),dcore.getName());
+            File idir = new File(dcore.getInstanceDir());
+            String instanceDir = idir.getPath();
+            SolrCore created;
             if (getZkController() != null) {
-                //TODO: add support for ZooKeeper managed cores
-                return super.create(dcore);
+                created = createFromZk(instanceDir, dcore);
             } else {
-                File idir = new File(dcore.getInstanceDir());
-                String instanceDir = idir.getPath();
-                SolrResourceLoader loader = new OsgiSolrResourceLoader(context, instanceDir, 
-                    CoreContainer.class.getClassLoader());
-                SolrConfig config;
-                try {
-                    config = new SolrConfig(loader, dcore.getConfigName(), null);
-                } catch (Exception e) {
-                    log.error("Failed to load file {}", new File(instanceDir, dcore.getConfigName()).getAbsolutePath());
-                    throw new SolrException(ErrorCode.SERVER_ERROR, "Could not load config for " + dcore.getConfigName(), e);
-                }
-                IndexSchema schema = null;
-                //indexSchemaCache is now protected (Solr 4.4)
-                if (indexSchemaCache != null) {
-                  final String resourceNameToBeUsed = IndexSchemaFactory.getResourceNameToBeUsed(dcore.getSchemaName(), config);
-                  File schemaFile = new File(resourceNameToBeUsed);
-                  if (!schemaFile.isAbsolute()) {
-                    schemaFile = new File(loader.getConfigDir(), schemaFile.getPath());
-                  }
-                  if (schemaFile.exists()) {
-                    String key = schemaFile.getAbsolutePath()
-                        + ":"
-                        + new SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT).format(new Date(
-                        schemaFile.lastModified()));
-                    schema = indexSchemaCache.get(key);
-                    if (schema == null) {
-                      log.info("creating new schema object for core: " + dcore.getProperty(CoreDescriptor.CORE_NAME));
-                      schema = IndexSchemaFactory.buildIndexSchema(dcore.getSchemaName(), config);
-                      indexSchemaCache.put(key, schema);
-                    } else {
-                      log.info("re-using schema object for core: " + dcore.getProperty(CoreDescriptor.CORE_NAME));
-                    }
-                  }
-                }
-
-                if (schema == null) {
-                  schema = IndexSchemaFactory.buildIndexSchema(dcore.getSchemaName(), config);
-                }
-
-                SolrCore core = new SolrCore(dcore.getName(), null, config, schema, dcore);
-                if (core.getUpdateHandler().getUpdateLog() != null) {
-                    // always kick off recovery if we are in standalone mode.
-                    core.getUpdateHandler().getUpdateLog().recoverFromLog();
-                }
-                return core;
+                created = createFromLocal(dcore, instanceDir);
             }
+            //TODO: solrCores is private ... 
+            //solrCores.addCreated(created); // For persisting newly-created cores.
+            return created;
         }
 
+        /*
+         * Create from local configuration (replaces the method with the same
+         * name in the parent class)
+         */
+        private SolrCore createFromLocal(CoreDescriptor dcore, String instanceDir) {
+            SolrResourceLoader loader = new OsgiSolrResourceLoader(context, instanceDir, 
+                CoreContainer.class.getClassLoader());
+            SolrConfig config;
+            try {
+                config = new SolrConfig(loader, dcore.getConfigName(), null);
+            } catch (Exception e) {
+                log.error("Failed to load file {}", new File(instanceDir, dcore.getConfigName()).getAbsolutePath());
+                throw new SolrException(ErrorCode.SERVER_ERROR, "Could not load config for " + dcore.getConfigName(), e);
+            }
+            IndexSchema schema = null;
+            if (indexSchemaCache != null) {
+              final String resourceNameToBeUsed = IndexSchemaFactory.getResourceNameToBeUsed(dcore.getSchemaName(), config);
+              File schemaFile = new File(resourceNameToBeUsed);
+              if (!schemaFile.isAbsolute()) {
+                schemaFile = new File(loader.getConfigDir(), schemaFile.getPath());
+              }
+              if (schemaFile.exists()) {
+                String key = schemaFile.getAbsolutePath()
+                    + ":"
+                    + new SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT).format(new Date(
+                    schemaFile.lastModified()));
+                schema = indexSchemaCache.get(key);
+                if (schema == null) {
+                  log.info("creating new schema object for core: " + dcore.getProperty(CoreDescriptor.CORE_NAME));
+                  schema = IndexSchemaFactory.buildIndexSchema(dcore.getSchemaName(), config);
+                  indexSchemaCache.put(key, schema);
+                } else {
+                  log.info("re-using schema object for core: " + dcore.getProperty(CoreDescriptor.CORE_NAME));
+                }
+              }
+            }
+
+            if (schema == null) {
+              schema = IndexSchemaFactory.buildIndexSchema(dcore.getSchemaName(), config);
+            }
+
+            SolrCore core = new SolrCore(dcore.getName(), null, config, schema, dcore);
+            if (core.getUpdateHandler().getUpdateLog() != null) {
+                // always kick off recovery if we are in standalone mode.
+                core.getUpdateHandler().getUpdateLog().recoverFromLog();
+            }
+            return core;
+        }
+        /*
+         * Create from Zookeeper (replaces the method with the same name in
+         * {@link ZkContainer})
+         */
+        private SolrCore createFromZk(String instanceDir, CoreDescriptor dcore) {
+            try {
+                SolrResourceLoader solrLoader = null;
+                SolrConfig config = null;
+                String zkConfigName = null;
+                IndexSchema schema;
+                String collection = dcore.getCloudDescriptor().getCollectionName();
+                ZkController zkController = getZkController();
+                zkController.createCollectionZkNode(dcore.getCloudDescriptor());
+
+                zkConfigName = zkController.readConfigName(collection);
+                if (zkConfigName == null) {
+                    log.error("Could not find config name for collection:" + collection);
+                    throw new ZooKeeperException(SolrException.ErrorCode.SERVER_ERROR,
+                            "Could not find config name for collection:" + collection);
+                }
+                solrLoader = new OsgiZkSolrResourceLoader(context, instanceDir, zkConfigName,
+                        CoreContainer.class.getClassLoader(),
+                        // TODO: Core properties are not accessible -> parse null
+                        // ConfigSolrXml.getCoreProperties(instanceDir, dcore),
+                        null, zkController);
+                config = zkSys.getSolrConfigFromZk(zkConfigName, dcore.getConfigName(), solrLoader);
+                schema = IndexSchemaFactory.buildIndexSchema(dcore.getSchemaName(), config);
+                return new SolrCore(dcore.getName(), null, config, schema, dcore);
+
+            } catch (KeeperException e) {
+                log.error("", e);
+                throw new ZooKeeperException(SolrException.ErrorCode.SERVER_ERROR, "", e);
+            } catch (InterruptedException e) {
+                // Restore the interrupted status
+                Thread.currentThread().interrupt();
+                log.error("", e);
+                throw new ZooKeeperException(SolrException.ErrorCode.SERVER_ERROR, "", e);
+            }
+        }
+        
         //this ensures that a closeHook is added to registered cores
         @Override
         protected SolrCore registerCore(boolean isTransientCore, String name, SolrCore core, boolean returnPrevNotClosed) {

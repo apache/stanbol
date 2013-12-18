@@ -90,39 +90,18 @@ public class OsgiSolrResourceLoader extends SolrResourceLoader {
         }
         if (clazz != null) {
             return clazz;
-        }
-        final Matcher m = legacyAnalysisPattern.matcher(cname);
-        if (m.matches()) {
-            final String name = m.group(4);
-            log.trace("Trying to load class from analysis SPI using name='{}'", name);
-            ServiceReference[] referenced;
-            String filter;
-            try {
-                filter = String.format("(%s=%s)", PROPERTY_ANALYZER_FACTORY_NAME, name.toLowerCase(Locale.ROOT));
-                referenced = bc.getServiceReferences(RegisteredSolrAnalyzerFactory.class.getName(), filter);
-            } catch (InvalidSyntaxException e) {
-                throw new IllegalStateException("Unable to create Filter for Service with name '" + name
-                        + "'!", e);
-            }
-            if (referenced != null && referenced.length > 0) {
-                Object service = bc.getService(referenced[0]);
-                if (service instanceof RegisteredSolrAnalyzerFactory) {
-                    //TODO: we could check the type here
-                    clazz = ((RegisteredSolrAnalyzerFactory)service).getFactoryClass();
-                    //we do not use a service so immediately unget it
-                    bc.ungetService(referenced[0]);
-                    return clazz;
-                }
-            } else {
-                parentEx = new SolrException(SolrException.ErrorCode.SERVER_ERROR, 
-                    "Error loading Class '" + cname + "' via OSGI service Registry by using filter '"
-                    + filter + "'!", parentEx);
-            }
-        }
-        if(parentEx != null) {
-            throw parentEx;
         } else {
-            throw new SolrException( SolrException.ErrorCode.SERVER_ERROR, "Error loading class '" + cname + "'");
+            try {
+                //try to load via the OSGI service factory
+                return OsgiResourceLoaderUtil.findOsgiClass(bc, cname, expectedType, subpackages);
+            } catch (SolrException e) {
+                //prefer to throw the first exception
+                if(parentEx != null){
+                    throw parentEx;
+                } else {
+                    throw e;
+                }
+            }
         }
     }
 
