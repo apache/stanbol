@@ -35,6 +35,11 @@
 			<version>2.2.9</version>
 		</bundle>
 		<bundle>
+		    <groupId>org.jboss.spec.javax.transaction</groupId>
+ 		   <artifactId>jboss-transaction-api_1.1_spec</artifactId>
+   		 	<version>1.0.1.Final</version>
+		</bundle>
+		<bundle>
 			<groupId>org.apache.jackrabbit</groupId>
 			<artifactId>jackrabbit-api</artifactId>
 			<version>2.2.9</version>
