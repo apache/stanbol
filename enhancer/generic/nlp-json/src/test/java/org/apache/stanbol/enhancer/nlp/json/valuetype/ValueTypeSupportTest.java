@@ -31,7 +31,7 @@ public abstract class ValueTypeSupportTest {
     /**
      * The line separator used by the Environment running this test
      */
-    protected static final String LINE_SEPARATOR = System.lineSeparator();
+    protected static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	/**
      * Empty AnalysedText instance created before each test
      */
