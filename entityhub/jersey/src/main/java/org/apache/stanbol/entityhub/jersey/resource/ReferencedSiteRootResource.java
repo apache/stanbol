@@ -180,7 +180,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     @Produces(value=MediaType.TEXT_HTML)
     public Response getHtmlInfo(@PathParam(value = "site") String siteId, 
             @Context HttpHeaders headers){
-        ResponseBuilder rb = Response.ok(new Viewable("index", this));
+        ResponseBuilder rb = Response.ok(new Viewable("index", new SiteResultData(getSite(siteId))));
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
         //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
@@ -827,4 +827,20 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         return rep;
     }
     
+    public class SiteResultData extends ResultData {
+
+        private Site site;
+
+        public SiteResultData(Site site) {
+            this.site = site;
+        }
+
+        public boolean isManagedSite() {
+            return site instanceof ManagedSite;
+        }
+
+        public Site getSite() {
+            return site;
+        }
+    }
 }
