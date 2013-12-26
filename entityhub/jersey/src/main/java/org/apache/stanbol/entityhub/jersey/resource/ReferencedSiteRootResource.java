@@ -279,7 +279,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
             supported, MediaType.APPLICATION_JSON_TYPE);
         if (id == null || id.isEmpty()) {
             if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
-                ResponseBuilder rb = Response.ok(new Viewable("entity", this));
+                ResponseBuilder rb = Response.ok(new Viewable("entity", new SiteResultData(site)));
                 rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
                // addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
@@ -541,7 +541,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
             headers, supported, MediaType.APPLICATION_JSON_TYPE);
         if(name == null || name.isEmpty()){
             if(MediaType.TEXT_HTML_TYPE.isCompatible(acceptedMediaType)){
-                ResponseBuilder rb = Response.ok(new Viewable("find", this));
+                ResponseBuilder rb = Response.ok(new Viewable("find", new SiteResultData(site)));
                 rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
                 //addCORSOrigin(servletContext, rb, headers);
                 return rb.build();
@@ -606,8 +606,8 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
     @GET
     @Path("/query")
     @Produces(TEXT_HTML)
-    public Response getQueryDocumentation(@Context HttpHeaders headers){
-        ResponseBuilder rb = Response.ok(new Viewable("query", this));
+    public Response getQueryDocumentation(@Context HttpHeaders headers, @PathParam(value = "site") String siteId){
+        ResponseBuilder rb = Response.ok(new Viewable("query", new SiteResultData(getSite(siteId))));
         rb.header(HttpHeaders.CONTENT_TYPE, TEXT_HTML+"; charset=utf-8");
         //addCORSOrigin(servletContext, rb, headers);
         return rb.build();
