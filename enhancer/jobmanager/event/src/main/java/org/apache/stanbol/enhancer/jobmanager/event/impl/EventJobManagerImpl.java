@@ -18,6 +18,10 @@ package org.apache.stanbol.enhancer.jobmanager.event.impl;
 
 import static org.apache.stanbol.enhancer.jobmanager.event.Constants.TOPIC_JOB_MANAGER;
 
+import java.io.ByteArrayOutputStream;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.lang.Character.UnicodeScript;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -26,12 +30,16 @@ import java.util.Map.Entry;
 
 import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.serializedform.Serializer;
+import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
+import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.enhancer.jobmanager.event.impl.EnhancementJobHandler.EnhancementJobObserver;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
@@ -80,6 +88,13 @@ public class EventJobManagerImpl implements EnhancementJobManager {
     @Reference
     protected EventAdmin eventAdmin;
 
+    /**
+     * If available it is used for logging ExecutionMetadata of failed or
+     * timed out Enhancement Requests (OPTIONAL)
+     */
+    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
+    protected Serializer serializer;
+    
     private ServiceRegistration jobHandlerRegistration;
     private EnhancementJobHandler jobHandler;
     private int maxEnhancementJobWaitTime = DEFAULT_MAX_ENHANCEMENT_JOB_WAIT_TIME;
@@ -173,6 +188,12 @@ public class EventJobManagerImpl implements EnhancementJobManager {
         //ci.getMetadata().addAll(job.getExecutionMetadata());
         if(job.isFailed()){
         	Exception e = job.getError();
+            EnhancementJobHandler.logJobInfo(log, job, null, true);
+            logExecutionMetadata(job);
+            log.warn("ExecutionMetadata: ");
+            for(Iterator<Triple> it = job.getExecutionMetadata().iterator();
+                    it.hasNext();
+                    log.warn(it.next().toString()));
         	if (e instanceof SecurityException) {
         		throw (SecurityException)e;
         	} else {
@@ -182,15 +203,39 @@ public class EventJobManagerImpl implements EnhancementJobManager {
         if(!job.isFinished()){
             log.warn("Execution finished, but Job is not finished!");
             EnhancementJobHandler.logJobInfo(log, job, null, true);
-            log.warn("ExecutionMetadata: ");
-            for(Iterator<Triple> it = job.getExecutionMetadata().iterator();
-                    it.hasNext();
-                    log.warn(it.next().toString()));
+            logExecutionMetadata(job);
             throw new ChainException("EnhancementJobManager was deactivated while" +
             		" enhancing the passed ContentItem "+job.getContentItem()+
             		" (EnhancementJobManager type: "+getClass()+")");
         }
     }
+	/**
+	 * Logs the ExecutionMetadata 
+	 * @param job
+	 */
+	protected void logExecutionMetadata(EnhancementJob job) {
+		if(log.isDebugEnabled()){
+			if(serializer != null){
+				log.debug("ExecutionMetadata: ");
+				ByteArrayOutputStream bout = new ByteArrayOutputStream();
+				try {
+					serializer.serialize(bout, job.getExecutionMetadata(), SupportedFormat.TURTLE);
+					log.debug(bout.toString("utf-8"));
+					return; //serialized
+				} catch (RuntimeException e){ 
+					log.warn("   ... unable to serialize Execution Metadata | {}: {}",
+							e.getClass(), e.getMessage());
+				} catch (UnsupportedEncodingException e) {
+					log.warn("   ... unable to serialize Execution Metadata | {}: {}",
+							e.getClass(), e.getMessage());
+				}
+			}
+			//No serializer for TURTLE ... use the toString method of triple
+			for(Triple t : job.getExecutionMetadata()){
+				log.debug(t.toString());
+			}
+		}
+	}
 
     @Override
     public List<EnhancementEngine> getActiveEngines() {
