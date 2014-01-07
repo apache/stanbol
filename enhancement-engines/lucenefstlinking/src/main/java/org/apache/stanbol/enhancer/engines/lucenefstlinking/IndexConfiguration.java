@@ -290,9 +290,22 @@ public class IndexConfiguration {
         this.rankingField = rankingField == null ? null :
             FieldEncodingEnum.encodeFloat(rankingField, fieldEncoding);
     }
-
+    /**
+     * Returns the CorpusInfo for the parsed language. If the language has an
+     * extension (e.g. en-US) it first tires to load the corpus for the exact
+     * match and falls back to the main lanugage (en) if such a corpus does not
+     * exist.
+     * @param language the language
+     * @return the corpus information or <code>null</code> if not present
+     */
     public CorpusInfo getCorpus(String language) {
-        return corpusInfos.get(language);
+        CorpusInfo langCorpusInfo =  corpusInfos.get(language);
+        if(langCorpusInfo == null && language.indexOf('-') > 0){
+        	String rootLang = language.substring(0,language.indexOf('-'));
+        	log.debug(" - no FST corpus for {}. Fallback to {}", language,rootLang);
+        	langCorpusInfo =  corpusInfos.get(rootLang);
+        }
+        return langCorpusInfo;
     }
     /**
      * Getter for the languages of all configured FST corpora
