@@ -131,7 +131,9 @@ public class TaggingSession implements Closeable {
         
         //get the corpusInfo
         CorpusInfo langCorpusInfo = config.getCorpus(language);
+        log.debug("> language Corpus: {}", langCorpusInfo);
         CorpusInfo defaultCorpusInfo = config.getDefaultCorpus();
+        log.debug("> default Corpus: {}", defaultCorpusInfo);
         
         //obtain the Solr Document Id field
         SchemaField idSchemaField = config.getIndex().getLatestSchema().getUniqueKeyField();
