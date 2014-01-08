@@ -70,6 +70,7 @@
             <exclude>src/main/resources/config/org.apache.stanbol.enhancer.engines.entityhublinking.EntityhubLinkingEngine-dbpedia.config</exclude>
             <exclude>src/main/resources/config/org.apache.stanbol.enhancer.engines.entityhublinking.EntityhubLinkingEngine-dbpediadisamblinking.config</exclude>
             <exclude>src/main/resources/config/org.apache.stanbol.enhancer.engines.lucenefstlinking.FstLinkingEngineComponent-dbpedia_fst.config</exclude>
+            <exclude>src/main/resources/config/org.apache.stanbol.enhancer.engines.dereference.entityhub.EntityhubDereferenceEngine-dbpedia.config</exclude>
           </excludes>
         </configuration>
       </plugin>
