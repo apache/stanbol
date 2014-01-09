@@ -60,6 +60,7 @@
 	  <module>langdetect</module>
     <module>langid</module>
     <module>opennlp</module>
+    <module>pos-chunker</module>
 
     <!-- Chinese language support -->
     <module>smartcn-token</module> <!-- sentence detection and tokenizing -->

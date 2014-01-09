@@ -214,6 +214,13 @@
       <artifactId>org.apache.stanbol.enhancer.engines.restful.nlp</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </bundle>
+    
+    <bundle> <!-- POS annotation based chunker (STANBOL-1251) -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.poschunker</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </bundle>
+    
     <!-- NLP metadata to RDF (using NIF 1.0) - NOT YET READY FOR DEFAULT CONFIG
     <bundle>
       <groupId>org.apache.stanbol</groupId>
