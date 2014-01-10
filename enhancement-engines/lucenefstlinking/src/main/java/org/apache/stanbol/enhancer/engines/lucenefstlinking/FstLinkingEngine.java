@@ -370,13 +370,13 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
             new CharSequenceReader(at.getText()));
         LinkableTokenFilter linkableTokenFilter = new LinkableTokenFilter(baseTokenStream, 
             at, session.getLanguage(), tpConfig.getConfiguration(session.getLanguage()),
-            elConfig.getMinChunkMatchScore());
+            elConfig.getMinChunkMatchScore(), elConfig.getMinFoundTokens());
         //we use two TagClusterReducer implementations.
         // (1) the linkableTokenFilter filters all tags that do not overlap any
         //     linkable Token
         // (2) the LONGEST_DOMINANT_RIGHT reducer (TODO: make configurable)
         TagClusterReducer reducer = new ChainedTagClusterReducer(
-            linkableTokenFilter,TagClusterReducer.LONGEST_DOMINANT_RIGHT);
+            TagClusterReducer.LONGEST_DOMINANT_RIGHT, linkableTokenFilter);
         final long[] time = new long[]{0};
         new Tagger(corpus.getFst(), linkableTokenFilter, reducer,session.isSkipAltTokens()) {
             

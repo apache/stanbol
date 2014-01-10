@@ -213,6 +213,13 @@ public class FstLinkingEngineComponent {
      * The default size of the Entity Cache is set to 65k entities.
      */
     public static final int DEFAULT_ENTITY_CACHE_SIZE = 65536;
+
+    /**
+     * Changed default for the {@link EntityLinkerConfig#MIN_FOUND_TOKENS} property.
+     * This Engine uses <code>2</code> as default. While the {@link EntityLinkerConfig}
+     * currently sets the default to <code>1</code>
+     */
+    private static final Integer FST_DEFAULT_MIN_FOUND_TOKENS = 2;
     
     private final Logger log = LoggerFactory.getLogger(FstLinkingEngineComponent.class);
     /**
@@ -352,7 +359,13 @@ public class FstLinkingEngineComponent {
         //(1) parse the TextProcessing configuration
         //TODO: decide if we should use the TextProcessingConfig for this engine
         textProcessingConfig = TextProcessingConfig.createInstance(properties);
+        //change default for EntityLinkerConfig.MIN_FOUND_TOKENS
+        value = properties.get(EntityLinkerConfig.MIN_FOUND_TOKENS);
         entityLinkerConfig = EntityLinkerConfig.createInstance(properties, prefixService);
+        if(value == null){ //no MIN_FOUND_TOKENS config present
+            //manually set the default to the value used by this engine
+            entityLinkerConfig.setMinFoundTokens(FST_DEFAULT_MIN_FOUND_TOKENS);
+        }
         
         //(2) parse the configured IndexReference
         value = properties.get(SOLR_CORE);

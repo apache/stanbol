@@ -161,9 +161,14 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
      * {@link Chunk} so that is is not omitted. 
      */
     private double minChunkMatchScore;
+    /**
+     * The minimum amount of matched (matchable) Tokens so that an Entity is
+     * considered. Only used within processable chunks
+     */
+    private int minFoundTokens;
     
     protected LinkableTokenFilter(TokenStream input, AnalysedText at, 
-            String lang, LanguageProcessingConfig lpc, double minChunkMatchScore) {
+            String lang, LanguageProcessingConfig lpc, double minChunkMatchScore, int minFoundTokens) {
         super(input);
         //STANBOL-1177: add attributes in doPrivileged to avoid 
         //AccessControlException: access denied ("java.lang.RuntimePermission" "getClassLoader")
@@ -185,6 +190,7 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
         this.isUnicaseLanguage = lang != null && !lang.isEmpty() &&
                 UNICASE_SCRIPT_LANUAGES.contains(lang);
         this.minChunkMatchScore = minChunkMatchScore;
+        this.minFoundTokens = minFoundTokens;
     }
 
     @Override
@@ -359,13 +365,13 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
                 tag.removeLL(); //remove the tag from the cluster
                 if(log.isTraceEnabled()){
                     CharSequence tagSequence = at.getText().subSequence(start, end);
-                    log.trace(" > reduce tag {}", tagSequence);
+                    log.trace(" > reduce tag {} - no overlapp with linkable token", tagSequence);
                 }
             } else { //if the tag overlaps a linkable token 
                 TokenData linkableToken = linkableTokenContext.linkableToken;
                 List<TokenData> tokens = linkableTokenContext.context;
                 ChunkData cd = linkableToken.inChunk; //check if it maches > 50% of the chunk
-                if(!lpc.isIgnoreChunks() && cd != null &&
+                 if(!lpc.isIgnoreChunks() && cd != null &&
                         cd.isProcessable){
                     int cstart = cd.getMatchableStartChar() >= 0 ? cd.getMatchableStartChar() :
                         start;
@@ -385,32 +391,32 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
                         }
                         //only accept tags with more as half of the matchable
                         //tokens in the Chunk are matched!
-                        if(((float)match/(float)num) < minChunkMatchScore){
+                        if(((float)match/(float)num) < minChunkMatchScore &&
+                                match < minFoundTokens){
                             tag.removeLL(); //ignore
                             if(log.isTraceEnabled()){
                                 CharSequence text = at.getText();
-                                log.trace(" - reduce tag {}[{},{}] because it does only match "
+                                log.trace(" - reduce tag {}[{},{}] - does only match "
                                     + "{} of {} of matchable Chunk {}[{},{}]", 
                                     new Object[]{text.subSequence(start, end), start, end, match,  
                                             num, text.subSequence(cstart, cend), cstart, cend});
                             }
                         } else if(log.isTraceEnabled()){
                             CharSequence text = at.getText();
-                            log.trace(" + keep tag {}[{},{}] matching {} of {} "
+                            log.trace(" + keep tag {}[{},{}] - matches {} of {} "
                                 + "matchable Tokens for matchable Chunk {}[{},{}]", 
                                 new Object[]{text.subSequence(start, end), start, end, match,
                                         num, text.subSequence(cstart, cend), cstart, cend});
                         }
                     } else if(log.isTraceEnabled()){
                         CharSequence text = at.getText();
-                        log.trace(" + keep tag {}[{},{}] for matchable Chunk {}[{},{}]", 
+                        log.trace(" + keep tag {}[{},{}] - matches whole Chunk {}[{},{}]", 
                             new Object[]{text.subSequence(start, end), start, end, 
                                  text.subSequence(cstart, cend), cstart, cend});
                     }
-                }
-                if(log.isTraceEnabled()){
+                } else if(log.isTraceEnabled()){
                     CharSequence tagSequence = at.getText().subSequence(start, end);
-                    log.trace(" + keep tag {}", tagSequence);
+                    log.trace(" + keep tag {} - not in processable chunk", tagSequence);
                 }
             }
         }
