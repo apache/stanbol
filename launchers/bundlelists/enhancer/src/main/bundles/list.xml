@@ -96,11 +96,11 @@
       <artifactId>org.apache.stanbol.enhancer.eventjobmanager</artifactId>
       <version>0.11.0-SNAPSHOT</version>
     </bundle>
-    <bundle>
+    <!-- bundle> - no longer used as it does not support chains -
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.weightedjobmanager</artifactId>
       <version>0.11.0-SNAPSHOT</version>
-    </bundle>
+    </bundle -->
   </startLevel>
   <!-- Enhancement Chain implementations -->
   <startLevel level="30">
@@ -214,6 +214,13 @@
       <artifactId>org.apache.stanbol.enhancer.engines.restful.nlp</artifactId>
       <version>0.10.1-SNAPSHOT</version>
     </bundle>
+    
+    <bundle> <!-- POS annotation based chunker (STANBOL-1251) -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.engines.poschunker</artifactId>
+      <version>0.10.1-SNAPSHOT</version>
+    </bundle>
+    
     <!-- NLP metadata to RDF (using NIF 1.0) - NOT YET READY FOR DEFAULT CONFIG
     <bundle>
       <groupId>org.apache.stanbol</groupId>
