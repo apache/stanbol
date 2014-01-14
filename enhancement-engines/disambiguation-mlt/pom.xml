@@ -23,11 +23,11 @@
     <parent>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>apache-stanbol-enhancement-engines</artifactId>
-      <version>0.10.1-SNAPSHOT</version>
+      <version>0.12.0-SNAPSHOT</version>
       <relativePath>..</relativePath>
     </parent>
+
 	<artifactId>org.apache.stanbol.enhancer.engine.disambiguation.mlt</artifactId>
-    <version>0.10.0-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
 	<name>Apache Stanbol Enhancer Enhancement Engine : Disambiguation using Solr MLT</name>
@@ -56,6 +56,11 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
+		            <Import-Package>
+				       org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.13)",
+				       org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.13)",
+				       *
+		            </Import-Package>
 						<Export-Package>
 							org.apache.stanbol.enhancer.engine.disambiguation.mlt.*;version=${project.version}
 						</Export-Package>

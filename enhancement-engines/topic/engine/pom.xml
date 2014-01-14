@@ -16,13 +16,11 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines</artifactId>
-    <version>0.10.1-SNAPSHOT</version>
+    <version>0.12.0-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
 
-  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engine.topic</artifactId>
-  <version>0.10.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancement Engine : Topic Classification</name>
@@ -61,9 +59,10 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
-              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.12)",
-              org.apache.stanbol.enhancer.topic.api.*; provide:=true; version="[0.10.1,0.12)",
+              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.13)",
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.13)",
+              org.apache.stanbol.enhancer.topic.api; provide:=true,
+              org.apache.stanbol.enhancer.topic.api.training; provide:=true,
               *
             </Import-Package>
             <Private-Package>
@@ -306,7 +305,7 @@
       <dependency>
           <groupId>org.apache.stanbol</groupId>
           <artifactId>org.apache.stanbol.enhancer.engine.topic.api</artifactId>
-          <version>0.10.1-SNAPSHOT</version>
+          <version>0.12.0-SNAPSHOT</version>
       </dependency>
   </dependencies>
 

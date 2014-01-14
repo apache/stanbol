@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines-opennlp</artifactId>
-    <version>0.10.1-SNAPSHOT</version>
+    <version>0.12.0-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -51,8 +51,8 @@
               org.apache.stanbol.enhancer.engines.opennlp.pos.model;version=${project.version}
             </Export-Package>
             <Import-Package>
-              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
-              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.12)",
+              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.13)",
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.13)",
               org.apache.stanbol.enhancer.engines.opennlp.pos.model,
               *
             </Import-Package>
@@ -69,7 +69,6 @@
           <excludes>
             <!-- AL20 License -->
             <exclude>src/license/THIRD-PARTY.properties</exclude>
-            <exclude>src/main/resources/config/org.apache.stanbol.enhancer.engines.pos.services.POSTaggingEngine-snml.config</exclude>
           </excludes>
         </configuration>
       </plugin>

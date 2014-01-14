@@ -1,4 +1,4 @@
- <?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -22,13 +22,11 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines</artifactId>
-    <version>0.10.1-SNAPSHOT</version>
+    <version>0.12.0-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
 
-  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engine.topic.web</artifactId>
-  <version>0.10.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancement Engine : Topic Classification : Web API</name>
@@ -113,12 +111,12 @@
       <dependency>
           <groupId>org.apache.stanbol</groupId>
           <artifactId>org.apache.stanbol.enhancer.engine.topic.api</artifactId>
-          <version>0.10.1-SNAPSHOT</version>
+          <version>0.12.0-SNAPSHOT</version>
       </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.topic</artifactId>
-      <version>0.10.1-SNAPSHOT</version>
+      <version>0.12.0-SNAPSHOT</version>
     </dependency>
     
     <dependency>

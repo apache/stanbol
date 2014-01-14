@@ -25,7 +25,6 @@
     <relativePath>../../../parent</relativePath>
   </parent>
 
-  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
   <version>0.12.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
@@ -68,9 +67,11 @@
             <Import-Package>
               javax.servlet.*; version="[2.5.0,4.0.0)",
               javax.ws.rs.*; version="[0,2)",
-              org.apache.stanbol.commons.web.base; provide:=true,
               *
             </Import-Package>
+            <!-- removed Import-Package
+               org.apache.stanbol.commons.web.base; provide:=true,
+             -->
           </instructions>
         </configuration>
       </plugin>

@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines-uima</artifactId>
-    <version>0.10.1-SNAPSHOT</version>
+    <version>0.12.0-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -42,7 +42,6 @@
   <build>
     <plugins>
       <plugin>
-        <version>1.7.4</version>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
         <executions>
@@ -57,13 +56,12 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>2.2.0</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
             <Export-Package>
-              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
-              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.12)",
+              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.13)",
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.13)",
               org.apache.stanbol.enhancer.engines.uimatotriples;version=${project.version},
               org.apache.stanbol.enhancer.engines.uimatotriples.tools;version=${project.version}
             </Export-Package>
@@ -82,38 +80,27 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>1.4.0</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr</artifactId>
-      <version>1.6.0</version>
-      <type>jar</type>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
-      <version>1.6.0</version>
-      <type>jar</type>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
       <version>0.10.0</version>
-      <type>jar</type>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.6.1</version>
-      <type>jar</type>
     </dependency>
     <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.core</artifactId>
-      <version>0.12-incubating</version>
-      <type>jar</type>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>

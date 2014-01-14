@@ -22,13 +22,11 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines</artifactId>
-    <version>0.10.1-SNAPSHOT</version>
+    <version>0.12.0-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
-  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engine.keywordextraction</artifactId>
-  <version>0.10.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancement Engine : Keyword Extraction</name>
@@ -60,8 +58,8 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.12)",
-              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.12)",
+              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.13)",
+              org.apache.stanbol.enhancer.servicesapi.impl; provide:=true; version="[0.10,0.13)",
               org.apache.stanbol.enhancer.engines.keywordextraction.impl,
               org.apache.stanbol.enhancer.engines.keywordextraction.engine,
               org.apache.stanbol.enhancer.engines.keywordextraction.linking; provide:=true,

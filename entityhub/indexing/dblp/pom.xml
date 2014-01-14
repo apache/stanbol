@@ -77,7 +77,7 @@
               </includes>
             </artifactSet>
             <transformers>
-              <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+              <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
             </transformers>
           </configuration>
         <executions>
@@ -159,11 +159,11 @@
       <artifactId>slf4j-log4j12</artifactId>
       <scope>runtime</scope>
     </dependency>
-    <dependency> <!-- see also the log4j.properties in src/main/resources -->
+    <!-- dependency> - see also the log4j.properties in src/main/resources -
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
       <scope>runtime</scope>
-    </dependency>
+    </dependency -->
   </dependencies>
 
 </project>

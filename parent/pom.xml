@@ -1629,6 +1629,32 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <!-- 
+         Deactivates downloading of SNAPSHOT dependencies from the Apache
+         snapshot maven repository defined in the org.apache:apache parent
+       
+         This is intended to be used to check if the build dependencies are
+         valid e.g. after a version change for some modules
+        -->
+      <id>no-snapshot-dep</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <repositories>
+        <repository>
+          <id>apache.snapshots</id>
+          <name>Apache Snapshot Repository</name>
+          <url>http://repository.apache.org/snapshots</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+    </profile>
   </profiles>
 
 </project>

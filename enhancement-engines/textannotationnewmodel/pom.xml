@@ -22,11 +22,11 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines</artifactId>
-    <version>0.10.1-SNAPSHOT</version>
+    <version>0.12.0-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
-	<packaging>bundle</packaging>
-	<artifactId>org.apache.stanbol.enhancer.engines.textannotationnewmodel</artifactId>
+  <packaging>bundle</packaging>
+  <artifactId>org.apache.stanbol.enhancer.engines.textannotationnewmodel</artifactId>
   <name>Apache Stanbol Enhancement Engine : TextAnnotation new Model Conterter</name>
 	<description>
     Post processing Engine that converts fise:TextAnnotation to the model as
@@ -76,19 +76,19 @@
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+			<version>0.12.0-SNAPSHOT</version>
 		</dependency>
 		<!-- for tests -->
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.test</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+			<version>0.12.0-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.core</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+			<version>0.12.0-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
