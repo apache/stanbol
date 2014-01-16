@@ -20,13 +20,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.lucene.document.Document;
 import org.apache.solr.search.CacheRegenerator;
 import org.apache.solr.search.FastLRUCache;
 import org.apache.solr.search.SolrCache;
 import org.apache.solr.util.RefCounted;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of the {@link EntityCacheManager} based on the Solr
@@ -37,6 +37,8 @@ import org.apache.solr.util.RefCounted;
  */
 public class FastLRUCacheManager implements EntityCacheManager {
 
+	private final Logger log = LoggerFactory.getLogger(getClass());
+	
     RefCounted<EntityCache> current;
     private final CacheRegenerator regenerator;
     private final Map<String,String> config;
@@ -75,21 +77,49 @@ public class FastLRUCacheManager implements EntityCacheManager {
     public RefCounted<EntityCache> getCache(Object version) {
         if(current == null || !current.get().getVersion().equals(version)){
             if(current != null){
-                //the the old one as outdated!
-                ((RefCountedImpl)current).setOutdated();
+            	log.debug(" > invalidate EntityCache for version {}", current.get().getVersion());
+            	//remove the reference to the old instance. This will allow to
+            	//destroy the old cache as soon as it is no longer used
+            	current.decref(); 
+            	log.debug("  ... {} remaining users for invalidated Cache", current.getRefcount());
+            	current = null;
             }
             //create a new cache
+            log.debug(" > create EntityCache for version {}", version);
             SolrCache<Integer,Document> cache = new FastLRUCache<Integer,Document>();
             cache.init(config, null, regenerator);
             current = new RefCountedImpl(new SolrEntityCache(version, cache));
+            //add a reference to the new cache by this class. This will be removed
+            //as soon as the instance is outdated
+            current.incref(); 
         }
-        current.incref();
+        current.incref(); //this increase is for the holder of the returned instance
+        log.debug(" > increase RefCount for EntityCache for version {} to {}", 
+        		version, current.getRefcount());
         return current;
     }
 
+    @Override
+    public void close() {
+    	if(current != null){
+    		current.decref();
+    		current = null;
+    	}
+    }
+    
+    @Override
+    protected void finalize() {
+    	if(current != null){
+    		log.warn("[finalize] EntityCache Manager was not closed. This can "
+    				+ "cause Memory Leaks as Cached Entities will be kept in " 
+    				+ "Memory until finalization!");
+    	}
+    	close();
+    }
+    
     /**
-     * {@link RefCounted} implementation that ensures that outdated caches are
-     * cleared and closed as soon as they are no longer in use.
+     * {@link RefCounted} implementation that closes the {@link SolrEntityCache}
+     * when {@link #close()} is called by the supoer implementation.
      * 
      * @author Rupert Westenthaler
      *
@@ -100,23 +130,23 @@ public class FastLRUCacheManager implements EntityCacheManager {
             super(resource);
         }
 
-        private boolean outdated;
-
-        /**
-         * Used by the manager implementation to set the RefCounted EntityCache
-         * as outdated
-         */
-        protected void setOutdated() {
-            outdated = true;
+        @Override
+        public void decref() {
+        	super.decref();
+        	if(log.isDebugEnabled()){
+	            log.debug(" > decrease RefCount for EntityCache for version {} to {}", 
+	            		get().getVersion(), current.getRefcount());
+        	}
         }
-
         /**
-         * clears the cache if outdated
+         * closes the {@link SolrEntityCache}
          */
         protected void close(){
-            if(outdated){
-                ((SolrEntityCache)get()).close();
-            }
+        	if(log.isDebugEnabled()){
+        		log.debug(" > close EntityCache for version {}", 
+        				current.get().getVersion());
+        	}
+            ((SolrEntityCache)get()).close();
         }
 
     }

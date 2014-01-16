@@ -476,12 +476,13 @@ public class FstLinkingEngineComponent {
         } else {
             ecSize = -1;
         }
-        if(ecSize < 0){
-            documentCacheFactory = new FastLRUCacheManager(DEFAULT_ENTITY_CACHE_SIZE);
-        } else if(ecSize == 0){
+        if(ecSize == 0){
+            log.info(" ... EntityCache deactivated");
             documentCacheFactory = null;
         } else {
-            documentCacheFactory = new FastLRUCacheManager(ecSize);
+            int size = ecSize < 0 ? DEFAULT_ENTITY_CACHE_SIZE : ecSize;
+        	log.info(" ... create EntityCache (size: {})",size);
+            documentCacheFactory = new FastLRUCacheManager(size);
         }
         
         //(7) parse the Entity type field
@@ -776,6 +777,10 @@ public class FstLinkingEngineComponent {
         engineMetadata = null;
         textProcessingConfig = null;
         entityLinkerConfig = null;
+        if(documentCacheFactory != null){
+        	documentCacheFactory.close(); //ensure that old caches are cleared
+        }
+        documentCacheFactory = null;
         bundleContext = null;
         skipAltTokensConfig = null;
     }
