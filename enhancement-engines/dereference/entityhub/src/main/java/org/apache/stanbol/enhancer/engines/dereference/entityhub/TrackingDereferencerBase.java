@@ -19,6 +19,7 @@ package org.apache.stanbol.enhancer.engines.dereference.entityhub;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -57,6 +58,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
+import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
@@ -158,16 +160,27 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
      */
     public void setDereferencedFields(List<String> dereferencedFields) {
         if(dereferencedFields != null && !dereferencedFields.isEmpty()){
-            fieldMapper = new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
-            log.debug(" > Initialise configured field mappings");
+            List<FieldMapping> mappings = new ArrayList<FieldMapping>(dereferencedFields.size());
+            log.debug(" > parse configured field mappings");
             for(String configuredMapping : dereferencedFields){
+            	log.trace(" - parse configure mapping '{}'",configuredMapping);
                 FieldMapping mapping = FieldMappingUtils.parseFieldMapping(configuredMapping,nsPrefixService);
                 if(mapping != null){
                     log.debug("   - add FieldMapping {}",mapping);
-                    fieldMapper.addMapping(mapping);
+                    mappings.add(mapping);
                 } else if(configuredMapping != null && !configuredMapping.isEmpty()){
                     log.warn("   - unable to parse FieldMapping '{}'", configuredMapping);
                 }
+            }
+            if(!mappings.isEmpty()){
+                log.debug(" > apply {} valid mappings",mappings.size());
+                fieldMapper = new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
+                for(FieldMapping mapping : mappings){
+                	fieldMapper.addMapping(mapping);
+                }
+            } else { //no valid mapping parsed
+            	log.debug(" > no valid mapping parsed ... will dereference all fields");
+            	fieldMapper = null;
             }
         } else {
             fieldMapper = null;
@@ -332,6 +345,10 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
                 }
             }
         }
+       	if(log.isTraceEnabled()){
+    		log.trace("dereferenced via LDPath {}", ModelUtils.getRepresentationInfo(result));
+    	}
+
         if(!ldPathResults.isEmpty()){ //copy the results
             writeLock.lock();
             try {
@@ -388,6 +405,9 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
         try {
             RdfRepresentation clerezzaRep = valueFactory.createRdfRepresentation(uri, graph);
             fieldMapper.applyMappings(rep, clerezzaRep, valueFactory);
+           	if(log.isTraceEnabled()){
+        		log.trace("dereferenced via Mappings {}", ModelUtils.getRepresentationInfo(clerezzaRep));
+        	}
         } finally {
             writeLock.unlock();
         }
@@ -403,6 +423,9 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
     private void copyAll(UriRef uri, Representation rep, MGraph graph, Lock writeLock) {
         writeLock.lock();
         try {
+        	if(log.isTraceEnabled()){
+        		log.trace("dereferenced all of {}", ModelUtils.getRepresentationInfo(rep));
+        	}
             if(rep instanceof RdfRepresentation){
                 graph.addAll(((RdfRepresentation)rep).getRdfGraph());
             } else {
