@@ -49,4 +49,9 @@ public interface EntityCacheManager {
      */
     RefCounted<EntityCache> getCache(Object version);
 
+    /**
+     * Called if the EntityCacheManager is no longer used
+     */
+    void close();
+    
 }
