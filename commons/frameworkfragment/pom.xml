@@ -236,7 +236,6 @@
                  javax.activation,
                  javax.jws,
                  javax.jws.soap,
-                 javax.transaction.xa,
                  javax.xml,
                  javax.xml.bind,
                  javax.xml.bind.annotation,
