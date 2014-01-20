@@ -216,12 +216,16 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
             boolean lookup = false;
             int lastMatchable = -1;
             int lastIndex = -1;
-            log.trace("> solr:[{},{}] {}",new Object[]{
-                            offset.startOffset(), offset.endOffset(), termAtt});
+            if(log.isTraceEnabled()){
+	            log.trace("> solr:[{},{}] {}",new Object[]{
+	                            offset.startOffset(), offset.endOffset(), termAtt});
+            }
             while((token = nextToken(first)) != null){
-                log.trace("  < [{},{}]:{} (link {}, match; {})",new Object[]{
-                        token.token.getStart(), token.token.getEnd(),token.getTokenText(),
-                        token.isLinkable, token.isMatchable});
+            	if(log.isTraceEnabled()) {
+	                log.trace("  < [{},{}]:{} (link {}, match; {})",new Object[]{
+	                        token.token.getStart(), token.token.getEnd(),token.getTokenText(),
+	                        token.isLinkable, token.isMatchable});
+            	}
                 first = false;
                 if(token.isLinkable){
                     lookup = true;
