@@ -63,8 +63,12 @@ import org.slf4j.LoggerFactory;
 @org.apache.felix.scr.annotations.Properties(value={
     @Property(name=PROPERTY_NAME),
     @Property(name=EntityhubDereferenceEngine.SITE_ID),
+    @Property(name=DereferenceConstants.FALLBACK_MODE, 
+    	boolValue=DereferenceConstants.DEFAULT_FALLBACK_MODE),
+    @Property(name=DereferenceConstants.URI_PREFIX, cardinality=Integer.MAX_VALUE),
+    @Property(name=DereferenceConstants.URI_PATTERN, cardinality=Integer.MAX_VALUE),
     @Property(name=DereferenceConstants.FILTER_CONTENT_LANGUAGES, 
-    boolValue=DereferenceConstants.DEFAULT_FILTER_CONTENT_LANGUAGES),
+    	boolValue=DereferenceConstants.DEFAULT_FILTER_CONTENT_LANGUAGES),
     @Property(name=DEREFERENCE_ENTITIES_FIELDS,cardinality=Integer.MAX_VALUE,
     	value={"rdfs:comment","geo:lat","geo:long","foaf:depiction","dbp-ont:thumbnail"}),
     @Property(name=DEREFERENCE_ENTITIES_LDPATH, cardinality=Integer.MAX_VALUE),

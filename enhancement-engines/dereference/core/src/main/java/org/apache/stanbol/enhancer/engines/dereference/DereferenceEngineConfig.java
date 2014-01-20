@@ -213,4 +213,60 @@ public class DereferenceEngineConfig implements DereferenceConstants {
         return config;
     }
     
+    /**
+     * If the {@link DereferenceConstants#FALLBACK_MODE} is active or inactive
+     * @return the fallback mode state
+     */
+    public boolean isFallbackMode(){
+    	Object value = config.get(FALLBACK_MODE);
+    	return value == null ? DereferenceConstants.DEFAULT_FALLBACK_MODE :
+    		Boolean.parseBoolean(value.toString());
+    }
+    
+    /**
+     * The configured {@link DereferenceConstants#URI_PATTERN}
+     * @return the URI patterns. An empty List if none
+     */
+    public List<String> getUriPatterns(){
+    	Object value = config.get(DereferenceConstants.URI_PATTERN);
+    	return getStrValues(value);
+    }
+    /**
+     * The configured {@link DereferenceConstants#URI_PREFIX}
+     * @return the URI prefixes. An empty List if none
+     */
+    public List<String> getUriPrefixes(){
+    	Object value = config.get(DereferenceConstants.URI_PREFIX);
+    	return getStrValues(value);
+    }
+	/**
+	 * Extracts String values from the parsed value.
+	 * @param value the value (String, String[] or Collection<?>
+	 * @return the values as List in the parsed order
+	 */
+	private List<String> getStrValues(Object value) {
+		final List<String> values;
+    	if(value instanceof String){
+    		values = StringUtils.isBlank(((String)value)) ? 
+    				Collections.<String>emptyList() : 
+    					Collections.singletonList((String)value);
+    	} else if(value instanceof String[]){
+    		values = new ArrayList<String>();
+    		for(String pattern : (String[])value){
+    			if(!StringUtils.isBlank(pattern)){
+    				values.add(pattern);
+    			}
+    		}
+    	} else if(value instanceof Collection<?>){
+    		values = new ArrayList<String>();
+    		for(Object pattern : (Collection<?>)value){
+    			if(pattern != null && StringUtils.isBlank(pattern.toString())){
+    				values.add(pattern.toString());
+    			}
+    		}    		
+    	} else {
+    		values = Collections.emptyList();
+    	}
+    	return values;
+	}
 }
