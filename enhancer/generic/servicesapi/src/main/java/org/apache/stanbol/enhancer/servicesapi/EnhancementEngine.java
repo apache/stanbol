@@ -36,13 +36,13 @@ public interface EnhancementEngine {
     /**
      * Return value for {@link #canEnhance}, meaning this engine can enhance
      * supplied {@link ContentItem}, and suggests enhancing it synchronously
-     * instead of queuing a request for enhancement.
+     * instead of queueing a request for enhancement.
      */
     int ENHANCE_SYNCHRONOUS = 1;
 
     /**
      * Return value for {@link #canEnhance}, meaning this engine can enhance
-     * supplied {@link ContentItem}, and suggests queuing a request for
+     * supplied {@link ContentItem}, and suggests queueing a request for
      * enhancement instead of enhancing it synchronously.
      */
     int ENHANCE_ASYNC = 2;
@@ -52,7 +52,16 @@ public interface EnhancementEngine {
      * suggests enhancing it synchronously or asynchronously. The
      * {@link EnhancementJobManager} can force sync/async mode if desired, it is
      * just a suggestion from the engine.
+     * <p>
+     * This method is expected to execute fast and MUST NOT change the parsed
+     * {@link ContentItem}. It is called with a read lock on the ContentItem.
+     * <p>
+     * <b>NOTE:</b> Returning {@link #CANNOT_ENHANCE} will cause the 
+     * {@link EnhancementJobManager} to skip the execution of this Engine. If
+     * an {@link EngineException} is thrown the executed {@link Chain} will
+     * fail (unless this engine is marked as OPTIONAL).
      *
+     * @param ci The ContentItem to enhance
      * @throws EngineException if the introspecting process of the content item
      *             fails
      */
@@ -60,15 +69,24 @@ public interface EnhancementEngine {
 
     /**
      * Compute enhancements for supplied ContentItem. The results of the process
-     * are expected to be stored in the metadata of the content item.
+     * are expected to be stored in the {@link ContentItem#getMetadata() metadata 
+     * of the content item} or by adding/modifying any contentPart.<p>
+     * Engines that do support {@link #ENHANCE_ASYNC} are required to use the
+     * {@link ContentItem#getLock()} to acquire read/write locks when reading/
+     * modifying information of the {@link ContentItem}. For Engines that that
+     * do use {@link #ENHANCE_SYNCHRONOUS} the {@link EnhancementJobManager}
+     * is responsible to acquire a write lock before calling this method. 
+     * <p>
+     * <b>NOTE</b>: If an EnhancementEngine can not extract any information it
+     * is expected to return. In case an error is encountered during processing
+     * an {@link EngineException} need to be thrown.
      *
-     * The client (usually an {@link EnhancementJobManager}) should take care of
-     * persistent storage of the enhanced {@link ContentItem}.
-     *
+     * @param ci The ContentItem to enhance
      * @throws EngineException if the underlying process failed to work as
      *             expected
      */
     void computeEnhancements(ContentItem ci) throws EngineException;
+
     /**
      * Getter for the name of this EnhancementEngine instance as configured
      * by {@link #PROPERTY_NAME}
