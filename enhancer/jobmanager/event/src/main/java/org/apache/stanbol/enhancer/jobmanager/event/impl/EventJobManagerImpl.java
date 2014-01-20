@@ -19,9 +19,7 @@ package org.apache.stanbol.enhancer.jobmanager.event.impl;
 import static org.apache.stanbol.enhancer.jobmanager.event.Constants.TOPIC_JOB_MANAGER;
 
 import java.io.ByteArrayOutputStream;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.Character.UnicodeScript;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -32,7 +30,6 @@ import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
-import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
