@@ -39,6 +39,8 @@ public interface ContentItem {
      * The binary content stream. Shortcut for
      * <code>{@link #getBlob()}{@link Blob#getStream() .getStream()}</code>
      * @return the InputStream
+     * @deprecated use <code>{@link #getBlob()}{@link Blob#getStream() .getStream()}</code>
+     * instead
      */
     InputStream getStream();
 
@@ -46,6 +48,8 @@ public interface ContentItem {
      * The MimeType. Shortcut for
      * <code>{@link #getBlob()}{@link Blob#getMimeType() .getMimeType()}</code>.
      * @return the MimeType as string
+     * @deprecated use <code>{@link #getBlob()}{@link Blob#getMimeType() .getMimeType()}</code>
+     * instead
      */
     String getMimeType();
 

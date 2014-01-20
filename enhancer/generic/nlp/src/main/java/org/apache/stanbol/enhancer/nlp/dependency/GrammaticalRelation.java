@@ -214,6 +214,17 @@ public enum GrammaticalRelation {
 	 * raise)
 	 */
 	DirectObject(Object),
+	
+	/**
+	 * The "discourse element" grammatical relation. This is used for interjections and
+	 * other discourse particles and elements (which are not clearly linked to the structure
+	 * of the sentence, except in an expressive way). We generally follow the
+	 * guidelines of what the Penn Treebanks count as an INTJ.  They
+	 * define this to include: interjections (oh, uh-huh, Welcome), fillers (um, ah),
+	 * and discourse markers (well, like, actually, but not: you know).
+	 * We also use it for emoticons.
+	 */
+	Discourse(Modifier),
 
 	/**
 	 * This relation captures an existential &quot;there&quot;. The main verb of

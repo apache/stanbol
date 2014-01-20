@@ -41,7 +41,7 @@ public class DependencyRelationSupport implements ValueTypeParser<DependencyRela
 
     private static final String RELATION_TYPE_TAG = "tag";
     private static final String RELATION_STANBOL_TYPE_TAG = "relationType";
-    private static final String RELATION_IS_DEPENDEE_TAG = "isDependent";
+    private static final String RELATION_IS_DEPENDENT_TAG = "isDependent";
     private static final String RELATION_PARTNER_TYPE_TAG = "partnerType";
     private static final String RELATION_PARTNER_START_TAG = "partnerStart";
     private static final String RELATION_PARTNER_END_TAG = "partnerEnd";
@@ -54,7 +54,7 @@ public class DependencyRelationSupport implements ValueTypeParser<DependencyRela
         GrammaticalRelationTag gramRelTag = relation.getGrammaticalRelationTag();
         jDependencyRelation.put(RELATION_TYPE_TAG, gramRelTag.getTag());
         jDependencyRelation.put(RELATION_STANBOL_TYPE_TAG, gramRelTag.getGrammaticalRelation().ordinal());
-        jDependencyRelation.put(RELATION_IS_DEPENDEE_TAG, (relation.isDependent()));
+        jDependencyRelation.put(RELATION_IS_DEPENDENT_TAG, (relation.isDependent()));
 
         Span partner = relation.getPartner();
         if (partner != null) {
@@ -90,7 +90,7 @@ public class DependencyRelationSupport implements ValueTypeParser<DependencyRela
         GrammaticalRelationTag gramRelTag = new GrammaticalRelationTag(tag.getTextValue(),
                 grammaticalRelation);
 
-        JsonNode isDependent = jDependencyRelation.path(RELATION_IS_DEPENDEE_TAG);
+        JsonNode isDependent = jDependencyRelation.path(RELATION_IS_DEPENDENT_TAG);
 
         if (!isDependent.isBoolean()) {
             throw new IllegalStateException("Field 'isDependent' must have a true/false format");

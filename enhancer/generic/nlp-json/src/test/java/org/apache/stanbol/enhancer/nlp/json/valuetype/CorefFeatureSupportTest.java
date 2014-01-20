@@ -81,11 +81,11 @@ public class CorefFeatureSupportTest extends ValueTypeSupportTest {
         Set<Span> obamaMentions = new HashSet<Span>();
         obamaMentions.add(he);
         obama.addAnnotation(NlpAnnotations.COREF_ANNOTATION, 
-        	Value.value(new CorefFeature(true, Collections.unmodifiableSet(obamaMentions))));
+        	Value.value(new CorefFeature(true, obamaMentions)));
         
         Set<Span> heMentions = new HashSet<Span>();
         heMentions.add(obama);
         he.addAnnotation(NlpAnnotations.COREF_ANNOTATION, 
-        	Value.value(new CorefFeature(false, Collections.unmodifiableSet(heMentions))));
+        	Value.value(new CorefFeature(false, heMentions)));
 	}
 }
