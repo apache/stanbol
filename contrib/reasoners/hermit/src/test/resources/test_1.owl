@@ -1,0 +1,57 @@
+# Test 1
+Prefix: xsd: <http://www.w3.org/2001/XMLSchema#>
+Prefix: owl: <http://www.w3.org/2002/07/owl#>
+Prefix: vs: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+Prefix: foaf: <http://xmlns.com/foaf/0.1/>
+Prefix: xml: <http://www.w3.org/XML/1998/namespace>
+Prefix: rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+Prefix: dc: <http://purl.org/dc/elements/1.1/>
+Prefix: rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+Prefix: wot: <http://xmlns.com/wot/0.1/>
+Prefix: dbpedia: <http://dbpedia.org/ontology/>
+Prefix: test: <http://www.example.org/test/>
+
+Ontology: <http://www.example.org/test/1/>
+    Import: <http://xmlns.com/foaf/0.1/>
+
+Annotations: 
+    dc:title "This ontology is an example for testing the Stanbol Reasoners: HermiT reasoning service",
+    dc:description "This is just an example, we define here only things necessary to test reasoner, relying on FOAF and fragments form the DBPedia Ontology"
+
+
+AnnotationProperty: dc:title
+
+
+AnnotationProperty: dc:description
+
+
+Class: foaf:Person
+
+
+Class: dbpedia:Person
+    
+    EquivalentTo: 
+        foaf:Person
+
+    
+Class: foaf:Agent
+
+
+Individual: test:alexdma
+    
+    Types:
+        dbpedia:Person
+
+        
+Individual: test:enridaga
+    
+    Types:
+        foaf:Person
+
+        
+Individual: test:anticitizen1
+    
+    SameAs: 
+        test:alexdma
+        
+        
