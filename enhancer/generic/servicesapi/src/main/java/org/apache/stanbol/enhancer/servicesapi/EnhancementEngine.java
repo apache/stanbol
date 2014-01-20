@@ -64,13 +64,10 @@ public interface EnhancementEngine {
      * fail (unless this engine is marked as OPTIONAL).
      *
      * @param ci The ContentItem to enhance
-     * @param context The enhancement context: Request specific parameters
-     *
      * @throws EngineException if the introspecting process of the content item
      *             fails
      */
     int canEnhance(ContentItem ci) throws EngineException;
-    //int canEnhance(ContentItem ci, Map<String,Object> context) throws EngineException;
 
     /**
      * Compute enhancements for supplied ContentItem. The results of the process
@@ -87,13 +84,11 @@ public interface EnhancementEngine {
      * an {@link EngineException} need to be thrown.
      *
      * @param ci The ContentItem to enhance
-     * @param context The enhancement context: Request specific parameters
-     *
      * @throws EngineException if the underlying process failed to work as
      *             expected
      */
     void computeEnhancements(ContentItem ci) throws EngineException;
-    //void computeEnhancements(ContentItem ci, Map<String,Object> context) throws EngineException;
+
     /**
      * Getter for the name of this EnhancementEngine instance as configured
      * by {@link #PROPERTY_NAME}
