@@ -47,6 +47,10 @@ public class DependencyRelation {
 	}
 
 	public DependencyRelation(GrammaticalRelationTag grammaticalRelationTag) {
+		if (grammaticalRelationTag == null) {
+			throw new IllegalArgumentException("The grammatical relation tag cannot be null");
+		}
+		
 		this.grammaticalRelationTag = grammaticalRelationTag;
 	}
 
@@ -79,16 +83,11 @@ public class DependencyRelation {
 		return this.partner;
 	}
 
-	public void setPartner(Span partner) {
-		this.partner = partner;
-	}
-
-    @Override
+	@Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((grammaticalRelationTag == null) ? 0
-                        : grammaticalRelationTag.hashCode());
+        result = prime * result + grammaticalRelationTag.hashCode();
         result = prime * result + (isDependent ? 1231 : 1237);
         result = prime * result + ((partner == null) ? 0 : partner.hashCode());
         return result;
@@ -102,19 +101,16 @@ public class DependencyRelation {
             return false;
         if (getClass() != obj.getClass())
             return false;
+        
         DependencyRelation other = (DependencyRelation) obj;
-        if (grammaticalRelationTag == null) {
-            if (other.grammaticalRelationTag != null)
-                return false;
-        } else if (!grammaticalRelationTag.equals(other.grammaticalRelationTag))
-            return false;
-        if (isDependent != other.isDependent)
-            return false;
+        
         if (partner == null) {
             if (other.partner != null)
                 return false;
         } else if (!partner.equals(other.partner))
             return false;
-        return true;
+        
+        return (grammaticalRelationTag.equals(other.grammaticalRelationTag))
+        	&& (isDependent == other.isDependent);
     }
 }

@@ -18,7 +18,6 @@ package org.apache.stanbol.enhancer.nlp.json.valuetype;
 
 import java.io.IOException;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
 import org.apache.stanbol.enhancer.nlp.dependency.DependencyRelation;
 import org.apache.stanbol.enhancer.nlp.dependency.GrammaticalRelation;
@@ -41,7 +40,7 @@ public class DependencyRelationSupportTest extends ValueTypeSupportTest {
 	    + "    \"end\" : 5," + LINE_SEPARATOR
 	    + "    \"stanbol.enhancer.nlp.dependency\" : {" + LINE_SEPARATOR
 	    + "      \"tag\" : \"nsubj\"," + LINE_SEPARATOR
-	    + "      \"relationType\" : 32," + LINE_SEPARATOR
+	    + "      \"relationType\" : 33," + LINE_SEPARATOR
 	    + "      \"isDependent\" : true," + LINE_SEPARATOR
 	    + "      \"partnerType\" : \"Token\"," + LINE_SEPARATOR
 	    + "      \"partnerStart\" : 6," + LINE_SEPARATOR
@@ -56,7 +55,7 @@ public class DependencyRelationSupportTest extends ValueTypeSupportTest {
 	    + "    \"end\" : 13," + LINE_SEPARATOR
 	    + "    \"stanbol.enhancer.nlp.dependency\" : [ {" + LINE_SEPARATOR
 	    + "      \"tag\" : \"root\"," + LINE_SEPARATOR
-	    + "      \"relationType\" : 56," + LINE_SEPARATOR
+	    + "      \"relationType\" : 57," + LINE_SEPARATOR
 	    + "      \"isDependent\" : true," + LINE_SEPARATOR
 	    + "      \"partnerType\" : \"ROOT\"," + LINE_SEPARATOR
 	    + "      \"partnerStart\" : 0," + LINE_SEPARATOR
@@ -64,7 +63,7 @@ public class DependencyRelationSupportTest extends ValueTypeSupportTest {
 	    + "      \"class\" : \"org.apache.stanbol.enhancer.nlp.dependency.DependencyRelation\"" + LINE_SEPARATOR
 	    + "    }, {" + LINE_SEPARATOR
 	    + "      \"tag\" : \"nsubj\"," + LINE_SEPARATOR
-	    + "      \"relationType\" : 32," + LINE_SEPARATOR
+	    + "      \"relationType\" : 33," + LINE_SEPARATOR
 	    + "      \"isDependent\" : false," + LINE_SEPARATOR
 	    + "      \"partnerType\" : \"Token\"," + LINE_SEPARATOR
 	    + "      \"partnerStart\" : 0," + LINE_SEPARATOR

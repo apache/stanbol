@@ -39,14 +39,23 @@ public class GrammaticalRelationTag extends Tag<GrammaticalRelationTag> {
 			GrammaticalRelation grammaticalRelation) {
 		this(tag);
 
-		this.setGrammaticalRelation(grammaticalRelation);
+		if (grammaticalRelation == null) {
+			throw new IllegalArgumentException("The grammatical relation cannot be null");
+		}
+		
+		this.grammaticalRelation = grammaticalRelation;
 	}
 
 	public GrammaticalRelation getGrammaticalRelation() {
 		return grammaticalRelation;
 	}
 
-	public void setGrammaticalRelation(GrammaticalRelation grammaticalRelation) {
-		this.grammaticalRelation = grammaticalRelation;
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + grammaticalRelation.hashCode();
+        
+        return result;
 	}
 }

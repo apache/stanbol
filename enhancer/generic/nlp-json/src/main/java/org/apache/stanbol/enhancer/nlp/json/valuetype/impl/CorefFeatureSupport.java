@@ -15,7 +15,6 @@
  * limitations under the License.
  */package org.apache.stanbol.enhancer.nlp.json.valuetype.impl;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -53,23 +52,20 @@ public class CorefFeatureSupport implements ValueTypeParser<CorefFeature>, Value
 		
 		jCoref.put(IS_REPRESENTATIVE_TAG, coref.isRepresentative());
 		
-        Set<Span> mentions = coref.getMentions();
+        Set<Span> mentions = coref.getMentions(); 
+        ArrayNode jMentions = mapper.createArrayNode();
         
-        if(!mentions.isEmpty()) {
-            ArrayNode jMentions = mapper.createArrayNode();
+        for(Span mention : mentions) {
+            ObjectNode jMention = mapper.createObjectNode();
             
-            for(Span mention : mentions) {
-                ObjectNode jMention = mapper.createObjectNode();
-                
-                jMention.put(MENTION_TYPE_TAG, mention.getType().toString());
-                jMention.put(MENTION_START_TAG, mention.getStart());
-                jMention.put(MENTION_END_TAG, mention.getEnd());
-                
-                jMentions.add(jMention);
-            }
+            jMention.put(MENTION_TYPE_TAG, mention.getType().toString());
+            jMention.put(MENTION_START_TAG, mention.getStart());
+            jMention.put(MENTION_END_TAG, mention.getEnd());
             
-            jCoref.put(MENTIONS_TAG, jMentions);
+            jMentions.add(jMention);
         }
+        
+        jCoref.put(MENTIONS_TAG, jMentions);
         
 		return jCoref;
 	}
@@ -121,7 +117,7 @@ public class CorefFeatureSupport implements ValueTypeParser<CorefFeature>, Value
                 }
             }
 		}    
-                
-		return new CorefFeature(jIsRepresentative.asBoolean(), Collections.unmodifiableSet(mentions));
+        
+		return new CorefFeature(jIsRepresentative.asBoolean(), mentions);
 	}	
 }

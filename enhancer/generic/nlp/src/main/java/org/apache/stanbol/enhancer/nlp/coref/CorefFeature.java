@@ -42,19 +42,13 @@ public class CorefFeature {
 	 */
 	private Set<Span> mentions;
 
-	public CorefFeature() {
-		this(false, Collections.unmodifiableSet(Collections
-				.<Span> emptySet()));
-	}
-
-	public CorefFeature(boolean isRepresentative) {
-		this(isRepresentative, Collections.unmodifiableSet(Collections
-				.<Span> emptySet()));
-	}
-
 	public CorefFeature(boolean isRepresentative, Set<Span> mentions) {
+		if (mentions == null || mentions.isEmpty()) {
+			throw new IllegalArgumentException("The mentions set cannot be null or empty");
+		}
+		
 		this.isRepresentative = isRepresentative;
-		this.mentions = mentions;
+		this.mentions = Collections.unmodifiableSet(mentions);
 	}
 
 	/**
@@ -78,11 +72,25 @@ public class CorefFeature {
 	}
 
 	public int hashCode() {
-		return (this.mentions != null) ? this.mentions.hashCode() : 0;
+		final int prime = 31;
+        int result = 1;
+        result = prime * result + (isRepresentative ? 1231 : 1237);
+        result = prime * result + mentions.hashCode();
+		
+        return result;
 	}
 
 	public boolean equals(Object obj) {
-		return (obj instanceof CorefFeature)
-				&& (this.mentions.equals(((CorefFeature) obj).getMentions()));
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+            return false;
+		
+        CorefFeature other = (CorefFeature) obj;
+        
+		return (isRepresentative == other.isRepresentative)
+			&& (mentions.equals(other.mentions));
 	}
 }
