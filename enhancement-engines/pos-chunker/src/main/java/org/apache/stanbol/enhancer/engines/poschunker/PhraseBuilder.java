@@ -32,9 +32,13 @@ import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
 import org.apache.stanbol.enhancer.nlp.phrase.PhraseTag;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PhraseBuilder {
     
+	private final Logger log = LoggerFactory.getLogger(getClass());
+	
     /**
      * Just a fallback in case Pos annotations do not provide probabilities. 
      * In most cases the value of this will not have any effect as typically 
@@ -75,6 +79,7 @@ public class PhraseBuilder {
             throw new IllegalArgumentException("The parsed PhraseTypeDefinition MUST NOT be NULL!");
         }
         this.phraseType = phraseType;
+        log.debug("Create {} for {}",getClass().getSimpleName(),phraseType);
         this.phraseTag = new PhraseTag(phraseType.getPhraseType().name(), 
             phraseType.getPhraseType());
         if(chunkFactory == null){
@@ -100,6 +105,7 @@ public class PhraseBuilder {
     
     public void nextSection(Section section){
         buildPhrase(null);
+    	log.trace("-- next {} --", section);
     }
     
 
@@ -109,6 +115,11 @@ public class PhraseBuilder {
             phraseType.getRequiredType());
         if(states[0]){
             current.add(token);
+            if(log.isTraceEnabled()) {
+	        	log.trace("-- {} phrase start --", phraseType.getPhraseType().name());
+	        	log.trace(" {}. {} {}", new Object[]{ current.size(), token, 
+	        			logPosCategories(token)});
+            }
             valid = states[1];
         }
     }
@@ -116,14 +127,18 @@ public class PhraseBuilder {
     @SuppressWarnings("unchecked") //varargs with generic types
     private boolean checkContinuation(Token token){
         final boolean[] states;
-        if(!valid){
-            states = checkCategories(token, phraseType.getContinuationType(),
+        if(!valid){ //check for prefix types and required types
+            states = checkCategories(token, phraseType.getPrefixType(),
                 phraseType.getRequiredType());
-        } else {
+        } else { //check for continuation types
             states = checkCategories(token, phraseType.getContinuationType());
         }
         if(states[0]){
             current.add(token);
+            if(log.isTraceEnabled()) {
+	        	log.trace(" {}. {} {}", new Object[]{ current.size(), token, 
+	        			logPosCategories(token)});
+            }
         }
         if(states.length > 1){
             valid = states[1];
@@ -148,7 +163,19 @@ public class PhraseBuilder {
                 Chunk chunk = chunkFactory.createChunk(current.get(0), lastConsumedToken);
                 //TODO: add support for confidence
                 chunk.addAnnotation(PHRASE_ANNOTATION, Value.value(phraseTag));
+                if(log.isTraceEnabled()){
+                	log.trace("  << add {} phrase {} '{}'", new Object[]{
+                			phraseType.getPhraseType().name(), chunk,chunk.getSpan()});
+                }
+            } else if(log.isTraceEnabled()){
+            	log.trace("  >> ignore {} phrase with single {} ", 
+            			phraseType.getPhraseType().name() ,
+            			current.get(0));
             }
+        } else if(!current.isEmpty() && log.isTraceEnabled()){
+        	log.trace("  << ignore invalid {} phrase [{},{}]",  new Object[]{ 
+        			phraseType.getPhraseType().name(), current.get(0).getStart(), 
+        			current.get(current.size()-1).getEnd()});
         }
         //cleanup
         current.clear();
@@ -209,6 +236,27 @@ public class PhraseBuilder {
             matches[i] = matchScores[i]/normScore >= minPosSocre;
         }
         return matches;
+    }
+    
+    /**
+     * used for trace level logging of Tokens part of a chunk
+     * @param token
+     * @return
+     */
+    private String logPosCategories(Token token){
+    	List<Value<PosTag>> posTags = token.getAnnotations(POS_ANNOTATION);
+    	List<String> catNames = new ArrayList<String>(posTags.size());
+    	for(Value<PosTag> tag : posTags){
+    		Set<LexicalCategory> cats = tag.value().getCategories();
+    		if(cats.size() > 1){
+    			catNames.add(cats.toString());
+    		} else if(!cats.isEmpty()){
+    			catNames.add(cats.iterator().next().toString());
+    		} else {
+    			catNames.add(tag.value().getTag());
+    		}
+    	}
+    	return catNames.toString();
     }
 
     public static interface ChunkFactory {

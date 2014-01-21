@@ -21,13 +21,36 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
+import org.apache.stanbol.enhancer.nlp.pos.Pos;
 
+/**
+ * Definition of a phrase type<p>
+ * 
+ * Phrases are defined by a set of POS tags that can <ul>
+ * <li> required Tokens - typically noun for noun phrases, verbs for verb phrases.
+ * <li> start types - types that can start a new phrase
+ * <li> prefix types - types that can continue a phrase not yet containing a
+ * required token
+ * <li> continuation types - types that can continue a phrase already containing
+ * a required token
+ * <li> end types - types that can end a phrase. Used to remove tailing tokens
+ * from a phrase (typically punctations).
+ * </ul>
+ * 
+ * <b>TODO:</b> Add support for {@link Pos} and String tags in addition to
+ * {@link LexicalCategory}.
+ * 
+ * @author Rupert Westenthaler
+ *
+ */
 public class PhraseTypeDefinition {
 
     protected final LexicalCategory phraseType;
     
     private final Set<LexicalCategory> startTypes;
     protected final Set<LexicalCategory> readOnlyStartTypes;
+    private final Set<LexicalCategory> prefixTypes;
+    protected final Set<LexicalCategory> readOnlyPrefixTypes;
     private final Set<LexicalCategory> continuationTypes;
     protected final Set<LexicalCategory> readOnlyContinuationTypes;
     private final Set<LexicalCategory> requiredTypes;
@@ -42,6 +65,8 @@ public class PhraseTypeDefinition {
         this.phraseType = phraseType;
         startTypes = EnumSet.of(phraseType);
         readOnlyStartTypes = Collections.unmodifiableSet(startTypes);
+        prefixTypes = EnumSet.of(phraseType);
+        readOnlyPrefixTypes = Collections.unmodifiableSet(prefixTypes);
         continuationTypes = EnumSet.of(phraseType);
         readOnlyContinuationTypes = Collections.unmodifiableSet(continuationTypes);
         requiredTypes = EnumSet.of(phraseType);
@@ -52,6 +77,10 @@ public class PhraseTypeDefinition {
     
     public boolean addStartType(LexicalCategory...types){
         return add(startTypes,types);
+    }
+
+    public boolean addPrefixType(LexicalCategory...types){
+        return add(prefixTypes,types);
     }
     
     public boolean addContinuationType(LexicalCategory...types){
@@ -67,6 +96,10 @@ public class PhraseTypeDefinition {
     
     public boolean removeStartType(LexicalCategory...types){
         return remove(startTypes,types);
+    }
+    
+    public boolean removePrefixType(LexicalCategory...types){
+        return remove(prefixTypes,types);
     }
     
     public boolean removeContinuationType(LexicalCategory...types){
@@ -89,18 +122,34 @@ public class PhraseTypeDefinition {
     }
     
     /**
-     * Getter for the read only set with the start types
+     * Getter for the read only set with the start types.
      * @return the read only set with {@link LexicalCategory LexicalCategories}
      * that can start a phrase of that type
      */
     public Set<LexicalCategory> getStartType(){
         return readOnlyStartTypes;
     }
+    /**
+     * Getter for the read only set with the prefix types
+     * @return the read only set with {@link LexicalCategory LexicalCategories}
+     * that can continue a phrase that does not yet include a token classified
+     * with a {@link #getRequiredType() required type}. A typical Example are
+     * {@link LexicalCategory#Adjective} in Noun Phrases that need to be
+     * considered in prefixes (e.g. "A nice weekend") but excluded after the
+     * first noun (e.g. "the trip last week"). 
+     */
+    public Set<LexicalCategory> getPrefixType(){
+        return readOnlyPrefixTypes;
+    }
     
     /**
      * Getter for the read only set with the continuation types
      * @return the read only set with {@link LexicalCategory LexicalCategories}
-     * that can continue a phrase of that type
+     * that can continue a phrase that does already include a token classified
+     * with a {@link #getRequiredType() required type}. A typical Example are
+     * {@link LexicalCategory#Adjective} in Noun Phrases that need to be
+     * considered in prefixes (e.g. "A nice weekend") but excluded after the
+     * first noun (e.g. "the trip last week"). 
      */
     public Set<LexicalCategory> getContinuationType(){
         return readOnlyContinuationTypes;
@@ -150,5 +199,10 @@ public class PhraseTypeDefinition {
             }
         }
         return changed;
+    }
+    
+    @Override
+    public String toString() {
+    	return phraseType.name();
     }
 }

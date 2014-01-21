@@ -83,7 +83,8 @@ import org.slf4j.LoggerFactory;
 @Service
 @Properties(value={
         @Property(name=EnhancementEngine.PROPERTY_NAME,value="pos-chunker"),
-        @Property(name=PosChunkerEngine.CONFIG_LANGUAGES, value = {"*"}),
+        @Property(name=PosChunkerEngine.CONFIG_LANGUAGES, 
+        	cardinality=Integer.MAX_VALUE, value = {"*"}),
         @Property(name=PosChunkerEngine.MIN_POS_SCORE, 
             doubleValue=PosChunkerEngine.DEFAULT_MIN_POS_SCORE),
         @Property(name=PosChunkerEngine.NOUN_PHRASE_STATE, 
@@ -121,14 +122,17 @@ public class PosChunkerEngine extends AbstractEnhancementEngine<RuntimeException
     private static final PhraseTypeDefinition VERB_PHRASE_TYPE;
 
     //TODO: maybe move this to PhraseTypeDefinition
+    //TODO: this might be language specific
+    //TODO: make configurable
     static {
         PhraseTypeDefinition nounPD = new PhraseTypeDefinition(LexicalCategory.Noun);
         //start types noun (automatically included) pronoun or determiners, adjectives 
         nounPD.addStartType(LexicalCategory.PronounOrDeterminer, LexicalCategory.Adjective);
-        //continuation types are nouns, adpositions , pronouns, determiner, adjectives and punctations
-        //optionally one could also allow Adverbs, PronounOrDeterminer
-        nounPD.addContinuationType(LexicalCategory.Adjective, LexicalCategory.Adposition,
-            LexicalCategory.Punctuation); //LexicalCategory.PronounOrDeterminer, LexicalCategory.Adverb, );
+        //prefix types are the same as start types (e.g. "the nice trip")
+        nounPD.addPrefixType(LexicalCategory.PronounOrDeterminer, LexicalCategory.Adjective);
+        //continuation types are nouns and punctations. 
+        //NOTE: Adverbs are excluded to avoid phrases like "the nice trip last week"
+        nounPD.addContinuationType(LexicalCategory.Punctuation);
         //end types are the same as start terms
         nounPD.addEndType(LexicalCategory.PronounOrDeterminer, LexicalCategory.Adjective);
         //and required types do include a Noun (what is actually included by default)
@@ -230,37 +234,38 @@ public class PosChunkerEngine extends AbstractEnhancementEngine<RuntimeException
         for(PhraseBuilder pb : phraseBuilders){
             pb.nextSection(null);
         }
-        if(log.isTraceEnabled()){
-            logChunks(at);
-        }
+//        if(log.isTraceEnabled()){
+//            logChunks(at);
+//        }
     }
     
     @Override
     public Map<String,Object> getServiceProperties() {
         return SERVICE_PROPERTIES;
     }
-    
-    private void logChunks(AnalysedText at){
-        Iterator<Span> it = at.getEnclosed(EnumSet.of(SpanTypeEnum.Sentence, SpanTypeEnum.Chunk));
-        while(it.hasNext()){
-            Span span = it.next();
-            if(span.getType() == SpanTypeEnum.Chunk){
-                Value<PhraseTag> phraseAnno = span.getAnnotation(PHRASE_ANNOTATION);
-                log.trace(" > {} Phrase: {} {}", new Object[]{
-                    phraseAnno != null ? phraseAnno.value().getTag() : "unknown",
-                    span, span.getSpan()});
-                log.trace("  Tokens: ");
-                int i = 1;
-                for(Iterator<Token> tokens = ((Chunk)span).getTokens(); tokens.hasNext();i++){
-                    Token token = tokens.next();
-                    log.trace("    {}. {}{}", new Object[]{i,token.getSpan(),
-                            token.getAnnotations(NlpAnnotations.POS_ANNOTATION)});
-                }
-            } else {
-                log.trace("--- {}",span);
-            }
-        }
-    }
+
+//logging is now done by the PhraseBuilder
+//    private void logChunks(AnalysedText at){
+//        Iterator<Span> it = at.getEnclosed(EnumSet.of(SpanTypeEnum.Sentence, SpanTypeEnum.Chunk));
+//        while(it.hasNext()){
+//            Span span = it.next();
+//            if(span.getType() == SpanTypeEnum.Chunk){
+//                Value<PhraseTag> phraseAnno = span.getAnnotation(PHRASE_ANNOTATION);
+//                log.trace(" > {} Phrase: {} {}", new Object[]{
+//                    phraseAnno != null ? phraseAnno.value().getTag() : "unknown",
+//                    span, span.getSpan()});
+//                log.trace("  Tokens: ");
+//                int i = 1;
+//                for(Iterator<Token> tokens = ((Chunk)span).getTokens(); tokens.hasNext();i++){
+//                    Token token = tokens.next();
+//                    log.trace("    {}. {}{}", new Object[]{i,token.getSpan(),
+//                            token.getAnnotations(NlpAnnotations.POS_ANNOTATION)});
+//                }
+//            } else {
+//                log.trace("--- {}",span);
+//            }
+//        }
+//    }
 
     /**
      * Activate and read the properties. Configures and initialises a ChunkerHelper for each language configured in
