@@ -19,6 +19,7 @@ package org.apache.stanbol.enhancer.engines.entitylinking.impl;
 import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.POS_ANNOTATION;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -54,7 +55,7 @@ public class SectionData {
             Set<SpanTypeEnum> enclosedSpanTypes, boolean isUnicaseLanguage){
         this.section = section;
         Iterator<Span> enclosed = section.getEnclosed(enclosedSpanTypes);
-        ChunkData activeChunk = null;
+        List<ChunkData> activeChunks = new ArrayList<ChunkData>();
         while(enclosed.hasNext()){
             Span span = enclosed.next();
             if(span.getStart() >= span.getEnd()){ //save guard against empty spans
@@ -64,27 +65,20 @@ public class SectionData {
             if(span.getType() == SpanTypeEnum.Chunk){
                 ChunkData chunkData = new ChunkData(tpc,(Chunk)span);
                 if(chunkData.isProcessable()){
-                    if(activeChunk != null){ //current Chunk not yet closed -> overlapping chunks!
-                        if(activeChunk.getEndChar() < span.getEnd()){ //merge partly overlapping chunks
-                            log.info("   - merge overlapping and processable Chunks {} <-> {}",
-                                activeChunk.merged == null? activeChunk.chunk : activeChunk.merged,span);
-                            activeChunk.merged = (Chunk)span; //set this one as last merged
-                        } //ignore completely covered chunks
-                    } else { // a new Chunk starts
-                        activeChunk = chunkData;
-                        activeChunk.startToken = tokens.size();
-                        if(log.isDebugEnabled()){
-                            log.debug(">> Chunk: (type:{}, startPos: {}) text: '{}'",
-                                new Object []{
-                                    activeChunk.chunk.getType(),
-                                    activeChunk.startToken,
-                                    activeChunk.chunk.getSpan()
-                                });
-                        }
+                	activeChunks.add(0, chunkData);
+                	chunkData.startToken = tokens.size();
+                    if(log.isDebugEnabled()){
+                        log.debug(">> Chunk: (type:{}, startPos: {}) text: '{}'",
+                            new Object []{
+                        		chunkData.chunk.getType(),
+                        		chunkData.startToken,
+                        		chunkData.chunk.getSpan()
+                            });
                     } 
                 } //else ignore chunks that are not processable
             } else if(span.getType() == SpanTypeEnum.Token){
-                TokenData tokenData = new TokenData(tpc,tokens.size(),(Token)span,activeChunk);
+                TokenData tokenData = new TokenData(tpc,tokens.size(),(Token)span,
+                		activeChunks.isEmpty() ? null : activeChunks.get(0));
                 if(log.isDebugEnabled()){
                     log.debug("  > {}: {} {}(pos:{}) chunk: '{}'",
                         new Object[]{tokenData.index,tokenData.token,
@@ -155,7 +149,9 @@ public class SectionData {
                 if(!hasLinkableToken){
                     hasLinkableToken = tokenData.isLinkable;
                 }
-                if(activeChunk != null){
+                Iterator<ChunkData> activeChunkIt = activeChunks.iterator();
+                while(activeChunkIt.hasNext()){
+                	ChunkData activeChunk = activeChunkIt.next();
                     if (tokenData.isLinkable){
                         //ignore matchableCount in Chunks with linkable Tokens
                         activeChunk.matchableCount = -10; //by setting the count to -10
@@ -173,10 +169,14 @@ public class SectionData {
                             activeChunk.matchableEndCharIndex = tokenData.token.getEnd();
                         }
                     }
-                    if (span.getEnd() >= activeChunk.getEndChar()){
+                    if(span.getEnd() >= activeChunk.getEndChar()){
                         //this is the last token in the current chunk
                         activeChunk.endToken = tokens.size()-1;
-                        log.debug("   - end Chunk@pos: {}", activeChunk.endToken);
+                        if(log.isDebugEnabled()){
+	                        log.debug(" << end Chunk {} '{}' @pos: {}", new Object[]{
+	                        		activeChunk.chunk, activeChunk.chunk.getSpan(),
+	                        		activeChunk.endToken});
+                        }
                         if(tpc.isLinkMultiMatchableTokensInChunk() && 
                                 activeChunk.getMatchableCount() > 1 ){
                             log.debug("   - multi-matchable Chunk:");
@@ -198,7 +198,8 @@ public class SectionData {
                                 }
                             }
                         }
-                        activeChunk = null;
+                        //remove the closed chunk from the list with active
+                        activeChunkIt.remove(); 
                     }
                 }
             }
