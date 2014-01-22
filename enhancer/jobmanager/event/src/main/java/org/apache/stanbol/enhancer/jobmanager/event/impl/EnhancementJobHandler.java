@@ -24,9 +24,11 @@ import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -34,10 +36,16 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
+import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper;
+import org.apache.stanbol.enhancer.servicesapi.helper.execution.ChainExecution;
+import org.apache.stanbol.enhancer.servicesapi.helper.execution.Execution;
+import org.apache.stanbol.enhancer.servicesapi.helper.execution.ExecutionMetadata;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventHandler;
@@ -60,7 +68,7 @@ public class EnhancementJobHandler implements EventHandler {
      *  r: ... read lock
      *  w: ... write lock
      */
-    private Logger log = LoggerFactory.getLogger(EnhancementJobHandler.class);
+    private static Logger log = LoggerFactory.getLogger(EnhancementJobHandler.class);
     /**
      * Keys are {@link EnhancementJob}s currently asynchronously enhancing 
      * contentItems and the values are the objects used to interrupt the 
@@ -348,6 +356,51 @@ public class EnhancementJobHandler implements EventHandler {
             startedExecution = true;
         }
         return startedExecution;
+    }
+    /**
+     * Helper method that logs the execution time for the Chain and all the
+     * Enhancement Engines on DEBUG level
+     * @param logger The logger used for logging
+     * @param job the job to log. This expects that 
+     * <code>{@link EnhancementJob#isFinished()} == true</code>
+     */
+    protected static void logExecutionTimes(Logger logger, EnhancementJob job){
+    	if(logger.isInfoEnabled()){
+    		try {
+		    	ExecutionMetadata em = ExecutionMetadata.parseFrom(
+		    			job.getExecutionMetadata(),job.getContentItem().getUri());
+		    	ChainExecution ce = em.getChainExecution();
+		    	long cd = ce.getDuration();
+		    	logger.info("Executed Chain {} in {}ms", ce.getChainName(),
+		    				ce.getDuration());
+		    	logger.info(" > ContentItem: {}", job.getContentItem().getUri().getUnicodeString());
+		    	List<Execution> ees = new ArrayList<Execution>(em.getEngineExecutions().values());
+		    	//sort by start date (execution order)
+		    	Collections.sort(ees, new Comparator<Execution>() {
+		    		@Override
+		    		public int compare(Execution e1, Execution e2) {
+		    			return e1.getStarted().compareTo(e2.getStarted());
+		    		}
+				});
+		    	long eds = 0;
+		    	for(Execution ee : ees){
+		    		long ed = ee.getDuration();
+		    		eds = eds + ed;
+		    		int edp = Math.round(ed*100/(float)cd);
+		    		logger.info(" - {} in {}ms ({}%)", new Object[]{
+		    				ee.getExecutionNode().getEngineName(), ed, edp});
+		    	}
+		    	float cf = eds/cd;
+		    	int cfp = Math.round((cf-1)*100);
+		    	logger.info(" > concurrency: {} ({}%)",cf, cfp);
+    		} catch (RuntimeException e) {
+    			log.warn("Exception while logging ExecutionTimes for Chain: '" +
+    					job.getChainName() + " and ContentItem "+
+    					job.getContentItem().getUri() +" to Logger " +
+    					logger.getName(),e);
+    			
+    		}
+    	}
     }
     
     /**
