@@ -105,6 +105,23 @@ launcher with::
 In eclipse, you can then create a new "Debug Configuration" with type "Remote
 Java Application" and connect it to localhost on port 8787.
 
+
+## Build without SNAPSHOTs from Apache Repository
+
+Apache Stanbol deployes current SNAPSHOTS of components from the trunk to the
+Apache SNAPSHOT Maven repository. This is done on each succesful Jenkins build
+at https://builds.apache.org/view/S-Z/view/Stanbol/job/stanbol-trunk/
+
+To locally build Stanbol without loading available SNAPSHOTs from the Apache
+SNAPSHOT repository, use can use the 'no-snapshot-dep' profile.
+
+    $ mvn clean install -Pno-snapshot-dep
+
+This profile especially useful if you are preparing a release and want to
+ensure that there are no dangling SNAPSHOT dependencies that can not be
+resolved from within the locally available components.
+
+
 ## License check via the Apache's Release Audit Tool (RAT)
 
 To check for license headers within the source code Stanbol uses the RAT Maven
@@ -113,6 +130,7 @@ plugin [1]. You can activate a 'rat:check' by using the 'rat' Maven profile.
 For example to check the licenses in the Stanbol Framework use
 
     $ mvn install -Prat
+
 
 ## Release Apache Stanbol
 
@@ -132,6 +150,7 @@ release plugin [3] is used. For doing official release you start with
 [1] http://www.apache.org/dev/#releases
 [2] http://incubator.apache.org/guides/releasemanagement.html
 [3] http://maven.apache.org/plugins/maven-release-plugin/
+
 
 ## Useful links
 
