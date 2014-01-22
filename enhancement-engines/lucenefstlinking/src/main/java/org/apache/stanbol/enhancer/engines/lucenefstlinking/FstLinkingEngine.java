@@ -181,7 +181,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                 corpus = session.getLanguageCorpus();
                 long t = System.currentTimeMillis();
                 int d = tag(at, session,corpus,tags);
-                log.info(" - {}: fst: {}ms (callback: {}ms)", new Object[]{
+                log.debug(" - {}: fst: {}ms (callback: {}ms)", new Object[]{
                         corpus.getIndexedField(), System.currentTimeMillis()-t, d
                 });
             }
@@ -191,7 +191,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                 }
                 long t = System.currentTimeMillis();
                 int d = tag(at, session, session.getDefaultCorpus(),tags);
-                log.info(" - {}: fst: {}ms (callback: {}ms)",new Object[]{
+                log.debug(" - {}: fst: {}ms (callback: {}ms)",new Object[]{
                         session.getDefaultCorpus().getIndexedField(), 
                         System.currentTimeMillis()-t, d});
             }
@@ -201,7 +201,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                     + "language '"+session.getLanguage()+"'!",null);
             } else {
                 if(session.getLanguageCorpus() != null && session.getDefaultCorpus() != null){
-                    log.info(" - sum fst: {} ms", taggingEnd - taggingStart);
+                    log.debug(" - sum fst: {} ms", taggingEnd - taggingStart);
                 }
             }
             int matches = match(at,tags.values());
