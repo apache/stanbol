@@ -82,4 +82,32 @@ public interface DereferenceConstants {
      */
     String DEREFERENCE_ENTITIES_LDPATH = "enhancer.engines.dereference.ldpath";
 
+	/**
+	 * A URI prefix checked for entity URIs. Only entities that do match any of the
+	 * parsed prefixes or {@link #URI_PATTERN} will be dereferenced. If no 
+	 * pattern nor prefixes are configured all entities will be dereferenced. 
+	 * This has lower priority as {@link #FALLBACK_MODE}.
+	 * @see #FALLBACK_MODE
+	 */
+    String URI_PREFIX = "enhancer.engines.dereference.uriPrefix";
+    
+    
+	/**
+	 * Regex pattern applied to entity URIs. Only entities that do match any of
+	 * the configured {@link #URI_PREFIX} or pattern will be dereferenced. 
+	 * If no pattern nor prefixes are configured all entities will be dereferenced.
+	 * This has lower priority as {@link #FALLBACK_MODE}.
+	 * @see #FALLBACK_MODE
+	 */
+    String URI_PATTERN = "enhancer.engines.dereference.uriPattern";
+    
+    /**
+     * If fallback mode is activated a dereference engine will not try to
+     * dereference entities for those there are already triples added to the
+     * enhancement results.
+     */
+    String FALLBACK_MODE = "enhancer.engines.dereference.fallback";
+    
+    boolean DEFAULT_FALLBACK_MODE = true;
+    
 }
