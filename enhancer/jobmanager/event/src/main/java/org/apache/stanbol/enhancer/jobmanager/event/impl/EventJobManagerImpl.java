@@ -179,10 +179,10 @@ public class EventJobManagerImpl implements EnhancementJobManager {
                 + " \n To change the timeout change value of property '"+
                     MAX_ENHANCEMENT_JOB_WAIT_TIME+"' for the service "+getClass());
         }
-        log.info("Execution of Chain {} {} after {}ms for ContentItem {}",
-            new Object[]{ chain.getName(), job.isFailed() ? "failed" : "finished",
-                    System.currentTimeMillis()-start,
-                    job.getContentItem().getUri()});
+        log.debug("Execution of Chain {} {} after {}ms for ContentItem {}",
+                new Object[]{ chain.getName(), job.isFailed() ? "failed" : "finished",
+                        System.currentTimeMillis()-start,
+                        job.getContentItem().getUri()});
         //NOTE: ExecutionMetadata are not added to the metadata of the ContentItem
         //      by the EnhancementJobManager.
         //      However one could add this as an optional feature to the
@@ -190,7 +190,8 @@ public class EventJobManagerImpl implements EnhancementJobManager {
         //ci.getMetadata().addAll(job.getExecutionMetadata());
         if(job.isFailed()){
         	Exception e = job.getError();
-            EnhancementJobHandler.logJobInfo(log, job, null, true);
+            EnhancementJobHandler.logJobInfo(enhancementJobManager, job, 
+            		"-- log information about failed EnhancementJob --", true);
             logExecutionMetadata(job);
             log.warn("ExecutionMetadata: ");
             for(Iterator<Triple> it = job.getExecutionMetadata().iterator();

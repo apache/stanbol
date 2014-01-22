@@ -408,7 +408,10 @@ public class EnhancementJobHandler implements EventHandler {
      * @param job
      */
     protected static void logJobInfo(Logger log, EnhancementJob job, String header, boolean logExecutions) {
-        if(header != null){
+    	if(!log.isInfoEnabled()){
+    		return;
+    	}
+    	if(header != null){
             log.info(header);
         }
         log.info("   finished:     {}",job.isFinished());
