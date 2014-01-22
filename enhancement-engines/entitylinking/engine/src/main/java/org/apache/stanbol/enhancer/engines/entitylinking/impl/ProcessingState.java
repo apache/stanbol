@@ -20,7 +20,6 @@
 package org.apache.stanbol.enhancer.engines.entitylinking.impl;
 
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig.UNICASE_SCRIPT_LANUAGES;
-import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.POS_ANNOTATION;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,14 +31,10 @@ import java.util.Locale;
 
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.collections.iterators.FilterIterator;
-import org.apache.stanbol.commons.namespaceprefix.service.StanbolNamespacePrefixService;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.LanguageProcessingConfig;
-import org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
-import org.apache.stanbol.enhancer.nlp.model.Chunk;
 import org.apache.stanbol.enhancer.nlp.model.Section;
 import org.apache.stanbol.enhancer.nlp.model.Sentence;
-import org.apache.stanbol.enhancer.nlp.model.Span;
 import org.apache.stanbol.enhancer.nlp.model.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.nlp.pos.Pos;
@@ -92,7 +87,7 @@ public class ProcessingState {
     protected final LanguageProcessingConfig tpc;
     //protected final EntityLinkerConfig elc;
 
-    private AnalysedText at;
+    //private AnalysedText at;
     /**
      * If the language uses a unicase script and therefore upper case specific
      * processing rules can not be used (see STANBOL-1049)
@@ -125,7 +120,7 @@ public class ProcessingState {
         if(!tpc.isIgnoreChunks()){
             enclosedSpanTypes.add(SpanTypeEnum.Chunk);
         }
-        this.at = at; //store as field (just used for logging)
+        //this.at = at; //store as field (just used for logging)
         this.language = language;
         //STANBOL-1049: we need now to know if a language uses a unicase script
         //ensure lower case and only use the language part 
@@ -244,7 +239,7 @@ public class ProcessingState {
                 continue; //ignore this section
             }
             consumedSectionIndex = section.getEnd();
-            SectionData sectionData = new SectionData(tpc, section, enclosedSpanTypes, foundLinkableToken);
+            SectionData sectionData = new SectionData(tpc, section, enclosedSpanTypes, isUnicaseLanguage);
             //TODO: It would be better to use a SectionData field instead
             tokens = sectionData.getTokens();
             section = sectionData.section;
@@ -285,9 +280,6 @@ public class ProcessingState {
             sb.append("none");
         } else {
             sb.append(token.inChunk.chunk);
-            if(token.inChunk.merged != null){
-                sb.append("(merged with ").append(token.inChunk.merged).append(')');
-            }
         }
         sb.append("| sentence: ");
         if(section == null){

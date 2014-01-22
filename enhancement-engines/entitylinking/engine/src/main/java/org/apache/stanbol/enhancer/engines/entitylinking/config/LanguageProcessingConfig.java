@@ -36,6 +36,7 @@ public class LanguageProcessingConfig implements Cloneable{
      */
     public static final Set<LexicalCategory> DEFAULT_PROCESSED_PHRASE_CATEGORIES = 
             EnumSet.of(LexicalCategory.Noun);
+        
     /**
      * The default set of {@link LexicalCategory LexicalCategories} used to
      * lookup (link) Entities within the {@link EntitySearcher}

@@ -19,12 +19,14 @@ package org.apache.stanbol.enhancer.engines.entitylinking.impl;
 import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.PHRASE_ANNOTATION;
 
 import org.apache.stanbol.enhancer.engines.entitylinking.config.LanguageProcessingConfig;
+import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.Chunk;
 import org.apache.stanbol.enhancer.nlp.model.Sentence;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
 import org.apache.stanbol.enhancer.nlp.phrase.PhraseTag;
+import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 
 /** 
  * Represents a Chunk (group of tokens) used as context for EntityLinking.
@@ -41,19 +43,12 @@ import org.apache.stanbol.enhancer.nlp.phrase.PhraseTag;
  */
 public class ChunkData {
     protected final static boolean DEFAULT_PROCESSABLE_STATE = true;
+    /** if this Chunk represents a Named Entity **/
+    protected final boolean isNamedEntity;
     /** if the Chunk is processable */
     public final boolean isProcessable;
     /** the Chunk */
     public final Chunk chunk;
-    /** 
-     * In case multiple overlapping and processable {@link Chunk}s the
-     * section selected by the chunks are merged. While {@link #chunk}
-     * holds the original chunk (the first) this variable holds the
-     * last merged one. Enclosed chunks (in case more than two are
-     * merged) are not available via this class, but can be retrieved
-     * by iterating over the {@link AnalysedText} content part.
-     */
-    Chunk merged;
     /** the start token index relative to the current section (sentence) */
     int startToken;
     /** the end token index relative to the current section (sentence) */
@@ -100,6 +95,13 @@ public class ChunkData {
                 break;
             } // else probability to low for exclusion
         }
+        //fallback for NER chunks in case Noun Phrases are processible and a NER
+        //annotation is present for the parsed chunk.
+        isNamedEntity = chunk.getAnnotation(NlpAnnotations.NER_ANNOTATION) != null;
+        if(process == null && isNamedEntity &&
+        		tpc.getProcessedPhraseCategories().contains(LexicalCategory.Noun)){
+        	process = true;
+        }
         isProcessable = process == null ? DEFAULT_PROCESSABLE_STATE : process;
     }
     /**
@@ -110,13 +112,11 @@ public class ChunkData {
         return chunk.getStart();
     }
     /**
-     * Getter for the end character position of the text selected by
-     * possible multiple {@link #merged} chunks.
-     * @return the end character position considering possible {@link #merged}
-     * chunks.
+     * Getter for the end character position of the text
+     * @return the end character position
      */
     public int getEndChar(){
-        return merged == null ? chunk.getEnd() : merged.getEnd();
+        return chunk.getEnd();
     }
     /**
      * If this chunk is processable
@@ -125,6 +125,11 @@ public class ChunkData {
     public boolean isProcessable() {
         return isProcessable;
     }
+    
+    public boolean isNamedEntity() {
+    	return isNamedEntity;
+    }
+    
     /**
      * Getter for the number of matchable tokens contained in this chunk
      * @return The number of matchable tokens contained in this chunk
