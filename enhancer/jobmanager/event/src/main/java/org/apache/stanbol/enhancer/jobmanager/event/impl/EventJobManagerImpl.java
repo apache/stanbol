@@ -68,6 +68,11 @@ import org.slf4j.LoggerFactory;
 public class EventJobManagerImpl implements EnhancementJobManager {
 
     private final Logger log = LoggerFactory.getLogger(EventJobManagerImpl.class);
+    /**
+     * Logger for the {@link EnhancementJobManager} interface. This is used
+     * to log statistics about execution times for enhancement jobs
+     */
+    private final Logger enhancementJobManager = LoggerFactory.getLogger(EnhancementJobManager.class);
     
     public static final int DEFAULT_SERVICE_RANKING = 0;
 
@@ -204,6 +209,9 @@ public class EventJobManagerImpl implements EnhancementJobManager {
             throw new ChainException("EnhancementJobManager was deactivated while" +
             		" enhancing the passed ContentItem "+job.getContentItem()+
             		" (EnhancementJobManager type: "+getClass()+")");
+        } else {
+        	//log infos about the execution times to the enhancementJobManager
+        	EnhancementJobHandler.logExecutionTimes(enhancementJobManager, job);
         }
     }
 	/**
