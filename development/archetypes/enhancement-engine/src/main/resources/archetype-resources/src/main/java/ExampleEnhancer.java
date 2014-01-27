@@ -55,6 +55,20 @@ public class ExampleEnhancer extends AbstractEnhancementEngine<RuntimeException,
     private static final Logger log = LoggerFactory.getLogger(ExampleEnhancer.class);
 
     /**
+     * Configuration property for option 1
+     */
+    @Property(value=ExampleEnhancer.DEFAULT_OPTION1_VALUE)
+    public static final String EXAMPLE_CONFIG_OPTION1 = "${package}.option1";
+    /**
+     * The default value for EXAMPLE_CONFIG_OPTION1
+     */
+    public static final String DEFAULT_OPTION1_VALUE = "value1";
+    /**
+     * The value of option1
+     */
+    private String option1;
+
+    /**
      * TODO: change to fit your engine. See constants defined in the 
      * ServiceProperties class
      */
@@ -77,13 +91,23 @@ public class ExampleEnhancer extends AbstractEnhancementEngine<RuntimeException,
         @SuppressWarnings("unchecked")
         Dictionary<String, Object> properties = ce.getProperties();
         //TODO: parse custom properties
+
+        //As Example we parse EXAMPLE_CONFIG_OPTION1 form the config
+        Object value = properties.get(EXAMPLE_CONFIG_OPTION1);
+        if(value == null || value.toString().isEmpty()){
+            option1 = DEFAULT_OPTION1_VALUE;
+        } else {
+            option1 = value.toString();
+        }
     }
     
     @Deactivate
     protected void deactivate(ComponentContext context) {
         log.info("deactivating {}: {}", getClass().getSimpleName(), getName());
         //TODO: reset fields to default, close resources ...
-        super.deactivate(context);
+        option1 = null;
+        
+        super.deactivate(context); //call deactivate on the super class
     }
     
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
