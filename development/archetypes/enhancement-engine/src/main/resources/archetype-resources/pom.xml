@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
+    <version>5-SNAPSHOT</version>
+  </parent>
   <groupId>${groupId}</groupId>
   <artifactId>${artifactId}</artifactId>
   <version>${version}</version>
   <packaging>bundle</packaging>
-
+  <!-- TODO: change the name and description for your engine -->
   <name>Skeleton for ${artifactId}</name>
-
+  <description>The description for the ${artifactId}</description>
+  
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -44,6 +51,26 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <version>2.3.7</version>
         <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <!-- Keep engine classes private as Enhancement engines typically 
+              do not export functionality. Because of that we have an empty
+              list of exported packages and are defining all packages of the
+              engine as private -->
+            <Export-Package></Export-Package>
+            <Private-Package>
+              ${package}*;version=${project.version}
+            </Private-Package>
+            <!-- those import statements allow to use the engine within Stanbol 
+              version 0.11 or higher. If you just want to use your engine to
+              be used with Stanbol 1.0+ you can remove this element -->
+            <Import-Package>
+              org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.11,1.1)",
+              org.apache.stanbol.enhancer.servicesapi.*;version="[0.11,1.1)",
+              *
+            </Import-Package>
+          </instructions>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>
