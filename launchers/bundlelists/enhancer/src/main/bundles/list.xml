@@ -53,32 +53,32 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.core</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle> <!-- NLP processing (STANBOL-733) -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.nlp</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle> <!-- JSON serialization support for AnalyzedText (STANBOL-878) -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.nlp.json</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle> <!-- API for Topic Classification Engines -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.topic.api</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle> <!-- Core Module for Dereference Engines -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.dereference.core</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
   </startLevel>
   <!-- LDPath -->
@@ -86,7 +86,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.ldpath</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
   </startLevel>
   <!-- EnhancementJobManager implementations -->
@@ -94,12 +94,12 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.eventjobmanager</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <!-- bundle> - no longer used as it does not support chains -
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.weightedjobmanager</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle -->
   </startLevel>
   <!-- Enhancement Chain implementations -->
@@ -107,22 +107,22 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.chain.allactive</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.chain.graph</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.chain.weighted</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.chain.list</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
   </startLevel>
   <!-- Web Fragment -->
@@ -130,7 +130,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.jersey</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
   </startLevel>
 
@@ -139,7 +139,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.benchmark</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
   </startLevel>
 
@@ -151,17 +151,17 @@
     <!-- bundle> - Metaxa deactivated - STANBOL-510
      <groupId>org.apache.stanbol</groupId>
      <artifactId>org.apache.stanbol.enhancer.engines.metaxa</artifactId>
-     <version>0.10.0de.verlinked.bootstrap.server</version>
+     <version>0.10.0</version>
      </bundle -->
     <bundle><!-- Apache Tika Engine -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.tika</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle><!-- XMP Extractor engine -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.xmpextractor</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
 	  </bundle>
 
     <!-- language identification -->
@@ -169,17 +169,17 @@
     <bundle> 
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.langdetect</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
 	  <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.langid</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle><!-- RESTful Language Identification engine -->
       <groupId>org.apache.stanbol</groupId> <!-- see STANBOL-895 -->
       <artifactId>org.apache.stanbol.enhancer.engines.restful.nlp</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     
     <!-- NLP processing engines (all STANBOL-733 and sub-tasks) -->
@@ -187,134 +187,134 @@
     <bundle><!-- sentence detection with OpenNLP -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.opennlp.sentence</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle><!-- OpenNLP based tokenizing of Texts -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.opennlp.token</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle><!-- POS tagging with OpenNLP -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.opennlp.pos</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle><!-- Chunking tagging with OpenNLP -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.opennlp.chunker</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle> <!-- Open NLP based NER -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.opennlp.ner</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle><!-- RESTful NLP Analysis engine -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.restful.nlp</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     
     <bundle> <!-- POS annotation based chunker (STANBOL-1251) -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.poschunker</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     
     <!-- NLP metadata to RDF (using NIF 1.0) - NOT YET READY FOR DEFAULT CONFIG
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.nlp2rdf</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>  -->
     <!-- Sentiment Enhancement Engines -->
     <bundle><!-- Sentiment Word Classifiers -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.sentiment.wordclassifier</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.sentiment.summarization</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <!-- Solr based Topic Engine (see also the topic.api bundle above -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.topic</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle> <!-- The RESTful services used to train the engine -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.topic.web</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     
     <!-- Entity Extraction/Linking -->
     <bundle><!-- NER linking (depends on the Entityhub) -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.entitytagging</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle><!-- Keyword Extraction from Text DEPRECATED! (depends on the Entityhub) -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.keywordextraction</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <!-- Stanbol EntityLinking -->
     <bundle><!-- Engine -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.entitylinking.engine</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle><!-- OpenNLP LabelTokenizing support -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.opennlp</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle><!-- Lucene LabelTokenizing support -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.lucene</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle><!-- EntityLinking for the Stanbol Entityhub -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.entityhublinking</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
  
     <bundle><!-- FST Linking Engine (STANBOL-1128) -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.lucenefstlinking</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
 	  <!-- Post-Processing engine -->
     
     <bundle> <!-- Disambigutation using Solr MLT queries -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engine.disambiguation.mlt</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle> <!-- Converts TextAnnotations to the STANBOL-987 model extensions -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.textannotationnewmodel</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle> <!-- finds co-mentions of Entities earlier mentioned on the Text (STANBOL-1070)-->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.entitycomention</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <!-- Dereference Engine for the Entityhub (STANBOL-1223) -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.dereference.entityhub</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle> <!-- Refactor Enhancement Engine -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.refactor</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
 
     
@@ -323,27 +323,27 @@
     <bundle> <!-- http://www.opencalais.com/ -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.opencalais</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle> <!-- http://www.zemanta.com/ -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.zemanta</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle> <!-- http://www.geonames.org/ -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle> <!-- http://linguagrid.org/ -->
       <groupId>org.apache.stanbol</groupId>
 	  <artifactId>org.apache.stanbol.enhancer.engines.celi</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle> <!-- DBpedia Spotlight Engines (STANBOL-706) -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.dbpspotlight</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
   </startLevel>
   
@@ -353,7 +353,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.defaults</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
   </startLevel>
 </bundles>

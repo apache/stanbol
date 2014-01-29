@@ -20,12 +20,12 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>4de.verlinked.bootstrap.server</version>
+    <version>4</version>
     <relativePath>../../../parent/pom.xml</relativePath>
   </parent>
 
   <artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
-  <version>0.12.0de.verlinked.bootstrap.server</version>
+  <version>0.12.0</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Offline Utilities</name>

@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines</artifactId>
-    <version>0.12.0de.verlinked.bootstrap.server</version>
+    <version>0.12.0</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -95,8 +95,8 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-      <!-- NOTE: 0.11.0 would be fine, but 0.12.0de.verlinked.bootstrap.server is required for unit tests -->
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <!-- NOTE: 0.11.0 would be fine, but 0.12.0 is required for unit tests -->
+      <version>0.12.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
@@ -149,19 +149,19 @@
     <!-- dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
       <scope>test</scope>
     </dependency -->
      <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
       <scope>test</scope>
     </dependency>
      <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
-      <version>1.2.0de.verlinked.bootstrap.server</version>
+      <version>1.2.0</version>
       <scope>test</scope>
     </dependency>
      <dependency>

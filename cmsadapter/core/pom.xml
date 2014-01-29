@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.cmsadapter.parent</artifactId>
-    <version>0.12.0de.verlinked.bootstrap.server</version>
+    <version>0.12.0</version>
     <relativePath>../parent</relativePath>
   </parent>
 

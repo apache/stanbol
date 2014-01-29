@@ -15,40 +15,40 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.servicesapi</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.store.solr</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.search.solr
       </artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.search.related
       </artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.search.featured
       </artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.web</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.contenthub.ldpath</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </bundle>
   </startLevel>
 </bundles>

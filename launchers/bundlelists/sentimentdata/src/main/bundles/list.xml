@@ -21,12 +21,12 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.sentiment.sentiws</artifactId>
-      <version>1.2.0de.verlinked.bootstrap.server</version>
+      <version>1.2.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.sentiment.sentiwordnet</artifactId>
-      <version>1.2.0de.verlinked.bootstrap.server</version>
+      <version>1.2.0</version>
     </bundle>
   </startLevel>
 </bundles>  

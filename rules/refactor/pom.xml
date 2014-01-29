@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>4de.verlinked.bootstrap.server</version>
+    <version>4</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.rules.refactor</artifactId>
-  <version>0.12.0de.verlinked.bootstrap.server</version>
+  <version>0.12.0</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Rules Refactorer</name>
@@ -75,17 +75,17 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.base</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.manager</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.adapters.abstract</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </dependency>
 
     <!-- OSGi deps -->
@@ -143,7 +143,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.adapters.clerezza</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </dependency>
 
   </dependencies>

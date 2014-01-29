@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-contenthub</artifactId>
-    <version>0.12.0de.verlinked.bootstrap.server</version>
+    <version>0.12.0</version>
     <relativePath>..</relativePath>
   </parent>
 

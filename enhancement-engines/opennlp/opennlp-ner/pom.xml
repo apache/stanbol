@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines-opennlp</artifactId>
-    <version>0.12.0de.verlinked.bootstrap.server</version>
+    <version>0.12.0</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -80,12 +80,12 @@
     <dependency> <!-- 0.10.0 also works, but tests need newer version -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.nlp</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
     </dependency>
     <dependency>
         <groupId>org.apache.stanbol</groupId>
@@ -127,13 +127,13 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.test</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.core</artifactId>
-      <version>0.12.0de.verlinked.bootstrap.server</version>
+      <version>0.12.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -165,13 +165,13 @@
         <dependency>
           <groupId>org.apache.stanbol</groupId>
           <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
-          <version>1.2.0de.verlinked.bootstrap.server</version>
+          <version>1.2.0</version>
           <scope>test</scope>
         </dependency>
         <dependency>
           <groupId>org.apache.stanbol</groupId>
           <artifactId>org.apache.stanbol.data.opennlp.ner.en</artifactId>
-          <version>1.2.0de.verlinked.bootstrap.server</version>
+          <version>1.2.0</version>
           <scope>test</scope>
         </dependency>
       </dependencies>

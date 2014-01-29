@@ -75,27 +75,27 @@
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.servicesapi</artifactId>
-			<version>0.12.0de.verlinked.bootstrap.server</version>
+			<version>0.12.0</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.core</artifactId>
-			<version>0.12.0de.verlinked.bootstrap.server</version>
+			<version>0.12.0</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.web</artifactId>
-			<version>0.12.0de.verlinked.bootstrap.server</version>
+			<version>0.12.0</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.jcr</artifactId>
-			<version>0.12.0de.verlinked.bootstrap.server</version>
+			<version>0.12.0</version>
 		</bundle>
 		<bundle>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.cmsadapter.cmis</artifactId>
-			<version>0.12.0de.verlinked.bootstrap.server</version>
+			<version>0.12.0</version>
 		</bundle>
 	</startLevel>
 </bundles>
