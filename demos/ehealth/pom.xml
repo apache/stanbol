@@ -16,13 +16,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>2-SNAPSHOT</version>
+    <version>2de.verlinked.bootstrap.server</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.demo.ehealth</artifactId>
-  <version>0.10.1-SNAPSHOT</version>
+  <version>0.10.1de.verlinked.bootstrap.server</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Demo: ehealth</name>

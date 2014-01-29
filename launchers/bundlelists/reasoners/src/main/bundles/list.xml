@@ -21,29 +21,29 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.reasoners.servicesapi</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>0.12.0de.verlinked.bootstrap.server</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.reasoners.manager</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>0.12.0de.verlinked.bootstrap.server</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.reasoners.jena</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>0.12.0de.verlinked.bootstrap.server</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.reasoners.owlapi</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>0.12.0de.verlinked.bootstrap.server</version>
     </bundle>
   </startLevel>
   <startLevel level="38">
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.reasoners.web</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>0.12.0de.verlinked.bootstrap.server</version>
     </bundle>
   </startLevel>
 </bundles>  

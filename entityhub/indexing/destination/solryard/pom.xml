@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-entityhub-indexing</artifactId>
-    <version>0.12.0-SNAPSHOT</version>
+    <version>0.12.0de.verlinked.bootstrap.server</version>
     <relativePath>../..</relativePath>
   </parent>
 
@@ -102,17 +102,17 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>0.12.0de.verlinked.bootstrap.server</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.indexing.core</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>0.12.0de.verlinked.bootstrap.server</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>0.12.0de.verlinked.bootstrap.server</version>
     </dependency>
     <!-- FST model generation -->
     <dependency>

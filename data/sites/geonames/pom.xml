@@ -22,7 +22,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.data.sites.geonames</artifactId>
-  <version>1.2.0-SNAPSHOT</version>
+  <version>1.2.0de.verlinked.bootstrap.server</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Data: geonames.org</name>

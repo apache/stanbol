@@ -23,7 +23,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.extras.paoding</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>0.12.0de.verlinked.bootstrap.server</version>
     </bundle>
   </startLevel>
   
@@ -35,7 +35,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.paoding.token</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>0.12.0de.verlinked.bootstrap.server</version>
     </bundle>
   </startLevel>
 
@@ -52,7 +52,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.paoding</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>0.12.0de.verlinked.bootstrap.server</version>
     </bundle>
   </startLevel>
   

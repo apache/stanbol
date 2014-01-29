@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines</artifactId>
-    <version>0.12.0-SNAPSHOT</version>
+    <version>0.12.0de.verlinked.bootstrap.server</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -109,7 +109,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.core</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>0.12.0de.verlinked.bootstrap.server</version>
     </dependency>  
   
     <dependency>
@@ -121,13 +121,13 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>0.12.0de.verlinked.bootstrap.server</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.entitylinking.engine</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>0.12.0de.verlinked.bootstrap.server</version>
     </dependency>
 
     <dependency>
@@ -153,26 +153,26 @@
      <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.core</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>0.12.0de.verlinked.bootstrap.server</version>
       <scope>test</scope>
     </dependency>
     <!-- the SolrYard with the dbpedia default dataset is used for testing -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>0.12.0de.verlinked.bootstrap.server</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
-      <version>1.2.0-SNAPSHOT</version>
+      <version>1.2.0de.verlinked.bootstrap.server</version>
       <scope>test</scope>
     </dependency>
     <dependency><!-- dbpedia default data do use ICU Tokenizer -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.extras.icu</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>0.12.0de.verlinked.bootstrap.server</version>
       <scope>test</scope>
     </dependency>
     <dependency> <!-- required to read the test data (merkel_nlp.json) -->

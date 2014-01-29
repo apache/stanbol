@@ -15,13 +15,13 @@
   <parent>
     <artifactId>stanbol-parent</artifactId>
     <groupId>org.apache.stanbol</groupId>
-    <version>4-SNAPSHOT</version>
+    <version>4de.verlinked.bootstrap.server</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.cmsadapter.parent</artifactId>
-  <version>0.12.0-SNAPSHOT</version>
+  <version>0.12.0de.verlinked.bootstrap.server</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol CMS Adapter Parent</name>

@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-bundlelists</artifactId>
-    <version>0.12.0-SNAPSHOT</version>
+    <version>0.12.0de.verlinked.bootstrap.server</version>
     <relativePath>..</relativePath>
   </parent>
     

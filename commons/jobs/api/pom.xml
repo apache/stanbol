@@ -22,12 +22,12 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>4-SNAPSHOT</version>
+    <version>4de.verlinked.bootstrap.server</version>
     <relativePath>../../../parent</relativePath>
   </parent>
 
   <artifactId>org.apache.stanbol.commons.jobs.api</artifactId>
-  <version>0.12.0-SNAPSHOT</version>
+  <version>0.12.0de.verlinked.bootstrap.server</version>
   <packaging>bundle</packaging>
   
   <name>Apache Stanbol Commons Jobs API</name>

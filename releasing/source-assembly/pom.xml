@@ -27,7 +27,7 @@
   
   <groupId>org.apache.stanbol</groupId>
   <artifactId>source-assembly</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.1de.verlinked.bootstrap.server</version>
   <packaging>jar</packaging>
   
   <name>Apache Stanbol Releasing Source Assembly Descriptor</name>

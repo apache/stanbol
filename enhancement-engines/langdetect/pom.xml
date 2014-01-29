@@ -17,7 +17,7 @@
 	<parent>
 		<groupId>org.apache.stanbol</groupId>
 		<artifactId>apache-stanbol-enhancement-engines</artifactId>
-		<version>0.12.0-SNAPSHOT</version>
+		<version>0.12.0de.verlinked.bootstrap.server</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -89,7 +89,7 @@
 		<dependency>  <!-- 0.10.0 also works, but tests need newer version -->
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-			<version>0.12.0-SNAPSHOT</version>
+			<version>0.12.0de.verlinked.bootstrap.server</version>
 		</dependency>
 
 		<dependency>
@@ -124,13 +124,13 @@
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.test</artifactId>
-			<version>0.12.0-SNAPSHOT</version>
+			<version>0.12.0de.verlinked.bootstrap.server</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.core</artifactId>
-			<version>0.12.0-SNAPSHOT</version>
+			<version>0.12.0de.verlinked.bootstrap.server</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
