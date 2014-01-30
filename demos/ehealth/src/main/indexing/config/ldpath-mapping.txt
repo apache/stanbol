@@ -1,1 +1,0 @@
-skos:prefLabel = .[rdf:type is diseasome:genes]/rdfs:label;

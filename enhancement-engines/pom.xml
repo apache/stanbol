@@ -51,8 +51,6 @@
     <module>tika</module>
     <module>htmlextractor</module>
     <module>xmpextractor</module>
-    <!-- TODO: reactivate as soon as mvn repo is back online -->
-    <!-- module>metaxa</module -->
     <module>refactor</module>
 
     <!-- NLP processing engines -->
@@ -63,7 +61,6 @@
 
     <!-- Chinese language support -->
     <module>smartcn-token</module> <!-- sentence detection and tokenizing -->
-    <module>paoding-token</module> <!-- tokenizing -->
     <module>nlp2rdf</module> <!-- converts AnalyzedText ContentPart to RDF -->
 
     <!-- Japanese NLP processing -->
