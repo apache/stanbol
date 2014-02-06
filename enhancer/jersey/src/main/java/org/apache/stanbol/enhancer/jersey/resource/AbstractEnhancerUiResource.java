@@ -116,7 +116,7 @@ public abstract class AbstractEnhancerUiResource extends AbstractEnhancerResourc
                                     @FormParam("ajax") boolean buildAjaxview, 
                                     @Context HttpHeaders headers) throws EnhancementException,
                                                                          IOException {
-        log.info("enhance from From: " + content);
+        log.debug("enhance from From: " + content);
         ContentItem ci = ciFactory.createContentItem(new StringSource(content));
         if(!buildAjaxview){ //rewrite to a normal EnhancementRequest
             return enhanceFromData(ci, false, null, false, null, false, null, headers);
