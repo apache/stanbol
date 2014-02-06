@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 
 import org.apache.clerezza.rdf.core.Language;
@@ -100,6 +101,8 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
     private Map<T,RDFBackend<Object>> rdfBackendCache = new IdentityHashMap<T,RDFBackend<Object>>();
 
     private final Class<T> serviceClass;
+
+	private ExecutorServiceProvider executorServiceProvider;
     /**
      * Creates a new instance for the parsed parameter
      * @param context the BundleContexed used to create the {@link ServiceTracker}
@@ -108,9 +111,11 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
      * @param filterEntries
      */
     protected TrackingDereferencerBase(BundleContext context, Class<T> serviceClass,
-            Map<String,String> filterEntries, ServiceTrackerCustomizer customizer){
+            Map<String,String> filterEntries, ServiceTrackerCustomizer customizer,
+            ExecutorServiceProvider executorServiceProvider){
         this.bundleContext = context;
         this.serviceClass = serviceClass;
+        this.executorServiceProvider = executorServiceProvider;
         //the fieldMapper allows to configure users fields that should be dereferenced
         if(filterEntries == null || filterEntries.isEmpty()){
             searchServiceTracker = new ServiceTracker(context, serviceClass.getName(), customizer);
@@ -268,6 +273,11 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
         } else {
             return (T) searchServiceTracker.getService();
         }
+    }
+    
+    @Override
+    public final ExecutorService getExecutor() {
+    	return executorServiceProvider == null ? null : executorServiceProvider.getExecutorService();
     }
     
     @Override
