@@ -31,24 +31,21 @@ import at.newmedialab.ldpath.api.backend.RDFBackend;
 public final class SitesDereferencer extends TrackingDereferencerBase<SiteManager> {
     
 //    private final Logger log = LoggerFactory.getLogger(SiteDereferencer.class);
-    
-    private final ExecutorService executorService;
 
-    public SitesDereferencer(BundleContext context, ExecutorService executorService){
-        this(context, null, executorService);
+    public SitesDereferencer(BundleContext context){
+        this(context, null, null);
     }
-    public SitesDereferencer(BundleContext context, ServiceTrackerCustomizer customizer, ExecutorService executorService) {
-        super(context, SiteManager.class, null, customizer);
-        this.executorService = executorService;
+    public SitesDereferencer(BundleContext context, ExecutorServiceProvider executorServiceProvider){
+        this(context, null, executorServiceProvider);
+    }
+    public SitesDereferencer(BundleContext context, ServiceTrackerCustomizer customizer, 
+    		ExecutorServiceProvider executorServiceprovider) {
+        super(context, SiteManager.class, null, customizer, executorServiceprovider);
     }
     
     @Override
     public boolean supportsOfflineMode() {
         return true; //can not be determined here .. return true
-    }
-    @Override
-    public ExecutorService getExecutor() {
-        return executorService;
     }
     
     @Override
