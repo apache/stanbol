@@ -72,7 +72,7 @@ public class EventJobManagerImpl implements EnhancementJobManager {
      * Logger for the {@link EnhancementJobManager} interface. This is used
      * to log statistics about execution times for enhancement jobs
      */
-    private final Logger enhancementJobManager = LoggerFactory.getLogger(EnhancementJobManager.class);
+    private final Logger enhancementJobManagerLog = LoggerFactory.getLogger(EnhancementJobManager.class);
     
     public static final int DEFAULT_SERVICE_RANKING = 0;
 
@@ -160,6 +160,7 @@ public class EventJobManagerImpl implements EnhancementJobManager {
                 "' because NULL was passed as enhancement chain");
         }
         long start = System.currentTimeMillis();
+        enhancementJobManagerLog.info(">> enhance {} with chain {}", ci.getUri(), chain.getName());
         boolean isDefaultChain = chain.equals(chainManager.getDefault());
         EnhancementJob job = new EnhancementJob(ci, chain.getName(), chain.getExecutionPlan(),isDefaultChain);
         //start the execution
@@ -190,7 +191,7 @@ public class EventJobManagerImpl implements EnhancementJobManager {
         //ci.getMetadata().addAll(job.getExecutionMetadata());
         if(job.isFailed()){
         	Exception e = job.getError();
-            EnhancementJobHandler.logJobInfo(enhancementJobManager, job, 
+            EnhancementJobHandler.logJobInfo(enhancementJobManagerLog, job, 
             		"-- log information about failed EnhancementJob --", true);
             logExecutionMetadata(job);
             log.warn("ExecutionMetadata: ");
@@ -212,7 +213,7 @@ public class EventJobManagerImpl implements EnhancementJobManager {
             		" (EnhancementJobManager type: "+getClass()+")");
         } else {
         	//log infos about the execution times to the enhancementJobManager
-        	EnhancementJobHandler.logExecutionTimes(enhancementJobManager, job);
+        	EnhancementJobHandler.logExecutionTimes(enhancementJobManagerLog, job);
         }
     }
 	/**
