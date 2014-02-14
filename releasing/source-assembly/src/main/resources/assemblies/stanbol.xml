@@ -30,21 +30,6 @@
         <include>*/**</include>
       </includes>
       <excludes>
-        <exclude>PLAYGROUND.txt</exclude>
-
-        <!-- Contrib stuff is never released -->
-        <exclude>contrib/**</exclude>
-
-        <!-- license issues -->
-        <exclude>enhancer/engines/metaxa/**</exclude>
-
-        <!-- demos have their own release cycle -->
-        <exclude>demos/**</exclude>
-
-        <!-- exclude components of KReS profile -->
-        <exclude>reengineering/**</exclude>
-        <exclude>launchers/kres/**</exclude>
-
         <!-- SCM files -->
         <exclude>.gitignore</exclude>
 
