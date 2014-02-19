@@ -43,10 +43,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/data/sentiment/sentiws
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/data/sentiment/sentiws
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/data/sentiment/sentiws
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/data/sentiment/sentiws
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>

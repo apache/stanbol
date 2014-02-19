@@ -33,10 +33,10 @@
   <description>SPARQL HTTP endpoint for Stanbol</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/web/sparql
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/commons/web/sparql
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/web/sparql
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/commons/web/sparql
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

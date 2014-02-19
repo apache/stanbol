@@ -33,10 +33,10 @@
   <description>Home page and common stylesheets for documenting HTTP endpoints.</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/web/home
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/commons/web/home
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/web/home
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/commons/web/home
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

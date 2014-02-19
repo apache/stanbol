@@ -40,10 +40,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancement-engines/entitycomention/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/enhancement-engines/entitycomention/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancement-engines/entitycomention/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/enhancement-engines/entitycomention/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
