@@ -210,7 +210,7 @@ public class ContentItemResource extends BaseStanbolResource {
                 engineExecutions = null;
             }
         }
-        log.info(" ... {}ms fro parsing Enhancement Reuslts",System.currentTimeMillis()-start);
+        log.info(" ... {}ms for parsing Enhancement Results", System.currentTimeMillis()-start);
     }
 
     public String getRdfMetadata(String mediatype) throws UnsupportedEncodingException {

@@ -44,10 +44,10 @@
   
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/entityhub/site/managed
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/entityhub/site/managed
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/entityhub/site/managed
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/entityhub/site/managed
     </developerConnection>
     <url>http://stanbol.apache.org</url>
   </scm>

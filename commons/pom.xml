@@ -47,10 +47,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/commons
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/commons
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
@@ -92,6 +92,7 @@
     <module>solr/install</module>
     <module>solr/defaults</module>
     <module>solr/extras/smartcn</module> <!-- support for the smartcn (Chinese) analyzer -->
+    <module>solr/extras/paoding</module> <!-- alternative support for Chinese -->
     <module>solr/extras/kuromoji</module> <!-- support for Japanese -->
     <module>solr/extras/icu</module> <!-- support for ICU -->
     <module>solr/extras/stempel</module> <!-- support for the Polish stemmer -->

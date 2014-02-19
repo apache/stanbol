@@ -1,0 +1,12 @@
+<!ENTITY title "Apache Stanbol SAP Settings">
+<!ENTITY cancel "Cancel">
+<!ENTITY service "Service">
+<!ENTITY server "Server">
+<!ENTITY automatic "Automatic">
+<!ENTITY service_automatic "Automatically analyze any webpage">
+<!ENTITY organization "Organization">
+<!ENTITY money "Money">
+<!ENTITY revenue "Statements on revenue">
+<!ENTITY time "Time">
+<!ENTITY highlight "Highlight">
+<!ENTITY market "Market">

@@ -16,8 +16,6 @@
 */
 package org.apache.stanbol.enhancer.engines.dereference.entityhub;
 
-import java.util.concurrent.ExecutorService;
-
 import org.apache.stanbol.enhancer.engines.dereference.EntityDereferencer;
 import org.apache.stanbol.entityhub.ldpath.backend.EntityhubBackend;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
@@ -36,14 +34,15 @@ import at.newmedialab.ldpath.api.backend.RDFBackend;
  */
 public final class EntityhubDereferencer extends TrackingDereferencerBase<Entityhub> implements EntityDereferencer {
     
-    private final ExecutorService executorService;
     
-    public EntityhubDereferencer(BundleContext context, ExecutorService executorService) {
-        this(context,null,executorService);
+    public EntityhubDereferencer(BundleContext context) {
+        this(context,null,null);
     }
-    public EntityhubDereferencer(BundleContext context, ServiceTrackerCustomizer customizer, ExecutorService executorService) {
-        super(context,Entityhub.class,null,customizer);
-        this.executorService = executorService;
+    public EntityhubDereferencer(BundleContext context, ExecutorServiceProvider executorServiceProvider) {
+        this(context,null,executorServiceProvider);
+    }
+    public EntityhubDereferencer(BundleContext context, ServiceTrackerCustomizer customizer, ExecutorServiceProvider executorServiceProvider) {
+        super(context,Entityhub.class,null,customizer, executorServiceProvider);
     }
     
     @Override
@@ -55,10 +54,6 @@ public final class EntityhubDereferencer extends TrackingDereferencerBase<Entity
     @Override
     public boolean supportsOfflineMode() {
         return true; //the entityhub is always offline
-    }
-    @Override
-    public ExecutorService getExecutor() {
-        return executorService;
     }
     
     @Override

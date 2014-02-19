@@ -1,0 +1,2 @@
+This is a Demo which demonstrates a usage example of the <b>/engines</b>, <b>/entityhub</b>, <b>/ontonet</b>, <b>/rules</b> and <b>/reasoners</b> REST services for checking the integrity of RDF data with respect to some requirements.
+<#macro view>This is a Demo which demonstrates a usage example of the <b>/engines</b>, <b>/entityhub</b>, <b>/ontonet</b>, <b>/rules</b> and <b>/reasoners</b> REST services for checking the integrity of remote data with respect to some requirements.</#macro>

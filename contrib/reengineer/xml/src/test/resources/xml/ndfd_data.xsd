@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<!--   **********************************************************************   
+                                                                           
+       ndfd_data.xsd   
+
+       John L. Schattel          MDL                4 August 2004  
+       Red Hat Linux                                Apache Server  
+
+    <xsd:include schemaLocation="http://graphical.weather.gov/xml/DWMLgen/schema/location.xsd" />
+    <xsd:include schemaLocation="http://graphical.weather.gov/xml/DWMLgen/schema/moreWeatherInformation.xsd" />
+    <xsd:include schemaLocation="http://graphical.weather.gov/xml/DWMLgen/schema/time_layout.xsd" />
+    <xsd:include schemaLocation="http://graphical.weather.gov/xml/DWMLgen/schema/parameters.xsd" />
+
+      *************************************************************************   -->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <xsd:include schemaLocation="http://graphical.weather.gov/xml/DWMLgen/schema/location.xsd" />
+    <xsd:include schemaLocation="http://graphical.weather.gov/xml/DWMLgen/schema/moreWeatherInformation.xsd" />
+    <xsd:include schemaLocation="http://graphical.weather.gov/xml/DWMLgen/schema/time_layout.xsd" />
+    <xsd:include schemaLocation="http://graphical.weather.gov/xml/DWMLgen/schema/parameters.xsd" />
+
+    <xsd:complexType name="dataType">
+        <xsd:sequence>           
+            <xsd:element name="location" type="locationType" minOccurs="1" maxOccurs="unbounded" />
+            <xsd:element name="moreWeatherInformation" type="moreWeatherInformationType" minOccurs="1" maxOccurs="unbounded" />
+            <xsd:element name="time-layout" type="time-layoutElementType" minOccurs="1" maxOccurs="unbounded" />
+            <xsd:element name="parameters" type="parametersType" minOccurs="1" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>          
+          
+</xsd:schema>

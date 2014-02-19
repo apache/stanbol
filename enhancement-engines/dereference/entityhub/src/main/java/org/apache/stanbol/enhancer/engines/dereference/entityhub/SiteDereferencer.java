@@ -35,17 +35,18 @@ public final class SiteDereferencer extends TrackingDereferencerBase<Site> {
 //    private final Logger log = LoggerFactory.getLogger(SiteDereferencer.class);
     
     private final String siteId;
-    private final ExecutorService executorService;
 
-    public SiteDereferencer(BundleContext context, String siteId, ExecutorService executorService){
-        this(context,siteId, null, executorService);
+    public SiteDereferencer(BundleContext context, String siteId){
+        this(context,siteId, null, null);
     }
-    public SiteDereferencer(BundleContext context, String siteId, ServiceTrackerCustomizer customizer, ExecutorService executorService) {
+    public SiteDereferencer(BundleContext context, String siteId, ExecutorServiceProvider executorServiceProvider){
+        this(context,siteId, null, executorServiceProvider);
+    }
+    public SiteDereferencer(BundleContext context, String siteId, ServiceTrackerCustomizer customizer, ExecutorServiceProvider executorServiceProvider) {
         super(context, Site.class, 
             Collections.singletonMap(SiteConfiguration.ID,siteId),
-            customizer);
+            customizer, executorServiceProvider);
         this.siteId = siteId;
-        this.executorService = executorService;
     }
     
     @Override
@@ -53,10 +54,6 @@ public final class SiteDereferencer extends TrackingDereferencerBase<Site> {
         Site site = getService();
         //Do not throw an exception here if the site is not available. Just return false
         return site == null ? false : site.supportsLocalMode();
-    }
-    @Override
-    public ExecutorService getExecutor() {
-        return executorService;
     }
     
     @Override

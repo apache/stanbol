@@ -35,10 +35,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/enhancement-engines/zemanta/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancement-engines/zemanta/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/enhancement-engines/zemanta/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancement-engines/zemanta/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

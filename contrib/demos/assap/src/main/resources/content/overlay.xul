@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="chrome://assap/skin/overlay.css" type="text/css"?>
+<!DOCTYPE overlay SYSTEM "chrome://assap/locale/assap.dtd">
+<overlay id="assap-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script src="chrome://assap/content/json2.js" />
+  <script src="chrome://assap/content/functions.js" />
+  <script src="chrome://assap/content/overlay.js" />
+  <stringbundleset id="assap-stringbundleset">
+    <stringbundle id="assap-strings" src="chrome://assap/locale/assap.properties" />
+  </stringbundleset>
+  <statusbar id="status-bar">
+     <statusbarpanel id="assap-statusbarpanel" src="chrome://assap/skin/statusbar.png" tooltip="assap-tooltip" class="statusbarpanel-menu-iconic" label="Apache Stanbol Semantic Annotation Plugin">
+     <menupopup position="before_end">
+       <menuitem id="" label="Run Analysis" class="menuitem-iconic" src="chrome://assap/skin/lightning.png" tooltiptext="Analyse Content" oncommand="assap.onManualAnalyse();" />
+	     <menuseparator/>
+       <menuitem id="" label="Settings" class="menuitem-iconic" src="chrome://assap/skin/wrench.png" tooltiptext="Configure the Plugin" oncommand="window.openDialog('chrome://assap/content/settings.xul', '', 'centerscreen,chrome,resizable=no,dependent=yes')" /> 
+       <menuseparator/>
+       <menuitem id="" label="About" class="menuitem-iconic" src="chrome://assap/skin/information.png" tooltiptext="About this Plugin" oncommand="window.openDialog('chrome://assap/content/about.xul', '', 'centerscreen,chrome,resizable=no,dependent=yes')" />
+     </menupopup>
+     </statusbarpanel>
+     <tooltip id="assap-tooltip" onpopupshowing="">
+       <hbox>
+       <image src="chrome://assap/skin/layout_content.png" /> <label value="Semantic Annotation Plugin"/>
+       </hbox>
+     </tooltip>
+  </statusbar>
+</overlay>

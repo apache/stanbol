@@ -1260,13 +1260,13 @@ public class EntityLinker {
      * @param log the logger used to log the statistics
      */
     public void logStatistics(Logger log){
-        log.info("EntityLinking Statistics:");
+        log.debug("EntityLinking Statistics:");
         double textProcessingDuration = textProcessingStats.getDuration();
         double lookupDuration = lookupStats.getDuration();
         double matchingDuration = matchingStats.getDuration();
         double rankingDuration = rankingStats.getDuration();
         double other = processingTime-textProcessingDuration-lookupDuration-matchingDuration;
-        log.info("    - overal: {}ms (text processing: {}%, lookup: {}%, matching {}%, ranking {}%, other {}%)", new Object[]{
+        log.debug("    - overal: {}ms (text processing: {}%, lookup: {}%, matching {}%, ranking {}%, other {}%)", new Object[]{
                 processingTime, 
                 Math.round(textProcessingDuration*100/(double)processingTime),
                 Math.round(lookupDuration*100/(double)processingTime),
@@ -1278,8 +1278,8 @@ public class EntityLinker {
         lookupStats.printStatistics(log);
         float cacheHitPercentage = lookupStats.count > 0 ? //avoid division by zero
                 cacheHits*100f/(float)lookupStats.count : Float.NaN;
-        log.info("    - cache hits: {} ({}%)",cacheHits,cacheHitPercentage);
-        log.info("      - {} query results ({} filtered - {}%)",
+        log.debug("    - cache hits: {} ({}%)",cacheHits,cacheHitPercentage);
+        log.debug("      - {} query results ({} filtered - {}%)",
             new Object[]{numQueryResults,numFilteredResults, 
                 numFilteredResults*100f/(float)numQueryResults});
         matchingStats.printStatistics(log);

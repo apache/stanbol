@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+	
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+  <Description about="urn:mozilla:install-manifest">
+	  <em:id>fchrist@apache.org</em:id>
+	  <em:version>0.1</em:version>
+	
+    <em:targetApplication>
+	    <Description>
+	      <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+	      <em:minVersion>3.0</em:minVersion>
+	      <em:maxVersion>8.*</em:maxVersion>
+	    </Description>
+    </em:targetApplication>
+	
+	  <em:name>Apache Stanbol Semantic Bookmarks</em:name>
+	  <em:description>Apache Stanbol Semantic Bookmarks Demo Plugin</em:description>
+	  <em:creator>Apache Stanbol Incubating Project</em:creator>
+	  <em:contributor>Fabian Christ</em:contributor>
+	  <em:homepageURL>http://incubator.apache.org/stanbol/</em:homepageURL>
+	  <em:updateURL>https://incubator.apache.org/stanbol/semanticbookmarks/semanticbookmarks-update.rdf</em:updateURL>
+	  <em:aboutURL>chrome://semanticbookmarks/content/about.xul</em:aboutURL>
+	  <em:optionsURL>chrome://semanticbookmarks/content/settings.xul</em:optionsURL>
+  </Description>
+
+</RDF>
+

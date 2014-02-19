@@ -38,10 +38,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/enhancement-engines
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancement-engines
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/enhancement-engines
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancement-engines
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
@@ -51,6 +51,8 @@
     <module>tika</module>
     <module>htmlextractor</module>
     <module>xmpextractor</module>
+    <!-- TODO: reactivate as soon as mvn repo is back online -->
+    <!-- module>metaxa</module -->
     <module>refactor</module>
 
     <!-- NLP processing engines -->
@@ -61,6 +63,7 @@
 
     <!-- Chinese language support -->
     <module>smartcn-token</module> <!-- sentence detection and tokenizing -->
+    <module>paoding-token</module> <!-- tokenizing -->
     <module>nlp2rdf</module> <!-- converts AnalyzedText ContentPart to RDF -->
 
     <!-- Japanese NLP processing -->

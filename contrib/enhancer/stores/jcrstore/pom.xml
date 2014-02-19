@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.enhancer.parent</artifactId>
+    <version>0.10.0-SNAPSHOT</version>
+    <relativePath>../../parent</relativePath>
+  </parent>
+
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.enhancer.stores.jcrstore</artifactId>
+  <packaging>bundle</packaging>
+  <name>Apache Stanbol Enhancer JCR Store</name>
+  <description>Implementation of the Stanbol Enhancer Store API that uses JCR
+  </description>
+  <inceptionYear>2010</inceptionYear>
+
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancer/stores/jcrstore
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/enhancer/stores/jcrstore
+    </developerConnection>
+    <url>http://stanbol.apache.org/</url>
+  </scm>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>org.apache.stanbol.enhancer.store.*;version=${project.version}</Export-Package>
+            <Import-Package>*</Import-Package>
+            <!-- Embed-Dependency>
+               jcr, org.apache.sling.jcr.jackrabbit.server, org.apache.sling.jcr.api, org.apache.sling.jcr.base,
+ org.apache.sling.api, jackrabbit-api, jackrabbit-jcr-commons, jackrabbit-jcr-rmi, jackrabbit-core,
+ jackrabbit-spi-commons, jackrabbit-spi, tika-bundle, xalan, lucene-core, xerces-impl,
+ concurrent, bcel, xml-resolver, commons-dbcp, commons-pool
+           </Embed-Dependency -->
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <!--
+          Use this profile to install the OSGi bundle
+          automatically, during development
+      -->
+      <id>autoInstallBundle</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>maven-sling-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>install-bundle</id>
+                <goals>
+                  <goal>install</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+      <version>1.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.core</artifactId>
+      <version>0.12-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.simple.storage</artifactId>
+      <version>0.7-SNAPSHOT</version>
+    </dependency>
+
+    <!-- repository dependencies -->
+
+    <dependency>
+      <groupId>javax.jcr</groupId>
+      <artifactId>jcr</artifactId>
+      <version>2.0</version>
+    </dependency>
+    <!-- dependency>
+         <groupId>org.apache.sling</groupId>
+         <artifactId>org.apache.sling.jcr.jackrabbit.server</artifactId>
+         <version>2.0.6</version>
+     </dependency>
+     <dependency>
+         <groupId>org.apache.sling</groupId>
+         <artifactId>org.apache.sling.jcr.api</artifactId>
+         <version>2.0.6</version>
+     </dependency>
+     <dependency>
+         <groupId>org.apache.sling</groupId>
+         <artifactId>org.apache.sling.jcr.base</artifactId>
+         <version>2.0.6</version>
+     </dependency>
+     <dependency>
+         <groupId>org.apache.sling</groupId>
+         <artifactId>org.apache.sling.api</artifactId>
+         <version>2.0.6</version>
+     </dependency>
+     <dependency>
+         <groupId>org.apache.jackrabbit</groupId>
+         <artifactId>jackrabbit-api</artifactId>
+         <version>2.0.0</version>
+     </dependency>
+     <dependency>
+         <groupId>org.apache.jackrabbit</groupId>
+         <artifactId>jackrabbit-jcr-commons</artifactId>
+         <version>2.0.0</version>
+     </dependency>
+     <dependency>
+         <groupId>org.apache.jackrabbit</groupId>
+         <artifactId>jackrabbit-jcr-rmi</artifactId>
+         <version>2.0.0</version>
+     </dependency>
+     <dependency>
+         <groupId>org.apache.jackrabbit</groupId>
+         <artifactId>jackrabbit-spi-commons</artifactId>
+         <version>2.0.0</version>
+     </dependency>
+     <dependency>
+         <groupId>org.apache.jackrabbit</groupId>
+         <artifactId>jackrabbit-spi</artifactId>
+         <version>2.0.0</version>
+     </dependency>
+     <dependency>
+         <groupId>org.apache.jackrabbit</groupId>
+         <artifactId>jackrabbit-core</artifactId>
+         <version>2.0.0</version>
+     </dependency>
+     <dependency>
+         <groupId>org.apache.tika</groupId>
+         <artifactId>tika-bundle</artifactId>
+         <version>0.7</version>
+     </dependency>
+     <dependency>
+         <groupId>org.apache.derby</groupId>
+         <artifactId>derby</artifactId>
+         <version>10.6.1.0</version>
+     </dependency>
+     <dependency>
+         <groupId>xalan</groupId>
+         <artifactId>xalan</artifactId>
+         <version>2.7.0</version>
+     </dependency>
+     <dependency>
+         <groupId>org.apache.lucene</groupId>
+         <artifactId>lucene-core</artifactId>
+         <version>3.0.1</version>
+     </dependency>
+     <dependency>
+         <groupId>org.bluestemsoftware.open.maven.tparty</groupId>
+         <artifactId>xerces-impl</artifactId>
+         <version>2.9.0</version>
+     </dependency>
+      <dependency>
+         <groupId>oswego-concurrent</groupId>
+         <artifactId>concurrent</artifactId>
+         <version>1.3.4</version>
+     </dependency>
+     <dependency>
+         <groupId>org.apache.bcel</groupId>
+         <artifactId>bcel</artifactId>
+         <version>5.2</version>
+     </dependency>
+     <dependency>
+         <groupId>xml-resolver</groupId>
+         <artifactId>xml-resolver</artifactId>
+         <version>1.2</version>
+     </dependency>
+     <dependency>
+         <groupId>commons-dbcp</groupId>
+         <artifactId>commons-dbcp</artifactId>
+         <version>1.2.2</version>
+     </dependency>
+     <dependency>
+         <groupId>commons-pool</groupId>
+         <artifactId>commons-pool</artifactId>
+         <version>1.5.4</version>
+     </dependency-->
+
+
+  </dependencies>
+
+  <!-- repositories>
+  <repository>
+      <id>jboss</id>
+      <url>http://repository.jboss.com/maven2/</url>
+      <releases>
+          <enabled>true</enabled>
+      </releases>
+      <snapshots>
+          <enabled>false</enabled>
+      </snapshots>
+  </repository>
+  </repositories -->
+
+</project>

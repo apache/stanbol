@@ -1,0 +1,724 @@
+Prefix: tbox: <http://swrl.stanford.edu/ontologies/built-ins/3.3/tbox.owl#>
+Prefix: query: <http://swrl.stanford.edu/ontologies/built-ins/3.3/query.owl#>
+Prefix: xml: <http://www.w3.org/XML/1998/namespace>
+Prefix: rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+Prefix: swrl: <http://www.w3.org/2003/11/swrl#>
+Prefix: swlrx: <http://swrl.stanford.edu/ontologies/built-ins/3.3/swrlx.owl#>
+Prefix: swrla: <http://swrl.stanford.edu/ontologies/3.3/swrla.owl#>
+Prefix: xsd: <http://www.w3.org/2001/XMLSchema#>
+Prefix: swrlb: <http://www.w3.org/2003/11/swrlb#>
+Prefix: owl: <http://www.w3.org/2002/07/owl#>
+Prefix: abox: <http://swrl.stanford.edu/ontologies/built-ins/3.3/abox.owl#>
+Prefix: temporal: <http://swrl.stanford.edu/ontologies/built-ins/3.3/temporal.owl#>
+Prefix: : <http://a.com/ontology#>
+Prefix: rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+
+
+Ontology: <http://a.com/ontology>
+
+Import: <http://www.w3.org/2003/11/swrl>
+Import: <http://swrl.stanford.edu/ontologies/3.3/swrla.owl>
+Import: <http://swrl.stanford.edu/ontologies/built-ins/3.3/abox.owl>
+Import: <http://swrl.stanford.edu/ontologies/built-ins/3.3/tbox.owl>
+Import: <http://www.w3.org/2003/11/swrlb>
+Import: <http://swrl.stanford.edu/ontologies/built-ins/3.3/temporal.owl>
+Import: <http://swrl.stanford.edu/ontologies/built-ins/3.3/query.owl>
+Import: <http://swrl.stanford.edu/ontologies/built-ins/3.3/swrlx.owl>
+
+AnnotationProperty: swrla:isRuleEnabled
+
+    
+AnnotationProperty: swrl:propertyPredicate
+
+    
+AnnotationProperty: swrl:argument1
+
+    
+Datatype: xsd:boolean
+
+    
+ObjectProperty: hasDaughter
+
+    SubPropertyOf: 
+        hasChild
+    
+    Domain: 
+        Person
+    
+    Range: 
+        Woman
+    
+    Rule: 
+        Person(?<http://a.com/ontology#x>), Woman(?<http://a.com/ontology#y>), hasChild(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>) -> hasDaughter(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>)
+    
+    
+ObjectProperty: hasFather
+
+    SubPropertyOf: 
+        hasParent
+    
+    Characteristics: 
+        Functional
+    
+    Domain: 
+        Person
+    
+    Range: 
+        Man
+    
+    Rule: 
+        Man(?<http://a.com/ontology#y>), Person(?<http://a.com/ontology#x>), hasParent(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>) -> hasFather(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>)
+    
+    
+ObjectProperty: hasUncle
+
+    Domain: 
+        Person
+    
+    Range: 
+        Man
+    
+    Rule: 
+        Person(?<http://a.com/ontology#x>), hasBrother(?<http://a.com/ontology#y>, ?<http://a.com/ontology#z>), hasParent(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>) -> hasUncle(?<http://a.com/ontology#x>, ?<http://a.com/ontology#z>)
+    
+    
+ObjectProperty: hasConsort
+
+    Characteristics: 
+        Symmetric,
+        Functional
+    
+    Domain: 
+        Person
+    
+    Range: 
+        Person
+    
+    
+ObjectProperty: hasNiece
+
+    Domain: 
+        Person
+    
+    Range: 
+        Woman
+    
+    Rule: 
+        Person(?<http://a.com/ontology#x>), hasDaughter(?<http://a.com/ontology#y>, ?<http://a.com/ontology#z>), hasSibling(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>) -> hasNiece(?<http://a.com/ontology#x>, ?<http://a.com/ontology#z>)
+    
+    
+ObjectProperty: hasBrother
+
+    SubPropertyOf: 
+        hasSibling
+    
+    Domain: 
+        Person
+    
+    Range: 
+        Man
+    
+    Rule: 
+        Man(?<http://a.com/ontology#y>), Person(?<http://a.com/ontology#x>), hasSibling(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>) -> hasBrother(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>)
+    
+    
+ObjectProperty: hasAunt
+
+    Domain: 
+        Person
+    
+    Range: 
+        Woman
+    
+    Rule: 
+        Person(?<http://a.com/ontology#x>), hasParent(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>), hasSister(?<http://a.com/ontology#y>, ?<http://a.com/ontology#z>) -> hasAunt(?<http://a.com/ontology#x>, ?<http://a.com/ontology#z>)
+    
+    
+ObjectProperty: hasMother
+
+    SubPropertyOf: 
+        hasParent
+    
+    Characteristics: 
+        Functional
+    
+    Domain: 
+        Person
+    
+    Range: 
+        Woman
+    
+    Rule: 
+        Person(?<http://a.com/ontology#x>), Woman(?<http://a.com/ontology#y>), hasParent(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>) -> hasMother(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>)
+    
+    
+ObjectProperty: hasNephew
+
+    Domain: 
+        Person
+    
+    Range: 
+        Man
+    
+    Rule: 
+        Person(?<http://a.com/ontology#x>), hasSibling(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>), hasSon(?<http://a.com/ontology#y>, ?<http://a.com/ontology#z>) -> hasNephew(?<http://a.com/ontology#x>, ?<http://a.com/ontology#z>)
+    
+    
+ObjectProperty: swrl:argument2
+
+    
+ObjectProperty: hasSon
+
+    SubPropertyOf: 
+        hasChild
+    
+    Domain: 
+        Person
+    
+    Range: 
+        Man
+    
+    Rule: 
+        Man(?<http://a.com/ontology#y>), Person(?<http://a.com/ontology#x>), hasChild(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>) -> hasSon(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>)
+    
+    
+ObjectProperty: hasSibling
+
+    Characteristics: 
+        Symmetric
+    
+    Domain: 
+        Person
+    
+    Range: 
+        Person
+    
+    Rule: 
+        Person(?<http://a.com/ontology#y>), hasChild(?<http://a.com/ontology#y>, ?<http://a.com/ontology#x>), hasChild(?<http://a.com/ontology#y>, ?<http://a.com/ontology#z>),  DifferentFrom (?<http://a.com/ontology#x>, ?<http://a.com/ontology#z>) -> hasSibling(?<http://a.com/ontology#x>, ?<http://a.com/ontology#z>)
+    
+    
+ObjectProperty: hasParent
+
+    Domain: 
+        Person
+    
+    Range: 
+        Person
+    
+    InverseOf: 
+        hasChild
+    
+    Rule: 
+        Person(?<http://a.com/ontology#y>), hasConsort(?<http://a.com/ontology#y>, ?<http://a.com/ontology#z>), hasParent(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>) -> hasParent(?<http://a.com/ontology#x>, ?<http://a.com/ontology#z>)
+    
+    
+ObjectProperty: hasSister
+
+    SubPropertyOf: 
+        hasSibling
+    
+    Domain: 
+        Person
+    
+    Range: 
+        Woman
+    
+    Rule: 
+        Person(?<http://a.com/ontology#x>), Woman(?<http://a.com/ontology#y>), hasSibling(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>) -> hasSister(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>)
+    
+    
+ObjectProperty: hasChild
+
+    Domain: 
+        Person
+    
+    Range: 
+        Person
+    
+    InverseOf: 
+        hasParent
+    
+    
+ObjectProperty: hasSex
+
+    Characteristics: 
+        Functional
+    
+    Domain: 
+        Person
+    
+    Range: 
+        Gender
+    
+    
+Class: owl:Thing
+
+    
+Class: Aunt
+
+    EquivalentTo: 
+        Woman
+         and ((hasNephew min 1 owl:Thing)
+         or (hasNiece min 1 owl:Thing))
+    
+    SubClassOf: 
+        Relative
+    
+    DisjointWith: 
+        Uncle
+    
+    
+Class: Nephew
+
+    EquivalentTo: 
+        Man
+         and ((hasAunt min 1 owl:Thing)
+         or (hasUncle min 1 owl:Thing))
+    
+    SubClassOf: 
+        hasSex value Male,
+        Relative
+    
+    DisjointWith: 
+        Niece
+    
+    
+Class: Uncle
+
+    EquivalentTo: 
+        Man
+         and ((hasNephew min 1 owl:Thing)
+         or (hasNiece min 1 owl:Thing))
+    
+    SubClassOf: 
+        hasSex value Male,
+        Relative
+    
+    DisjointWith: 
+        Aunt
+    
+    
+Class: Sister
+
+    EquivalentTo: 
+        Sibling
+         and Woman
+    
+    DisjointWith: 
+        Brother
+    
+    
+Class: Woman
+
+    EquivalentTo: 
+        Person
+         and (hasSex value Female)
+    
+    
+Class: Father
+
+    EquivalentTo: 
+        Man
+         and Parent
+    
+    
+Class: Niece
+
+    EquivalentTo: 
+        Woman
+         and ((hasAunt min 1 owl:Thing)
+         or (hasUncle min 1 owl:Thing))
+    
+    SubClassOf: 
+        hasSex value Female,
+        Relative
+    
+    DisjointWith: 
+        Nephew
+    
+    
+Class: Child
+
+    EquivalentTo: 
+        Person
+         and (hasParent min 1 owl:Thing)
+    
+    
+Class: Mother
+
+    EquivalentTo: 
+        Parent
+         and Woman
+    
+    
+Class: Person
+
+    EquivalentTo: 
+        Man
+         or Woman
+    
+    
+Class: Daugther
+
+    EquivalentTo: 
+        Child
+         and Woman
+    
+    DisjointWith: 
+        Son
+    
+    
+Class: Sibling
+
+    EquivalentTo: 
+        Person
+         and (hasSibling min 1 owl:Thing)
+    
+    
+Class: Brother
+
+    EquivalentTo: 
+        Man
+         and Sibling
+    
+    DisjointWith: 
+        Sister
+    
+    
+Class: Man
+
+    EquivalentTo: 
+        Person
+         and (hasSex value Male)
+    
+    
+Class: Parent
+
+    EquivalentTo: 
+        Person
+         and (hasChild min 1 owl:Thing)
+    
+    
+Class: Relative
+
+    EquivalentTo: 
+        Aunt
+         or Child
+         or Nephew
+         or Niece
+         or Parent
+         or Sibling
+         or Uncle
+    
+    SubClassOf: 
+        Person
+    
+    
+Class: Son
+
+    EquivalentTo: 
+        Child
+         and Man
+    
+    DisjointWith: 
+        Daugther
+    
+    
+Class: Gender
+
+    EquivalentTo: 
+        {Female , Male}
+    
+    
+Individual: M10
+
+    Types: 
+        Man
+    
+    Facts:  
+     hasMother  F06,
+     hasParent  M08,
+     hasSex  Male
+    
+    
+Individual: z
+
+    
+Individual: F10
+
+    Types: 
+        Woman
+    
+    Facts:  
+     hasSex  Female,
+     hasChild  M09
+    
+    
+Individual: M05
+
+    Types: 
+        Man
+    
+    Facts:  
+     hasSex  Male,
+     hasParent  M02,
+     hasParent  F04
+    
+    
+Individual: M06
+
+    Types: 
+        Man
+    
+    Facts:  
+     hasParent  M04,
+     hasParent  F03,
+     hasConsort  F10,
+     hasChild  M09,
+     hasSex  Male
+    
+    
+Individual: M07
+
+    Types: 
+        Man
+    
+    Facts:  
+     hasChild  M04,
+     hasConsort  F07,
+     hasSex  Male
+    
+    
+Individual: M08
+
+    Types: 
+        Man
+    
+    Facts:  
+     hasSex  Male,
+     hasConsort  F06,
+     hasChild  M10
+    
+    
+Individual: Male
+
+    Types: 
+        Gender
+    
+    
+Individual: M01
+
+    Types: 
+        Man
+    
+    Facts:  
+     hasSex  Male,
+     hasChild  F03,
+     hasChild  M02,
+     hasConsort  F01,
+     hasChild  F02
+    
+    
+Individual: M02
+
+    Types: 
+        Man
+    
+    Facts:  
+     hasChild  F05,
+     hasParent  M01,
+     hasMother  F01,
+     hasConsort  F04,
+     hasChild  M03,
+     hasSex  Male,
+     hasChild  M05
+    
+    
+Individual: M03
+
+    Types: 
+        Man
+    
+    Facts:  
+     hasMother  F04,
+     hasChild  F09,
+     hasSex  Male,
+     hasConsort  F08,
+     hasParent  M02
+    
+    
+Individual: M04
+
+    Types: 
+        Man
+    
+    Facts:  
+     hasSex  Male,
+     hasParent  M07,
+     hasMother  F07,
+     hasChild  M06,
+     hasConsort  F03,
+     hasChild  F06
+    
+    
+Individual: F08
+
+    Types: 
+        Woman
+    
+    Facts:  
+     hasSex  Female,
+     hasChild  F09
+    
+    
+Individual: M09
+
+    Types: 
+        Man
+    
+    Facts:  
+     hasSex  Male,
+     hasParent  M06,
+     hasParent  F10
+    
+    
+Individual: F09
+
+    Types: 
+        Woman
+    
+    Facts:  
+     hasParent  M03,
+     hasParent  F08,
+     hasSex  Female
+    
+    
+Individual: F04
+
+    Types: 
+        Woman
+    
+    Facts:  
+     hasSex  Female,
+     hasChild  F05,
+     hasChild  M05
+    
+    
+Individual: F05
+
+    Types: 
+        Woman
+    
+    Facts:  
+     hasSex  Female,
+     hasParent  F04,
+     hasParent  M02
+    
+    
+Individual: F06
+
+    Types: 
+        Woman
+    
+    Facts:  
+     hasSex  Female,
+     hasParent  F03,
+     hasParent  M04
+    
+    
+Individual: F07
+
+    Types: 
+        Woman
+    
+    Facts:  
+     hasSex  Female
+    
+    
+Individual: F01
+
+    Types: 
+        Woman
+    
+    Facts:  
+     hasSex  Female,
+     hasChild  F03
+    
+    
+Individual: Female
+
+    Types: 
+        Gender
+    
+    
+Individual: F02
+
+    Types: 
+        Woman
+    
+    Facts:  
+     hasSex  Female,
+     hasMother  F01,
+     hasParent  M01
+    
+    
+Individual: F03
+
+    Types: 
+        Woman
+    
+    Facts:  
+     hasChild  M06,
+     hasParent  M01,
+     hasSex  Female,
+     hasParent  F01,
+     hasChild  F06
+    
+    
+Individual: _:http://a.com/ontology#genid162
+
+    Annotations: 
+        swrl:argument1 <http://a.com/ontology#y>,
+        swrl:propertyPredicate <http://a.com/ontology#hasSister>
+    
+    Facts:  
+     swrl:argument2  z
+    
+    
+Rule: 
+    Man(?<http://a.com/ontology#y>), Person(?<http://a.com/ontology#x>), hasChild(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>) -> hasSon(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>)
+
+Rule: 
+    Man(?<http://a.com/ontology#y>), Person(?<http://a.com/ontology#x>), hasSibling(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>) -> hasBrother(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>)
+
+Rule: 
+    Person(?<http://a.com/ontology#x>), hasParent(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>), hasSister(?<http://a.com/ontology#y>, ?<http://a.com/ontology#z>) -> hasAunt(?<http://a.com/ontology#x>, ?<http://a.com/ontology#z>)
+
+Rule: 
+    Person(?<http://a.com/ontology#x>), Woman(?<http://a.com/ontology#y>), hasSibling(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>) -> hasSister(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>)
+
+Rule: 
+    Person(?<http://a.com/ontology#y>), hasConsort(?<http://a.com/ontology#y>, ?<http://a.com/ontology#z>), hasParent(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>) -> hasParent(?<http://a.com/ontology#x>, ?<http://a.com/ontology#z>)
+
+Rule: 
+    Person(?<http://a.com/ontology#y>), hasChild(?<http://a.com/ontology#y>, ?<http://a.com/ontology#x>), hasChild(?<http://a.com/ontology#y>, ?<http://a.com/ontology#z>),  DifferentFrom (?<http://a.com/ontology#x>, ?<http://a.com/ontology#z>) -> hasSibling(?<http://a.com/ontology#x>, ?<http://a.com/ontology#z>)
+
+Rule: 
+    Man(?<http://a.com/ontology#y>), Person(?<http://a.com/ontology#x>), hasParent(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>) -> hasFather(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>)
+
+Rule: 
+    Person(?<http://a.com/ontology#x>), hasSibling(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>), hasSon(?<http://a.com/ontology#y>, ?<http://a.com/ontology#z>) -> hasNephew(?<http://a.com/ontology#x>, ?<http://a.com/ontology#z>)
+
+Rule: 
+    Person(?<http://a.com/ontology#x>), Woman(?<http://a.com/ontology#y>), hasParent(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>) -> hasMother(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>)
+
+Rule: 
+    Person(?<http://a.com/ontology#x>), Woman(?<http://a.com/ontology#y>), hasChild(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>) -> hasDaughter(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>)
+
+Rule: 
+    Person(?<http://a.com/ontology#x>), hasBrother(?<http://a.com/ontology#y>, ?<http://a.com/ontology#z>), hasParent(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>) -> hasUncle(?<http://a.com/ontology#x>, ?<http://a.com/ontology#z>)
+
+Rule: 
+    Person(?<http://a.com/ontology#x>), hasDaughter(?<http://a.com/ontology#y>, ?<http://a.com/ontology#z>), hasSibling(?<http://a.com/ontology#x>, ?<http://a.com/ontology#y>) -> hasNiece(?<http://a.com/ontology#x>, ?<http://a.com/ontology#z>)
+

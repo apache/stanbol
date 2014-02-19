@@ -46,10 +46,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/entityhub/indexing/source/vcard
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/entityhub/indexing/source/vcard
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/entityhub/indexing/source/vcard
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/entityhub/indexing/source/vcard
     </developerConnection>
     <url>http://stanbol.apache.org</url>
   </scm>

@@ -18,22 +18,7 @@ package org.apache.stanbol.enhancer.engines.entitycomention;
 
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.CASE_SENSITIVE;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_CASE_SENSITIVE_MATCHING_STATE;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_DEREFERENCE_ENTITIES_STATE;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_MATCHING_LANGUAGE;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_MIN_TOKEN_SCORE;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_SUGGESTIONS;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEREFERENCE_ENTITIES;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEREFERENCE_ENTITIES_FIELDS;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.MIN_TOKEN_SCORE;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.NAME_FIELD;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.REDIRECT_FIELD;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.REDIRECT_MODE;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.SUGGESTIONS;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.TYPE_FIELD;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.TYPE_MAPPINGS;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig.DEFAULT_MIN_SEARCH_TOKEN_LENGTH;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig.DEFAULT_PROCESS_ONLY_PROPER_NOUNS_STATE;
-import static org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig.MIN_SEARCH_TOKEN_LENGTH;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig.PROCESSED_LANGUAGES;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig.PROCESS_ONLY_PROPER_NOUNS_STATE;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getAnalysedText;
@@ -59,15 +44,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
@@ -79,14 +63,11 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.enhancer.engines.entitycomention.impl.ContentItemMentionBuilder;
-import org.apache.stanbol.enhancer.engines.entitycomention.impl.InMemoryEntityIndex;
 import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
-import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcherException;
 import org.apache.stanbol.enhancer.engines.entitylinking.LabelTokenizer;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig;
@@ -95,8 +76,8 @@ import org.apache.stanbol.enhancer.engines.entitylinking.config.LanguageProcessi
 import org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.EntityLinker;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.LinkedEntity;
-import org.apache.stanbol.enhancer.engines.entitylinking.impl.Suggestion;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.LinkedEntity.Occurrence;
+import org.apache.stanbol.enhancer.engines.entitylinking.impl.Suggestion;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -105,8 +86,6 @@ import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
-import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -423,7 +402,7 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                             } else if(maxConfidence.compareTo(confidnece) <= 0){
                                 maxConfidence = confidnece;
                             }
-                        }
+                        } //else nothing to do
                         //now we need to compare the suggestions of the initial
                         //mention(s) with the existing one. 
                         //Get information about the suggestions of the initial mention
@@ -438,9 +417,10 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                                         metadata, suggestion, ENHANCER_CONFIDENCE, Double.class, literalFactory);
                                     if(maxConfidence == null){
                                         maxConfidence = confidence;
-                                    } else if(maxConfidence.compareTo(confidnece) <= 0){
+                                    } else if(confidnece != null && 
+                                    		maxConfidence.compareTo(confidnece) <= 0){
                                         maxConfidence = confidnece;
-                                    }
+                                    } //else nothing to do
                                     initialSuggestions.put(suggestion,confidence);
                                     initialSuggestedEntities.put(suggestedEntity, suggestion);
                                 } //no suggestion (dc:relation to some other resource)
@@ -472,8 +452,7 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                                             //we need to check confidences to decide what to do
                                             Resource initialSuggestion = initialSuggestedEntities.get(suggestedEntity);
                                             Double initialConfidence = initialSuggestions.get(initialSuggestion);
-                                            if((existingConfidence == null && initialConfidence == null) ||
-                                                    (existingConfidence != null && 
+                                            if(initialConfidence == null || (existingConfidence != null && 
                                                     existingConfidence.compareTo(initialConfidence) >= 0)){
                                                 //existing confidence >= initial .. keep existing
                                                 initialSuggestions.remove(initialSuggestion); 
@@ -494,9 +473,10 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                                         initialSuggestions.remove(existingSuggestion);
                                         if(maxExistingConfidence == null){
                                             maxExistingConfidence = existingConfidence;
-                                        } else if(maxExistingConfidence.compareTo(existingConfidence) <= 0){
+                                        } else if(existingConfidence != null &&
+                                        		maxExistingConfidence.compareTo(existingConfidence) <= 0){
                                             maxExistingConfidence = existingConfidence;
-                                        }
+                                        } //else maxExistingConfidence == null (undefined)
                                     }
 	                        	} //else ignore dc:relations to other fise:TextAnnotations
  	                        }

@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<dwml version="1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.nws.noaa.gov/forecasts/xml/DWMLgen/schema/DWML.xsd">
+<data>
+  <location>
+      <location-key>SanFrancisco</location-key>
+      <point latitude="37.47" longitude="122.26"/>
+  </location>
+  <time-layout time-coordinate="local" summarization="12hourly">
+      <layout-key>k-p12h-n14-3</layout-key>
+      <start-valid-time period-name="Today">2010-24-09T06:00:00-07:00</start-valid-time>
+      <end-valid-time>2010-24-09T18:00:00-07:00</end-valid-time>
+  </time-layout>
+  <parameters applicable-location="SanFrancisco">
+      <temperature type="maximum" units="Fahrenheit" time-layout="k-p12h-n14-3">
+        <name>Daily Maximum Temperature</name>
+        <value>38</value>
+      </temperature>
+      <temperature type="minimum" units="Fahrenheit" time-layout="k-p12h-n14-3">
+        <name>Daily Minimum Temperature</name>
+      </temperature>
+      <probability-of-precipitation type="12 hour" units="percent" time-layout="k-p12h-n14-3">
+        <name>12 Hourly Probability of Precipitation</name>
+        <value>27</value>
+      </probability-of-precipitation>
+      <weather time-layout="k-p12h-n14-3">
+        <name>Weather Type, Coverage, and Intensity</name>
+	<weather-conditions weather-summary="Mostly Cloudy"/>
+      </weather>
+  </parameters> 
+</data>
+</dwml>

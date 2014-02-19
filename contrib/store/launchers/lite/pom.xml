@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    IKS Persistence Store software is licensed under the Apache License, Version 2.0,
+    see http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+    applicable law or agreed to in writing, software distributed under the
+    License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+    CONDITIONS OF ANY KIND, either express or implied. See the License for
+    the specific language governing permissions and limitations under the
+    License.
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.ontologymanager.store.parent</artifactId>
+    <version>0.10.0-SNAPSHOT</version>
+    <relativePath>../../parent</relativePath>
+  </parent>
+
+
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.ontologymanager.store.launchers.lite</artifactId>
+  <packaging>jar</packaging>
+  <name>Apache Stanbol Ontology Manager Store - Sling-based standalone launcher - lite version</name>
+  <description>Runnable jar that runs the lite Apache Stanbol Ontology Manager Store configuration	</description>
+  
+  <build>
+                <plugins>
+                        <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>                     
+                                <artifactId>maven-clean-plugin</artifactId>
+                                <configuration>
+                                        <filesets>
+                                                <fileset>
+                                                        <directory>.</directory>
+                                                        <includes>
+                                                                <include>sling/**</include>
+                                                                <!-- Apache Derby database directory -->
+                                                                <include>ps_db/**</include>
+                                                                <include>derby.log</include>
+                                                        </includes>
+                                                </fileset>
+                                        </filesets>
+                                </configuration>
+                        </plugin>
+                        <plugin>
+                                <groupId>org.apache.sling</groupId>
+                                <artifactId>maven-launchpad-plugin</artifactId>
+                                <!--
+                                        TODO the maven-launchpad-plugin can also generate a war file and
+                                        Karaf description, we could add this. See
+                                        http://sling.apache.org/site/maven-launchpad-plugin.html
+                                -->
+                                <executions>
+                                        <execution>
+                                                <id>prepare-package</id>
+                                                <goals>
+                                                        <goal>prepare-package</goal>
+                                                </goals>
+                                                <configuration>
+                                                        <includeDefaultBundles>false</includeDefaultBundles>
+                                                        <!-- Standalone jar requires an OSGi http service implementation -->
+                                                        <jarWebSupport>
+                                                                <groupId>org.apache.felix</groupId>
+                                                                <artifactId>org.apache.felix.http.jetty</artifactId>
+                                                                <version>2.0.4</version>
+                                                        </jarWebSupport>
+                                                </configuration>
+                                        </execution>
+                                </executions>
+                        </plugin>
+                        <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>
+                                <artifactId>maven-jar-plugin</artifactId>
+                                <configuration>
+                                        <archive>
+                                                <manifest>
+                                                        <!-- make the generated jar runnable -->
+                                                        <addClasspath>true</addClasspath>
+                                                        <mainClass>org.apache.sling.launchpad.app.Main</mainClass>
+                                                        <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                                </manifest>
+                                        </archive>
+                                </configuration>
+                        </plugin>
+                </plugins>
+        </build>
+        
+        <dependencies>
+                <dependency>
+                        <!-- maven-launchpad-plugin builds on the launchpad.base app -->
+                        <groupId>org.apache.sling</groupId>
+                        <artifactId>org.apache.sling.launchpad.base</artifactId>
+                        <classifier>app</classifier>
+                </dependency>
+        </dependencies>
+</project>

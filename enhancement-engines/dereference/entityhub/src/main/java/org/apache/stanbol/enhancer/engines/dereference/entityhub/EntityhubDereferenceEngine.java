@@ -22,7 +22,11 @@ import static org.apache.stanbol.enhancer.servicesapi.EnhancementEngine.PROPERTY
 import static org.osgi.framework.Constants.SERVICE_RANKING;
 
 import java.util.Dictionary;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -34,6 +38,8 @@ import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.enhancer.engines.dereference.DereferenceConstants;
 import org.apache.stanbol.enhancer.engines.dereference.DereferenceEngineConfig;
 import org.apache.stanbol.enhancer.engines.dereference.EntityDereferenceEngine;
+import org.apache.stanbol.enhancer.engines.dereference.entityhub.shared.SharedDereferenceThreadPool;
+import org.apache.stanbol.enhancer.engines.dereference.entityhub.shared.SharedExecutorServiceProvider;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
@@ -45,6 +51,8 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 /**
  * The EntityhubLinkingEngine in NOT an {@link EnhancementEngine} but only an
  * OSGI {@link Component} that allows to configure instances of the
@@ -72,6 +80,10 @@ import org.slf4j.LoggerFactory;
     @Property(name=DEREFERENCE_ENTITIES_FIELDS,cardinality=Integer.MAX_VALUE,
     	value={"rdfs:comment","geo:lat","geo:long","foaf:depiction","dbp-ont:thumbnail"}),
     @Property(name=DEREFERENCE_ENTITIES_LDPATH, cardinality=Integer.MAX_VALUE),
+    @Property(name=EntityhubDereferenceEngine.SHARED_THREAD_POOL_STATE,
+    	boolValue=EntityhubDereferenceEngine.DEFAULT_SHARED_THREAD_POOL_STATE),
+    @Property(name=EntityhubDereferenceEngine.THREAD_POOL_SIZE,
+    	intValue=EntityhubDereferenceEngine.DEFAULT_THREAD_POOL_SIZE),
     @Property(name=SERVICE_RANKING,intValue=0)
 })
 public class EntityhubDereferenceEngine implements ServiceTrackerCustomizer {
@@ -87,6 +99,18 @@ public class EntityhubDereferenceEngine implements ServiceTrackerCustomizer {
      */
     public static final String SITE_ID = "enhancer.engines.dereference.entityhub.siteId";
 
+    /**
+     * If a Entityhub dereferencer should use the shared thread pool
+     */
+    public static final String SHARED_THREAD_POOL_STATE = "enhancer.engines.dereference.entityhub.threads.shared";
+
+    public static final boolean DEFAULT_SHARED_THREAD_POOL_STATE = true;
+    
+    public static final String THREAD_POOL_SIZE = "enhancer.engines.dereference.entityhub.threads.size";
+    
+    public static final int DEFAULT_THREAD_POOL_SIZE = 0;
+    
+    private int threadPoolSize = DEFAULT_THREAD_POOL_SIZE;
     
     /**
      * The engine initialised based on the configuration of this component
@@ -110,6 +134,8 @@ public class EntityhubDereferenceEngine implements ServiceTrackerCustomizer {
     protected String siteName;
 
     private BundleContext bundleContext;
+
+	private ExecutorService executorService;
 
     /**
      * Default constructor as used by OSGI. This expects that 
@@ -139,17 +165,61 @@ public class EntityhubDereferenceEngine implements ServiceTrackerCustomizer {
             siteName = "*";
         }
         log.debug(" - siteName: {}", siteName);
+        
+        final boolean sharedPoolState;
+        value = properties.get(SHARED_THREAD_POOL_STATE);
+        if(value instanceof Boolean){
+        	sharedPoolState = ((Boolean)value).booleanValue();
+        } else if(value != null && !StringUtils.isBlank(value.toString())){
+        	sharedPoolState = Boolean.parseBoolean(value.toString());
+        } else {
+        	sharedPoolState = DEFAULT_SHARED_THREAD_POOL_STATE;
+        }
+        final ExecutorServiceProvider esProvider;
+        log.debug(" - shared thread pool state: {}", sharedPoolState);
+        if(sharedPoolState){
+        	esProvider = new SharedExecutorServiceProvider(ctx.getBundleContext());
+        } else { //we need to create our own ExecutorService
+	        value = properties.get(THREAD_POOL_SIZE);
+	        if(value instanceof Number){
+	        	this.threadPoolSize = ((Number)value).intValue();
+	        } else if(value != null){
+	        	try {
+	        		this.threadPoolSize = Integer.parseInt(value.toString());
+	        	} catch (NumberFormatException e){
+	        		throw new ConfigurationException(THREAD_POOL_SIZE, "Value '" + value
+	        				+ "'(type: "+value.getClass().getName()+") can not be parsed "
+	        				+ "as Integer");
+	        	}
+	        } else {
+	        	this.threadPoolSize = DEFAULT_THREAD_POOL_SIZE;
+	        }
+	        if(threadPoolSize > 0){
+	            String namePattern = getClass().getSimpleName()+"-"
+	                    + engineConfig.getEngineName()+ "-thread-%s";
+	            ThreadFactory threadFactory = new ThreadFactoryBuilder()
+	                .setNameFormat(namePattern)
+	                .setDaemon(true).build();
+	            log.debug(" - create Threadpool(namePattern='{}' | size='{}')",
+	                namePattern,threadPoolSize);
+	            executorService = Executors.newFixedThreadPool(threadPoolSize, threadFactory);
+	        } else {
+	        	log.debug(" - no thread pool configured (poolSize: {})",threadPoolSize);
+	            executorService = null;
+	        }
+	        esProvider = new StaticExecutorServiceProvider(executorService);
+        }
         //init the tracking entity searcher
         trackedServiceCount = 0;
         if(Entityhub.ENTITYHUB_IDS.contains(siteName.toLowerCase())){
             log.info("  ... init Entityhub dereferencer");
-            entityDereferencer = new EntityhubDereferencer(bundleContext, this, null);
+            entityDereferencer = new EntityhubDereferencer(bundleContext, this, esProvider);
         } else if(siteName.equals("*")){
             log.info("  ... init dereferencer for all referenced sites");
-            entityDereferencer = new SitesDereferencer(bundleContext, this, null);
+            entityDereferencer = new SitesDereferencer(bundleContext, this, esProvider);
         } else {
             log.info(" ... init dereferencer for referenced site {}", siteName);
-            entityDereferencer = new SiteDereferencer(bundleContext,siteName, this, null);
+            entityDereferencer = new SiteDereferencer(bundleContext,siteName, this, esProvider);
         }
         //set the namespace prefix service to the dereferencer
         entityDereferencer.setNsPrefixService(prefixService);
@@ -174,6 +244,10 @@ public class EntityhubDereferenceEngine implements ServiceTrackerCustomizer {
         if(reg != null){
             reg.unregister();
             engineRegistration = null;
+        }
+        if(executorService != null){
+        	executorService.shutdown();
+        	executorService = null;
         }
         //* reset engine
         entityDereferenceEngine = null;

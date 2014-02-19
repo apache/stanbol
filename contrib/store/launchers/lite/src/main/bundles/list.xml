@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+	<!--
+		List of initial bundles for the FISE Sling-based standalone launcher.
+	-->
+<bundles>
+
+	<!-- OSGi infrastructure -->
+	<startLevel level="5">
+		<bundle>
+			<groupId>org.apache.sling</groupId>
+			<artifactId>org.apache.sling.commons.log</artifactId>
+			<version>2.0.6</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<version>1.2.0</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.scr</artifactId>
+			<version>1.6.0</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.configadmin</artifactId>
+			<version>1.2.4</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.metatype</artifactId>
+			<version>1.0.4</version>
+		</bundle>
+		<!-- HTTP service -->
+		<bundle>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.http.whiteboard</artifactId>
+			<version>2.0.4</version>
+		</bundle>
+		<bundle>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
+			<version>4.1.0</version>
+		</bundle>
+	</startLevel>
+
+	<!-- Felix web console and plugins -->
+	<startLevel level="20">
+		<bundle>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.webconsole</artifactId>
+			<version>3.1.2</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.webconsole.plugins.memoryusage
+			</artifactId>
+			<version>1.0.2</version>
+		</bundle>
+	</startLevel>
+
+	<!-- General-purpose libraries -->
+	<startLevel level="20">
+		<bundle>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore-osgi</artifactId>
+			<version>4.0.1</version>
+		</bundle>
+		<!--  <bundle>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math</artifactId>
+			<version>2.1</version>
+		</bundle>-->
+		<bundle>
+            <groupId>org.apache.derby</groupId>
+			<artifactId>derby</artifactId>
+			<version>10.6.2.1</version>
+        </bundle>
+	</startLevel>
+
+	<!-- JAX-RS -->
+	<startLevel level="24">
+		<!--
+			WARNING: jersey-core bug, must start before jersey-server to avoid
+			jersey spi class not found errors. Restart jersey-server manually if
+			getting those.
+		-->
+		<bundle>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-core</artifactId>
+			<version>1.2</version>
+		</bundle>
+	</startLevel>
+	
+	<!-- Jersey -->
+	<startLevel level="25">
+		<bundle>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>jsr311-api</artifactId>
+			<version>1.1.1</version>
+		</bundle>
+		<bundle>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-server</artifactId>
+			<version>1.2</version>
+		</bundle>
+		<bundle>
+			<groupId>org.codehaus.jettison</groupId>
+			<artifactId>jettison</artifactId>
+			<version>1.2</version>
+		</bundle>
+	</startLevel>
+	<!-- Clerezza storage and sparql infrastructure -->
+	<startLevel level="26">
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.core</artifactId>
+			<version>0.12-SNAPSHOT</version>
+		</bundle>
+		  <bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.utils</artifactId>
+			<version>0.13-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>utils</artifactId>
+			<version>0.1-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.ontologies</artifactId>
+			<version>0.11-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.jena.sparql</artifactId>
+			<version>0.5-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.jena.commons</artifactId>
+			<version>0.5-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.jena.facade</artifactId>
+			<version>0.12-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza.ext</groupId>
+			<artifactId>com.hp.hpl.jena.tdb</artifactId>
+			<version>0.3-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza.ext</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>0.4-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.wymiwyg</groupId>
+			<artifactId>wymiwyg-commons-core</artifactId>
+			<version>0.7.5</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza.ext</groupId>
+			<artifactId>com.ibm.icu</artifactId>
+			<version>0.5-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.jena.storage</artifactId>
+			<version>0.5-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.jena.tdb.storage</artifactId>
+			<version>0.5-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.jena.serializer</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.clerezza</groupId>
+			<artifactId>rdf.jena.parser</artifactId>
+			<version>0.10-SNAPSHOT</version>
+		</bundle>
+	</startLevel>
+	
+	<!-- Stanbol Web -->
+	<startLevel level="27">
+	<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.base</artifactId>
+			<version>0.11.0-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.home</artifactId>
+			<version>0.10.0-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.sparql</artifactId>
+			<version>0.10.0-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.jsonld</artifactId>
+			<version>0.10.0-SNAPSHOT</version>
+		</bundle>
+	</startLevel>
+	
+	<startLevel level="28">
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.ontologymanager.store.api</artifactId>
+			<version>0.10.0-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.commons.web.ontology</artifactId>
+			<version>0.10.0-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.ontologymanager.store.jena</artifactId>
+			<version>0.10.0-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.apache.stanbol.ontologymanager.store.clerezza</artifactId>
+			<version>0.10.0-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.semanticweb.owlapi</artifactId>
+			<version>3.0.0-SNAPSHOT</version>
+		</bundle>
+		<bundle>
+			<groupId>org.apache.stanbol</groupId>
+			<artifactId>org.semanticweb.owlapi.owllink</artifactId>
+			<version>1.0.2-SNAPSHOT</version>
+		</bundle>
+	</startLevel>
+</bundles>

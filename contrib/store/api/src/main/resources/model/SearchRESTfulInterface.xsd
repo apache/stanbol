@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+
+<xsd:schema
+	targetNamespace="search.model.rest.persistence.iks.srdc.com.tr"	
+	attributeFormDefault="qualified" 
+	elementFormDefault="qualified" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:tns="search.model.rest.persistence.iks.srdc.com.tr">
+
+	<xsd:element name="Query">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="tns:KeywordList" minOccurs="1" maxOccurs="1" />
+				<xsd:element ref="tns:StructuralQueryPart" minOccurs="1" maxOccurs="1" />
+				<xsd:element ref="tns:FullTextSearchResultList" minOccurs="1" maxOccurs="1" />
+			</xsd:sequence>
+			<xsd:attribute name="useSynonymsInOntologyLookup" type="xsd:boolean" use="required"/>
+			<xsd:attribute name="usedbPediaForFindingSimilarContent" type="xsd:boolean" use="required"/>
+			<xsd:attribute name="flexibilityClasses" type="xsd:integer" use="optional" />
+			<xsd:attribute name="flexibilityIndividuals" type="xsd:integer" use="optional" />
+			<xsd:attribute name="maxResults" type="xsd:integer" use="optional" />
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="Result">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="tns:ReturnedDocuments" minOccurs="1" maxOccurs="1" />
+				<xsd:element ref="tns:ReturnedOntologyResources" minOccurs="1" maxOccurs="1" />
+				<xsd:element ref="tns:TopRelatedOntologyResources" minOccurs="1" maxOccurs="1" />
+				<xsd:element ref="tns:ReturnedWordnetResources" minOccurs="1" maxOccurs="1" />
+				<xsd:element ref="tns:ReturnedDBPediaResources" minOccurs="1" maxOccurs="1" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="TopRelatedOntologyResources">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="tns:ClassResource" minOccurs="0" maxOccurs="unbounded" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:element name="ReturnedDBPediaResources">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="tns:DBPediaResource" minOccurs="0" maxOccurs="unbounded" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:element name="DBPediaResource">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="Property" type="tns:non_empty_string" minOccurs="1" maxOccurs="1" />
+				<xsd:element name="Object" type="tns:non_empty_string" minOccurs="1" maxOccurs="1" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="ReturnedWordnetResources">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="tns:WordnetResource" minOccurs="0" maxOccurs="unbounded" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="WordnetResource">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="Name" type="tns:non_empty_string" minOccurs="1" maxOccurs="1" />
+				<xsd:element name="Score" type="xsd:float" minOccurs="1" maxOccurs="1" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="ReturnedDocuments">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="tns:Document" minOccurs="0" maxOccurs="unbounded" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="Document">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="DocumentXPath" type="tns:non_empty_string" minOccurs="1" maxOccurs="1" />
+				<xsd:element name="PrimaryType" type="tns:non_empty_string" minOccurs="0" maxOccurs="1" />
+				<xsd:element name="Score" type="xsd:float" minOccurs="1" maxOccurs="1" />
+				<xsd:element name="RelatedTo" minOccurs="0" maxOccurs="1" >
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="ClassURI" type="tns:non_empty_string" minOccurs="1" maxOccurs="unbounded" />
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="Metadata" minOccurs="0" maxOccurs="1" >
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="NameValuePair" minOccurs="1" maxOccurs="unbounded" >
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="Name" type="xsd:string" />
+										<xsd:element name="Value" type="xsd:string" />
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="ReturnedOntologyResources">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="tns:ClassResource" minOccurs="0" maxOccurs="unbounded" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="ClassResource">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="ClassURI" type="tns:non_empty_string" minOccurs="1" maxOccurs="1" />
+				<xsd:element name="Score" type="xsd:float" minOccurs="1" maxOccurs="1" />
+				<xsd:element ref="tns:ClassResource" minOccurs="0" maxOccurs="unbounded" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<!--
+	<xsd:element name="IndividualResource">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="IndividualURI" type="tns:non_empty_string" minOccurs="1" maxOccurs="1" />
+				<xsd:element name="Score" type="xsd:float" minOccurs="1" maxOccurs="1" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	-->
+
+	<xsd:element name="StructuralQueryPart">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:choice minOccurs="0" maxOccurs="1">
+					<xsd:element name="SPARQLQuery" type="tns:non_empty_string"/>
+					<xsd:element ref="tns:ResourceList"/>
+				</xsd:choice>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="KeywordList">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="Operator" type="tns:OperatorType" minOccurs="0" maxOccurs="1" />
+				<xsd:choice minOccurs="0" maxOccurs="unbounded">
+					<xsd:element ref="tns:KeywordList"/>
+					<xsd:element name="Keyword" type="tns:non_empty_string"/>
+				</xsd:choice>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="ResourceList">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="SelectiveResource" minOccurs="0" maxOccurs="unbounded" >
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="Operator" type="tns:OperatorType" minOccurs="0" maxOccurs="1" />
+							<xsd:element name="ResourceURI" type="tns:non_empty_string"/>
+						</xsd:sequence>					
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="FullTextSearchResultList">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="tns:FullTextSearchResult" minOccurs="0" maxOccurs="unbounded" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="FullTextSearchResult">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="DocumentXPath" type="tns:non_empty_string" minOccurs="1" maxOccurs="1" />
+				<xsd:element name="Score" type="xsd:float" minOccurs="1" maxOccurs="1" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:simpleType name="non_empty_string">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name = "OperatorType">
+		<xsd:restriction base = "xsd:NMTOKEN">
+			<xsd:enumeration value = "EXACT"/>
+			<xsd:enumeration value = "AND"/>
+			<xsd:enumeration value = "OR"/>
+			<xsd:enumeration value = "NOT_SELECTIVE"/>
+			<xsd:enumeration value = "EXCLUDE"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+</xsd:schema>

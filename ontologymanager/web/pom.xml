@@ -33,10 +33,10 @@
   <description>Home page of Apache Stanbol OntoNet HTTP endpoints.</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/ontologymanager/web
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/ontologymanager/web
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/ontologymanager/web
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/ontologymanager/web
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>

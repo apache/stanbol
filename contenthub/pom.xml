@@ -40,10 +40,10 @@
 
   <scm>
     <connection>
-  		scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/contenthub/
+  		scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/contenthub/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/contenthub/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/contenthub/
     </developerConnection>
   </scm>
 

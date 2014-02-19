@@ -370,12 +370,16 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
 		         * an empty list!
 		         */
 		    	int prefixPos = Math.abs(pos)-2;
-		    	String prefix = prefixList.get(prefixPos);
-		    	if(prefixPos >= 0 && entityUri.startsWith(prefix)){
-		    		log.trace(" ... matched prefix {}", prefix);
-		    		return true; //it matches a prefix in the list
+		    	if(prefixPos >= 0){
+			    	String prefix = prefixList.get(prefixPos);
+			    	if(entityUri.startsWith(prefix)){
+			    		log.trace(" ... matched prefix {}", prefix);
+			    		return true; //it matches a prefix in the list
+			    	} else { //try configured regex pattern
+			    		log.trace("  ... no match for prefix {}", prefix);
+			    	}
 		    	} else { //try configured regex pattern
-		    		log.trace("  ... no match for prefix {}", prefix);
+		    		log.trace("  ... no prefix matches");
 		    	}
 		    } else {
 		        return true; //entityUri found in list

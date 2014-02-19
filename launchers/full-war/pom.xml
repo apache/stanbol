@@ -33,10 +33,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/launchers/full/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/launchers/full/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-0.12/launchers/full/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/launchers/full/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
@@ -108,6 +108,17 @@
           </excludes>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+        <!--
+          Launcher bundles should never be deployed, e.g. as SNAPSHOTS, by default
+          unless explicitly specified in a POM because of known license issues.
+        -->
+          <skip>true</skip>
+        </configuration>
+      </plugin>      
     </plugins>
   </build>
 
