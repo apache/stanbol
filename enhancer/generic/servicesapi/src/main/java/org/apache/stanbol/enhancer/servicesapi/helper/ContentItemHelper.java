@@ -351,4 +351,74 @@ public class ContentItemHelper {
         return mimeType.toString();
     }
 
+    /*
+     * EnhancementProperties support for 0.12 (see STANBOL-1280) 
+     */
+    /**
+     * URI used to register an {@link ContentItem#getPart(int, Class) contentPart}
+     * of the type {@link Map Map&lt;String,Objext&gt;} containing the
+     * EnhancementEngine properties <p>
+     */
+    public static final UriRef ENHANCEMENT_PROPERTIES_URI = new UriRef(
+            "urn:apache.org:stanbol.web:enhancement.properties");
+
+    /**
+     * Getter for the EnhancementProperties content part
+     * @param ci the content item
+     * @return the content part or <code>null</code> if not present.
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String,Object> getEnhancementPropertiesContentPart(ContentItem ci){
+        if(ci == null){
+            throw new IllegalArgumentException("The parsed ContentItem MUST NOT be NULL!");
+        }
+        ci.getLock().readLock().lock();
+        try {
+            return ci.getPart(ENHANCEMENT_PROPERTIES_URI, Map.class);
+        } catch (NoSuchPartException e) {
+            return null;
+        } finally{
+            ci.getLock().readLock().unlock();
+        }
+        
+    }
+    
+    /**
+     * Initialises the EnhancementProperties ContentPart for an {@link ContentItem}.
+     * If the content part is already present it will just return the existing. If
+     * not it will register an empty one. The content part is registered with
+     * the URI {@link #ENHANCEMENT_PROPERTIES_URI}
+     * @param ci the contentItem MUST NOT be NULL
+     * @return the enhancement properties
+     * @throws IllegalArgumentException if <code>null</code> is parsed as {@link ContentItem}.
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String,Object> initEnhancementPropertiesContentPart(ContentItem ci){
+        if(ci == null){
+            throw new IllegalArgumentException("The parsed ContentItem MUST NOT be NULL!");
+        }
+        Map<String,Object> enhancementProperties;
+        ci.getLock().readLock().lock();
+        try {
+            enhancementProperties = ci.getPart(ENHANCEMENT_PROPERTIES_URI, Map.class);
+        } catch (NoSuchPartException e) {
+            enhancementProperties = null;
+        } finally{
+            ci.getLock().readLock().unlock();
+        }
+        if(enhancementProperties == null){
+            ci.getLock().writeLock().lock();
+            try { //check again ... maybe an other thread has added this part
+                enhancementProperties = ci.getPart(ENHANCEMENT_PROPERTIES_URI, Map.class);
+            } catch (NoSuchPartException e) {
+                enhancementProperties = new HashMap<String,Object>();
+                ci.addPart(ENHANCEMENT_PROPERTIES_URI, enhancementProperties);
+            } finally{
+                ci.getLock().writeLock().unlock();
+            }
+        } //else was already present
+        return enhancementProperties;
+    }
+    
+    
 }

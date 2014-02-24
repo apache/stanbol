@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.UUID;
 
@@ -760,4 +761,63 @@ public class EnhancementEngineHelper {
             ci.getLock().readLock().unlock();
         }
     }
+    
+    /* 
+     * Helper Methods for retrieving EnhancementProperties in 0.12 from the
+     * parsed ContentItem (see STANBOL-1280).
+     * NOTE: in 1.0.0 those are obsolete as EnhancementProperties will be parsed
+     * as additional parameter to the computeEnhancement method.
+     */
+    /**
+     * Retrieves the Enhancement Properties for the parsed Engine from the ContentItem.
+     * <p>
+     * The returned map will contain: <ul>
+     * <li> all properties with a key that does NOT include a '<code>:</code>'
+     * <li> all properties with a key starting with '<code>{engine-name}:</code>'
+     * </ul>
+     * NOTE: that only properties containing '<code>enhancer.</code>' will get 
+     * parsed from Enhancement Requests.<p>
+     * See <a href="https://issues.apache.org/jira/browse/STANBOL-488">STANBOL-488</a> 
+     * for the specification of Enhancement Properties and 
+     * <a href="https://issues.apache.org/jira/browse/STANBOL-1280">STANBOL-1280</a> 
+     * for the list of features supported inStanbol version <code>0.12.1+</code>
+     * @param engine the enhancement engine requesting the properties
+     * @param ci the content item (representing the enhancement request).
+     * @return The enhancement properties. This is a read/write copy of the
+     * read-only content part.
+     */
+    public static Map<String,Object> getEnhancementProperties(EnhancementEngine engine, ContentItem ci){
+        if(engine == null){
+            throw new IllegalArgumentException("The parsed EnhancementEngine MUST NOT be NULL");
+        }
+        if(ci == null){
+            throw new IllegalArgumentException("The parsed ContentItem MUST NOT be NULL");
+        }
+        Map<String,Object> epContentPart = ContentItemHelper.getEnhancementPropertiesContentPart(ci);
+        if(epContentPart == null){
+            log.debug("no EnhancementProperties for ContentItem",ci.getUri());
+            return Collections.emptyMap();
+        }
+        String prefix = new StringBuilder(engine.getName()).append(':').toString();
+        Map<String,Object> properties = new HashMap<String,Object>();
+        log.debug("Retrieve EnhancementProperties for Engine {} and ContentItem {}", 
+            engine.getName(), ci.getUri());
+        for(Entry<String,Object> entry : epContentPart.entrySet()){
+            String key = entry.getKey();
+            int sepIndex = key.indexOf(':');
+            if(sepIndex < 0){
+                log.debug(" - include chain property '{}'",key);
+                properties.put(key, entry.getValue());
+            } else if(key.startsWith(prefix) && key.length() > prefix.length()){
+                key = key.substring(prefix.length(),key.length());
+                log.debug(" - include engine property '{}'",key);
+                properties.put(key, entry.getValue());
+            } else {
+                log.debug(" - exclude engine property '{}'",key);
+            }
+        }
+        return properties;
+    }
+    
+    
 }
