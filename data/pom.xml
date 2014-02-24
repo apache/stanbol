@@ -116,11 +116,18 @@
                 <exclude>RAT-REPORT</exclude>
 
                 <!-- exclude downloads -->
-                <exclude>**/downloads/**</exclude>
+                <exclude>**/downloads/**/*</exclude>
 
                 <!-- exclude certain file types -->
                 <exclude>**/*.config</exclude>
                 <exclude>**/*.ref</exclude>
+                <exclude>**/*.xml</exclude>
+
+                <!-- exclude test resources -->
+                <exclude>**/test/resources/**/*</exclude>
+
+                <!-- eclude web ressources in bundles -->
+                <exclude>**/META-INF/resources/**/*</exclude>
               </excludes>
             </configuration>
           </plugin>

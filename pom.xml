@@ -112,25 +112,69 @@
             <groupId>org.apache.rat</groupId>
             <artifactId>apache-rat-plugin</artifactId>
             <configuration>
-              <excludeSubProjects>true</excludeSubProjects>
+              <excludeSubProjects>false</excludeSubProjects>
               <excludes>
-                <!-- exclude hidden and dummy files -->
+                <!--
+                  All license headers are also checked per
+                  artifact. These excludes are necessary
+                  to make the reactor build suceed. Consider
+                  the excluded files here as already checked
+                  in the artifacts.
+                -->
+
+                <!-- exclude hidden files -->
                 <exclude>**/.*</exclude>
-                <exclude>PLAYGROUND.txt</exclude>
+                <exclude>**/.*/*</exclude>
+                <exclude>**/.*/**/*</exclude>
 
-                <!-- unstable and not release relevant stuff -->
-                <exclude>contrib/**</exclude>
-                <exclude>demos/crawler/**</exclude>
-                <exclude>demos/ehealth/**</exclude>
-                <exclude>demos/integritycheck/**</exclude>
+                <!-- exclude build files -->
+                <exclude>**/target/**</exclude>
+                <exclude>**/*.log</exclude>
 
-                <exclude>conventions/**</exclude>
-                <exclude>releasing/**</exclude>
-                <exclude>integration-tests/**</exclude>
+                <!-- exclude generated files listing the licenses of deps -->
+                <exclude>DEPENDENCIES</exclude>
+                <exclude>DEPENDENCIES-BY-LICENSE</exclude>
+                <exclude>RAT-REPORT</exclude>
+                <exclude>**/src/license/THIRD-PARTY.properties</exclude>
+
+                <!-- exclude certain file types by extension -->
+                <exclude>**/*.properties</exclude>
+                <exclude>**/*.config</exclude>             
+                <exclude>**/*.nt</exclude>
+                <exclude>**/*.txt</exclude>
+                <exclude>**/*.css</exclude>
+                <exclude>**/*.js</exclude>
+                <exclude>**/*.xml</exclude>
+                <exclude>**/*.svg</exclude>
+                <exclude>**/*.ref</exclude>
+                <exclude>**/*.html</exclude>
+                <exclude>**/*.rdf</exclude>
+                <exclude>**/*.xhtml</exclude>
+                <exclude>**/*.json</exclude>
+                <exclude>**/*.eml</exclude>
+                <exclude>**/*.sem</exclude>
+                <exclude>**/*.ldpath</exclude>
+                <exclude>**/*.mappings</exclude>
+                <exclude>**/*.nq</exclude>
+                <exclude>**/*.md</exclude>
+                <exclude>**/*.ttl</exclude>
+                <exclude>**/*.rules</exclude>
+                <exclude>**/*.csv</exclude>
+                <exclude>**/*.rtf</exclude>
+                <exclude>**/jquery-1.6.1</exclude>
+
+                <!-- some specific files without extension -->
+                <exclude>commons/namespaceprefix/prefixccprovider/src/main/resources/META-INF/services/org.apache.stanbol.commons.namespaceprefix.NamespacePrefixProvider</exclude>
+                <exclude>commons/namespaceprefix/stanbolprovider/src/main/resources/META-INF/services/org.apache.stanbol.commons.namespaceprefix.NamespacePrefixProvider</exclude>
+                <exclude>data/sentiment/sentiwordnet/downloads/resources/org/apache/stanbol/data/sentiment/sentiwordnet/LICENSE.SentiWordNet</exclude>
+                <exclude>data/sentiment/sentiws/downloads/resources/org/apache/stanbol/data/sentiment/sentiws/LICENSE.SentiWS</exclude>
+                <exclude>enhancer/generic/core/src/main/resources/META-INF/services/org.apache.stanbol.enhancer.servicesapi.ContentItemFactory</exclude>
+                <exclude>enhancer/generic/nlp-json/src/main/resources/META-INF/services/org.apache.stanbol.enhancer.nlp.json.valuetype.ValueTypeParser</exclude>
+                <exclude>enhancer/generic/nlp-json/src/main/resources/META-INF/services/org.apache.stanbol.enhancer.nlp.json.valuetype.ValueTypeSerializer</exclude>
               </excludes>
             </configuration>
           </plugin>
-          <!-- plugin>
+          <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>license-maven-plugin</artifactId>
             <executions>
@@ -140,7 +184,7 @@
                 </goals>
               </execution>
             </executions>
-          </plugin -->
+          </plugin>
         </plugins>
       </build>
     </profile>
