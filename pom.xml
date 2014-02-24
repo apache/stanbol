@@ -31,7 +31,7 @@
   <version>0.12.0</version>
   <packaging>pom</packaging>
 
-  <name>Apache Stanbol Reactor</name>
+  <name>Apache Stanbol</name>
   <description>Pseudo project to build Apache Stanbol with all components.</description>
 
   <inceptionYear>2010</inceptionYear>
