@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancer</artifactId>
-    <version>0.12.0</version>
+    <version>0.12.1-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
 
@@ -61,8 +61,7 @@
             </Import-Package>
             <!-- removed Import-Package 
                   org.apache.commons.io;version="[1.4.0,3)",
-              as commons-io version 2+ still export versions < 2.0 for exported
-              packages
+              as commons-io version 2+ still export versions < 2.0 for exported packages
              -->
             <Private-Package>
             </Private-Package>

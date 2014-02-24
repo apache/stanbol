@@ -21,31 +21,31 @@
     <bundle> <!-- The English language and NER models are included as default -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.ner.en</artifactId>
-      <version>1.2.0</version>
+      <version>1.2.1-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.opennlp.lang.en</artifactId>
-      <version>1.2.0</version>
+      <version>1.2.1-SNAPSHOT</version>
     </bundle>
   </startLevel>
     <startLevel level="30">
     <bundle> <!-- Default ontology registries used by ontonet -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.registries.default</artifactId>
-      <version>1.2.0</version>
+      <version>1.2.1-SNAPSHOT</version>
     </bundle>
   </startLevel>
   <startLevel level="40">
     <bundle> <!-- The Apache Stanbol default configuration -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.defaultconfig</artifactId>
-      <version>1.2.0</version>
+      <version>1.2.1-SNAPSHOT</version>
     </bundle>
     <bundle> <!-- dbpedia is includes as default data set -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
-      <version>1.2.0</version>
+      <version>1.2.1-SNAPSHOT</version>
     </bundle>
   </startLevel>
 </bundles>

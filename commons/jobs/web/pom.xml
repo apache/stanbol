@@ -21,12 +21,12 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>4</version>
+    <version>4.1-SNAPSHOT</version>
     <relativePath>../../../parent</relativePath>
   </parent>
 
   <artifactId>org.apache.stanbol.commons.jobs.web</artifactId>
-  <version>0.12.0</version>
+  <version>0.12.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Jobs Web</name>

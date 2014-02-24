@@ -16,7 +16,7 @@
 	<parent>
 		<artifactId>org.apache.stanbol.cmsadapter.parent</artifactId>
 		<groupId>org.apache.stanbol</groupId>
-		<version>0.12.0</version>
+		<version>0.12.1-SNAPSHOT</version>
 		<relativePath>../parent</relativePath>
 	</parent>
 

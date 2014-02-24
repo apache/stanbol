@@ -29,7 +29,7 @@
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-parent</artifactId>
   <packaging>pom</packaging>
-  <version>4</version>
+  <version>4.1-SNAPSHOT</version>
 
   <name>Apache Stanbol Parent</name>
   <description>Parent POM for the Apache Stanbol project</description>
@@ -694,6 +694,12 @@
         <artifactId>sesame-repository-sail</artifactId>
         <version>${sesame-version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-rio-api</artifactId>
+        <version>${sesame-version}</version>
+      </dependency>
+      
       <!-- Commons -->
       <dependency>
         <groupId>commons-io</groupId>

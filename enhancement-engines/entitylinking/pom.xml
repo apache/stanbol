@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines</artifactId>
-    <version>0.12.0</version>
+    <version>0.12.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
   
   <groupId>org.apache.stanbol</groupId>
   <artifactId>apache-stanbol-enhancement-engines-entitylinking</artifactId>
-  <version>0.12.0</version>
+  <version>0.12.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Enhancement Engine : Entity Linking</name>
