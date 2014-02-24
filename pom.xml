@@ -27,12 +27,12 @@
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>stanbol-reactor</artifactId>
+  <artifactId>apache-stanbol</artifactId>
   <version>0.12.0</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Reactor</name>
-  <description>Pseudo project to build Apache Stanbol.</description>
+  <description>Pseudo project to build Apache Stanbol with all components.</description>
 
   <inceptionYear>2010</inceptionYear>
   <licenses>
@@ -53,10 +53,6 @@
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
-
-  <build>
-    <finalName>apache-stanbol-${project.version}</finalName>  
-  </build>
 
   <!-- These modules form the Stanbol Framework -->
   <modules>
