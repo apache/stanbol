@@ -26,7 +26,9 @@ import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLin
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEREFERENCE_ENTITIES;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEREFERENCE_ENTITIES_FIELDS;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig.MIN_SEARCH_TOKEN_LENGTH;
+import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.DEFAULT_INCLUDE_SIMILAR_SCORE;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.ENTITY_TYPES;
+import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.INCLUDE_SIMILAR_SCORE;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.MIN_TOKEN_SCORE;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.NAME_FIELD;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig.REDIRECT_FIELD;
@@ -108,6 +110,7 @@ import org.slf4j.LoggerFactory;
     @Property(name=MIN_SEARCH_TOKEN_LENGTH, intValue=DEFAULT_MIN_SEARCH_TOKEN_LENGTH),
     @Property(name=MIN_TOKEN_SCORE,floatValue=DEFAULT_MIN_TOKEN_SCORE),
     @Property(name=SUGGESTIONS, intValue=DEFAULT_SUGGESTIONS),
+    @Property(name=INCLUDE_SIMILAR_SCORE, boolValue=DEFAULT_INCLUDE_SIMILAR_SCORE),
     @Property(name=PROCESS_ONLY_PROPER_NOUNS_STATE, boolValue=DEFAULT_PROCESS_ONLY_PROPER_NOUNS_STATE),
     @Property(name=PROCESSED_LANGUAGES,
         cardinality=Integer.MAX_VALUE,

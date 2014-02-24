@@ -294,12 +294,25 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
             } else if(suggestions.size() > 1){ //if we have multiple suggestions
                 //sort based on score
                 Collections.sort(suggestions, Match.SCORE_COMPARATOR);
+                int maxSuggestions = elConfig.getMaxSuggestions();
+                if(suggestions.size() > maxSuggestions && 
+                        elConfig.isIncludeSuggestionsWithSimilarScore()){
+                    //include suggestions with similar score
+                    double minIncludeScore = suggestions.get(maxSuggestions).getScore();
+                    int numInclude = maxSuggestions + 1; //the next element
+                    double actScore;
+                    do {
+                        actScore = suggestions.get(numInclude).getScore();
+                        numInclude++; //increase for the next iteration
+                    } while(numInclude < suggestions.size() && actScore >= minIncludeScore);
+                    maxSuggestions = numInclude - 1;
+                }
+                //remove all suggestions > maxSuggestions
+                if(suggestions.size() > maxSuggestions){
+                    suggestions.subList(maxSuggestions,suggestions.size()).clear();
+                }
                 //adapt score based on entity ranking
                 adaptScoresForEntityRankings(suggestions);
-                //cut the list on the maximum nuber of suggestions
-                if(suggestions.size() > elConfig.getMaxSuggestions()){
-                    suggestions = suggestions.subList(0, elConfig.getMaxSuggestions());
-                }
             }
             if(log.isTraceEnabled()){ //log the suggestion information
                 log.trace("Suggestions:");

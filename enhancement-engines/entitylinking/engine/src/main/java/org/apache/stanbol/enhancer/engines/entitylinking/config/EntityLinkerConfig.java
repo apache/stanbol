@@ -92,6 +92,11 @@ public class EntityLinkerConfig {
      */
     public static final String SUGGESTIONS = "enhancer.engines.linking.suggestions";
     /**
+     * If enabled Suggestions with similar scores are included. This means also that
+     * there might me more as {@link #SUGGESTIONS} results returned by the engine.
+     */
+    public static final String INCLUDE_SIMILAR_SCORE = "enhancer.engines.linking.includeSimilarScore";
+    /**
      * If enabled {@link MorphoFeatures#getLemma()} values are used instead of the {@link Token#getSpan()} to
      * search/match Entities within the Vocabulary linked against.
      * @see EntityLinkerConfig#isLemmaMatching()
@@ -217,6 +222,10 @@ public class EntityLinkerConfig {
      * The default number for the maximum number of terms suggested for a word
      */
     public static final int DEFAULT_SUGGESTIONS = 3;
+    /**
+     * By default {@link #INCLUDE_SIMILAR_SCORE} is deactivated
+     */
+    public static final boolean DEFAULT_INCLUDE_SIMILAR_SCORE = false;
     /**
      * Default value for the number of tokens that must be contained in
      * suggested terms. The default is <code>1</code>
@@ -360,6 +369,8 @@ public class EntityLinkerConfig {
      * The the maximum number of terms suggested for a word
      */
     private int maxSuggestions = DEFAULT_SUGGESTIONS;
+    
+    private boolean includeSuggestionsWithSimilarScore = DEFAULT_INCLUDE_SIMILAR_SCORE;
     /**
      * The minimum number of Tokens in the text that must match with 
      * a label of the Entity so that also non-exact matches are
@@ -584,6 +595,13 @@ public class EntityLinkerConfig {
                 throw new ConfigurationException(SUGGESTIONS, "Values MUST be valid Integer values > 0");
             }
             linkerConfig.setMaxSuggestions(maxSuggestions);
+        }
+        //init INCLUDE_SIMILAR_SCORE
+        value = configuration.get(INCLUDE_SIMILAR_SCORE);
+        if(value instanceof Boolean){
+            linkerConfig.setIncludeSuggestionsWithSimilarScore((Boolean)value);
+        } else if(value != null){
+            linkerConfig.setIncludeSuggestionsWithSimilarScore(Boolean.parseBoolean(value.toString()));
         }
         
         //init MIN_FOUND_TOKENS
@@ -1047,6 +1065,18 @@ public class EntityLinkerConfig {
     public int getMaxSuggestions() {
         return maxSuggestions;
     }
+    
+    public boolean isIncludeSuggestionsWithSimilarScore(){
+        return includeSuggestionsWithSimilarScore;
+    }
+    public void setIncludeSuggestionsWithSimilarScore(Boolean state){
+        if(state == null){
+            includeSuggestionsWithSimilarScore = DEFAULT_INCLUDE_SIMILAR_SCORE;
+        } else {
+            includeSuggestionsWithSimilarScore = state;
+        }
+    }
+    
     /**
      * Setter for the minimum number of Tokens (of the content) that MUST match
      * with a {@link EntitySearcher#getNameField() label} of a 

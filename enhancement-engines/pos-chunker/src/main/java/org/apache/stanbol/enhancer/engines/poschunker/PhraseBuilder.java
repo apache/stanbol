@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.stanbol.enhancer.engines.poschunker.PhraseTypeDefinition.TokenTypeDefinition;
 import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
 import org.apache.stanbol.enhancer.nlp.model.Chunk;
 import org.apache.stanbol.enhancer.nlp.model.Section;
@@ -89,7 +90,7 @@ public class PhraseBuilder {
     
     public void nextSection(Section section){
         buildPhrase(null);
-    	log.trace("-- next {} --", section);
+    	log.debug("-- next {} --", section);
     }
     
 
@@ -99,12 +100,14 @@ public class PhraseBuilder {
             phraseType.getRequiredType());
         if(states[0]){
             current.add(token);
-            if(log.isTraceEnabled()) {
-	        	log.trace("-- {} phrase start --", phraseType.getPhraseType().name());
-	        	log.trace(" {}. {} {}", new Object[]{ current.size(), token, 
+            if(log.isDebugEnabled()) {
+	        	log.debug("-- {} phrase start --", phraseType.getPhraseType().name());
+	        	log.debug(" {}. {} {}", new Object[]{ current.size(), token, 
 	        			logPosCategories(token)});
             }
             valid = states[1];
+        } else if(log.isTraceEnabled()){
+            log.trace("  - {} {}", token, logPosCategories(token));
         }
     }
 
@@ -119,8 +122,8 @@ public class PhraseBuilder {
         }
         if(states[0]){
             current.add(token);
-            if(log.isTraceEnabled()) {
-	        	log.trace(" {}. {} {}", new Object[]{ current.size(), token, 
+            if(log.isDebugEnabled()) {
+	        	log.debug(" {}. {} {}", new Object[]{ current.size(), token, 
 	        			logPosCategories(token)});
             }
         }
@@ -147,17 +150,17 @@ public class PhraseBuilder {
                 Chunk chunk = chunkFactory.createChunk(current.get(0), lastConsumedToken);
                 //TODO: add support for confidence
                 chunk.addAnnotation(PHRASE_ANNOTATION, Value.value(phraseTag));
-                if(log.isTraceEnabled()){
-                	log.trace("  << add {} phrase {} '{}'", new Object[]{
+                if(log.isDebugEnabled()){
+                	log.debug("  << add {} phrase {} '{}'", new Object[]{
                 			phraseType.getPhraseType().name(), chunk,chunk.getSpan()});
                 }
-            } else if(log.isTraceEnabled()){
-            	log.trace("  >> ignore {} phrase with single {} ", 
+            } else if(log.isDebugEnabled()){
+            	log.debug("  >> ignore {} phrase with single {} ", 
             			phraseType.getPhraseType().name() ,
             			current.get(0));
             }
-        } else if(!current.isEmpty() && log.isTraceEnabled()){
-        	log.trace("  << ignore invalid {} phrase [{},{}]",  new Object[]{ 
+        } else if(!current.isEmpty() && log.isDebugEnabled()){
+        	log.debug("  << ignore invalid {} phrase [{},{}]",  new Object[]{ 
         			phraseType.getPhraseType().name(), current.get(0).getStart(), 
         			current.get(current.size()-1).getEnd()});
         }
@@ -177,12 +180,12 @@ public class PhraseBuilder {
      * is suitable for {@link PhraseTypeDefinition#getStartType()} and
      * {@link PhraseTypeDefinition#getRequiredType()}.
      * @param token the Token
-     * @param categories the list of categories to check
+     * @param ttd the list of categories to check
      * @return if the sum of matching annotations compared to the score of all
      * POS annotations is higher or equals the configured {@link #minPosSocre}.
      * For each parsed categories set a boolean state is returned.
      */
-    private boolean[] checkCategories(Token token, Set<LexicalCategory>...categories) {
+    private boolean[] checkCategories(Token token, TokenTypeDefinition...ttd) {
         //there are different ways NLP frameworks do assign scores. For some the
         //sum of all categories would sum up to 1.0, but as only the top three
         //categories are included the sum would be < 1
@@ -194,22 +197,28 @@ public class PhraseBuilder {
         //Match.max(1.0,sumScore).
         //POS tags without score are assigned a #DEFAULT_SCORE. If not a single
         //POS tag with a score is present the sumScore is NOT normalized to 1.0
+        log.trace("> check Categories for {}",token);
+        if(log.isTraceEnabled()){
+            for(int i = 0; i < ttd.length; i++){
+                log.trace( "Cat {}: {}",i,ttd[i]);
+            }
+        }
         boolean scorePresent = false;
         double sumScore = 0;
-        double[] matchScores = new double[categories.length];
+        double[] matchScores = new double[ttd.length];
         for(Value<PosTag> pos : token.getAnnotations(POS_ANNOTATION)){
+            log.trace(" - {}",pos);
             double score = pos.probability();
             if(score == Value.UNKNOWN_PROBABILITY){
                 score = DEFAULT_SCORE;
             } else {
                 scorePresent = true;
             }
-            sumScore = sumScore + pos.probability();
-            Set<LexicalCategory> tokenCategories = pos.value().getCategories();
-            for(int i = 0; i < categories.length; i++){
-                Set<LexicalCategory> category = categories[i];
-                if(!Collections.disjoint(tokenCategories, category)){
-                    matchScores[i] = matchScores[i] + pos.probability();
+            sumScore = sumScore + score;
+            for(int i = 0; i < ttd.length; i++){
+                if(ttd[i].matches(pos.value())){
+                    log.trace("  matches Category {} with score {}",i,score);
+                    matchScores[i] = matchScores[i] + score;
                 }
             }
         }

@@ -126,6 +126,10 @@ public class Match {
     public void updateScore(double score) {
         this.score = score;
     }
+    /**
+     * The score 
+     * @return the score
+     */
     public double getScore() {
         return score;
     }

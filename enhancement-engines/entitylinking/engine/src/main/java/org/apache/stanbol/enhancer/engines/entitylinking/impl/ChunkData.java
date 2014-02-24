@@ -54,6 +54,10 @@ public class ChunkData {
     /** the end token index relative to the current section (sentence) */
     int endToken;
     /**
+     * If this chunk has a linkable token
+     */
+    boolean hasLinkable = false;
+    /**
      * The number of matchable Tokens enclosed by this Chunk
      */
     int matchableCount;
@@ -128,6 +132,13 @@ public class ChunkData {
     
     public boolean isNamedEntity() {
     	return isNamedEntity;
+    }
+    /**
+     * If this chunk covers a linkable token
+     * @return
+     */
+    public boolean hasLinkable(){
+        return hasLinkable;
     }
     
     /**
