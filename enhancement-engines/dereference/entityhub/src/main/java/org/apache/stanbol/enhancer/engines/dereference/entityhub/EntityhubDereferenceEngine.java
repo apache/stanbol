@@ -22,6 +22,7 @@ import static org.apache.stanbol.enhancer.servicesapi.EnhancementEngine.PROPERTY
 import static org.osgi.framework.Constants.SERVICE_RANKING;
 
 import java.util.Dictionary;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -35,7 +36,10 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
+import org.apache.stanbol.enhancer.engines.dereference.DereferenceConfigurationException;
 import org.apache.stanbol.enhancer.engines.dereference.DereferenceConstants;
+import org.apache.stanbol.enhancer.engines.dereference.DereferenceContext;
+import org.apache.stanbol.enhancer.engines.dereference.DereferenceContextFactory;
 import org.apache.stanbol.enhancer.engines.dereference.DereferenceEngineConfig;
 import org.apache.stanbol.enhancer.engines.dereference.EntityDereferenceEngine;
 import org.apache.stanbol.enhancer.engines.dereference.entityhub.shared.SharedDereferenceThreadPool;
@@ -226,7 +230,16 @@ public class EntityhubDereferenceEngine implements ServiceTrackerCustomizer {
         //now parse dereference field config
         entityDereferencer.setDereferencedFields(engineConfig.getDereferenceFields());
         entityDereferencer.setLdPath(engineConfig.getLdPathProgram());
-        entityDereferenceEngine = new EntityDereferenceEngine(entityDereferencer, engineConfig);
+        entityDereferenceEngine = new EntityDereferenceEngine(entityDereferencer, engineConfig,
+            new DereferenceContextFactory() { //we want to use our own DereferenceContext impl
+                
+                @Override
+                public DereferenceContext createContext(EntityDereferenceEngine engine,
+                        Map<String,Object> enhancementProperties) throws DereferenceConfigurationException {
+                    return new EntityhubDereferenceContext(engine, enhancementProperties);
+                }
+            });
+        
         //NOTE: registration of this instance as OSGI service is done as soon as the
         //      entityhub service backing the entityDereferencer is available.
         
