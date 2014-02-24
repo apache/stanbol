@@ -153,6 +153,7 @@ public class SectionData {
                 while(activeChunkIt.hasNext()){
                 	ChunkData activeChunk = activeChunkIt.next();
                     if (tokenData.isLinkable){
+                        activeChunk.hasLinkable = true;
                         //ignore matchableCount in Chunks with linkable Tokens
                         activeChunk.matchableCount = -10; //by setting the count to -10
                     } else if(tokenData.isMatchable){

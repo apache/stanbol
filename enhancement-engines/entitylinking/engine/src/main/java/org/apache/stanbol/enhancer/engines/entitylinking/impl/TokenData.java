@@ -163,8 +163,9 @@ public class TokenData {
             for(Value<PosTag> posAnnotation : posAnnotations){
                 PosTag posTag = posAnnotation.value();
                 if(posTag.isMapped()){
-                    if(!Collections.disjoint(tpc.getMatchedLexicalCategories(), 
-                        posTag.getCategories())){
+                    if((!Collections.disjoint(tpc.getMatchedLexicalCategories(), posTag.getCategories())) ||
+                            (!Collections.disjoint(tpc.getMatchedPos(), posTag.getPosHierarchy())) ||
+                            tpc.getMatchedPosTags().contains(posTag.getTag())){
                         if(posAnnotation.probability() == Value.UNKNOWN_PROBABILITY ||
                                 posAnnotation.probability() >= tpc.getMinPosAnnotationProbability()){
                             //override selectedPosTag if present

@@ -228,13 +228,34 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
             	}
                 first = false;
                 if(token.isLinkable){
+                    log.trace("  + lookup because {} is linkable", token);
                     lookup = true;
                 } else if (token.isMatchable){
                     lastMatchable = token.index;
                     lastIndex = lastMatchable;
-                } //else if(token.hasAlphaNumeric){
-                //    lastIndex = token.index;
-                //}
+                }
+                //special rules for processable chunks (typically noun phrases)
+                //accept all tokens in processable chunks with a linkable or
+                //multiple matchable tokens.
+                if(!lookup && (!lpc.isIgnoreChunks()) && token.inChunk != null 
+                        && token.inChunk.isProcessable){
+                    if(token.inChunk.isNamedEntity()){
+                        if(log.isTraceEnabled()){
+                            log.trace("  + lookup because {} is part of Named Entity '{}'",
+                               token.token, token.inChunk.chunk.getSpan());
+                        }
+                        lookup = true;
+                    }
+                    if(token.inChunk.hasLinkable() || 
+                            (lpc.isLinkMultiMatchableTokensInChunk() && 
+                                    token.inChunk.getMatchableCount() > 1)){
+                        if(log.isTraceEnabled()){
+                            log.trace("  + lookup because {} is part of a linkable chunk '{}'", 
+                                token.token, token.inChunk.chunk.getSpan());
+                        }
+                        lookup = true;
+                    }
+                }
             }
             //lookahead
             if(!lookup && lastIndex >= 0 && sectionData != null){

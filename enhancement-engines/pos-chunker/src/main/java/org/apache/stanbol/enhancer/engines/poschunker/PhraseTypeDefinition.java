@@ -18,10 +18,13 @@ package org.apache.stanbol.enhancer.engines.poschunker;
 
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.Pos;
+import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 
 /**
  * Definition of a phrase type<p>
@@ -47,72 +50,24 @@ public class PhraseTypeDefinition {
 
     protected final LexicalCategory phraseType;
     
-    private final Set<LexicalCategory> startTypes;
-    protected final Set<LexicalCategory> readOnlyStartTypes;
-    private final Set<LexicalCategory> prefixTypes;
-    protected final Set<LexicalCategory> readOnlyPrefixTypes;
-    private final Set<LexicalCategory> continuationTypes;
-    protected final Set<LexicalCategory> readOnlyContinuationTypes;
-    private final Set<LexicalCategory> requiredTypes;
-    protected final Set<LexicalCategory> readOnlyRequiredTypes;
-    private final Set<LexicalCategory> endTypes;
-    protected final Set<LexicalCategory> readOnlyEndTypes;
+    private final TokenTypeDefinition startTypeDefinition;
+    private final TokenTypeDefinition prefixTypeDefinition;
+    private final TokenTypeDefinition continuationTypeDefinition;
+    private final TokenTypeDefinition requiredTypeDefinition;
+    private final TokenTypeDefinition endTypeDefinition;
     
     public PhraseTypeDefinition(LexicalCategory phraseType) {
         if(phraseType == null){
             throw new IllegalArgumentException("The parsed PhraseType MUST NOT be NULL!");
         }
         this.phraseType = phraseType;
-        startTypes = EnumSet.of(phraseType);
-        readOnlyStartTypes = Collections.unmodifiableSet(startTypes);
-        prefixTypes = EnumSet.of(phraseType);
-        readOnlyPrefixTypes = Collections.unmodifiableSet(prefixTypes);
-        continuationTypes = EnumSet.of(phraseType);
-        readOnlyContinuationTypes = Collections.unmodifiableSet(continuationTypes);
-        requiredTypes = EnumSet.of(phraseType);
-        readOnlyRequiredTypes = Collections.unmodifiableSet(requiredTypes);
-        endTypes = EnumSet.of(phraseType);
-        readOnlyEndTypes = Collections.unmodifiableSet(startTypes);
+        startTypeDefinition = new TokenTypeDefinition(phraseType);
+        prefixTypeDefinition = new TokenTypeDefinition(phraseType);
+        continuationTypeDefinition = new TokenTypeDefinition(phraseType);
+        requiredTypeDefinition = new TokenTypeDefinition(phraseType);
+        endTypeDefinition = new TokenTypeDefinition(phraseType);
     }
     
-    public boolean addStartType(LexicalCategory...types){
-        return add(startTypes,types);
-    }
-
-    public boolean addPrefixType(LexicalCategory...types){
-        return add(prefixTypes,types);
-    }
-    
-    public boolean addContinuationType(LexicalCategory...types){
-        return add(continuationTypes,types);
-    }
-    
-    public boolean addRequiredType(LexicalCategory...types){
-        return add(requiredTypes,types);
-    }
-    public boolean addEndType(LexicalCategory...types){
-        return add(endTypes,types);
-    }
-    
-    public boolean removeStartType(LexicalCategory...types){
-        return remove(startTypes,types);
-    }
-    
-    public boolean removePrefixType(LexicalCategory...types){
-        return remove(prefixTypes,types);
-    }
-    
-    public boolean removeContinuationType(LexicalCategory...types){
-        return remove(continuationTypes,types);
-    }
-    
-    public boolean removeRequiredType(LexicalCategory...types){
-        return remove(requiredTypes,types);
-    }
-
-    public boolean removeEndType(LexicalCategory...types){
-        return remove(endTypes,types);
-    }
     /**
      * Getter for the type of this phrase definition
      * @return
@@ -126,8 +81,8 @@ public class PhraseTypeDefinition {
      * @return the read only set with {@link LexicalCategory LexicalCategories}
      * that can start a phrase of that type
      */
-    public Set<LexicalCategory> getStartType(){
-        return readOnlyStartTypes;
+    public TokenTypeDefinition getStartType(){
+        return startTypeDefinition;
     }
     /**
      * Getter for the read only set with the prefix types
@@ -138,8 +93,8 @@ public class PhraseTypeDefinition {
      * considered in prefixes (e.g. "A nice weekend") but excluded after the
      * first noun (e.g. "the trip last week"). 
      */
-    public Set<LexicalCategory> getPrefixType(){
-        return readOnlyPrefixTypes;
+    public TokenTypeDefinition getPrefixType(){
+        return prefixTypeDefinition;
     }
     
     /**
@@ -151,8 +106,8 @@ public class PhraseTypeDefinition {
      * considered in prefixes (e.g. "A nice weekend") but excluded after the
      * first noun (e.g. "the trip last week"). 
      */
-    public Set<LexicalCategory> getContinuationType(){
-        return readOnlyContinuationTypes;
+    public TokenTypeDefinition getContinuationType(){
+        return continuationTypeDefinition;
     }
     
     /**
@@ -160,8 +115,8 @@ public class PhraseTypeDefinition {
      * @return the read only set with {@link LexicalCategory LexicalCategories}
      * that MUST occur within a phrase of that type
      */
-    public Set<LexicalCategory> getRequiredType(){
-        return readOnlyRequiredTypes;
+    public TokenTypeDefinition getRequiredType(){
+        return requiredTypeDefinition;
     }
     
     /**
@@ -169,40 +124,263 @@ public class PhraseTypeDefinition {
      * @return the read only set with {@link LexicalCategory LexicalCategories}
      * that can end a phrase of that type
      */
-    public Set<LexicalCategory> getEndType(){
-        return readOnlyEndTypes;
-    }
-
-    private boolean add(Set<LexicalCategory> set, LexicalCategory...types){
-        boolean changed = false;
-        if(types != null){
-            for(LexicalCategory type : types){
-                if(type != null){
-                    if(set.add(type)){
-                        changed = true;
-                    }
-                }
-            }
-        }
-        return changed;
-    }
-    
-    private boolean remove(Set<LexicalCategory> set, LexicalCategory...types){
-        boolean changed = false;
-        if(types != null){
-            for(LexicalCategory type : types){
-                if(type != null){
-                    if(set.remove(type)){
-                        changed = true;
-                    }
-                }
-            }
-        }
-        return changed;
+    public TokenTypeDefinition getEndType(){
+        return endTypeDefinition;
     }
     
     @Override
     public String toString() {
     	return phraseType.name();
     }
+    
+    public static class TokenTypeDefinition {
+        
+        private final Set<LexicalCategory> categories = EnumSet.noneOf(LexicalCategory.class);
+        private Set<Pos> posTags = EnumSet.noneOf(Pos.class);
+        private Set<Pos> excludedPosTags = EnumSet.noneOf(Pos.class);
+        private Set<String> tags = new HashSet<String>();
+        
+        /**
+         * Used by the constructor of the {@link PhraseTypeDefinition} class
+         * @param lc
+         */
+        private TokenTypeDefinition(LexicalCategory lc){
+            this(Collections.singleton(lc),null);
+        }
+        
+        public TokenTypeDefinition(Set<LexicalCategory> categories, Set<Pos> posTags, String...tags) {
+            if(categories != null){
+                for(LexicalCategory lc : categories){
+                    if(lc != null){
+                        this.categories.add(lc);
+                    }
+                }
+            }
+            if(posTags != null){
+                for(Pos pos : posTags){
+                    if(pos != null){
+                        this.posTags.add(pos);
+                    }
+                }
+            }
+            if(tags != null){
+                for(String tag : tags){
+                    if(tag != null){
+                        this.tags.add(tag);
+                    }
+                }
+            }
+        }
+        /**
+         * Read-/writeable set of {@link LexicalCategory LexicalCategories}
+         * @return the set of lexical categories
+         */
+        public Set<LexicalCategory> getCategories() {
+            return categories;
+        }
+        /**
+         * Adds the parsed {@link LexicalCategory LexicalCategories}
+         * @param categories the LexicalCategories
+         * @return if the {@link TokenTypeDefinition} was updated by this operation
+         */
+        public boolean addCategories(LexicalCategory...categories){
+            return add(this.categories, categories);
+        }
+        
+        /**
+         * Removes the parsed {@link LexicalCategory LexicalCategories}
+         * @param categories the LexicalCategories
+         * @return if the {@link TokenTypeDefinition} was updated by this operation
+         */
+        public boolean removeCategories(LexicalCategory...categories){
+            return remove(this.categories, categories);
+        }
+        
+        /**
+         * Read-/writeable set of {@link Pos} tags
+         * @return the set of POS tags
+         */
+        public Set<Pos> getPosTags() {
+            return posTags;
+        }
+        
+        /**
+         * Adds the parsed {@link Pos} tags
+         * @param pos the {@link Pos} tags
+         * @return if the {@link TokenTypeDefinition} was updated by this operation
+         */
+        public boolean addPosTags(Pos...pos){
+            return add(this.posTags, pos);
+        }
+        
+        /**
+         * Removes the parsed {@link Pos} tags
+         * @param pos the {@link Pos} tags
+         * @return if the {@link TokenTypeDefinition} was updated by this operation
+         */
+        public boolean removePosTags(Pos...pos){
+            return remove(this.posTags, pos);
+        }
+        
+        /**
+         * Read-/writeable set of excluded {@link Pos} tags. This allows to
+         * include a {@link LexicalCategory} but to exclude some specific 
+         * {@link Pos} member of this category.
+         * @return the set of excluded POS tags
+         */
+        public Set<Pos> getExcludedPosTags() {
+            return excludedPosTags;
+        }
+        
+        /**
+         * Adds the parsed {@link Pos} tags to the set of excluded {@link Pos} tags
+         * @param pos the {@link Pos} tags
+         * @return if the {@link TokenTypeDefinition} was updated by this operation
+         */
+        public boolean addExcludedPosTags(Pos...pos){
+            return add(this.excludedPosTags, pos);
+        }
+        
+        /**
+         * Removes the parsed {@link Pos} tags to the set of excluded {@link Pos} tags
+         * @param pos the {@link Pos} tags
+         * @return if the {@link TokenTypeDefinition} was updated by this operation
+         */
+        public boolean removeExcludedPosTags(Pos...pos){
+            return remove(this.excludedPosTags, pos);
+        }
+        /**
+         * Read-/writeable set of string tags (as provided by the POS tagger)
+         * @return the set of String tags
+         */
+        public Set<String> getTags() {
+            return tags;
+        }
+        /**
+         * Adds the parsed tags
+         * @param tag the tags
+         * @return if the {@link TokenTypeDefinition} was updated by this operation
+         */
+        public boolean addTags(String...tag){
+            return add(this.tags, tag);
+        }
+        
+        /**
+         * Removes the parsed tags
+         * @param tag the tags
+         * @return if the {@link TokenTypeDefinition} was updated by this operation
+         */
+        public boolean removeTags(String...tag){
+            return remove(this.tags, tag);
+        }
+        
+        /**
+         * Checks if a posTag matches against this TokenTypeDefinition
+         * @param posTag the posTag to check
+         * @return <code>true</code> in case of a match. Otherwise <code>false</code>
+         * @throws NullPointerException if the parsed posTag is <code>null</code>
+         */
+        public boolean matches(PosTag posTag){
+            //check against incldues categories, posTags and tags
+            boolean matches = 
+                    (!Collections.disjoint(posTag.getCategories(), categories)) ||
+                    (!Collections.disjoint(posTag.getPosHierarchy(), posTags)) ||
+                    tags.contains(posTag.getTag());
+            //if there is a match we need still to check for excluded POS tags
+            return matches ? Collections.disjoint(posTag.getPosHierarchy(),excludedPosTags) :
+                false;
+        }
+        
+        private <T> boolean add(Set<T> set, T...types){
+            boolean changed = false;
+            if(types != null){
+                for(T type : types){
+                    if(type != null){
+                        if(set.add(type)){
+                            changed = true;
+                        }
+                    }
+                }
+            }
+            return changed;
+        }
+        
+        private <T> boolean remove(Set<T> set, T...types){
+            boolean changed = false;
+            if(types != null){
+                for(T type : types){
+                    if(type != null){
+                        if(set.remove(type)){
+                            changed = true;
+                        }
+                    }
+                }
+            }
+            return changed;
+        }
+        
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            if(!categories.isEmpty()){
+                sb.append("Cat: ");
+                boolean first = true;
+                for(LexicalCategory lc : categories){
+                    if(first){
+                        first = false;
+                    } else {
+                        sb.append(", ");
+                    }
+                    sb.append(lc.name());
+                }
+            }
+            if(!posTags.isEmpty()){
+                if(sb.length() > 0){
+                    sb.append(" | ");
+                }
+                sb.append("Pos: ");
+                boolean first = true;
+                for(Pos pos : posTags){
+                    if(first){
+                        first = false;
+                    } else {
+                        sb.append(", ");
+                    }
+                    sb.append(pos.name());
+                }
+            }
+            if(!tags.isEmpty()){
+                if(sb.length() > 0){
+                    sb.append(" | ");
+                }
+                sb.append("Tags: ");
+                boolean first = true;
+                for(String tag : tags){
+                    if(first){
+                        first = false;
+                    } else {
+                        sb.append(", ");
+                    }
+                    sb.append(tag);
+                }
+            }
+            if(!excludedPosTags.isEmpty()){
+                if(sb.length() > 0){
+                    sb.append(" | ");
+                }
+                sb.append("Excluded: ");
+                boolean first = true;
+                for(Pos pos : excludedPosTags){
+                    if(first){
+                        first = false;
+                    } else {
+                        sb.append(", ");
+                    }
+                    sb.append(pos.name());
+                }
+            }
+            return sb.toString();
+        }
+    }
+    
 }

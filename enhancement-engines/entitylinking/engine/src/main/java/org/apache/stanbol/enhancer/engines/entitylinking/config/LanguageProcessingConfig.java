@@ -54,6 +54,13 @@ public class LanguageProcessingConfig implements Cloneable{
             EnumSet.of(LexicalCategory.Noun, LexicalCategory.Quantifier,LexicalCategory.Residual);
     
     /**
+     * The default set of {@link Pos} used to match (and search) for Entities <p>
+     * Matched Tokens are not used for linking, but are considered when matching
+     * label tokens of Entities with the Text.
+     */
+    public static final Set<Pos> DEFAULT_MATCHED_POS = EnumSet.of(Pos.Gerund);
+    
+    /**
      * The default set of {@link Pos} types that are used to lookup (link) Entities.
      * By defualt only {@link Pos#ProperNoun}s and two 
      * {@link LexicalCategory#Residual} acronyms and
@@ -139,6 +146,10 @@ public class LanguageProcessingConfig implements Cloneable{
 
     private Set<LexicalCategory> matchedLexicalCategories = DEFAULT_MATCHED_LEXICAL_CATEGORIES;
 
+    private Set<Pos> matchedPos = DEFAULT_MATCHED_POS;
+    
+    private Set<String> matchedPosTags = Collections.emptySet();
+    
     /**
      * The linked {@link Pos} categories
      */
@@ -244,6 +255,42 @@ public class LanguageProcessingConfig implements Cloneable{
             this.matchedLexicalCategories.addAll(matchedLexicalCategories);
         }
     }
+    /**
+     * Getter for the set of {@link Pos} tags used to match label tokens of
+     * suggested Entities
+     * @return the set of {@link Pos} tags used for matching
+     */
+    public Set<Pos> getMatchedPos(){
+        return matchedPos;
+    }
+    /**
+     * Setter for the matched {@link Pos} tags
+     * @param pos the set or <code>null</code>
+     * to set the {@link #DEFAULT_MATCHED_POS}
+     */
+    public void setMatchedPos(Set<Pos> pos) {
+        if(pos == null){
+            this.matchedPos = DEFAULT_MATCHED_POS;
+        } else {
+            this.matchedPos = EnumSet.noneOf(Pos.class);
+            this.matchedPos.addAll(pos);
+        }
+    }
+    public Set<String> getMatchedPosTags(){
+        return matchedPosTags;
+    }
+    
+    public void setMatchedPosTags(Set<String> matchedPosTags){
+        if(matchedPosTags == null){
+            this.matchedPosTags = Collections.emptySet();
+        } else if(matchedPosTags.contains(null)){
+            throw new IllegalArgumentException("The parsed set with matched POS tags MUST NOT contain the NULL element!");
+        } else {
+            this.matchedPosTags = matchedPosTags;
+        }
+
+    }
+    
     /**
      * The set of tags used for linking. This is useful if the string tags
      * used by the POS tagger are not mapped to {@link LexicalCategory} nor

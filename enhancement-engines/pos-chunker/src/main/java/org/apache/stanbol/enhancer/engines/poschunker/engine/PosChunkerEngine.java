@@ -52,6 +52,7 @@ import org.apache.stanbol.enhancer.nlp.model.Token;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
 import org.apache.stanbol.enhancer.nlp.phrase.PhraseTag;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
+import org.apache.stanbol.enhancer.nlp.pos.Pos;
 import org.apache.stanbol.enhancer.nlp.utils.LanguageConfiguration;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -126,22 +127,29 @@ public class PosChunkerEngine extends AbstractEnhancementEngine<RuntimeException
     //TODO: make configurable
     static {
         PhraseTypeDefinition nounPD = new PhraseTypeDefinition(LexicalCategory.Noun);
+        //NOTE: Pos.Acronym, Pos.Abbreviation, Pos.Foreign are also considered as
+        //      nouns by this definition.
+        nounPD.getRequiredType().addPosTags(Pos.Acronym, Pos.Abbreviation, Pos.Foreign);
         //start types noun (automatically included) pronoun or determiners, adjectives 
-        nounPD.addStartType(LexicalCategory.PronounOrDeterminer, LexicalCategory.Adjective);
+        nounPD.getStartType().addCategories(LexicalCategory.PronounOrDeterminer, LexicalCategory.Adjective);
+        nounPD.getStartType().addPosTags(Pos.Acronym, Pos.Abbreviation, Pos.Foreign);
         //prefix types are the same as start types (e.g. "the nice trip")
-        nounPD.addPrefixType(LexicalCategory.PronounOrDeterminer, LexicalCategory.Adjective);
+        nounPD.getPrefixType().addCategories(LexicalCategory.PronounOrDeterminer, LexicalCategory.Adjective);
+        nounPD.getPrefixType().addPosTags(Pos.Acronym, Pos.Abbreviation, Pos.Foreign);
         //continuation types are nouns and punctations. 
         //NOTE: Adverbs are excluded to avoid phrases like "the nice trip last week"
-        nounPD.addContinuationType(LexicalCategory.Punctuation);
+        nounPD.getContinuationType().addCategories(LexicalCategory.Punctuation);
+        nounPD.getContinuationType().addPosTags(Pos.Acronym, Pos.Abbreviation, Pos.Foreign);
         //end types are the same as start terms
-        nounPD.addEndType(LexicalCategory.PronounOrDeterminer, LexicalCategory.Adjective);
+        nounPD.getEndType().addCategories(LexicalCategory.PronounOrDeterminer, LexicalCategory.Adjective);
+        nounPD.getEndType().addPosTags(Pos.Acronym, Pos.Abbreviation, Pos.Foreign);
         //and required types do include a Noun (what is actually included by default)
         NOUN_PHRASE_TYPE = nounPD;
 
         PhraseTypeDefinition verbPD = new PhraseTypeDefinition(LexicalCategory.Verb);
-        verbPD.addStartType(LexicalCategory.Adverb);
-        verbPD.addContinuationType(LexicalCategory.Adverb,LexicalCategory.Punctuation);
-        verbPD.addEndType(LexicalCategory.Adverb);
+        verbPD.getStartType().addCategories(LexicalCategory.Adverb);
+        verbPD.getContinuationType().addCategories(LexicalCategory.Adverb,LexicalCategory.Punctuation);
+        verbPD.getEndType().addCategories(LexicalCategory.Adverb);
         //and required types do include a Verbs (what is actually included by default)
         VERB_PHRASE_TYPE = verbPD;
     }

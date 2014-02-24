@@ -24,6 +24,7 @@ import java.lang.ref.WeakReference;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
@@ -176,6 +177,7 @@ public class CorpusInfo {
         if(corpus != null){
             //on first usage replace a WeakReference with a SoftReference
             if(taggerCorpusRef instanceof WeakReference<?>){
+                log.debug(" ... convert Weak to Soft Reference for Corpus {}", fst);
                 taggerCorpusRef.clear();
                 taggerCorpusRef = new SoftReference<TaggerFstCorpus>(corpus);
             }
@@ -183,6 +185,7 @@ public class CorpusInfo {
             taggerCorpusRef = null; //reset to null as the reference was taken
         }
         if(corpus == null) {
+            log.info(" ... load FST corpus {}",fst);
             try { //STANBOL-1177: load FST models in AccessController.doPrivileged(..)
                 corpus = AccessController.doPrivileged(new PrivilegedExceptionAction<TaggerFstCorpus>() {
                     public TaggerFstCorpus run() throws IOException {
@@ -194,9 +197,17 @@ public class CorpusInfo {
                                 //I need to set fstDate here, because I can not
                                 //access lastModified() outside doPrivileged
                                 fstDate = new Date(fst.lastModified());
+                                if(log.isInfoEnabled()){
+                                    log.info(" ... loaded FST (date: {})", 
+                                        SimpleDateFormat.getDateTimeInstance().format(fstDate));
+                                }
+                            } else {
+                                log.warn(" ... no corpus loaded from {}",fst);
                             }
                             return corpus;
                         } else {
+                            log.warn(" ... unable to load FST from {} (exists: {}, fileError {})",
+                                new Object[]{fst, fst.exists(),fstFileError});
                             return null;
                         }
                     }

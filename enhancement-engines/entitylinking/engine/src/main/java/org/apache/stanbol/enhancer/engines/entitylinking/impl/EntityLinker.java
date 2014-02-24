@@ -315,14 +315,27 @@ public class EntityLinker {
                     log.warn(" currnet ranking : {}",suggestions);
                     log.warn("  ... this will result in worng confidence values relative to the best match");
                 }
+                int maxSuggestions = linkerConfig.getMaxSuggestions();
+                if(suggestions.size() > maxSuggestions && 
+                        linkerConfig.isIncludeSuggestionsWithSimilarScore()){
+                    //include suggestions with similar score
+                    double minIncludeScore = suggestions.get(maxSuggestions).getScore();
+                    int numInclude = maxSuggestions + 1; //the next element
+                    double actScore;
+                    do {
+                        actScore = suggestions.get(numInclude).getScore();
+                        numInclude++; //increase for the next iteration
+                    } while(numInclude < suggestions.size() && actScore >= minIncludeScore);
+                    maxSuggestions = numInclude - 1;
+                }
+                //remove all suggestions > maxSuggestions
+                if(suggestions.size() > maxSuggestions){
+                    suggestions.subList(maxSuggestions,suggestions.size()).clear();
+                }
                 //adapt equals rankings based on the entity rank
                 if(linkerConfig.isRankEqualScoresBasedOnEntityRankings()){
                     adaptScoresForEntityRankings(suggestions);
                     adaptScoresForEntityRankings(partialMatches);
-                }
-                //remove all suggestions > config.maxSuggestions
-                if(suggestions.size() > linkerConfig.getMaxSuggestions()){
-                    suggestions.subList(linkerConfig.getMaxSuggestions(),suggestions.size()).clear();
                 }
                 if(log.isDebugEnabled()){
                     log.debug("  >> Suggestions:");
