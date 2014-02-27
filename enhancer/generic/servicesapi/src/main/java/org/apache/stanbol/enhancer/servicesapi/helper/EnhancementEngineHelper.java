@@ -26,11 +26,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.clerezza.rdf.core.Language;
@@ -802,16 +804,26 @@ public class EnhancementEngineHelper {
         Map<String,Object> properties = new HashMap<String,Object>();
         log.debug("Retrieve EnhancementProperties for Engine {} and ContentItem {}", 
             engine.getName(), ci.getUri());
+        Set<String> engineKeys = new HashSet<String>();
         for(Entry<String,Object> entry : epContentPart.entrySet()){
             String key = entry.getKey();
             int sepIndex = key.indexOf(':');
             if(sepIndex < 0){
-                log.debug(" - include chain property '{}'",key);
-                properties.put(key, entry.getValue());
+                if(!engineKeys.contains(key)){
+                    log.debug(" - include chain property '{}'",key);
+                    properties.put(key, entry.getValue());
+                } else {
+                    log.debug(" - exclude chain property '{}' because property is "
+                        + "present in engine level.", key);
+                }
             } else if(key.startsWith(prefix) && key.length() > prefix.length()){
                 key = key.substring(prefix.length(),key.length());
                 log.debug(" - include engine property '{}'",key);
-                properties.put(key, entry.getValue());
+                engineKeys.add(key);
+                Object value = properties.put(key, entry.getValue());
+                if(value != null && log.isDebugEnabled()){
+                    log.debug("    ... overrides Chain level value: {}",value);
+                }
             } else {
                 log.debug(" - exclude engine property '{}'",key);
             }
