@@ -21,9 +21,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.marmotta.ldpath.model.programs.Program;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 
-import at.newmedialab.ldpath.model.programs.Program;
 
 /**
  * This interface provides create, retrieve, delete operations for LDPath programs to be managed in the scope

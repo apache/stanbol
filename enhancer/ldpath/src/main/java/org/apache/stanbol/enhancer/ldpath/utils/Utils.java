@@ -23,12 +23,11 @@ import java.util.Map;
 
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
+import org.apache.marmotta.ldpath.api.selectors.NodeSelector;
+import org.apache.marmotta.ldpath.parser.LdPathParser;
+import org.apache.marmotta.ldpath.parser.ParseException;
 import org.apache.stanbol.commons.ldpath.clerezza.ClerezzaBackend;
-
-import at.newmedialab.ldpath.api.backend.RDFBackend;
-import at.newmedialab.ldpath.api.selectors.NodeSelector;
-import at.newmedialab.ldpath.parser.ParseException;
-import at.newmedialab.ldpath.parser.RdfPathParser;
 
 public final class Utils {
     
@@ -67,7 +66,7 @@ public final class Utils {
         return parseSelector(path, (Map<String,String>)null);
     }
     public static NodeSelector<Resource> parseSelector(String path, Map<String,String> additionalNamespaceMappings) throws ParseException {
-        RdfPathParser<Resource> parser = new RdfPathParser<Resource>(
+        LdPathParser<Resource> parser = new LdPathParser<Resource>(
                getEmptyBackend(), getConfig(), new StringReader(path));
         return parser.parseSelector(additionalNamespaceMappings);
     }

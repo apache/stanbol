@@ -24,6 +24,7 @@ import java.io.Reader;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,14 +38,13 @@ import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import at.newmedialab.ldpath.LDPath;
-import at.newmedialab.ldpath.api.backend.RDFBackend;
-import at.newmedialab.ldpath.api.transformers.NodeTransformer;
-import at.newmedialab.ldpath.exception.LDPathParseException;
-import at.newmedialab.ldpath.model.programs.Program;
-import at.newmedialab.ldpath.model.transformers.IdentityTransformer;
-import at.newmedialab.ldpath.parser.Configuration;
+import org.apache.marmotta.ldpath.LDPath;
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
+import org.apache.marmotta.ldpath.api.transformers.NodeTransformer;
+import org.apache.marmotta.ldpath.exception.LDPathParseException;
+import org.apache.marmotta.ldpath.model.programs.Program;
+import org.apache.marmotta.ldpath.model.transformers.IdentityTransformer;
+import org.apache.marmotta.ldpath.parser.Configuration;
 
 /**
  * LDpath based processor that tries to cast the 
@@ -234,7 +234,8 @@ public class LdpathSourceProcessor implements EntityProcessor {
                                 NodeTransformer nt = transformer.get(type.toString());
                                 if(nt != null){ //add typed literal
                                     try {
-                                        result.add(entry.getKey(), nt.transform(backend, value));
+                                        result.add(entry.getKey(), nt.transform(backend, value, 
+                                            Collections.<String,String>emptyMap()));
                                     } catch (RuntimeException e) {
                                        log.info("Unable to transform {} to dataType {} -> will use lexical form",value,type);
                                        result.add(entry.getKey(),backend.stringValue(value));

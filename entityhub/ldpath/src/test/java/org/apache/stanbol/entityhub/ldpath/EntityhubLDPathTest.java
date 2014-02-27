@@ -18,6 +18,7 @@ package org.apache.stanbol.entityhub.ldpath;
 
 import static org.apache.stanbol.entityhub.ldpath.LDPathUtils.getReader;
 import static org.junit.Assert.*;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,6 +28,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.marmotta.ldpath.model.programs.Program;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.ldpath.impl.LDPathTestBase;
 import org.apache.stanbol.entityhub.ldpath.transformer.ValueConverterTransformerAdapter;
@@ -39,9 +41,6 @@ import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import at.newmedialab.ldpath.api.backend.RDFBackend;
-import at.newmedialab.ldpath.model.programs.Program;
 
 public class EntityhubLDPathTest extends LDPathTestBase {
 

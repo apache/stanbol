@@ -63,6 +63,8 @@
     <solr-version>4.4.0</solr-version>
     <pax-exam-version>2.3.0.M1</pax-exam-version>
     <sesame-version>2.7.7</sesame-version>
+    <marmotta-version>3.2.0-SNAPSHOT</marmotta-version>
+    <ldpath-version>${marmotta-version}</ldpath-version>
     <sourceReleaseAssemblyDescriptor>stanbol-source-release-zip-tar</sourceReleaseAssemblyDescriptor>    
   </properties>
 
@@ -827,6 +829,11 @@
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
+        <artifactId>log4j-over-slf4j</artifactId>
+        <version>1.6.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
         <artifactId>slf4j-jdk14</artifactId>
         <version>1.6.1</version>
       </dependency>
@@ -1251,16 +1258,71 @@
       <type>jar</type>
     </dependency>
     
-    <!-- LD Path -->
+    <!-- Marmotta LD Path -->
     <dependency>
-      <groupId>at.newmedialab.ldpath</groupId>
+      <groupId>org.apache.marmotta</groupId>
       <artifactId>ldpath-api</artifactId>
-      <version>0.9.5</version>
+      <version>${ldpath-version}</version>
     </dependency>
     <dependency>
-      <groupId>at.newmedialab.ldpath</groupId>
-      <artifactId>ldpath-core-bundle</artifactId>
-      <version>0.9.5</version>
+      <groupId>org.apache.marmotta</groupId>
+      <artifactId>ldpath-core</artifactId>
+      <version>${ldpath-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.marmotta</groupId>
+      <artifactId>ldpath-functions-collections</artifactId>
+      <version>${ldpath-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.marmotta</groupId>
+      <artifactId>ldpath-functions-date</artifactId>
+      <version>${ldpath-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.marmotta</groupId>
+      <artifactId>ldpath-functions-html</artifactId>
+      <version>${ldpath-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.marmotta</groupId>
+      <artifactId>ldpath-functions-math</artifactId>
+      <version>${ldpath-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.marmotta</groupId>
+      <artifactId>ldpath-functions-text</artifactId>
+      <version>${ldpath-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.marmotta</groupId>
+      <artifactId>ldpath-functions-xml</artifactId>
+      <version>${ldpath-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.marmotta</groupId>
+      <artifactId>ldpath-backend-jena</artifactId>
+      <version>${ldpath-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.marmotta</groupId>
+      <artifactId>ldpath-backend-sesame</artifactId>
+      <version>${ldpath-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.marmotta</groupId>
+      <artifactId>ldpath-backend-linkeddata</artifactId>
+      <version>${ldpath-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.marmotta</groupId>
+      <artifactId>ldpath-backend-file</artifactId>
+      <version>${ldpath-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.marmotta</groupId>
+      <artifactId>ldpath-template</artifactId>
+      <version>${ldpath-version}</version>
     </dependency>
     
     <!-- Apache Tika -->

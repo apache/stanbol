@@ -20,9 +20,8 @@ import java.util.Collection;
 
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.stanbol.enhancer.ldpath.backend.ContentItemBackend;
-
-import at.newmedialab.ldpath.api.backend.RDFBackend;
-import at.newmedialab.ldpath.api.functions.SelectorFunction;
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
+import org.apache.marmotta.ldpath.api.functions.SelectorFunction;
 
 /**
  * This class checks if the {@link RDFBackend} parsed to 
@@ -34,7 +33,7 @@ import at.newmedialab.ldpath.api.functions.SelectorFunction;
  * @author Rupert Westenthaler
  *
  */
-public abstract class ContentItemFunction implements SelectorFunction<Resource> {
+public abstract class ContentItemFunction extends SelectorFunction<Resource> {
     
     private final String name;
 
@@ -45,9 +44,9 @@ public abstract class ContentItemFunction implements SelectorFunction<Resource> 
         this.name = name;
     }
     
-    public final Collection<Resource> apply(RDFBackend<Resource> backend, Collection<Resource>... args) throws IllegalArgumentException {
+    public final Collection<Resource> apply(RDFBackend<Resource> backend, Resource context, Collection<Resource>... args) throws IllegalArgumentException {
         if(backend instanceof ContentItemBackend){
-            return apply((ContentItemBackend)backend, args);
+            return apply((ContentItemBackend)backend, context, args);
         } else {
             throw new IllegalArgumentException("This ContentFunction can only be " +
                     "used in combination with an RDFBackend of type '"+
@@ -56,10 +55,10 @@ public abstract class ContentItemFunction implements SelectorFunction<Resource> 
         }
     };
 
-    public abstract Collection<Resource> apply(ContentItemBackend backend,Collection<Resource>... args);
+    public abstract Collection<Resource> apply(ContentItemBackend backend,Resource context, Collection<Resource>... args);
     
     @Override
-    public String getPathExpression(RDFBackend<Resource> backend) {
+    protected String getLocalName() {
         return name;
     }
 }

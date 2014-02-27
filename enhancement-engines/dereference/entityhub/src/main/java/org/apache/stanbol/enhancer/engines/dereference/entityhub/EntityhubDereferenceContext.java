@@ -13,6 +13,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
+import org.apache.marmotta.ldpath.exception.LDPathParseException;
+import org.apache.marmotta.ldpath.model.programs.Program;
 import org.apache.stanbol.enhancer.engines.dereference.DereferenceConfigurationException;
 import org.apache.stanbol.enhancer.engines.dereference.DereferenceConstants;
 import org.apache.stanbol.enhancer.engines.dereference.DereferenceContext;
@@ -28,10 +31,6 @@ import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import at.newmedialab.ldpath.api.backend.RDFBackend;
-import at.newmedialab.ldpath.exception.LDPathParseException;
-import at.newmedialab.ldpath.model.programs.Program;
 
 public class EntityhubDereferenceContext extends DereferenceContext {
     
@@ -126,7 +125,7 @@ public class EntityhubDereferenceContext extends DereferenceContext {
             //finally validate if all mappings of the program do use a URI as key
             //also store used fieldNames as we need them later
             Set<String> contextFields = new HashSet<String>();
-            for(at.newmedialab.ldpath.model.fields.FieldMapping<?,Object> mapping : ldpathProgram.getFields()) {
+            for(org.apache.marmotta.ldpath.model.fields.FieldMapping<?,Object> mapping : ldpathProgram.getFields()) {
                 try {
                     new URI(mapping.getFieldName());
                     contextFields.add(mapping.getFieldName());
@@ -140,7 +139,7 @@ public class EntityhubDereferenceContext extends DereferenceContext {
             }
             //append the mappings configured for the engine
             if(dereferencer.getLdPathProgram() != null){
-                for(at.newmedialab.ldpath.model.fields.FieldMapping<?,Object> mapping : dereferencer.getLdPathProgram().getFields()) {
+                for(org.apache.marmotta.ldpath.model.fields.FieldMapping<?,Object> mapping : dereferencer.getLdPathProgram().getFields()) {
                     if(!contextFields.contains(mapping.getFieldName())){
                         ldpathProgram.addMapping(mapping);
                     }//else ignore mappings for fields specified in the context

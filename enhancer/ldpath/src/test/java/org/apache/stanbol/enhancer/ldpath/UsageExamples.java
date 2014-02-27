@@ -16,8 +16,8 @@
 */
 package org.apache.stanbol.enhancer.ldpath;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.apache.stanbol.enhancer.ldpath.ContentItemBackendTest.getTestResource;
 import static org.apache.stanbol.enhancer.ldpath.ContentItemBackendTest.parseRdfData;
 import static org.junit.Assert.assertFalse;
@@ -37,6 +37,9 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.serializedform.ParsingProvider;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.apache.commons.io.IOUtils;
+import org.apache.marmotta.ldpath.LDPath;
+import org.apache.marmotta.ldpath.exception.LDPathParseException;
+import org.apache.marmotta.ldpath.model.programs.Program;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.ldpath.backend.ContentItemBackend;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -49,10 +52,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import at.newmedialab.ldpath.LDPath;
-import at.newmedialab.ldpath.exception.LDPathParseException;
-import at.newmedialab.ldpath.model.programs.Program;
 
 /**
  * Uses the "example.*" files to build a contentItem. This contains a big
@@ -127,17 +126,17 @@ public class UsageExamples {
     @Test
     public void exampleExtractedPersons() throws LDPathParseException {
         StringBuilder program = new StringBuilder();
-        program.append("personMentions = fn:textAnnotation(.)" +
+        program.append("personMentions = fn:textAnnotation()" +
         		"[dc:type is dbpedia-ont:Person]/fise:selected-text :: xsd:string;");
         //this uses the labels of suggested person with the highest confidence
         //but also the selected-text as fallback if no entity is suggested.
-        program.append("personNames = fn:textAnnotation(.)" +
-                "[dc:type is dbpedia-ont:Person]/fn:first(fn:suggestion(.,\"1\")/fise:entity-label,fise:selected-text) :: xsd:string;");
-        program.append("linkedPersons = fn:textAnnotation(.)" +
-                "[dc:type is dbpedia-ont:Person]/fn:suggestedEntity(.,\"1\") :: xsd:anyURI;");
+        program.append("personNames = fn:textAnnotation()" +
+                "[dc:type is dbpedia-ont:Person]/fn:first(fn:suggestion(\"1\")/fise:entity-label,fise:selected-text) :: xsd:string;");
+        program.append("linkedPersons = fn:textAnnotation()" +
+                "[dc:type is dbpedia-ont:Person]/fn:suggestedEntity(\"1\") :: xsd:anyURI;");
         //this selects only linked Artists
-        program.append("linkedArtists = fn:textAnnotation(.)" +
-                "[dc:type is dbpedia-ont:Person]/fn:suggestion(.)" +
+        program.append("linkedArtists = fn:textAnnotation()" +
+                "[dc:type is dbpedia-ont:Person]/fn:suggestion()" +
                 "[fise:entity-type is dbpedia-ont:Artist]/fise:entity-reference :: xsd:anyURI;");
         Program<Resource> personProgram = ldpath.parseProgram(new StringReader(program.toString()));
         log.info("- - - - - - - - - - - - - ");
@@ -172,17 +171,17 @@ public class UsageExamples {
     @Test
     public void exampleExtractedPlaces() throws LDPathParseException {
         StringBuilder program = new StringBuilder();
-        program.append("locationMentions = fn:textAnnotation(.)" +
+        program.append("locationMentions = fn:textAnnotation()" +
                 "[dc:type is dbpedia-ont:Place]/fise:selected-text :: xsd:string;");
         //this uses the labels of suggested places with the highest confidence
         //but also the selected-text as fallback if no entity is suggested.
-        program.append("locationNames = fn:textAnnotation(.)" +
-                "[dc:type is dbpedia-ont:Place]/fn:first(fn:suggestion(.,\"1\")/fise:entity-label,fise:selected-text) :: xsd:string;");
-        program.append("linkedPlaces = fn:textAnnotation(.)" +
-                "[dc:type is dbpedia-ont:Place]/fn:suggestedEntity(.,\"1\") :: xsd:anyURI;");
+        program.append("locationNames = fn:textAnnotation()" +
+                "[dc:type is dbpedia-ont:Place]/fn:first(fn:suggestion(\"1\")/fise:entity-label,fise:selected-text) :: xsd:string;");
+        program.append("linkedPlaces = fn:textAnnotation()" +
+                "[dc:type is dbpedia-ont:Place]/fn:suggestedEntity(\"1\") :: xsd:anyURI;");
         //this selects only linked Artists
-        program.append("linkedCountries = fn:textAnnotation(.)" +
-                "[dc:type is dbpedia-ont:Place]/fn:suggestion(.)" +
+        program.append("linkedCountries = fn:textAnnotation()" +
+                "[dc:type is dbpedia-ont:Place]/fn:suggestion()" +
                 "[fise:entity-type is dbpedia-ont:Country]/fise:entity-reference :: xsd:anyURI;");
         Program<Resource> personProgram = ldpath.parseProgram(new StringReader(program.toString()));
         log.info("- - - - - - - - - - - - -");
@@ -200,18 +199,18 @@ public class UsageExamples {
     @Test
     public void exampleExtractedOrganization() throws LDPathParseException {
         StringBuilder program = new StringBuilder();
-        program.append("orgMentions = fn:textAnnotation(.)" +
+        program.append("orgMentions = fn:textAnnotation()" +
                 "[dc:type is dbpedia-ont:Organisation]/fise:selected-text :: xsd:string;");
         //this uses the labels of suggested organisations with the highest confidence
         //but also the selected-text as fallback if no entity is suggested.
-        program.append("orgNames = fn:textAnnotation(.)" +
-                "[dc:type is dbpedia-ont:Organisation]/fn:first(fn:suggestion(.,\"1\")/fise:entity-label,fise:selected-text) :: xsd:string;");
-        program.append("linkedOrgs = fn:textAnnotation(.)" +
-                "[dc:type is dbpedia-ont:Organisation]/fn:suggestedEntity(.,\"1\") :: xsd:anyURI;");
+        program.append("orgNames = fn:textAnnotation()" +
+                "[dc:type is dbpedia-ont:Organisation]/fn:first(fn:suggestion(\"1\")/fise:entity-label,fise:selected-text) :: xsd:string;");
+        program.append("linkedOrgs = fn:textAnnotation()" +
+                "[dc:type is dbpedia-ont:Organisation]/fn:suggestedEntity(\"1\") :: xsd:anyURI;");
         //this selects only linked education organisations
         //NOTE: this does not use a limit on suggestion(.)!
-        program.append("linkedEducationOrg = fn:textAnnotation(.)" +
-                "[dc:type is dbpedia-ont:Organisation]/fn:suggestion(.)" +
+        program.append("linkedEducationOrg = fn:textAnnotation()" +
+                "[dc:type is dbpedia-ont:Organisation]/fn:suggestion()" +
                 "[fise:entity-type is dbpedia-ont:EducationalInstitution]/fise:entity-reference :: xsd:anyURI;");
         Program<Resource> personProgram = ldpath.parseProgram(new StringReader(program.toString()));
         log.info("- - - - - - - - - - - - -");
@@ -229,11 +228,11 @@ public class UsageExamples {
     @Test
     public void exampleExtractedConcepts() throws LDPathParseException {
         StringBuilder program = new StringBuilder();
-        program.append("conceptNames = fn:entityAnnotation(.)" +
+        program.append("conceptNames = fn:entityAnnotation()" +
                 "[fise:entity-type is skos:Concept]/fise:entity-label :: xsd:anyURI;");
         //this uses the labels of suggested person with the highest confidence
         //but also the selected-text as fallback if no entity is suggested.
-        program.append("linkedConcepts = fn:entityAnnotation(.)" +
+        program.append("linkedConcepts = fn:entityAnnotation()" +
                 "[fise:entity-type is skos:Concept]/fise:entity-reference :: xsd:anyURI;");
         Program<Resource> personProgram = ldpath.parseProgram(new StringReader(program.toString()));
         log.info("- - - - - - - - - - - - -");

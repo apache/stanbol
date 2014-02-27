@@ -37,12 +37,11 @@ import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.utils.UnionMGraph;
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
 import org.apache.stanbol.commons.ldpath.clerezza.ClerezzaBackend;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import at.newmedialab.ldpath.api.backend.RDFBackend;
 
 /**
  * Basically a {@link ClerezzaBackend} over {@link ContentItem#getMetadata()}

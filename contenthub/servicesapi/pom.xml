@@ -62,8 +62,8 @@
       <artifactId>solr-solrj</artifactId>
     </dependency>
     <dependency>
-      <groupId>at.newmedialab.ldpath</groupId>
-      <artifactId>ldpath-core-bundle</artifactId>
+      <groupId>org.apache.marmotta</groupId>
+      <artifactId>ldpath-core</artifactId>
     </dependency>
   </dependencies>
 </project>

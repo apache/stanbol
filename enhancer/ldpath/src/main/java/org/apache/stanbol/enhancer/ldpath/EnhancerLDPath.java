@@ -27,18 +27,17 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHAN
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TOPICANNOTATION;
 
 import org.apache.clerezza.rdf.core.Resource;
+import org.apache.marmotta.ldpath.api.functions.SelectorFunction;
+import org.apache.marmotta.ldpath.api.selectors.NodeSelector;
+import org.apache.marmotta.ldpath.model.Constants;
+import org.apache.marmotta.ldpath.parser.Configuration;
+import org.apache.marmotta.ldpath.parser.DefaultConfiguration;
+import org.apache.marmotta.ldpath.parser.ParseException;
 import org.apache.stanbol.enhancer.ldpath.function.ContentFunction;
 import org.apache.stanbol.enhancer.ldpath.function.PathFunction;
 import org.apache.stanbol.enhancer.ldpath.function.SuggestionFunction;
 import org.apache.stanbol.enhancer.ldpath.utils.Utils;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
-
-import at.newmedialab.ldpath.api.functions.SelectorFunction;
-import at.newmedialab.ldpath.api.selectors.NodeSelector;
-import at.newmedialab.ldpath.model.Constants;
-import at.newmedialab.ldpath.parser.Configuration;
-import at.newmedialab.ldpath.parser.DefaultConfiguration;
-import at.newmedialab.ldpath.parser.ParseException;
 
 /**
  * Defines defaults for LDPath

@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,6 +43,11 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.IOUtils;
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
+import org.apache.marmotta.ldpath.model.fields.FieldMapping;
+import org.apache.marmotta.ldpath.model.programs.Program;
+import org.apache.marmotta.ldpath.parser.LdPathParser;
+import org.apache.marmotta.ldpath.parser.ParseException;
 import org.apache.stanbol.contenthub.servicesapi.Constants;
 import org.apache.stanbol.contenthub.servicesapi.ldpath.LDPathException;
 import org.apache.stanbol.entityhub.ldpath.backend.SiteManagerBackend;
@@ -58,12 +64,6 @@ import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.SAXException;
-
-import at.newmedialab.ldpath.api.backend.RDFBackend;
-import at.newmedialab.ldpath.model.fields.FieldMapping;
-import at.newmedialab.ldpath.model.programs.Program;
-import at.newmedialab.ldpath.parser.ParseException;
-import at.newmedialab.ldpath.parser.RdfPathParser;
 
 /**
  * Class containing utility methods for LDPath functionalities.
@@ -107,23 +107,23 @@ public class LDPathUtils {
     /**
      * A map mapping from XSD types to SOLR types.
      */
-    private static final Map<String,String> xsdSolrTypeMap;
+    private static final Map<URI,String> xsdSolrTypeMap;
     static {
-        Map<String,String> typeMap = new HashMap<String,String>();
+        Map<URI,String> typeMap = new HashMap<URI,String>();
 
-        typeMap.put(NS_XSD + "decimal", "long");
-        typeMap.put(NS_XSD + "integer", "int");
-        typeMap.put(NS_XSD + "int", "int");
-        typeMap.put(NS_XSD + "long", "long");
-        typeMap.put(NS_XSD + "short", "int");
-        typeMap.put(NS_XSD + "double", "double");
-        typeMap.put(NS_XSD + "float", "float");
-        typeMap.put(NS_XSD + "dateTime", "date");
-        typeMap.put(NS_XSD + "date", "date");
-        typeMap.put(NS_XSD + "time", "date");
-        typeMap.put(NS_XSD + "boolean", "boolean");
-        typeMap.put(NS_XSD + "anyURI", "uri");
-        typeMap.put(NS_XSD + "string", "string");
+        typeMap.put(URI.create(NS_XSD + "decimal"), "long");
+        typeMap.put(URI.create(NS_XSD + "integer"), "int");
+        typeMap.put(URI.create(NS_XSD + "int"), "int");
+        typeMap.put(URI.create(NS_XSD + "long"), "long");
+        typeMap.put(URI.create(NS_XSD + "short"), "int");
+        typeMap.put(URI.create(NS_XSD + "double"), "double");
+        typeMap.put(URI.create(NS_XSD + "float"), "float");
+        typeMap.put(URI.create(NS_XSD + "dateTime"), "date");
+        typeMap.put(URI.create(NS_XSD + "date"), "date");
+        typeMap.put(URI.create(NS_XSD + "time"), "date");
+        typeMap.put(URI.create(NS_XSD + "boolean"), "boolean");
+        typeMap.put(URI.create(NS_XSD + "anyURI"), "uri");
+        typeMap.put(URI.create(NS_XSD + "string"), "string");
 
         xsdSolrTypeMap = Collections.unmodifiableMap(typeMap);
     }
@@ -151,7 +151,7 @@ public class LDPathUtils {
      *            a URI identifying the XML Schema datatype
      * @return
      */
-    public String getSolrFieldType(String xsdType) {
+    public String getSolrFieldType(URI xsdType) {
         String result = xsdSolrTypeMap.get(xsdType);
         if (result == null) {
             logger.error("Could not find SOLR field type for type " + xsdType);
@@ -188,7 +188,7 @@ public class LDPathUtils {
             throw new LDPathException(msg);
         }
         RDFBackend<Object> rdfBackend = new SiteManagerBackend(referencedSiteManager);
-        RdfPathParser<Object> LDparser = new RdfPathParser<Object>(rdfBackend, constructReader(ldPathProgram));
+        LdPathParser<Object> LDparser = new LdPathParser<Object>(rdfBackend, constructReader(ldPathProgram));
         Program<Object> program = null;
         try {
             program = LDparser.parseProgram();

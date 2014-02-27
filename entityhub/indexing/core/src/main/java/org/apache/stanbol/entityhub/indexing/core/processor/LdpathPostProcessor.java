@@ -24,8 +24,6 @@ import org.apache.stanbol.entityhub.ldpath.EntityhubLDPath;
 import org.apache.stanbol.entityhub.ldpath.backend.YardBackend;
 import org.apache.stanbol.entityhub.servicesapi.yard.Yard;
 
-import at.newmedialab.ldpath.api.backend.RDFBackend;
-
 /**
  * Uses the {@link IndexingDestination#getYard()} as LDPath {@link RDFBackend}
  * for the execution of configured LDPath statements.<p>

@@ -19,6 +19,7 @@ package org.apache.stanbol.enhancer.engines.dereference.entityhub;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
 import org.apache.stanbol.entityhub.ldpath.backend.SiteBackend;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
@@ -27,8 +28,6 @@ import org.apache.stanbol.entityhub.servicesapi.site.Site;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteConfiguration;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
-import at.newmedialab.ldpath.api.backend.RDFBackend;
 
 public final class SiteDereferencer extends TrackingDereferencerBase<Site> {
     

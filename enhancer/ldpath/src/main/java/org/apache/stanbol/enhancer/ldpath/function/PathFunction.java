@@ -20,9 +20,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import at.newmedialab.ldpath.api.backend.RDFBackend;
-import at.newmedialab.ldpath.api.functions.SelectorFunction;
-import at.newmedialab.ldpath.api.selectors.NodeSelector;
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
+import org.apache.marmotta.ldpath.api.functions.SelectorFunction;
+import org.apache.marmotta.ldpath.api.selectors.NodeSelector;
 
 /**
  * Maps a {@link NodeSelector} to a function name. This is useful to provide
@@ -31,7 +31,7 @@ import at.newmedialab.ldpath.api.selectors.NodeSelector;
  *
  * @param <Node>
  */
-public class PathFunction<Node> implements SelectorFunction<Node> {
+public class PathFunction<Node> extends SelectorFunction<Node> {
     
     private final String name;
     private final NodeSelector<Node> selector;
@@ -56,22 +56,35 @@ public class PathFunction<Node> implements SelectorFunction<Node> {
     }
 
     @Override
-    public Collection<Node> apply(RDFBackend<Node> backend, Collection<Node>... args) throws IllegalArgumentException {
-        if(args == null || args.length < 1 || args[0] == null || args[0].isEmpty()){
-            throw new IllegalArgumentException("The 'fn:"+name+"' function " +
-                    "requires at least a single none empty parameter (the context). Use 'fn:" +
-                    name+"(.)' to execute it on the path context!");
-        }
+    public Collection<Node> apply(RDFBackend<Node> backend, Node context, Collection<Node>... args) throws IllegalArgumentException {
         Set<Node> selected = new HashSet<Node>();
-        for(Node context : args[0]){
-            selected.addAll(selector.select(backend, context));
+        if(args != null && args.length > 0 && args[0] != null && !args[0].isEmpty()){
+            for(Node contextParam : args[0]){
+                selected.addAll(selector.select(backend, contextParam,
+                    null,null)); //no path tracking support possible within functions
+            }
+        } else {
+            selected.addAll(selector.select(backend, context,
+                null,null)); //no path tracking support possible within functions
         }
         return selected;
     }
-
+    
     @Override
-    public String getPathExpression(RDFBackend<Node> backend) {
+    protected String getLocalName() {
         return name;
     }
 
+    @Override
+    public String getSignature() {
+        return "fn:"+name+"([context])";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Wraps a Selector as a function. The first parameter can be used "
+                + "to parse context(s) to execute the wraped selector on. If no arguments "
+                + "are parsed the current context is used.";
+    }
+    
 }

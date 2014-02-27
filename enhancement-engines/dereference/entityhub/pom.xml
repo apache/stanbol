@@ -100,12 +100,12 @@
     <dependency> <!-- ldpath support -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.ldpath</artifactId>
-      <version>0.11.0</version>
+      <version>0.12.1-SNAPSHOT</version>
     </dependency>
     <dependency> <!-- converting Representations to RDF triples -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-      <version>0.11.0</version>
+      <version>0.12.0</version>
     </dependency>
 
     <dependency>

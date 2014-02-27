@@ -16,7 +16,9 @@
 */
 package org.apache.stanbol.commons.ldpath.clerezza;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -27,38 +29,30 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.serializedform.ParsingProvider;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
-import org.apache.clerezza.rdf.ontologies.RDF;
+import org.apache.marmotta.ldpath.LDPath;
+import org.apache.marmotta.ldpath.exception.LDPathParseException;
+import org.apache.marmotta.ldpath.parser.Configuration;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
-import org.apache.stanbol.commons.ldpath.clerezza.ClerezzaBackend;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import at.newmedialab.ldpath.LDPath;
-import at.newmedialab.ldpath.exception.LDPathParseException;
-import at.newmedialab.ldpath.parser.Configuration;
 
 public class ClerezzaBackendTest {
     /**
@@ -75,12 +69,12 @@ public class ClerezzaBackendTest {
         }
     }
     
-    private Logger log = LoggerFactory.getLogger(ClerezzaBackendTest.class);
+    //private Logger log = LoggerFactory.getLogger(ClerezzaBackendTest.class);
 
     private static final String NS_SKOS = "http://www.w3.org/2004/02/skos/core#";
     private static final String NS_DBP = "http://dbpedia.org/property/";
     private static final String NS_DBO = "http://dbpedia.org/ontology/";
-    private static final UriRef SKOS_CONCEPT = new UriRef(NS_SKOS+"Concept");
+    //private static final UriRef SKOS_CONCEPT = new UriRef(NS_SKOS+"Concept");
     
     private static MGraph graph;
     
