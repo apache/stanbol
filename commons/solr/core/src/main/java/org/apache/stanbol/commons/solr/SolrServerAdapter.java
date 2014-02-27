@@ -573,10 +573,22 @@ public class SolrServerAdapter {
         CoreRegistration reg = registrations.get(name);
         return reg != null && reg.getServiceReference() != null;
     }
-
+    /**
+     * The Name of the registered {@link CoreContainer}
+     * @return
+     */
     public String getServerName(){
         Object value = serverRegistration.getReference().getProperty(PROPERTY_SERVER_NAME);
         return value == null ? null : value.toString();
+    }
+    /**
+     * The Directory of the registered {@link CoreContainer}
+     * @return
+     */
+    public String getServerDir(){
+        Object value = serverRegistration.getReference().getProperty(PROPERTY_SERVER_DIR);
+        return value == null ? null : value.toString();
+        
     }
     /**
      * Getter for the {@link ServiceReference} for the {@link CoreContainer}
