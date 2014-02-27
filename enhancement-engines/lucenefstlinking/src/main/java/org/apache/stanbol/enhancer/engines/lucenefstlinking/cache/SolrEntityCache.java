@@ -17,8 +17,9 @@
 package org.apache.stanbol.enhancer.engines.lucenefstlinking.cache;
 
 import org.apache.lucene.document.Document;
-import org.apache.solr.search.FastLRUCache;
 import org.apache.solr.search.SolrCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of the {@link EntityCache} interface by using the
@@ -28,14 +29,20 @@ import org.apache.solr.search.SolrCache;
  *
  */
 public class SolrEntityCache implements EntityCache {
+    
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final SolrCache<Integer,Document> cache;
     private final Object version;
     private boolean closed;
     
     public SolrEntityCache(Object version, SolrCache<Integer,Document> cache) {
+        log.debug("> create {} for version {}", getClass().getSimpleName(), version);
         this.cache = cache;
         this.version = version;
+        log.debug(" - initial Size: {}",cache.size());
+        log.debug(" - description: {}",cache.getDescription());
+        log.debug(" - statistics: {}", cache.getStatistics());
     }
     
     @Override
@@ -51,6 +58,7 @@ public class SolrEntityCache implements EntityCache {
     @Override
     public void cache(Integer docId, Document doc) {
         if(!closed){
+            log.trace(" - cache id:{} | {}",docId, doc);
             cache.put(docId, doc);
         }
     }
@@ -70,6 +78,8 @@ public class SolrEntityCache implements EntityCache {
     }
     
     void close(){
+        log.debug(" ... close EntityCache for version {} (size: {} | description: {})",
+            new Object[]{version, cache.size(),cache.getDescription()});
         closed = true;
         cache.clear();
         cache.close();
