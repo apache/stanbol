@@ -60,6 +60,8 @@ public class FastLRUCacheManager implements EntityCacheManager {
      * @param regenerator the regenerator instance used for autowarming
      */
     public FastLRUCacheManager(int size, int autowarmCount, CacheRegenerator regenerator){
+        log.debug("> create {} (size: {}| autowarmCount: {}| regenerator: {})",
+            new Object[]{getClass().getSimpleName(),size,autowarmCount,regenerator});
         Map<String,String> config = new HashMap<String,String>();
         config.put("name", "Tagging Document Cache");
         if(size > 0){

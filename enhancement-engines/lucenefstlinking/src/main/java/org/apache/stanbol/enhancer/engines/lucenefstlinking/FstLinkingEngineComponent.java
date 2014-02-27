@@ -321,18 +321,13 @@ public class FstLinkingEngineComponent {
      */
     private FieldEncodingEnum fieldEncoding;
     
-    /**
-     * Cache used for Lucene {@link Document}s recently loaded from the index.
-     * The size can be configured by using the {@link #ENTITY_CACHE_SIZE}
-     * configuration parameter.
-     * @see #ENTITY_CACHE_SIZE
-     * @see #DEFAULT_ENTITY_CACHE_SIZE
-     */
-    private EntityCacheManager documentCacheFactory;
-
     private IndexConfiguration indexConfig;
 
     private Boolean skipAltTokensConfig;
+    /**
+     * The size of the EntityCache ( <code>0</code> ... means deactivated)
+     */
+    private int entityCacheSize;
     
     /**
      * Default constructor as used by OSGI. This expects that 
@@ -463,13 +458,13 @@ public class FstLinkingEngineComponent {
         fstCreatorService = Executors.newFixedThreadPool(tpSize,tfBuilder.build());
         
         //(6) Parse the EntityCache config
-        int ecSize;
+        int entityCacheSize;
         value = properties.get(ENTITY_CACHE_SIZE);
         if(value instanceof Number){
-            ecSize = ((Number)value).intValue();
+            entityCacheSize = ((Number)value).intValue();
         } else if (value != null){
             try {
-                ecSize = Integer.parseInt(value.toString());
+                entityCacheSize = Integer.parseInt(value.toString());
             } catch (NumberFormatException e) {
                 throw new ConfigurationException(ENTITY_CACHE_SIZE, 
                     "Unable to parse the integer EntityCacheSize from the "
@@ -477,15 +472,14 @@ public class FstLinkingEngineComponent {
                     + value+"'!",e);
             }
         } else {
-            ecSize = -1;
+            entityCacheSize = -1;
         }
-        if(ecSize == 0){
+        if(entityCacheSize == 0){
             log.info(" ... EntityCache deactivated");
-            documentCacheFactory = null;
+            this.entityCacheSize = entityCacheSize;
         } else {
-            int size = ecSize < 0 ? DEFAULT_ENTITY_CACHE_SIZE : ecSize;
-        	log.info(" ... create EntityCache (size: {})",size);
-            documentCacheFactory = new FastLRUCacheManager(size);
+            this.entityCacheSize = entityCacheSize < 0 ? DEFAULT_ENTITY_CACHE_SIZE : entityCacheSize;
+        	log.info(" ... EntityCache enabled (size: {})",this.entityCacheSize);
         }
         
         //(7) parse the Entity type field
@@ -510,8 +504,9 @@ public class FstLinkingEngineComponent {
                 
                 @Override
                 public void removedService(ServiceReference reference, Object service) {
-                    log.info(" ... SolrCore for {} was removed!", indexReference);
-                    updateEngineRegistration(solrServerTracker.getServiceReference(), null); 
+                    log.info(" ... SolrCore for {} was removed!", reference);
+                    //try to get an other serviceReference from the tracker
+                    updateEngineRegistration(solrServerTracker.getServiceReference(), null);
                     super.removedService(reference, service);
                 }
                 
@@ -527,18 +522,17 @@ public class FstLinkingEngineComponent {
                 public SolrServer addingService(ServiceReference reference) {
                     SolrServer server = super.addingService(reference);
                     if(solrCore != null){
-                        log.warn("Multiple SolrServer for IndexLocation {} available!",
-                            indexReference);
-                    } else {
-                        log.info(" ... SolrCore for {} becomes available!", indexReference);
-                        updateEngineRegistration(reference, server);
-                    }
+                        log.info("Multiple SolrCores for name {}! Will update engine "
+                            + "with the newly added {}!", new Object[]{solrCore.getName(), 
+                            indexReference, reference});
+                    } 
+                    updateEngineRegistration(reference, server);
                     return server;
                 }
             };
         } catch (InvalidSyntaxException e) {
             throw new ConfigurationException(SOLR_CORE, "parsed SolrCore name '"
-                +value.toString()+"' is invalid (expected: '[{server-name}:]{indexname}'");
+                + value.toString()+"' is invalid (expected: '[{server-name}:]{indexname}'");
         }
         solrServerTracker.open();
     }
@@ -560,7 +554,8 @@ public class FstLinkingEngineComponent {
             server = solrServerTracker.getService(reference);
         }
         if(reference == null && this.indexReference == null){
-            return; //nothing to do
+            //unregisterEngine(); //unregister existing
+            return; //and return
         }
         BundleContext bundleContext = this.bundleContext;
         synchronized (this) { //init one after the other in case of multiple calls
@@ -598,7 +593,9 @@ public class FstLinkingEngineComponent {
                 //      FST directory of the SolrCore.
                 indexConfig.setFstDirectory(getFstDirectory(core, fstFolder));
                 //set the DocumentCacheFactory
-                indexConfig.setEntityCacheManager(documentCacheFactory);
+                if(entityCacheSize > 0){
+                    indexConfig.setEntityCacheManager(new FastLRUCacheManager(entityCacheSize));
+                } //else no entityCache is used
                 if(skipAltTokensConfig != null){
                     indexConfig.setSkipAltTokens(skipAltTokensConfig);
                 }
@@ -711,12 +708,20 @@ public class FstLinkingEngineComponent {
         solrServerReference = null;
         SolrCore solrServer = this.solrCore;
         if(solrServer != null){
+            log.debug(" ... unregister SolrCore {}", solrServer.getName());
             solrServer.close(); //decrease the reference count!!
             this.solrCore = null; //rest the field
         }
         //deactivate the index configuration if present
         if(indexConfig != null){
+            log.debug(" ... deactivate IndexingConfiguration");
             indexConfig.deactivate();
+            //close the EntityCacheManager (if present
+            EntityCacheManager cacheManager = indexConfig.getEntityCacheManager();
+            if(cacheManager != null){
+                log.debug(" ... deactivate {}", cacheManager.getClass().getSimpleName());
+                cacheManager.close();
+            }
             indexConfig = null;
         }
     }
@@ -780,12 +785,38 @@ public class FstLinkingEngineComponent {
         engineMetadata = null;
         textProcessingConfig = null;
         entityLinkerConfig = null;
-        if(documentCacheFactory != null){
-        	documentCacheFactory.close(); //ensure that old caches are cleared
-        }
-        documentCacheFactory = null;
+        entityCacheSize = -1;
         bundleContext = null;
         skipAltTokensConfig = null;
+        
+        //NOTE: just to be sure that all the engine is unregistered and to
+        //      100% make sure that there are no refs to unregistered SolrCores!
+        //      this also include IndexConfiguration instances that does refer
+        //      FST models for the closed SolrCore. Using old models will cause
+        //      FST and SolrCore to be out of sync if a new SolrCore with updated
+        //      data will become available
+        boolean unregisterFailier = false;
+        if(engineRegistration != null){
+            log.warn("Engine is still registered after deactivating Engine! Will "
+                    + "explicitly perform required clean-up, but please report "
+                    + "this as a Bug for the Lucene FST Linking Engine!");
+            unregisterFailier = true;
+        }
+        if(solrCore != null){
+            log.warn("SolrCore used for linking was not closed! Will "
+                    + "explicitly perform required clean-up, but please report "
+                    + "this as a Bug for the Lucene FST Linking Engine!");
+            unregisterFailier = true;
+        }
+        if(indexConfig != null){
+            log.warn("FST Configuration was not not reset! Will "
+                    + "explicitly perform required clean-up, but please report "
+                    + "this as a Bug for the Lucene FST Linking Engine!");
+            unregisterFailier = true;
+        }
+        if(unregisterFailier){
+            unregisterEngine();
+        }
     }
     
     /**
