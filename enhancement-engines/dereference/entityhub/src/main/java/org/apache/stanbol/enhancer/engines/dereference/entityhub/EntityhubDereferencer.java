@@ -16,6 +16,7 @@
 */
 package org.apache.stanbol.enhancer.engines.dereference.entityhub;
 
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
 import org.apache.stanbol.enhancer.engines.dereference.EntityDereferencer;
 import org.apache.stanbol.entityhub.ldpath.backend.EntityhubBackend;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
@@ -24,8 +25,6 @@ import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
-import at.newmedialab.ldpath.api.backend.RDFBackend;
 
 /**
  * {@link EntityDereferencer} implementation for the {@link Entityhub}

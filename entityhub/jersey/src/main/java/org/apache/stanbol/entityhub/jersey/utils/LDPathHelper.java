@@ -21,6 +21,7 @@ import static javax.ws.rs.core.MediaType.TEXT_HTML_TYPE;
 import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.getAcceptableMediaType;
 import static org.apache.stanbol.entityhub.ldpath.LDPathUtils.getReader;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -37,6 +38,12 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
+import org.apache.marmotta.ldpath.exception.LDPathParseException;
+import org.apache.marmotta.ldpath.model.fields.FieldMapping;
+import org.apache.marmotta.ldpath.model.programs.Program;
+import org.apache.marmotta.ldpath.model.selectors.PropertySelector;
+import org.apache.marmotta.ldpath.model.transformers.DoubleTransformer;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
@@ -54,15 +61,6 @@ import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.newmedialab.ldpath.LDPath;
-import at.newmedialab.ldpath.api.backend.RDFBackend;
-import at.newmedialab.ldpath.exception.LDPathParseException;
-import at.newmedialab.ldpath.model.fields.FieldMapping;
-import at.newmedialab.ldpath.model.programs.Program;
-import at.newmedialab.ldpath.model.selectors.PropertySelector;
-import at.newmedialab.ldpath.model.transformers.DoubleTransformer;
-
-
 public class LDPathHelper {
     private static final Logger log = LoggerFactory.getLogger(LDPathHelper.class);
     
@@ -72,7 +70,8 @@ public class LDPathHelper {
      */
     public static final FieldMapping<Double,Object> RESULT_SCORE_MAPPING = 
         new FieldMapping<Double,Object>(RdfResourceEnum.resultScore.getUri(), 
-            "http://www.w3.org/2001/XMLSchema#double", new PropertySelector<Object>(
+            URI.create("http://www.w3.org/2001/XMLSchema#double"), 
+            new PropertySelector<Object>(
                     InMemoryValueFactory.getInstance().createReference(
                         RdfResourceEnum.resultScore.getUri())), 
                     new DoubleTransformer<Object>(), null);

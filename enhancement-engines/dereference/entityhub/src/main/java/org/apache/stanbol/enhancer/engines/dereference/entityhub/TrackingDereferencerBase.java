@@ -37,6 +37,9 @@ import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.commons.lang.StringUtils;
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
+import org.apache.marmotta.ldpath.exception.LDPathParseException;
+import org.apache.marmotta.ldpath.model.programs.Program;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.enhancer.engines.dereference.DereferenceConstants;
 import org.apache.stanbol.enhancer.engines.dereference.DereferenceContext;
@@ -69,9 +72,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.newmedialab.ldpath.api.backend.RDFBackend;
-import at.newmedialab.ldpath.exception.LDPathParseException;
-import at.newmedialab.ldpath.model.programs.Program;
 /**
  * Abstract super class for EntityDereferencer that need to track the OSGI service
  * used to lookup Entities. Used by the {@link EntityhubDereferencer} and the 
@@ -234,7 +234,7 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
                     "Unable to parse configured LDPath program ", e);
             }
             //finally validate if all mappings of the programm do use a URI as key
-            for(at.newmedialab.ldpath.model.fields.FieldMapping<?,Object> mapping : ldpathProgram.getFields()) {
+            for(org.apache.marmotta.ldpath.model.fields.FieldMapping<?,Object> mapping : ldpathProgram.getFields()) {
                 try {
                     new URI(mapping.getFieldName());
                 } catch (URISyntaxException e){
@@ -335,22 +335,27 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
         RdfRepresentation result = valueFactory.createRdfRepresentation(uri, ldPathResults);
         //execute the LDPath Program and write results to the RDF Graph
         try {
-            for(at.newmedialab.ldpath.model.fields.FieldMapping<?,Object> mapping : ldpathProgram.getFields()) {
-                Collection<?> values = mapping.getValues(rdfBackend, context);
-                if(values != null && !values.isEmpty()){
-                    String fieldName = mapping.getFieldName();
-                    if(langs.isEmpty()){
-                        result.add(fieldName,values);
-                    } else { //filter for languages
-                        for(Object value : values){
-                            if((!(value instanceof Text)) || 
-                                    langs.contains(((Text)value).getLanguage())){
-                                result.add(fieldName, value);
-                            } //else text with filtered language ... do not add
-                        }
-                    }
-                }
-            }
+	        for(org.apache.marmotta.ldpath.model.fields.FieldMapping<?,Object> mapping : ldpathProgram.getFields()) {
+	        	Collection<?> values;
+	        	try {
+	        		values = mapping.getValues(rdfBackend, context);
+	            } catch (RuntimeException e){
+	                throw new DereferenceException(uri, e);
+	            }
+	            if(values != null && !values.isEmpty()){
+	                String fieldName = mapping.getFieldName();
+	                if(langs == null || langs.isEmpty()){
+	                    result.add(fieldName,values);
+	                } else { //filter for languages
+	                    for(Object value : values){
+	                        if((!(value instanceof Text)) || 
+	                                langs.contains(((Text)value).getLanguage())){
+	                            result.add(fieldName, value);
+	                        } //else text with filtered language ... do not add
+	                    }
+	                }
+	            }
+	        }
         } catch (EntityhubException e){
             throw new DereferenceException(uri, e);
         }

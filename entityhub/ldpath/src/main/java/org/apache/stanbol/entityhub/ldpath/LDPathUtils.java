@@ -22,8 +22,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 
-import at.newmedialab.ldpath.model.programs.Program;
-
 public class LDPathUtils {
     /**
      * Utility method that creates a reader over the parsed String using UTF-8 

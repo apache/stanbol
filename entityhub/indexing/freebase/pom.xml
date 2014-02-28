@@ -200,9 +200,9 @@
       <artifactId>slf4j-log4j12</artifactId>
       <scope>runtime</scope>
     </dependency>
-    <dependency> <!-- see also the log4j.properties in src/main/resources -->
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
       <scope>runtime</scope>
     </dependency>
 

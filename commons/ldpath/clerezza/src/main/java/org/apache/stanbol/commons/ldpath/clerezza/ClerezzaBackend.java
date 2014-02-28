@@ -43,11 +43,10 @@ import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TypedLiteralImpl;
 import org.apache.commons.collections.BidiMap;
 import org.apache.commons.collections.bidimap.DualHashBidiMap;
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
+import org.apache.marmotta.ldpath.model.backend.AbstractBackend;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import at.newmedialab.ldpath.api.backend.RDFBackend;
-import at.newmedialab.ldpath.model.backend.AbstractBackend;
 
 /**
  * Clerezza based implementation of {@link RDFBackend} interface. This implementation uses the

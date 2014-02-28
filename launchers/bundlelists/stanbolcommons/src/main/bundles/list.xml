@@ -104,6 +104,11 @@
       <version>2.6</version>
     </bundle>
     <bundle>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.2.1</version>
+    </bundle>
+    <bundle>
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
       <version>3.2.1</version>
@@ -581,14 +586,19 @@
   <!-- LD Path -->
   <startLevel level="27">
     <bundle> <!-- LD Path -->
-      <groupId>at.newmedialab.ldpath</groupId>
+      <groupId>org.apache.marmotta</groupId>
       <artifactId>ldpath-api</artifactId>
-      <version>0.9.5</version>
+      <version>3.2.0-SNAPSHOT</version>
     </bundle>
     <bundle>
-      <groupId>at.newmedialab.ldpath</groupId>
+      <groupId>org.apache.marmotta</groupId>
       <artifactId>ldpath-core-bundle</artifactId>
-      <version>0.9.5</version>
+      <version>3.2.0-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.marmotta</groupId>
+      <artifactId>ldpath-template</artifactId>
+      <version>3.2.0-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>

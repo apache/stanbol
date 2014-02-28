@@ -30,7 +30,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
@@ -42,8 +42,6 @@ import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.RepositoryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import at.newmedialab.ldpath.api.backend.RDFBackend;
 
 /**
  * Sesame Backend based on the code of 

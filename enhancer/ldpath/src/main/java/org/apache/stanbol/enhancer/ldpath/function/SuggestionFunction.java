@@ -26,16 +26,15 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.clerezza.rdf.core.Resource;
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
+import org.apache.marmotta.ldpath.api.functions.SelectorFunction;
+import org.apache.marmotta.ldpath.api.selectors.NodeSelector;
+import org.apache.marmotta.ldpath.model.transformers.IntTransformer;
+import org.apache.marmotta.ldpath.model.transformers.StringTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.newmedialab.ldpath.api.backend.RDFBackend;
-import at.newmedialab.ldpath.api.functions.SelectorFunction;
-import at.newmedialab.ldpath.api.selectors.NodeSelector;
-import at.newmedialab.ldpath.model.transformers.IntTransformer;
-import at.newmedialab.ldpath.model.transformers.StringTransformer;
-
-public class SuggestionFunction implements SelectorFunction<Resource> {
+public class SuggestionFunction extends SelectorFunction<Resource> {
     
     private static final Comparator<Entry<Double,Resource>> SUGGESTION_COMPARATOR = 
             new Comparator<Entry<Double,Resource>>() {
@@ -91,13 +90,27 @@ public class SuggestionFunction implements SelectorFunction<Resource> {
     }
     
     @Override
-    public Collection<Resource> apply(final RDFBackend<Resource> backend, Collection<Resource>... args) throws IllegalArgumentException {
-        Integer limit = parseParamLimit(backend, args,1);
+    public Collection<Resource> apply(final RDFBackend<Resource> backend, Resource context, Collection<Resource>... args) throws IllegalArgumentException {
+        int paramIndex = 0;
+        Collection<Resource> contexts = null;
+        if(args != null && args.length > 0 && args[0] != null && !args[0].isEmpty()){
+            contexts = new ArrayList<Resource>();
+            for(Resource r : args[0]){
+                if(backend.isURI(r)){
+                    contexts.add(r);
+                    paramIndex = 1;
+                }
+            }
+        }
+        if(paramIndex == 0){ //no contexts parsed os first param ... use the current context
+            contexts = Collections.singleton(context);
+        }
+        Integer limit = parseParamLimit(backend, args,paramIndex);
 //        final String processingMode = parseParamProcessingMode(backend, args,2);
-        final int missingConfidenceMode = parseParamMissingConfidenceMode(backend, args,2);
+        final int missingConfidenceMode = parseParamMissingConfidenceMode(backend, args,paramIndex+1);
         List<Resource> result = new ArrayList<Resource>();
 //        if(processingMode.equals(ANNOTATION_PROCESSING_MODE_UNION)){
-            processAnnotations(backend, args[0], limit, missingConfidenceMode, result);
+            processAnnotations(backend, contexts, limit, missingConfidenceMode, result);
 //        } else {
 //            for(Resource context : args[0]){
 //                processAnnotations(backend, singleton(context),
@@ -125,8 +138,9 @@ public class SuggestionFunction implements SelectorFunction<Resource> {
                                     List<Resource> result) {
         List<Entry<Double,Resource>> suggestions = new ArrayList<Entry<Double,Resource>>();
         for(Resource annotation : annotations){
-            for(Resource suggestion : suggestionSelector.select(backend, annotation)){
-                Collection<Resource> cs = confidenceSelector.select(backend, suggestion);
+            //NOTE: no Path Tracking support possible for selectors wrapped in functions
+            for(Resource suggestion : suggestionSelector.select(backend, annotation,null,null)){
+                Collection<Resource> cs = confidenceSelector.select(backend, suggestion,null,null);
                 Double confidence = !cs.isEmpty() ? backend.doubleValue(cs.iterator().next()) : 
                         missingConfidenceMode == MISSING_CONFIDENCE_FILTER ?
                                 null : missingConfidenceMode == MISSING_CONFIDENCE_FIRST ?
@@ -143,7 +157,7 @@ public class SuggestionFunction implements SelectorFunction<Resource> {
             if(resultSelector == null){
                 result.add(suggestion.getValue());
             } else {
-                result.addAll(resultSelector.select(backend, suggestion.getValue()));
+                result.addAll(resultSelector.select(backend, suggestion.getValue(),null,null));
             }
         }
     }
@@ -159,7 +173,8 @@ public class SuggestionFunction implements SelectorFunction<Resource> {
                                                 Collection<Resource>[] args, int index) {
         final int missingConfidenceMode;
         if(args.length > index && !args[index].isEmpty()){
-            String mode = stringTransformer.transform(backend, args[index].iterator().next());
+            String mode = stringTransformer.transform(backend, args[index].iterator().next(),
+                Collections.<String,String>emptyMap());
             if("first".equalsIgnoreCase(mode)){
                 missingConfidenceMode = MISSING_CONFIDENCE_FIRST;
             } else if("last".equalsIgnoreCase(mode)){
@@ -209,12 +224,12 @@ public class SuggestionFunction implements SelectorFunction<Resource> {
         if(args.length > index && !args[index].isEmpty()){
             Resource value = args[index].iterator().next();
             try {
-                limit = intTransformer.transform(backend, value);
+                limit = intTransformer.transform(backend, value, Collections.<String,String>emptyMap());
                 if(limit < 1){
                     limit = null;
                 }
             } catch (RuntimeException e) {
-                log.warn("Unable to parse parameter 'limit' form the 2nd argument '{}'",value);
+                log.warn("Unable to parse parameter 'limit' form the {}nd argument '{}'",index, value);
             }
         }
         return limit;
@@ -222,8 +237,16 @@ public class SuggestionFunction implements SelectorFunction<Resource> {
 
 
     @Override
-    public String getPathExpression(RDFBackend<Resource> backend) {
+    protected String getLocalName(){
         return name;
+    }
+    @Override
+    public String getSignature() {
+        return "fn:"+name+"([{context},]{limit},{missing-confidence-mode})";
+    }
+    @Override
+    public String getDescription() {
+        return "Function that retrieves EntitySuggestions for TextAnnotations (sorted by highest confidence first)";
     }
 
     

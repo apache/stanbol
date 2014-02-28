@@ -16,17 +16,19 @@
 */
 package org.apache.stanbol.commons.ldpathtemplate;
 
-import at.newmedialab.ldpath.api.backend.RDFBackend;
-import at.newmedialab.ldpath.template.engine.TemplateEngine;
 import freemarker.cache.TemplateLoader;
 import freemarker.template.TemplateException;
+
 import java.io.IOException;
 import java.io.Writer;
+
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
+import org.apache.marmotta.ldpath.template.engine.TemplateEngine;
 import org.apache.stanbol.commons.ldpath.clerezza.ClerezzaBackend;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

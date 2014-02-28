@@ -26,16 +26,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+
+import org.apache.marmotta.ldpath.LDPath;
+import org.apache.marmotta.ldpath.model.programs.Program;
 import org.apache.stanbol.entityhub.ldpath.impl.LDPathTestBase;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import at.newmedialab.ldpath.LDPath;
-import at.newmedialab.ldpath.api.backend.RDFBackend;
-import at.newmedialab.ldpath.model.programs.Program;
 
 public class BackendTest extends LDPathTestBase {
 

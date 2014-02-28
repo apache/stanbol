@@ -129,17 +129,6 @@
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
 
-    <!-- LD Path -->
-    <!--  imported via entityhub.ldpath
-    <dependency>
-      <groupId>at.newmedialab.ldpath</groupId>
-      <artifactId>ldpath-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>at.newmedialab.ldpath</groupId>
-      <artifactId>ldpath-core-bundle</artifactId>
-    </dependency>  -->
-        
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>

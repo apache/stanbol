@@ -22,6 +22,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataIterable;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataIterator;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataProvider;
@@ -55,8 +56,6 @@ import org.openrdf.rio.Rio;
 import org.openrdf.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import at.newmedialab.ldpath.api.backend.RDFBackend;
 
 public class RdfIndexingSource extends AbstractSesameBackend implements EntityDataIterable, EntityDataProvider, RDFBackend<Value> {
 

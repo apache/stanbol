@@ -16,10 +16,10 @@
 */
 package org.apache.stanbol.enhancer.ldpath;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedInputStream;
 import java.io.FilterInputStream;
@@ -48,6 +48,8 @@ import org.apache.clerezza.rdf.core.serializedform.ParsingProvider;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.apache.commons.io.IOUtils;
+import org.apache.marmotta.ldpath.LDPath;
+import org.apache.marmotta.ldpath.exception.LDPathParseException;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.ldpath.backend.ContentItemBackend;
@@ -61,9 +63,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import at.newmedialab.ldpath.LDPath;
-import at.newmedialab.ldpath.exception.LDPathParseException;
 
 public class ContentItemBackendTest {
     /**
@@ -242,6 +241,34 @@ public class ContentItemBackendTest {
 
     }
     @Test
+    public void testTextAnnotationFunctionWithoutParsedContext() throws LDPathParseException {
+        String path = "fn:textAnnotation()/fise:selected-text";
+        Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertTrue(result.size() == 2);
+        Set<String> expectedValues = new HashSet<String>(
+                Arrays.asList("Bob Marley","Paris"));
+        for(Resource r : result){
+            assertTrue(r instanceof Literal);
+            assertTrue(expectedValues.remove(((Literal)r).getLexicalForm()));
+        }
+        assertTrue(expectedValues.isEmpty());
+        
+        //test with a filter for the type
+        //same as the 1st example bat rather using an ld-path construct for
+        //filtering for TextAnnotations representing persons
+        path = "fn:textAnnotation()[dc:type is dbpedia-ont:Person]/fise:selected-text";
+        result = ldpath.pathQuery(ci.getUri(), path, null);
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertTrue(result.size() == 1);
+        Resource r = result.iterator().next();
+        assertTrue(r instanceof Literal);
+        assertEquals(((Literal)r).getLexicalForm(), "Bob Marley");
+
+    }
+    @Test
     public void testEntityAnnotation() throws LDPathParseException {
         String path = "fn:entityAnnotation(.)/fise:entity-reference";
         Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
@@ -269,6 +296,33 @@ public class ContentItemBackendTest {
         assertTrue(result.contains(new UriRef("http://dbpedia.org/resource/Bob_Marley")));
     }
     @Test
+    public void testEntityAnnotationWithoutParsedContext() throws LDPathParseException {
+        String path = "fn:entityAnnotation()/fise:entity-reference";
+        Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertTrue(result.size() == 4);
+        Set<UriRef> expectedValues = new HashSet<UriRef>(
+                Arrays.asList(
+                    new UriRef("http://dbpedia.org/resource/Paris"),
+                    new UriRef("http://dbpedia.org/resource/Bob_Marley"),
+                    new UriRef("http://dbpedia.org/resource/Centre_Georges_Pompidou"),
+                    new UriRef("http://dbpedia.org/resource/Paris,_Texas")));
+        for(Resource r : result){
+            assertTrue(r instanceof UriRef);
+            log.info("Entity: {}",r);
+            assertTrue(expectedValues.remove(r));
+        }
+        assertTrue(expectedValues.isEmpty());
+        //and with a filter
+        path = "fn:entityAnnotation()[fise:entity-type is dbpedia-ont:Person]/fise:entity-reference";
+        result = ldpath.pathQuery(ci.getUri(), path, null);
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertTrue(result.size() == 1);
+        assertTrue(result.contains(new UriRef("http://dbpedia.org/resource/Bob_Marley")));
+    }
+    @Test
     public void testEnhancements() throws LDPathParseException {
         String path = "fn:enhancement(.)";
         Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
@@ -287,6 +341,33 @@ public class ContentItemBackendTest {
         assertTrue(result.size() == 3);
 //        assertTrue(result.contains(new UriRef("http://dbpedia.org/resource/Bob_Marley")));
         path = "fn:enhancement(.)/dc:language";
+        result = ldpath.pathQuery(ci.getUri(), path, null);
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertTrue(result.size() == 1);
+        Resource r = result.iterator().next();
+        assertTrue(r instanceof Literal);
+        assertEquals("en",((Literal)r).getLexicalForm());
+    }
+    @Test
+    public void testEnhancementsWithoutParsedContext() throws LDPathParseException {
+        String path = "fn:enhancement()";
+        Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertTrue(result.size() == 7);
+        for(Resource r : result){
+            assertTrue(r instanceof UriRef);
+            log.info("Entity: {}",r);
+        }
+        //and with a filter
+        path = "fn:enhancement()[rdf:type is fise:TextAnnotation]";
+        result = ldpath.pathQuery(ci.getUri(), path, null);
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertTrue(result.size() == 3);
+//        assertTrue(result.contains(new UriRef("http://dbpedia.org/resource/Bob_Marley")));
+        path = "fn:enhancement()/dc:language";
         result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -335,6 +416,45 @@ public class ContentItemBackendTest {
         assertFalse(result2.contains(lowestConfidenceSuggestion));
     }
     @Test
+    public void testEntitySuggestionsWithoutParsedContext() throws LDPathParseException {
+        //NOTE: Sort while supported by fn:suggestion is currently not
+        //      supported by LDPath. Therefore the sort of fn:suggestion can
+        //      currently only ensure the the top most {limit} entities are
+        //      selected if the "limit" parameter is set.
+        // Because this test checks first that all three suggestions for Paris
+        // are returned and later that a limit of 2 only returns the two top
+        // most.
+        String path = "fn:textAnnotation()[dc:type is dbpedia-ont:Place]/fn:suggestion()";
+        Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertTrue(result.size() == 3);
+        Double lowestConfidence = null;
+        //stores the lowest confidence suggestion for the 2nd part of this test
+        UriRef lowestConfidenceSuggestion = null;
+        path = "fise:confidence :: xsd:double";
+        for(Resource r : result){
+            assertTrue(r instanceof UriRef);
+            log.info("confidence: {}",r);
+            Double current = (Double)ldpath.pathTransform(r, path, null).iterator().next();
+            assertNotNull(current);
+            if(lowestConfidence == null || lowestConfidence > current){
+                lowestConfidence = current;
+                lowestConfidenceSuggestion = (UriRef) r;
+            }
+        }
+        assertNotNull(lowestConfidenceSuggestion);
+        path = "fn:textAnnotation()[dc:type is dbpedia-ont:Place]/fn:suggestion(\"2\")";
+        Collection<Resource> result2 = ldpath.pathQuery(ci.getUri(), path, null);
+        assertNotNull(result2);
+        assertFalse(result2.isEmpty());
+        assertTrue(result2.size() == 2);
+        //first check that all results of the 2nd query are also part of the first
+        assertTrue(result.containsAll(result2));
+        //secondly check that the lowest confidence suggestion is now missing
+        assertFalse(result2.contains(lowestConfidenceSuggestion));
+    }
+    @Test
     public void testSuggestedEntity() throws LDPathParseException {
         //The suggestedEntity function can be used for twi usecases
         //(1) get the {limit} top rated linked Entities per parsed context
@@ -361,6 +481,41 @@ public class ContentItemBackendTest {
         //NOTE: the selector parsing all Annotations MUST BE used as first
         //      argument
         path = "fn:suggestedEntity(fn:textAnnotation(.),\"1\")";
+        result = ldpath.pathQuery(ci.getUri(), path, null);
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertTrue(result.size() == 1);
+        assertEquals(new UriRef("http://dbpedia.org/resource/Paris"),
+            result.iterator().next());
+        
+    }
+    @Test
+    public void testSuggestedEntityWithoutParsedContext() throws LDPathParseException {
+        //The suggestedEntity function can be used for twi usecases
+        //(1) get the {limit} top rated linked Entities per parsed context
+        //    In this example we parse all TextAnnotations
+        //NOTE: '.' MUST BE used as first argument in this case
+        String path = "fn:textAnnotation()/fn:suggestedEntity(\"1\")";
+        Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertTrue(result.size() == 2);
+        Set<UriRef> expectedValues = new HashSet<UriRef>(
+                Arrays.asList(
+                    new UriRef("http://dbpedia.org/resource/Paris"),
+                    new UriRef("http://dbpedia.org/resource/Bob_Marley")));
+        for(Resource r : result){
+            assertTrue(r instanceof UriRef);
+            log.info("Entity: {}",r);
+            assertTrue(expectedValues.remove(r));
+        }
+        assertTrue(expectedValues.isEmpty());
+        
+        //(2) get the {limit} top rated Entities for all Annotations parsed
+        //    as the first argument
+        //NOTE: the selector parsing all Annotations MUST BE used as first
+        //      argument
+        path = "fn:suggestedEntity(fn:textAnnotation(),\"1\")";
         result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());

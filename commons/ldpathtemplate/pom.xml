@@ -89,16 +89,13 @@
     </dependency>
     
     <dependency>
-      <groupId>at.newmedialab.ldpath</groupId>
-      <artifactId>ldpath-core-bundle</artifactId>
+      <groupId>org.apache.marmotta</groupId>
+      <artifactId>ldpath-core</artifactId>
     </dependency>
-    <!-- not present in Maven Central for this version
     <dependency>
-      <groupId>at.newmedialab.ldpath</groupId>
+      <groupId>org.apache.marmotta</groupId>
       <artifactId>ldpath-template</artifactId>
-	    <version>0.9.3</version>
-	  </dependency>
-	  -->
+  	</dependency>
 	  <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.ldpath.clerezza</artifactId>

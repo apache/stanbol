@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
 import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
@@ -51,7 +52,6 @@ import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.newmedialab.ldpath.api.backend.RDFBackend;
 /**
  * Abstract super class for all Entityhub related {@link RDFBackend}
  * implementations. This implements the whole {@link RDFBackend} interface by

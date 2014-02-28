@@ -16,15 +16,15 @@
 */
 package org.apache.stanbol.entityhub.ldpath.transformer;
 
+import java.util.Map;
+
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
+import org.apache.marmotta.ldpath.api.transformers.NodeTransformer;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory.ValueConverter;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
-
-import at.newmedialab.ldpath.LDPath;
-import at.newmedialab.ldpath.api.backend.RDFBackend;
-import at.newmedialab.ldpath.api.transformers.NodeTransformer;
 
 /**
  * LDPath {@link NodeTransformer} internally using the Entityhub 
@@ -49,7 +49,7 @@ public class ValueConverterTransformerAdapter<T> implements NodeTransformer<T,Ob
         this.vc = vc;
     }
     @Override
-    public T transform(RDFBackend<Object> backend, Object node) throws IllegalArgumentException {
+    public T transform(RDFBackend<Object> backend, Object node, Map<String, String> configuration) throws IllegalArgumentException {
         T value = vc.convert(node, vf);
         if(value == null){
             value = vc.convert(backend.stringValue(node), vf);

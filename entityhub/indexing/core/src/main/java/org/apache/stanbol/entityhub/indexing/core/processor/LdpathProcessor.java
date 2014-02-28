@@ -26,6 +26,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.marmotta.ldpath.exception.LDPathParseException;
+import org.apache.marmotta.ldpath.model.programs.Program;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.indexing.core.EntityProcessor;
 import org.apache.stanbol.entityhub.indexing.core.config.IndexingConfig;
@@ -35,9 +37,6 @@ import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import at.newmedialab.ldpath.exception.LDPathParseException;
-import at.newmedialab.ldpath.model.programs.Program;
 
 public class LdpathProcessor implements EntityProcessor{
 

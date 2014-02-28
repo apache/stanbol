@@ -16,7 +16,6 @@
 */
 package org.apache.stanbol.enhancer.ldpath.function;
 
-import static at.newmedialab.ldpath.util.Collections.concat;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper.parseMimeType;
 
 import java.io.IOException;
@@ -30,14 +29,14 @@ import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.io.IOUtils;
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
+import org.apache.marmotta.ldpath.util.Collections;
 import org.apache.stanbol.enhancer.ldpath.backend.ContentItemBackend;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import at.newmedialab.ldpath.api.functions.SelectorFunction;
 
 /**
  * Provides access to the contents stored in {@link Blob}s added as content parts
@@ -46,7 +45,7 @@ import at.newmedialab.ldpath.api.functions.SelectorFunction;
  * @author Rupert Westenthaler
  *
  */
-public class ContentFunction extends ContentItemFunction implements SelectorFunction<Resource> {
+public class ContentFunction extends ContentItemFunction {
 
     Logger log = LoggerFactory.getLogger(ContentFunction.class);
     LiteralFactory lf = LiteralFactory.getInstance();
@@ -56,30 +55,14 @@ public class ContentFunction extends ContentItemFunction implements SelectorFunc
     }
     
     @Override
-    public Collection<Resource> apply(ContentItemBackend backend, Collection<Resource>... args) throws IllegalArgumentException {
+    public Collection<Resource> apply(ContentItemBackend backend, Resource context, Collection<Resource>... args) throws IllegalArgumentException {
         ContentItem ci = ((ContentItemBackend)backend).getContentItem();
-//        Collection<Resource> contexts = args[0];
         Set<String> mimeTypes;
         if(args == null || args.length < 1){
             mimeTypes = null;
         } else {
-//TODO: Wait for ld-path to parse the context
-//      http://code.google.com/p/ldpath/issues/detail?id=7
-//                //1. check if the first parameter is the context
-//                if(!args[0].isEmpty() && backend.isURI(args[0].iterator().next())){
-//                    contexts = args[0];
-//                    if(args.length > 1){ // cut the context from the args
-//                        Collection<Resource>[] tmp = new Collection[args.length-1];
-//                        System.arraycopy(args, 0, tmp, 0, tmp.length);
-//                        args = tmp;
-//                    } else {
-//                        args = new Collection[]{};
-//                    }
-//                } else { //use the ContentItem as context
-//                    contexts = java.util.Collections.singleton((Resource)ci.getUri());
-//                }
             mimeTypes = new HashSet<String>();
-            for(Iterator<Resource> params = concat(args).iterator();params.hasNext();){
+            for(Iterator<Resource> params = Collections.concat(args).iterator();params.hasNext();){
                 Resource param = params.next();
                 String mediaTypeString = backend.stringValue(param);
                 try {
@@ -117,6 +100,16 @@ public class ContentFunction extends ContentItemFunction implements SelectorFunc
             }
         }
         return result;
+    }
+
+    @Override
+    public String getSignature() {
+        return "content = fn:content({content-resource},{media-type},{media-type2},.., {media-typeN})";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Provides access to the Content stored in Blobs of the ContentItem";
     }
 
 }

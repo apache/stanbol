@@ -136,6 +136,11 @@
       <artifactId>jena-arq</artifactId>
       <version>2.10.0</version>
     </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    
     <!-- dependencies for testing -->
     <dependency>  <!-- used for debug level logging during tests -->
       <groupId>org.slf4j</groupId>
@@ -143,10 +148,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
       <scope>test</scope>
     </dependency>
+    
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

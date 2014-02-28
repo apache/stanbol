@@ -26,12 +26,12 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
+import org.apache.marmotta.ldpath.model.backend.AbstractBackend;
+
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.graph.Node;
-
-import at.newmedialab.ldpath.api.backend.RDFBackend;
-import at.newmedialab.ldpath.model.backend.AbstractBackend;
 
 /**
  * Implements all the value converter methods of {@link RDFBackend}.

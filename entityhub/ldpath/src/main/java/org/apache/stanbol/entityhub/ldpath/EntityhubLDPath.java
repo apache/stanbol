@@ -18,6 +18,11 @@ package org.apache.stanbol.entityhub.ldpath;
 
 import java.util.Collection;
 
+import org.apache.marmotta.ldpath.LDPath;
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
+import org.apache.marmotta.ldpath.model.fields.FieldMapping;
+import org.apache.marmotta.ldpath.model.programs.Program;
+import org.apache.marmotta.ldpath.parser.DefaultConfiguration;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory.AnyUriConverter;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory.ReferenceConverter;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory.TextConverter;
@@ -30,13 +35,6 @@ import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
-
-import at.newmedialab.ldpath.LDPath;
-import at.newmedialab.ldpath.api.backend.RDFBackend;
-import at.newmedialab.ldpath.api.transformers.NodeTransformer;
-import at.newmedialab.ldpath.model.fields.FieldMapping;
-import at.newmedialab.ldpath.model.programs.Program;
-import at.newmedialab.ldpath.parser.DefaultConfiguration;
 
 /**
  * {@link LDPath} with Entityhub specific configurations.

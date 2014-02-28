@@ -120,7 +120,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
             .withFormContent(
                 "context","http://dbpedia.org/resource/Paris",
                 //unknown namespace prefix
-                "ldpath","name = dct:subject :: xsd:anyURI;")
+                "ldpath","name = nonexistendWkTzK:localName :: xsd:anyURI;")
         )
         .assertStatus(Status.BAD_REQUEST.getStatusCode());
         executor.execute(

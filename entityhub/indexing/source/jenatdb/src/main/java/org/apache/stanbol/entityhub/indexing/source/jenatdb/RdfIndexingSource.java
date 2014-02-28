@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataIterable;
 import org.apache.stanbol.entityhub.indexing.core.EntityDataIterator;
@@ -44,8 +45,6 @@ import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import at.newmedialab.ldpath.api.backend.RDFBackend;
 
 import com.hp.hpl.jena.datatypes.BaseDatatype;
 import com.hp.hpl.jena.datatypes.DatatypeFormatException;

@@ -57,7 +57,7 @@
         <configuration>
           <instructions>
             <Import-Package>
-              at.newmedialab.ldpath.api.backend; provide:=true,
+              org.apache.marmotta.ldpath.api.backend; provide:=true,
               *
             </Import-Package>
             <Export-Package>
@@ -77,12 +77,12 @@
     </dependency>
     <!-- LD-Path -->
     <dependency>
-      <groupId>at.newmedialab.ldpath</groupId>
+      <groupId>org.apache.marmotta</groupId>
       <artifactId>ldpath-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>at.newmedialab.ldpath</groupId>
-      <artifactId>ldpath-core-bundle</artifactId>
+      <groupId>org.apache.marmotta</groupId>
+      <artifactId>ldpath-core</artifactId>
     </dependency>
     <!-- Commons -->
     <dependency>
