@@ -312,7 +312,9 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                     suggestions.subList(maxSuggestions,suggestions.size()).clear();
                 }
                 //adapt score based on entity ranking
-                adaptScoresForEntityRankings(suggestions);
+                if(elConfig.isRankEqualScoresBasedOnEntityRankings()){
+                    adaptScoresForEntityRankings(suggestions);
+                }
             }
             if(log.isTraceEnabled()){ //log the suggestion information
                 log.trace("Suggestions:");
