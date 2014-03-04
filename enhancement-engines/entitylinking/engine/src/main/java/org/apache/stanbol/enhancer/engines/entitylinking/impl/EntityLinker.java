@@ -316,7 +316,7 @@ public class EntityLinker {
                     log.warn("  ... this will result in worng confidence values relative to the best match");
                 }
                 int maxSuggestions = linkerConfig.getMaxSuggestions();
-                if(suggestions.size() > maxSuggestions && 
+                if((suggestions.size() + 1) > maxSuggestions && 
                         linkerConfig.isIncludeSuggestionsWithSimilarScore()){
                     //include suggestions with similar score
                     double minIncludeScore = suggestions.get(maxSuggestions).getScore();
