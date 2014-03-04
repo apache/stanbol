@@ -295,7 +295,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                 //sort based on score
                 Collections.sort(suggestions, Match.SCORE_COMPARATOR);
                 int maxSuggestions = elConfig.getMaxSuggestions();
-                if(suggestions.size() > maxSuggestions && 
+                if((suggestions.size() > maxSuggestions + 1) && 
                         elConfig.isIncludeSuggestionsWithSimilarScore()){
                     //include suggestions with similar score
                     double minIncludeScore = suggestions.get(maxSuggestions).getScore();
