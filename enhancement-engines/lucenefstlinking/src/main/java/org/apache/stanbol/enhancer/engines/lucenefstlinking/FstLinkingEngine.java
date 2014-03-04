@@ -307,22 +307,23 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                     } while(numInclude < suggestions.size() && actScore >= minIncludeScore);
                     maxSuggestions = numInclude - 1;
                 }
-                //remove all suggestions > maxSuggestions
-                if(suggestions.size() > maxSuggestions){
-                    suggestions.subList(maxSuggestions,suggestions.size()).clear();
-                }
                 //adapt score based on entity ranking
                 if(elConfig.isRankEqualScoresBasedOnEntityRankings()){
                     adaptScoresForEntityRankings(suggestions);
                 }
-            }
-            if(log.isTraceEnabled()){ //log the suggestion information
-                log.trace("Suggestions:");
-                int si=1;
-                for(Match m : suggestions){
-                    log.trace(" {}. {} - {} ({})", new Object[]{
-                            si,m.getScore(),m.getMatchLabel(),m.getUri()});
-                    si++;
+                if(log.isTraceEnabled()){ //log the suggestion information
+                    log.trace("Suggestions:");
+                    int si=1;
+                    for(Match m : suggestions){
+                        log.trace(" {}. {} - {} ({})", new Object[]{
+                                si <= maxSuggestions ? si : "--",
+                                m.getScore(),m.getMatchLabel(),m.getUri()});
+                        si++;
+                    }
+                }
+                //remove all suggestions > maxSuggestions
+                if(suggestions.size() > maxSuggestions){
+                    suggestions.subList(maxSuggestions,suggestions.size()).clear();
                 }
             }
             tag.setSuggestions(suggestions);
