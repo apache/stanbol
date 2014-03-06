@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.enhancer.engines.langdetect;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper.validateAllEntityAnnotations;
 import static org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper.validateAllTextAnnotations;
 import static org.junit.Assert.assertEquals;
@@ -133,5 +133,15 @@ public class LanguageDetectionEngineTest {
         int entityAnnoNum = validateAllEntityAnnotations(ci.getMetadata(), expectedValues);
         assertEquals("No EntityAnnotations are expected",0, entityAnnoNum);
 
+    }
+    
+    @Test
+    public void testNonTextContent() throws EngineException, ConfigurationException, LangDetectException, IOException {
+        LanguageDetectionEnhancementEngine langIdEngine = new LanguageDetectionEnhancementEngine();
+        ComponentContext context =  new MockComponentContext();
+        context.getProperties().put(EnhancementEngine.PROPERTY_NAME, "langdetect");
+        langIdEngine.activate(context);
+        ContentItem ci = ciFactory.createContentItem(new StringSource("123"));
+        langIdEngine.computeEnhancements(ci);
     }
 }

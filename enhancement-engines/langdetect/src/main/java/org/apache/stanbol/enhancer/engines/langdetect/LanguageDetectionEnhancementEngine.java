@@ -232,13 +232,23 @@ public class LanguageDetectionEnhancementEngine
             languages = languageIdentifier.getLanguages(text);
             log.debug("language identified: {}",languages);
         } catch (LangDetectException e) {
-            StringBuilder msg = new StringBuilder("Could not identify language of text: ");
-            if(text.length() < 200){
-                msg.append(text);
+            Enum<?> errorCode = (Enum<?>)e.getCode();
+            //NOTE: https://code.google.com/p/language-detection/issues/detail?id=49
+            //ErrorCode enumeration is not visible. This engine wants to silently
+            //ignore " 0 - NoTextError" and "5 - CantDetectError"
+            if(errorCode.ordinal() != 0 && errorCode.ordinal() != 5) {
+                StringBuilder msg = new StringBuilder("Could not identify language of text: ");
+                if(text.length() < 200){
+                    msg.append(text);
+                } else {
+                    msg.append(text.subSequence(0, 199)).append("...");
+                }
+                msg.append(" (Error Code: ").append(errorCode.ordinal())
+                        .append(" - ").append(errorCode.name()).append(")");
+                throw new EngineException(this, ci, msg.toString(), e);
             } else {
-                msg.append(text.subSequence(0, 199)).append("...");
+                log.debug("No text to detect the language from present in ContentItem ",ci);
             }
-            throw new EngineException(this, ci, msg.toString(), e);
         }
         
         // add language to metadata
