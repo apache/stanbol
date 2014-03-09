@@ -368,7 +368,7 @@
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.sparql</artifactId>
-      <version>0.6</version>
+      <version>0.7-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
@@ -414,12 +414,12 @@
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.serializer</artifactId>
-      <version>0.10</version>
+      <version>0.11-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.parser</artifactId>
-      <version>0.11</version>
+      <version>0.12-SNAPSHOT</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
