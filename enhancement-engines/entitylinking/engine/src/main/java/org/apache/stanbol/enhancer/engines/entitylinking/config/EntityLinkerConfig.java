@@ -217,6 +217,12 @@ public class EntityLinkerConfig {
      * based on the entity ranking (popularity of the entity within the knowledge base)
      */
     public static final String RANK_EQUAL_SCORES_BASED_ON_ENTITY_RANKINGS = "enhancer.engines.linking.useEntityRankings";
+    /**
+     * Allows to enable/disable the inclusion of the <code>fise:entity-ranking</code>
+     * property to <code>fise:EntityAnnotation</code> created by the linking engine.
+     */
+    public static final String WRITE_ENTITY_RANKINGS = "enhancer.engines.linking.writeEntityRankings";
+
     
     /**
      * The default number for the maximum number of terms suggested for a word
@@ -466,6 +472,13 @@ public class EntityLinkerConfig {
      * higher ranking (popularity) do have an higher score.
      */
     public static final boolean DEFAULT_RANK_EQUAL_SCORES_BASED_ON_ENTITY_RANKINGS = true;
+    
+    /**
+     * By default the <code>fise:entity-ranking</code> property is not added to 
+     * <code>fise:EntityAnnotation</code>.
+     */
+    public static final boolean DEFAULT_WRITE_ENTITY_RANKINGS = false;
+    
     /**
      * If Tokens match is determined by comparing them using some algorithm.
      * Results need to be in the range [0..1]. This factor defines the minimum
@@ -490,6 +503,8 @@ public class EntityLinkerConfig {
 
     private boolean rankEqualScoresBasedOnEntityRankings = DEFAULT_RANK_EQUAL_SCORES_BASED_ON_ENTITY_RANKINGS;
 
+    private boolean writeEntityRankings = DEFAULT_WRITE_ENTITY_RANKINGS;
+    
     /**
      * Default constructor the initializes the configuration with the 
      * default values
@@ -908,6 +923,16 @@ public class EntityLinkerConfig {
             linkerConfig.setRankEqualScoresBasedOnEntityRankings(
                 DEFAULT_RANK_EQUAL_SCORES_BASED_ON_ENTITY_RANKINGS);
         }
+        //init WRITE ENTITY RANKINGS (STANBOL-1292)
+        value = configuration.get(WRITE_ENTITY_RANKINGS);
+        if(value instanceof Boolean){
+            linkerConfig.setWriteEntityRankings(((Boolean)value).booleanValue());
+        } else if (value != null){
+            linkerConfig.setWriteEntityRankings(Boolean.parseBoolean(value.toString()));
+        } else {
+            linkerConfig.setWriteEntityRankings(DEFAULT_WRITE_ENTITY_RANKINGS);
+        }
+        
         //init the list of whitelisted/blacklisted types
         value = configuration.get(ENTITY_TYPES);
         List<String> entityTypesConfig; //first collect and cleanup the config
@@ -1516,6 +1541,29 @@ public class EntityLinkerConfig {
     public void setRankEqualScoresBasedOnEntityRankings(boolean state) {
         this.rankEqualScoresBasedOnEntityRankings = state;
     }
+    
+    /**
+     * getter for the state if <code>fise:entity-ranking</code> values should
+     * be added to <code>fise:EntityAnnotation</code> (if rankings are available
+     * for the linked datasets
+     * @return the write entity ranking state
+     */
+    public boolean isWriteEntityRankings() {
+        return writeEntityRankings;
+    }
+    /**
+     * Setter for the {@link #WRITE_ENTITY_RANKINGS} state. 
+     * @param writeEntityRankings the state. Parse <code>null</code> to set
+     * to the default
+     */
+    public void setWriteEntityRankings(Boolean writeEntityRankings) {
+        if(writeEntityRankings == null){
+            this.writeEntityRankings = DEFAULT_WRITE_ENTITY_RANKINGS;
+        } else {
+            this.writeEntityRankings = writeEntityRankings;
+        }
+    }
+    
     
     /**
      * Adds an type to the blacklist

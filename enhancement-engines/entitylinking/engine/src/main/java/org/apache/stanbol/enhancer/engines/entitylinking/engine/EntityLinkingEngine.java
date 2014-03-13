@@ -44,6 +44,7 @@ import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.rdf.core.impl.TypedLiteralImpl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
@@ -66,6 +67,7 @@ import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
+import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,6 +97,10 @@ public class EntityLinkingEngine implements EnhancementEngine, ServiceProperties
      * to ensure that other engines do not get confused
      */
     public static final Integer DEFAULT_ORDER = ServiceProperties.ORDERING_DEFAULT - 10;
+    
+    private static final UriRef XSD_DOUBLE = new UriRef("http://www.w3.org/2001/XMLSchema#double");
+    
+    private static final UriRef ENHANCER_ENTITY_RANKING = new UriRef(NamespaceEnum.fise + "entity-ranking");
     
     /**
      * The name of this engine
@@ -267,7 +273,8 @@ public class EntityLinkingEngine implements EnhancementEngine, ServiceProperties
         //write results (requires a write lock)
         ci.getLock().writeLock().lock();
         try {
-            writeEnhancements(ci, entityLinker.getLinkedEntities().values(), language);
+            writeEnhancements(ci, entityLinker.getLinkedEntities().values(), language,
+                linkerConfig.isWriteEntityRankings());
         } finally {
             ci.getLock().writeLock().unlock();
         }
@@ -280,7 +287,8 @@ public class EntityLinkingEngine implements EnhancementEngine, ServiceProperties
      * @param linkedEntities
      * @param language
      */
-    private void writeEnhancements(ContentItem ci, Collection<LinkedEntity> linkedEntities, String language) {
+    private void writeEnhancements(ContentItem ci, Collection<LinkedEntity> linkedEntities, 
+            String language, boolean writeRankings) {
         Language languageObject = null;
         if(language != null && !language.isEmpty()){
             languageObject = new Language(language);
@@ -357,6 +365,15 @@ public class EntityLinkingEngine implements EnhancementEngine, ServiceProperties
                     for(Resource value : originInfo.getValue()){
                         metadata.add(new TripleImpl(entityAnnotation, 
                             originInfo.getKey(),value));
+                    }
+                }
+                if(writeRankings){
+                    Float ranking = suggestion.getEntity().getEntityRanking();
+                    if(ranking != null){
+                        metadata.add(new TripleImpl(entityAnnotation, 
+                            ENHANCER_ENTITY_RANKING,
+                            //write the float as double
+                            new TypedLiteralImpl(ranking.toString(), XSD_DOUBLE)));
                     }
                 }
                 //in case dereferencing of Entities is enabled we need also to
