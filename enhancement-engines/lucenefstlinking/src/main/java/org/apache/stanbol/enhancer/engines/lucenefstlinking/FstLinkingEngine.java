@@ -16,7 +16,6 @@
 */
 package org.apache.stanbol.enhancer.engines.lucenefstlinking;
 
-import static org.apache.stanbol.enhancer.engines.entitylinking.impl.Suggestion.ENTITY_RANK_COMPARATOR;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getAnalysedText;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getLanguage;
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.getSelectionContext;
@@ -31,7 +30,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -40,14 +38,11 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
@@ -58,14 +53,12 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.OpenBitSet;
 import org.apache.solr.core.SolrCore;
-import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConfig;
 import org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig;
 import org.apache.stanbol.enhancer.engines.entitylinking.engine.EntityLinkingEngine;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.LinkedEntity;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.Suggestion;
-import org.apache.stanbol.enhancer.engines.entitylinking.impl.LinkedEntity.Occurrence;
 import org.apache.stanbol.enhancer.engines.lucenefstlinking.TaggingSession.Corpus;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -91,6 +84,8 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
     public static final Integer ENGINE_ORDERING = EntityLinkingEngine.DEFAULT_ORDER;
     private static final Map<String,Object> SERVICE_PROPERTIES = Collections.unmodifiableMap(Collections
             .singletonMap(ServiceProperties.ENHANCEMENT_ENGINE_ORDERING, (Object) ENGINE_ORDERING));
+
+    private static final UriRef ENHANCER_ENTITY_RANKING = new UriRef(NamespaceEnum.fise + "entity-ranking");
 
     private final LiteralFactory literalFactory = LiteralFactory.getInstance();
     
@@ -226,7 +221,8 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
         }
         ci.getLock().writeLock().lock();
         try {
-            writeEnhancements(ci,at.getSpan(),tags.values(),language);
+            writeEnhancements(ci,at.getSpan(),tags.values(),language, 
+                elConfig.isWriteEntityRankings());
         } finally {
             ci.getLock().writeLock().unlock();
         }
@@ -515,7 +511,8 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
      * @param tags
      * @param language
      */
-    private void writeEnhancements(ContentItem ci, String text, Collection<Tag> tags, String language) {
+    private void writeEnhancements(ContentItem ci, String text, Collection<Tag> tags, 
+            String language, boolean writeRankings) {
         Language languageObject = null;
         if(language != null && !language.isEmpty()){
             languageObject = new Language(language);
@@ -589,6 +586,15 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
 //                            originInfo.getKey(),value));
 //                    }
 //                }
+                if(writeRankings){
+                    Double ranking = match.getRanking();
+                    if(ranking != null){
+                        metadata.add(new TripleImpl(entityAnnotation, 
+                            ENHANCER_ENTITY_RANKING,
+                            literalFactory.createTypedLiteral(ranking)));
+                    }
+                }
+
                 //TODO: dereferencing 
 //                if(linkerConfig.isDereferenceEntitiesEnabled() &&
 //                        dereferencedEntitis.add(entity.getUri())){ //not yet dereferenced
