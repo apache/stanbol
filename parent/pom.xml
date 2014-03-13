@@ -87,8 +87,8 @@
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <message>Java 6 or higher is required to compile this module</message>
-                  <version>1.6</version>
+                  <message>Java 7 or higher is required to compile this module</message>
+                  <version>1.7</version>
                 </requireJavaVersion>
               </rules>
             </configuration>
