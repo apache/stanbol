@@ -643,6 +643,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
             solrYardConfig.setAllowInitialisation(Boolean.FALSE);
             server = StandaloneEmbeddedSolrServerProvider.getInstance().getSolrServer(
                 solrServerRef,solrServerRef.getIndex());
+            this.core = server.getCoreContainer().getCore(solrServerRef.getIndex());
         } else {
             //allow the default initialisation
             solrYardConfig.setAllowInitialisation(Boolean.TRUE);
