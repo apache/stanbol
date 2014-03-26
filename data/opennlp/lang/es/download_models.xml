@@ -34,7 +34,7 @@
         <!-- there is no sentence detector for es
              so we use the pt for now. -->
         <resources>
-            <url url="${git.model.url}/opennlp-es-maxent-pos-es.bin"/>
+            <url url="${sf.model.url}/opennlp-es-maxent-pos-es.bin"/>
         </resources>
         <mergemapper to="es-pos-maxent.bin"/>
     </copy>
