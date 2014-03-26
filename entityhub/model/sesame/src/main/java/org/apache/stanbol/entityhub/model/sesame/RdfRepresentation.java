@@ -16,6 +16,9 @@
 */
 package org.apache.stanbol.entityhub.model.sesame;
 
+import static org.apache.commons.collections.PredicateUtils.instanceofPredicate;
+import static org.apache.commons.collections.PredicateUtils.notPredicate;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -27,6 +30,8 @@ import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.commons.collections.IteratorUtils;
+import org.apache.commons.collections.Predicate;
+import org.apache.commons.collections.PredicateUtils;
 import org.apache.commons.collections.Transformer;
 import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
@@ -34,6 +39,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.UnsupportedTypeException;
 import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
+import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
@@ -225,9 +231,11 @@ public class RdfRepresentation implements Representation, RdfWrapper {
         }
         URI property = sesameFactory.createURI(field);
         return IteratorUtils.transformedIterator(
-            IteratorUtils.transformedIterator(
-                model.filter(subject, property, null).iterator(), 
-                objectTransFormer), // get the object from the statement
+            IteratorUtils.filteredIterator(
+                IteratorUtils.transformedIterator(
+                    model.filter(subject, property, null).iterator(), 
+                    objectTransFormer), // get the object from the statement
+                notPredicate(instanceofPredicate(BNode.class))),
             org.apache.stanbol.entityhub.model.sesame.ModelUtils.VALUE_TRANSFORMER); // transform the values
     }
 

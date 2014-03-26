@@ -80,9 +80,11 @@ class ValueTypeFilter<T> implements Predicate {
     
     @Override
     public boolean evaluate(Object object) {
-        if(sesameType != null){
+        if(object == null){
+            return false;
+        } else if(sesameType != null){
             return sesameType.isAssignableFrom(object.getClass());
-        } else if(referenceState && object instanceof URI || object instanceof BNode){
+        } else if(referenceState && object instanceof URI){
             return true;
         } else if(object instanceof Literal){
             Literal literal = (Literal)object;
