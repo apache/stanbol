@@ -28,13 +28,24 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 import org.apache.stanbol.entityhub.test.model.RepresentationTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
+import org.openrdf.model.Model;
+import org.openrdf.model.URI;
+import org.openrdf.model.impl.BNodeImpl;
+import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.vocabulary.DCTERMS;
+import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.model.vocabulary.RDFS;
+import org.openrdf.model.vocabulary.SKOS;
 import org.openrdf.model.vocabulary.XMLSchema;
 
 
@@ -192,6 +203,42 @@ public class RdfRepresentationTest extends RepresentationTest {
         assertEquals(dateValue, dateValues.next());
         assertFalse(dateValues.hasNext());
     }
+    /**
+     * Test for STANBOL-1301
+     */
+    @Test
+    public void testBNodeFiltering(){
+        URI concept = new URIImpl("http://example.org/mySkos#Concept123");
+        Representation r = createRepresentation(concept.stringValue());
+        assertTrue(r instanceof RdfRepresentation);
+        RdfRepresentation rep = (RdfRepresentation)r;
+        //add the example as listed in STANBOL-1301 to directly to the
+        //Sesame Model backing the created Representation
+        Model m  = rep.getModel();
+        m.add(concept,RDF.TYPE,SKOS.CONCEPT);
+        m.add(concept,DCTERMS.IDENTIFIER, new LiteralImpl("123"));
+        m.add(concept, SKOS.PREF_LABEL, new LiteralImpl("Concept123","en"));
+        
+        BNode note1 = new BNodeImpl("5d8580be71044a88bcfe9852d1e9cfb6node17c4j452vx19576");
+        m.add(concept, SKOS.SCOPE_NOTE, note1);
+        m.add(note1, DCTERMS.CREATOR, new LiteralImpl("User1"));
+        m.add(note1, DCTERMS.CREATED, new LiteralImpl("2013-03-03T02:02:02Z",XMLSchema.DATETIME));
+        m.add(note1, RDFS.COMMENT, new LiteralImpl("The scope of this example global","en"));
+
+        BNode note2 = new BNodeImpl("5d8580be71044a88bcfe9852d1e9cfb6node17c4j452vx19634");
+        m.add(concept, SKOS.SCOPE_NOTE, note2);
+        m.add(note2, DCTERMS.CREATOR, new LiteralImpl("User2"));
+        m.add(note2, DCTERMS.CREATED, new LiteralImpl("2013-03-03T04:04:04Z",XMLSchema.DATETIME));
+        m.add(note2, RDFS.COMMENT, new LiteralImpl("Der Geltungsbereich ist Global","de"));
+        
+        //now assert that BNodes are not reported via the Representation API
+        Iterator<Object> scopeNotes = rep.get(SKOS.SCOPE_NOTE.stringValue());
+        assertFalse(scopeNotes.hasNext());
+        
+        Iterator<Reference> scopeNoteRefs = rep.getReferences(SKOS.SCOPE_NOTE.stringValue());
+        assertFalse(scopeNoteRefs.hasNext());
+    }
+    
     //TODO add tests for adding Integers, Doubles, ... and getting TypedLiterals
     public static void main(String[] args) {
         RdfRepresentationTest test = new RdfRepresentationTest();
