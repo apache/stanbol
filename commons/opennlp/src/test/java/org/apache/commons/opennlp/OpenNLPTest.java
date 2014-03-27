@@ -92,14 +92,14 @@ public class OpenNLPTest {
     }
     @Test
     public void testLoadEnPOS() throws IOException{
-        POSModel model = openNLP.getPartOfSpeachModel("en");
+        POSModel model = openNLP.getPartOfSpeechModel("en");
         Assert.assertNotNull(model);
         POSTagger posTagger = openNLP.getPartOfSpeechTagger("en");
         Assert.assertNotNull(posTagger);
     }
     @Test
     public void testLoadMissingPOS() throws IOException{
-        POSModel model = openNLP.getPartOfSpeachModel("ru");
+        POSModel model = openNLP.getPartOfSpeechModel("ru");
         Assert.assertNull(model);
         POSTagger posTagger = openNLP.getPartOfSpeechTagger("ru");
         Assert.assertNull(posTagger);

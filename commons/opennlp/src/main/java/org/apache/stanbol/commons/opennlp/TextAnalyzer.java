@@ -231,7 +231,7 @@ public class TextAnalyzer {
         }
         if(posTagger == null && !posTaggerNotAvailable){
             try {
-                POSModel posModel = openNLP.getPartOfSpeachModel(language);
+                POSModel posModel = openNLP.getPartOfSpeechModel(language);
                 if(posModel != null){
                     posTagger = new POSTaggerME(posModel);
                 } else {

@@ -426,7 +426,7 @@ public class OpenNlpPosTaggingEngine extends AbstractEnhancementEngine<RuntimeEx
         try {
             POSModel model;
             if(modelName == null){ //use the default
-                model = openNLP.getPartOfSpeachModel(language);
+                model = openNLP.getPartOfSpeechModel(language);
             } else {
                 model = openNLP.getModel(POSModel.class, modelName, null);
             }

@@ -189,7 +189,7 @@ public class OpenNLP {
             try {
                 TokenizerModel model = getTokenizerModel(language);
                 if(model != null){
-                    tokenizer = new TokenizerME(getTokenizerModel(language));
+                    tokenizer = new TokenizerME(model);
                 }
             } catch (InvalidFormatException e) {
                 log.warn("Unable to load Tokenizer Model for "+language+": " +
@@ -216,7 +216,7 @@ public class OpenNLP {
      * @throws InvalidFormatException in case the found model data are in the wrong format
      * @throws IOException on any error while reading the model data
      */
-    public POSModel getPartOfSpeachModel(String language) throws IOException, InvalidFormatException {
+    public POSModel getPartOfSpeechModel(String language) throws IOException, InvalidFormatException {
         //typically there are two versions
         //we prefer the perceptron variant but if not available try to build the other
         IOException first = null;
@@ -252,7 +252,7 @@ public class OpenNLP {
      * @throws IOException on any error while reading the model data
      */
     public POSTagger getPartOfSpeechTagger(String language) throws IOException {
-        POSModel posModel = getPartOfSpeachModel(language);
+        POSModel posModel = getPartOfSpeechModel(language);
         if(posModel != null){
             return new POSTaggerME(posModel);
         } else {
