@@ -186,7 +186,7 @@ public class OpenNLP {
             try {
                 TokenizerModel model = getTokenizerModel(language);
                 if(model != null){
-                    tokenizer = new TokenizerME(getTokenizerModel(language));
+                    tokenizer = new TokenizerME(model);
                 }
             } catch (InvalidFormatException e) {
                 log.warn("Unable to load Tokenizer Model for "+language+": " +
@@ -212,8 +212,25 @@ public class OpenNLP {
      * @return the model or <code>null</code> if no model data are found
      * @throws InvalidFormatException in case the found model data are in the wrong format
      * @throws IOException on any error while reading the model data
+     * @deprecated type in method name. Use {@link #getPartOfSpeechModel(String)} instead.
+     * Will get removed with <code>1.0</code>
+     * @see #getPartOfSpeechModel(String)
      */
     public POSModel getPartOfSpeachModel(String language) throws IOException, InvalidFormatException {
+        return getPartOfSpeechModel(language);
+    }
+    
+    /**
+     * Getter for the "part-of-speech" model for the parsed language.
+     * If the model is not yet available a new one is built. The required data
+     * are loaded by using the {@link DataFileProvider} service.  
+     * @param language the language
+     * @return the model or <code>null</code> if no model data are found
+     * @throws InvalidFormatException in case the found model data are in the wrong format
+     * @throws IOException on any error while reading the model data
+     * @since 0.12.1
+     */
+    public POSModel getPartOfSpeechModel(String language) throws IOException, InvalidFormatException {
         //typically there are two versions
         //we prefer the perceptron variant but if not available try to build the other
         IOException first = null;
