@@ -59,7 +59,8 @@
     <!-- define the path to/home of the OpenNLP modles-->
     <opennlp.model.path>org/apache/stanbol/data/opennlp</opennlp.model.path>
     <opennlp.model.home>http://dev.iks-project.eu/downloads/opennlp/models-1.5</opennlp.model.home>
-    <opennlp.git.model.home>https://github.com/utcompling/OpenNLP-Models/raw/58ef0c60031403e66e47ae35edaf58d3478b67af/models/es</opennlp.git.model.home>
+    <!-- no longer used
+    opennlp.git.model.home>https://github.com/utcompling/OpenNLP-Models/raw/master/models/es</opennlp.git.model.home -->
   </properties>
 
   <build>
@@ -110,7 +111,7 @@
               <target>
                 <property name="target.directory" value="${project.basedir}/downloads/resources/${opennlp.model.path}" />
                 <property name="sf.model.url" value="${opennlp.model.home}" />
-                <property name="git.model.url" value="${opennlp.git.model.home}" />
+                <!--  property name="git.model.url" value="${opennlp.git.model.home}" / -->
                                 
                 <echo message="copy OpenNLP models" />
                 <echo message=" FROM ${model.url} " />
