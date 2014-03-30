@@ -68,6 +68,7 @@
 
     <!-- Components -->
     <module>enhancer</module>
+    <module>enhancer-engines-restricted</module>
     <!-- entityhub -->
     <module>entityhub/core</module>
     <module>entityhub/clerezza</module>
