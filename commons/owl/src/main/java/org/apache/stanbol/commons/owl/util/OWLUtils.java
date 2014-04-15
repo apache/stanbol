@@ -94,7 +94,7 @@ public final class OWLUtils {
             }
             if (subj instanceof UriRef) {
                 ontologyIri = IRI.create(((UriRef) subj).getUnicodeString());
-                Iterator<Triple> it2 = graph.filter((UriRef) subj, new UriRef(OWL2Constants.OWL_VERSION_IRI),
+                Iterator<Triple> it2 = graph.filter(subj, new UriRef(OWL2Constants.OWL_VERSION_IRI),
                     null);
                 if (it2.hasNext()) versionIri = IRI.create(((UriRef) it2.next().getObject())
                         .getUnicodeString());

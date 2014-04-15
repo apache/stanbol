@@ -246,7 +246,7 @@ public class MGraphMultiplexer implements Multiplexer {
                     break;
             }
         } else if (meta.contains(new TripleImpl(candidate, RDF.type, SESSION_URIREF))) {
-            String sessionId = ((UriRef) candidate).getUnicodeString().substring(prefix_session.length());
+            String sessionId = candidate.getUnicodeString().substring(prefix_session.length());
             handles.add(sessionManager.getSession(sessionId));
         }
     }

@@ -163,7 +163,7 @@ public class RuleAdaptersFactoryImpl implements RuleAdaptersFactory, ServiceList
     @Override
     public synchronized void addRuleAdapter(RuleAdapter ruleAdapter) throws UnavailableRuleObjectException {
 
-        ruleAdapters.put((Class<?>) ruleAdapter.getExportClass(), ruleAdapter);
+        ruleAdapters.put(ruleAdapter.getExportClass(), ruleAdapter);
 
     }
 

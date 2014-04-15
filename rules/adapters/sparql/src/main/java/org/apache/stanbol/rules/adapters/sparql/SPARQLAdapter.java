@@ -135,9 +135,9 @@ public class SPARQLAdapter extends AbstractRuleAdapter {
 
             SPARQLObject tmp = ((SPARQLObject) adaptRuleAtomTo(ruleAtom, type));
             if (tmp instanceof SPARQLNot) {
-                sparqlObjects.add((SPARQLNot) tmp);
+                sparqlObjects.add(tmp);
             } else if (tmp instanceof SPARQLComparison) {
-                sparqlObjects.add((SPARQLComparison) tmp);
+                sparqlObjects.add(tmp);
             } else {
                 if (!firstIte) {
                     sparql += " . ";

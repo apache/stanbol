@@ -67,8 +67,7 @@ public class DBPSpotlightAnnotateEnhancementTest {
 			.getLogger(DBPSpotlightAnnotateEnhancementTest.class);
 	private static String SPL_URL = System
 			.getProperty(Constants.PARAM_URL_KEY) == null ? "http://spotlight.dbpedia.org/rest/annotate"
-			: (String) System
-					.getProperty(Constants.PARAM_URL_KEY);
+			: System.getProperty(Constants.PARAM_URL_KEY);
 	private static String TEST_TEXT = "President Obama is meeting Angela Merkel in Berlin on Monday";
 	private static DBPSpotlightAnnotateEnhancementEngine dbpslight;
 

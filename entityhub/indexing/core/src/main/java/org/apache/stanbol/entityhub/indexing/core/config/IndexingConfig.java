@@ -657,7 +657,7 @@ public class IndexingConfig {
             if(in != null){
                 LineIterator lines = IOUtils.lineIterator(in, "UTF-8");
                 while(lines.hasNext()){
-                    String line = (String)lines.next();
+                    String line = lines.next();
                     if(!line.isEmpty()){
                         int indexOfEquals = line.indexOf('=');
                         String key = indexOfEquals > 0 ?

@@ -230,7 +230,7 @@ public final class ConfigUtils {
             log.info("  - read from jar-file");
             try {
                 for (@SuppressWarnings("unchecked")
-                Enumeration<ZipArchiveEntry> entries = (Enumeration<ZipArchiveEntry>) archive.getEntries(); entries
+                Enumeration<ZipArchiveEntry> entries = archive.getEntries(); entries
                         .hasMoreElements();) {
                     ZipArchiveEntry entry = entries.nextElement();
                     if (!entry.isDirectory() && entry.getName().startsWith(CONFIG_DIR)) {
@@ -594,7 +594,7 @@ public final class ConfigUtils {
                 (coreName == null ? "" : coreName), sourceRoot.getName(), coreDir.getAbsolutePath(), override));
             try {
                 for (@SuppressWarnings("unchecked")
-                Enumeration<ZipArchiveEntry> entries = (Enumeration<ZipArchiveEntry>) archive.getEntries(); entries
+                Enumeration<ZipArchiveEntry> entries = archive.getEntries(); entries
                         .hasMoreElements();) {
                     ZipArchiveEntry entry = entries.nextElement();
                     if (entry.getName().startsWith(context)) {

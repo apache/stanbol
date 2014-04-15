@@ -68,7 +68,7 @@ public class TextIterator extends AdaptingIterator<Object,Text> implements Itera
                     return null;
                 }
             } else if(isNullLanguage && value instanceof String){
-                return valueFactory.createText((String)value);
+                return valueFactory.createText(value);
             }  else {//type does not fit -> filter
                 return null;
             }

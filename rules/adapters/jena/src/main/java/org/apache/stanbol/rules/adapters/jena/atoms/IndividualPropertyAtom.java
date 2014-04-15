@@ -52,9 +52,9 @@ public class IndividualPropertyAtom extends AbstractAdaptableAtom {
         IObjectAtom objectProperty = tmp.getObjectProperty();
 
         System.out.println(argument1);
-        ClauseEntry argument2ClauseEntry = (ClauseEntry) adapter.adaptTo(argument2, Rule.class);
-        ClauseEntry argument1ClauseEntry = (ClauseEntry) adapter.adaptTo(argument1, Rule.class);
-        ClauseEntry objectPropertyClauseEntry = (ClauseEntry) adapter.adaptTo(objectProperty, Rule.class);
+        ClauseEntry argument2ClauseEntry = adapter.adaptTo(argument2, Rule.class);
+        ClauseEntry argument1ClauseEntry = adapter.adaptTo(argument1, Rule.class);
+        ClauseEntry objectPropertyClauseEntry = adapter.adaptTo(objectProperty, Rule.class);
 
         Node subjectNode;
         Node predicateNode;

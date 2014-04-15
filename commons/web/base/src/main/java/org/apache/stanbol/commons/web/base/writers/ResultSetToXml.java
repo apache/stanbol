@@ -68,7 +68,7 @@ class ResultSetToXml {
             Element bindingElement = doc.createElement("binding");
             bindingElement.setAttribute("name", key.getName());
             bindingElement.appendChild(createValueElement(
-                    (Resource) solutionMap.get(key), doc));
+                    solutionMap.get(key), doc));
             result.appendChild(bindingElement);
         }
     }
@@ -106,7 +106,7 @@ class ResultSetToXml {
             }
         } else {
             value = doc.createElement("bnode");
-            value.appendChild(doc.createTextNode(((BNode) resource).toString()));
+            value.appendChild(doc.createTextNode(resource.toString()));
         }
         return value;
     }

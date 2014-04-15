@@ -51,7 +51,7 @@ public class IsBlankAtom extends AbstractAdaptableAtom {
 
         IObjectAtom uriResource = tmp.getUriResource();
 
-        ClauseEntry argumentClauseEntry = (ClauseEntry) adapter.adaptTo(uriResource, Rule.class);
+        ClauseEntry argumentClauseEntry = adapter.adaptTo(uriResource, Rule.class);
 
         Node argNode;
 

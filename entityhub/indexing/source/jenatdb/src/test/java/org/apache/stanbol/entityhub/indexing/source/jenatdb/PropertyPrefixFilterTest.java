@@ -59,7 +59,7 @@ public class PropertyPrefixFilterTest {
         nsPrefixProvider = new NamespacePrefixProviderImpl(nsMappings);
         InputStream in = PropertyPrefixFilterTest.class.getClassLoader().getResourceAsStream(TEST_CONFIG);
         Assert.assertNotNull("Unable to read test config",in);
-        configLines = (List<String>)IOUtils.readLines(in, "UTF-8");
+        configLines = IOUtils.readLines(in, "UTF-8");
     }
     
     @Before

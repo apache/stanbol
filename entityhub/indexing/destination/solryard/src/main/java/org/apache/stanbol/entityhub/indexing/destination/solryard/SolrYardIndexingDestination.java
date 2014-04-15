@@ -854,7 +854,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         //seams not support files > 2Gb
         File solrArchiveFile = new File(indexingConfig.getDistributionFolder(),solrArchive.getName());
         ZipOutputStream out = new ZipOutputStream(new FileOutputStream(solrArchiveFile));
-        for(File file : (Collection<File>)FileUtils.listFiles(solrIndexLocation, null, true)){
+        for(File file : FileUtils.listFiles(solrIndexLocation, null, true)){
             String name = file.getAbsolutePath().substring(parentPathLength);
             if(!file.isHidden() && !name.endsWith(SOLR_WRITE_LOCK)){
                 log.info("add "+name);

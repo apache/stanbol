@@ -313,7 +313,7 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
                     Span span = spans.next();
                     switch (span.getType()) {
                         case Sentence:
-                            context = (Sentence)context;
+                            context = context;
                             break;
                         default:
                             Value<NerTag> nerAnno = span.getAnnotation(NER_ANNOTATION);

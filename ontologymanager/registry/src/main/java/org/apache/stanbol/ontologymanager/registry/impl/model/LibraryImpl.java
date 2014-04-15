@@ -112,7 +112,7 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
         Set<O> ontologies = new HashSet<O>();
         for (RegistryItem child : getChildren()) {
             if (child instanceof RegistryOntology) {
-                O o = getCache().getStoredOntology(((RegistryOntology) child).getIRI(), returnType);
+                O o = getCache().getStoredOntology(child.getIRI(), returnType);
                 // Should never be null if the library was loaded correctly (an error should have already been
                 // thrown when loading it), but just in case.
                 if (o != null) ontologies.add(o);
@@ -138,7 +138,7 @@ public class LibraryImpl extends AbstractRegistryItem implements Library {
 
         RegistryItem child = getChild(id);
         if (child instanceof RegistryOntology) {
-            ontology = getCache().getStoredOntology(((RegistryOntology) child).getIRI(), returnType);
+            ontology = getCache().getStoredOntology(child.getIRI(), returnType);
         }
         return ontology;
     }

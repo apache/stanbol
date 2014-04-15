@@ -87,7 +87,7 @@ public final class RegistryUtils {
             }
         } else if (item instanceof Library || item instanceof Registry)
         // Inspect children
-        for (RegistryItem child : ((RegistryItem) item).getChildren()) {
+        for (RegistryItem child : item.getChildren()) {
             result |= containsOntologyRecursive(child, ontologyId);
             if (result) break;
         }

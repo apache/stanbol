@@ -90,12 +90,12 @@ public class SparqlEndpointResource extends BaseStanbolResource {
             int r1,r2;
             Object tmp = ref1.getProperty(Constants.SERVICE_RANKING);
             r1 = tmp != null ? ((Integer)tmp).intValue() : 0;
-            tmp = (Integer)ref2.getProperty(Constants.SERVICE_RANKING);
+            tmp = ref2.getProperty(Constants.SERVICE_RANKING);
             r2 = tmp != null ? ((Integer)tmp).intValue() : 0;
             if(r1 == r2){
-                tmp = (Long)ref1.getProperty(Constants.SERVICE_ID);
+                tmp = ref1.getProperty(Constants.SERVICE_ID);
                 long id1 = tmp != null ? ((Long)tmp).longValue() : Long.MAX_VALUE;
-                tmp = (Long)ref2.getProperty(Constants.SERVICE_ID);
+                tmp = ref2.getProperty(Constants.SERVICE_ID);
                 long id2 = tmp != null ? ((Long)tmp).longValue() : Long.MAX_VALUE;
                 //the lowest id must be first -> id1 < id2 -> [id1,id2] -> return -1
                 return id1 < id2 ? -1 : id2 == id1 ? 0 : 1; 
@@ -190,7 +190,7 @@ public class SparqlEndpointResource extends BaseStanbolResource {
     private TripleCollection getTripleCollection(String graphUri) throws InvalidSyntaxException {
         LinkedHashMap<ServiceReference,TripleCollection> services = getServices(graphUri);
         if (services != null && services.size() > 0) {
-            return (TripleCollection) services.get(services.keySet().iterator().next());
+            return services.get(services.keySet().iterator().next());
         }
         return null;
     }

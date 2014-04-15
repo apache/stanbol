@@ -42,10 +42,10 @@ public class UObjectAtom extends AbstractAdaptableAtom {
 
         switch (actualType) {
             case 0:
-                argumentSPARQL = "\"" + (String) argument + "\"^^<http://www.w3.org/2001/XMLSchema#string>";
+                argumentSPARQL = "\"" + argument + "\"^^<http://www.w3.org/2001/XMLSchema#string>";
                 break;
             case 1:
-                argumentSPARQL = ((Integer) argument).toString() + "^^<http://www.w3.org/2001/XMLSchema#int>";
+                argumentSPARQL = argument.toString() + "^^<http://www.w3.org/2001/XMLSchema#int>";
                 break;
             case 2:
                 argumentSPARQL = "?" + argument.toString().replace(Symbols.variablesPrefix, "");

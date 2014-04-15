@@ -735,7 +735,7 @@ public abstract class YardTest {
         //value1@null,en
         query = getYard().getQueryFactory().createFieldQuery();
         query.setConstraint(data.textField, new TextConstraint(
-                data.textValue1.getText(), (String)null, "en"));
+                data.textValue1.getText(), null, "en"));
         query.addSelectedField(data.textField);
         query.addSelectedField(data.refField);
         validateQueryResults(query, getYard().find(query), 

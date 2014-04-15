@@ -127,7 +127,7 @@ public class SolrYardComponent {
     private RegisteredSolrServerTracker registeredServerTracker;
     
     protected void bindManagedSolrServer(ManagedSolrServer manager){
-        SolrYardConfig config = (SolrYardConfig) this.config;
+        SolrYardConfig config = this.config;
         log.info(" ... bind ManagedSolrServer '{}' to SolrYardConfig '{}'",
             manager.getServerName(),config != null ? config.getId() : "<not yet activated>");
         this.managedSolrServer = manager;
@@ -142,7 +142,7 @@ public class SolrYardComponent {
     }
     
     protected void unbindManagedSolrServer(ManagedSolrServer manager){
-        SolrYardConfig config = (SolrYardConfig) this.config;
+        SolrYardConfig config = this.config;
         log.info(" ... unbind ManagedSolrServer '{}' from SolrYard '{}'",
             manager.getServerName(),config != null ? config.getId() : "<not yet activated>");
         this.managedSolrServer = null;

@@ -59,7 +59,7 @@ public class GraphSource extends AbstractClerezzaGraphInputSource {
      *             if <code>graph</code> is neither a {@link Graph} nor a {@link MGraph}.
      */
     public GraphSource(TripleCollection graph) {
-        if (graph instanceof Graph) bindRootOntology((Graph) graph);
+        if (graph instanceof Graph) bindRootOntology(graph);
         else if (graph instanceof MGraph) bindRootOntology(((MGraph) graph).getGraph());
         else throw new IllegalArgumentException("GraphSource supports only Graph and MGraph types. "
                                                 + graph.getClass() + " is not supported.");

@@ -215,8 +215,8 @@ public class AuthenticatingFilter implements Filter {
             if (cause instanceof ServletException) {
                 if (cause.getCause() instanceof SecurityException) {
                     //working around JERSEY-1926
-                    writeLoginResponse(request, response, 
-                            (SecurityException) cause.getCause());
+                    writeLoginResponse(request, response,
+                            cause.getCause());
                 } else {
                     throw (ServletException) cause;
                 }
