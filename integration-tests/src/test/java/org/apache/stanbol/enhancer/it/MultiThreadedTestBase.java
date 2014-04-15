@@ -293,7 +293,6 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
             private String getNext(){
                 if(it == null){
                     UriRef property;
-                    propertyString.trim();
                     if("*".equals(propertyString)){
                         property = null; //wildcard
                         log.info("Iterate over values of all Triples");
@@ -505,7 +504,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
             if(propertyString == null || propertyString.isEmpty()){
                 this.propertyString = DEFAULT_TEST_DATA_PROPERTY;
             } else {
-                this.propertyString = propertyString;
+                this.propertyString = propertyString.trim();
             }
         }
         public String getContentProperty() {
