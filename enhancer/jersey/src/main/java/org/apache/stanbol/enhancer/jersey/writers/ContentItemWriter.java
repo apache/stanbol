@@ -402,7 +402,7 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
         Set<MediaType> includeMediaTypes = new HashSet<MediaType>(includeMediaTypeStrings.size());
         for(String includeString : includeMediaTypeStrings){
             if(includeString != null){
-                includeString.trim();
+                includeString = includeString.trim();
                 if(!includeString.isEmpty()){
                     if("*".equals(includeString)){ //also support '*' for '*/*'
                         includeMediaTypes.add(WILDCARD_TYPE);
