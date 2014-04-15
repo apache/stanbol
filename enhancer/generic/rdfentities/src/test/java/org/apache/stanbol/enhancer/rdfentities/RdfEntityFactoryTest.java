@@ -211,7 +211,7 @@ public class RdfEntityFactoryTest {
         UriRef node2 = new UriRef(testUri2);
         UriRef node3 = new UriRef(testUri3);
         SubTestRdfEntity entity = factory.getProxy(node, SubTestRdfEntity.class);
-        TestRdfEntity entity2 = factory.getProxy(node2, TestRdfEntity.class,new Class<?>[]{SubTestRdfEntity.class,TestRdfEntity2.class});
+        TestRdfEntity entity2 = factory.getProxy(node2, TestRdfEntity.class, SubTestRdfEntity.class, TestRdfEntity2.class);
         TestRdfEntity entity3 = factory.getProxy(node3, TestRdfEntity.class);
 
         //Start with checking the types for entity2

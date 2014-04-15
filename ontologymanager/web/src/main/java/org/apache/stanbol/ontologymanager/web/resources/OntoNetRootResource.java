@@ -647,8 +647,8 @@ public class OntoNetRootResource extends AbstractOntologyAccessResource {
                 formats = Collections.singletonList(format);
             } else // The RESTful API has its own list of preferred formats
             {
-                formats = Arrays.asList(new String[]{RDF_XML, TURTLE, X_TURTLE, N3, N_TRIPLE, OWL_XML,
-                    FUNCTIONAL_OWL, MANCHESTER_OWL, RDF_JSON});
+                formats = Arrays.asList(RDF_XML, TURTLE, X_TURTLE, N3, N_TRIPLE, OWL_XML,
+                        FUNCTIONAL_OWL, MANCHESTER_OWL, RDF_JSON);
             }
             int unsupported = 0, failed = 0;
             Iterator<String> itf = formats.iterator();
