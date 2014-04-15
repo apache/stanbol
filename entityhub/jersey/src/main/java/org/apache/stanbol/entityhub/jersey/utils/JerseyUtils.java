@@ -179,7 +179,7 @@ public final class JerseyUtils {
             // optional parameter and callers of this method MUST provide an
             // valid default value in case the request does not provide any or
             // valid data. 
-            new IllegalArgumentException("The parsed search \"field\" MUST NOT be NULL nor EMPTY");
+            throw new IllegalArgumentException("The parsed search \"field\" MUST NOT be NULL nor EMPTY");
         } else {
             field = field.trim();
         }
