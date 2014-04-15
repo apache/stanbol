@@ -34,6 +34,11 @@ import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 public final class SparqlQueryUtils {
 
     /**
+     * Restrict instantiation
+     */
+    private SparqlQueryUtils() {}
+
+    /**
      * {@link UriRef} constant for {@link RdfResourceEnum#queryResult}
      * 
      * @see ClerezzaQueryUtils#FIELD_QUERY_RESULT

@@ -22,7 +22,7 @@ import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.Pos;
 import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 
-public class Spanish {
+public final class Spanish {
     private Spanish(){}
     
     /**

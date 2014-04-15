@@ -110,7 +110,7 @@ public class OpenNlpAnalysedContentFactory {
      * @author Rupert Westenthaler
      *
      */
-    private class OpenNlpAnalysedContent implements AnalysedContent{
+    private final class OpenNlpAnalysedContent implements AnalysedContent{
         private final TextAnalyzer analyzer;
         private final double minPosTagProbability;
         private final double minExcludePosTagProbability;

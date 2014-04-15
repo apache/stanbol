@@ -55,7 +55,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class EnhancementEngineHelper {
+public final class EnhancementEngineHelper {
+
+    /**
+     * Restrict instantiation
+     */
+    private EnhancementEngineHelper() {}
 
     /**
      * The maximum size of the prefix/suffix for the selection context

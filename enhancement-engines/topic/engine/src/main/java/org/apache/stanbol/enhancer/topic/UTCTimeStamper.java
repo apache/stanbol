@@ -24,7 +24,12 @@ import java.util.TimeZone;
 /**
  * Utilities to compute UTC timestamp to make Solr queries independent of the locale of the server.
  */
-public class UTCTimeStamper {
+public final class UTCTimeStamper {
+
+    /**
+     * Restrict instantiation
+     */
+    private UTCTimeStamper() {}
 
     protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 

@@ -24,7 +24,12 @@ import org.apache.clerezza.rdf.core.UriRef;
  * @author anil.sinaci
  * 
  */
-public class Constants {
+public final class Constants {
+
+    /**
+     * Restrict instantiation
+     */
+    private Constants() {}
 
     /**
      * Default encoding

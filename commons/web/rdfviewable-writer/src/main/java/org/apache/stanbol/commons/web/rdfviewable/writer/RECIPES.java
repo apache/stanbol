@@ -22,7 +22,13 @@ import org.apache.clerezza.rdf.core.UriRef;
  * 
  * TODO: generate this with the maven plugin in separate projects
  */
-public class RECIPES {
+public final class RECIPES {
+
+    /**
+     * Restrict instantiation
+     */
+    private RECIPES() {}
+
     public static final UriRef Recipe = new UriRef("http://vocab.netlabs.org/recipe#Recipe");
     
     public static final UriRef recipeDomain = new UriRef("http://vocab.netlabs.org/recipe#recipeDomain");

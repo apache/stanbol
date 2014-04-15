@@ -24,7 +24,12 @@ import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 
-public class EntitySearcherUtils {
+public final class EntitySearcherUtils {
+
+    /**
+     * Restrict instantiation
+     */
+    private EntitySearcherUtils() {}
 
     /**
      * Validated the parsed parameter as parsed to 

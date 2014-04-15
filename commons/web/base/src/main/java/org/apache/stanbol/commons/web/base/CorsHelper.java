@@ -49,6 +49,11 @@ import javax.ws.rs.core.Response.Status;
 public final class CorsHelper {
 
     /**
+     * Restrict instantiation
+     */
+    private CorsHelper() {}
+
+   /**
      * The "Origin" header as used in requests
      */
     public static final String ORIGIN = "Origin";

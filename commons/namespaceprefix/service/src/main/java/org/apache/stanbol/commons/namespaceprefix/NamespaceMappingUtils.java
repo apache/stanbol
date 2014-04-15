@@ -23,8 +23,14 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.osgi.service.cm.ConfigurationException;
 
-public class NamespaceMappingUtils {
+public final class NamespaceMappingUtils {
+
     /**
+     * Restrict instantiation
+     */
+    private NamespaceMappingUtils() {}
+
+   /**
      * This pattern checks for invalid chars within an prefix.
      * The used pattern is <code>[^a-zA-Z0-9\-_]</code>. Meaning that prefixes
      * are allows to include alpha numeric characters including '-' and '_'

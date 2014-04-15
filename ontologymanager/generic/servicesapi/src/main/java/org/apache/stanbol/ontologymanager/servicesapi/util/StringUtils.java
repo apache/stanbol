@@ -18,7 +18,12 @@ package org.apache.stanbol.ontologymanager.servicesapi.util;
 
 import org.semanticweb.owlapi.model.IRI;
 
-public class StringUtils {
+public final class StringUtils {
+
+    /**
+     * Restrict instantiation
+     */
+    private StringUtils() {}
 
     public static IRI stripIRITerminator(IRI iri) {
         if (iri == null) return null;

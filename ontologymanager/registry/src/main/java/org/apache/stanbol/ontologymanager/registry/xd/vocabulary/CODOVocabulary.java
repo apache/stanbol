@@ -20,7 +20,12 @@ package org.apache.stanbol.ontologymanager.registry.xd.vocabulary;
  * @author Enrico Daga
  * 
  */
-public class CODOVocabulary {
+public final class CODOVocabulary {
+
+    /**
+     * Restrict instantiation
+     */
+    private CODOVocabulary() {}
 
     public static final String CODD_hasLogicalLanguage = Vocabulary.CODD.uri + "#hasLogicalLanguage";
     public static final String CODD_hasVersion = Vocabulary.CODD.uri + "#hasVersion";

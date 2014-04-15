@@ -43,7 +43,13 @@ import com.hp.hpl.jena.rdf.model.impl.Util;
  * @author suat
  * 
  */
-public class RDFBridgeHelper {
+public final class RDFBridgeHelper {
+
+    /**
+     * Restrict instantiation
+     */
+    private RDFBridgeHelper() {}
+
     private static final Logger log = LoggerFactory.getLogger(RDFBridgeHelper.class);
 
     public static final UriRef RDF_TYPE = new UriRef(NamespaceEnum.rdf + "type");

@@ -62,7 +62,13 @@ import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LDPathHelper {
+public final class LDPathHelper {
+
+    /**
+     * Restrict instantiation
+     */
+    private LDPathHelper() {}
+
     private static final Logger log = LoggerFactory.getLogger(LDPathHelper.class);
     
     /**

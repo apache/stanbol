@@ -49,10 +49,14 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
  *
  */
 
-public class JenaToClerezzaConverter {
+public final class JenaToClerezzaConverter {
 
-	
-	/**
+    /**
+     * Restrict instantiation
+     */
+    private JenaToClerezzaConverter() {}
+
+   /**
 	 * 
 	 * Converts a Jena {@link Model} to an {@link ArrayList} of Clerezza triples (instances of class {@link Triple}).
 	 * 

@@ -42,7 +42,7 @@ public class LinkedEntity {
      * @author Rupert Westenthaler
      *
      */
-    public class Occurrence {
+    public final class Occurrence {
         /**
          * The maximum number of chars until that the current sentence is used
          * as context for TextOcccurrences. If the sentence is longer a area of

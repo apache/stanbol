@@ -57,7 +57,7 @@ import org.apache.stanbol.enhancer.nlp.pos.PosTag;
  * @author Alessio Bosca
  * 
  */
-public class CeliMorphoFeatures extends MorphoFeatures{
+public final class CeliMorphoFeatures extends MorphoFeatures{
 
     private static CeliTagSetRegistry tagRegistry = CeliTagSetRegistry.getInstance();
 

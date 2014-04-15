@@ -33,7 +33,12 @@ import com.hp.hpl.jena.vocabulary.XSD;
  * @author anuzzolese
  * 
  */
-public class SWRLLiteralBuilder {
+public final class SWRLLiteralBuilder {
+
+    /**
+     * Restrict instantiation
+     */
+    private SWRLLiteralBuilder() {}
 
     public static SWRLLiteralArgument getSWRLLiteral(Object argument) {
 

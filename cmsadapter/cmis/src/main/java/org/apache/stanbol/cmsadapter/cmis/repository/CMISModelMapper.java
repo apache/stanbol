@@ -43,7 +43,12 @@ import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropertyDefinition;
  * @author cihan
  * 
  */
-public class CMISModelMapper {
+public final class CMISModelMapper {
+
+    /**
+     * Restrict instantiation
+     */
+    private CMISModelMapper() {}
 
     private static final SimpleDateFormat XML_DATETIME_FORMAT = new SimpleDateFormat("yyyy-mm-dd HH:mm:ssZ");
 

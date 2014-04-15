@@ -27,7 +27,12 @@ import org.semanticweb.owlapi.model.IRI;
  * @author alexdma
  * 
  */
-public class URIUtils {
+public final class URIUtils {
+
+    /**
+     * Restrict instantiation
+     */
+    private URIUtils() {}
 
     /**
      * Converts a UriRef to an IRI.

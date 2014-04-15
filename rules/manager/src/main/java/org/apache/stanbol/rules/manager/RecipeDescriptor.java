@@ -27,7 +27,12 @@ import com.hp.hpl.jena.rdf.model.Resource;
  * @author anuzzolese
  * 
  */
-public class RecipeDescriptor {
+public final class RecipeDescriptor {
+
+    /**
+     * Restrict instantiation
+     */
+    private RecipeDescriptor() {}
 
     /**
      * <p>

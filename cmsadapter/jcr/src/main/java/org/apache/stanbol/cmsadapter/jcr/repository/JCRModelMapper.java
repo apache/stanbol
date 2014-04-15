@@ -35,7 +35,13 @@ import org.apache.stanbol.cmsadapter.servicesapi.model.web.PropType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JCRModelMapper {
+public final class JCRModelMapper {
+
+    /**
+     * Restrict instantiation
+     */
+    private JCRModelMapper() {}
+
     private static Logger logger = LoggerFactory.getLogger(JCRModelMapper.class);
 
     /**

@@ -22,8 +22,13 @@ import java.util.Map;
 import net.fortuna.ical4j.vcard.Property.Id;
 import edu.emory.mathcs.backport.java.util.Collections;
 
-public class OntologyMappings {
-    
+public final class OntologyMappings {
+
+    /**
+     * Restrict instantiation
+     */
+    private OntologyMappings() {}
+
     public static final String N_FAMILY = "N.family";
     public static final String N_GIVEN = "N.given";
     public static final String N_ADDITIONAL ="N.additional";
@@ -74,7 +79,7 @@ public class OntologyMappings {
      * </code></pre>
      * @author Rupert Westenthaler
      */
-    public static class Mapping{
+    public static final class Mapping{
         /**
          * The uri
          */

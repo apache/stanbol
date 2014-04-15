@@ -424,7 +424,7 @@ public class StanbolNamespacePrefixService implements NamespacePrefixService, Na
      * Internally used to mimic ServiceReferences when used outside OSGI
      * @param <T>
      */
-    private class NonOsgiServiceRef<T> implements ServiceReference {
+    private final class NonOsgiServiceRef<T> implements ServiceReference {
         
         private T service;
 

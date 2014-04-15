@@ -21,7 +21,13 @@ import org.apache.stanbol.contenthub.search.featured.DocumentResultImpl;
 import org.apache.stanbol.contenthub.servicesapi.search.featured.DocumentResult;
 import org.apache.stanbol.contenthub.servicesapi.store.vocabulary.SolrVocabulary.SolrFieldName;
 
-public class SolrContentItemConverter {
+public final class SolrContentItemConverter {
+
+    /**
+     * Restrict instantiation
+     */
+    private SolrContentItemConverter() {}
+
     /**
      * This method converts a {@link SolrDocument} into a {@link HTMLContentItem}. Note currently, it ignores
      * its metadata produced after enhancement process and stored. Its constraints indexed in Solr are also

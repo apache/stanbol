@@ -34,7 +34,12 @@ import org.apache.stanbol.commons.owl.util.URIUtils;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 
-public class OntologyUtils {
+public final class OntologyUtils {
+
+    /**
+     * Restrict instantiation
+     */
+    private OntologyUtils() {}
 
     private static String[] preferredFormats = {RDF_XML, TURTLE, X_TURTLE, RDF_JSON, N3, N_TRIPLE,
                                                 MANCHESTER_OWL, FUNCTIONAL_OWL, OWL_XML};

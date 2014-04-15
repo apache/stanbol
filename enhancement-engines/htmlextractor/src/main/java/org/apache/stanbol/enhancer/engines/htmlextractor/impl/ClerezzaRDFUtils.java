@@ -41,8 +41,13 @@ import org.slf4j.LoggerFactory;
  * 
  */
 
-public class ClerezzaRDFUtils {
-    
+public final class ClerezzaRDFUtils {
+
+    /**
+     * Restrict instantiation
+     */
+    private ClerezzaRDFUtils() {}
+
     private static final Logger LOG = LoggerFactory.getLogger(ClerezzaRDFUtils.class);
     
     public static void urifyBlankNodes(MGraph model) {

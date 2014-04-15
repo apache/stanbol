@@ -38,7 +38,13 @@ import org.slf4j.LoggerFactory;
  * Helper class for serializing and deserializing bridge definitions
  * 
  */
-public class MappingModelParser {
+public final class MappingModelParser {
+
+    /**
+     * Restrict instantiation
+     */
+    private MappingModelParser() {}
+
     private static final Logger logger = LoggerFactory.getLogger(MappingModelParser.class);
 
     /**

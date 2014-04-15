@@ -50,7 +50,12 @@ import org.slf4j.LoggerFactory;
  * @author alexdma
  * 
  */
-public class OntologyImportUtils {
+public final class OntologyImportUtils {
+
+    /**
+     * Restrict instantiation
+     */
+    private OntologyImportUtils() {}
 
     private static final Logger logger = LoggerFactory.getLogger(OntologyImportUtils.class);
 

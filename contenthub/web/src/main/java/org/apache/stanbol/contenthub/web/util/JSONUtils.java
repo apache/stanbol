@@ -42,9 +42,14 @@ import org.slf4j.LoggerFactory;
  * @author meric
  * 
  */
-public class JSONUtils {
+public final class JSONUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(JSONUtils.class);
+   /**
+    * Restrict instantiation
+    */
+   private JSONUtils() {}
+
+   private static final Logger logger = LoggerFactory.getLogger(JSONUtils.class);
 
     /**
      * This function only operates on one-level JSON objects. Nested constraints cannot be processed.

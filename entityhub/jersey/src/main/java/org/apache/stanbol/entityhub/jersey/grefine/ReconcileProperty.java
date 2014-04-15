@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  *
  */
-public class ReconcileProperty {
+public final class ReconcileProperty {
     
     private static final Logger log = LoggerFactory.getLogger(ReconcileProperty.class);
     

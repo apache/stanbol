@@ -18,9 +18,14 @@ package org.apache.stanbol.commons.usermanagement;
 
 import org.apache.clerezza.rdf.core.UriRef;
 
-public class Ontology {
-    
-    public final static String userManagementBase = "http://stanbol.apache.org/ontologies/usermanagement#";
+public final class Ontology {
+
+   /**
+    * Restrict instantiation
+    */
+   private Ontology() {}
+
+   public final static String userManagementBase = "http://stanbol.apache.org/ontologies/usermanagement#";
     
 	
 	public final static UriRef EditableUser = 

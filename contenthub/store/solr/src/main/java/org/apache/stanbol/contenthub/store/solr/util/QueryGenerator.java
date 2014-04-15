@@ -26,9 +26,14 @@ import org.slf4j.LoggerFactory;
  * @author anil.sinaci
  * 
  */
-public class QueryGenerator {
+public final class QueryGenerator {
 
-	private static final Logger logger = LoggerFactory
+   /**
+    * Restrict instantiation
+    */
+   private QueryGenerator() {}
+
+   private static final Logger logger = LoggerFactory
 			.getLogger(QueryGenerator.class);
 
 	public static final String getFieldQuery(SolrFieldName fieldName) {

@@ -25,7 +25,7 @@ import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper;
 
-public class ExecutionMetadata {
+public final class ExecutionMetadata {
 
     
     private final ChainExecution chainExecution;

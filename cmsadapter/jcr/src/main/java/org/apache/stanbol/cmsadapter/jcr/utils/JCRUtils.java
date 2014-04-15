@@ -29,7 +29,13 @@ import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.cmsadapter.servicesapi.helper.NamespaceEnum;
 
-public class JCRUtils {
+public final class JCRUtils {
+
+    /**
+     * Restrict instantiation
+     */
+    private JCRUtils() {}
+
     private static final UriRef base64Uri = dataTypeURI("base64Binary");
     private static final UriRef dateTimeUri = dataTypeURI("dateTime");
     private static final UriRef booleanUri = dataTypeURI("boolean");

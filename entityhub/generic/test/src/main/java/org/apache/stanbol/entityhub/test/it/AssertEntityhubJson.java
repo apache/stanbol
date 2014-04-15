@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler.
  *
  */
-public class AssertEntityhubJson {
+public final class AssertEntityhubJson {
     
     private final static Logger log = LoggerFactory.getLogger(AssertEntityhubJson.class);
     

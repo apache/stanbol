@@ -440,7 +440,7 @@ public class EnhancementJobHandler implements EventHandler {
             log.info("Reported Exception:",job.getError());
         }
     }
-    public class EnhancementJobObserver{
+    public final class EnhancementJobObserver{
         
         private static final int MIN_WAIT_TIME = 500;
         private final EnhancementJob enhancementJob;

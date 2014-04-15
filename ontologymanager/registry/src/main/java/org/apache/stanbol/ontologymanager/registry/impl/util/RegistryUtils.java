@@ -41,7 +41,12 @@ import org.semanticweb.owlapi.util.OWLAxiomVisitorAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RegistryUtils {
+public final class RegistryUtils {
+
+    /**
+     * Restrict instantiation
+     */
+    private RegistryUtils() {}
 
     private static final OWLClass cRegistryLibrary, cOntology;
 

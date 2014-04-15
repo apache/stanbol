@@ -32,8 +32,14 @@ import org.w3c.dom.Node;
  * 
  */
 
-public class DOMBuilder {
+public final class DOMBuilder {
+
   /**
+   * Restrict instantiation
+   */
+  private DOMBuilder() {}
+
+   /**
    * Returns a W3C DOM that exposes the same content as the supplied Jsoup document into a W3C DOM.
    * @param jsoupDocument The Jsoup document to convert.
    * @return A W3C Document.

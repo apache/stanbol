@@ -29,7 +29,12 @@ import org.apache.clerezza.rdf.core.UriRef;
  * @author ogrisel
  *
  */
-public class Properties {
+public final class Properties {
+
+    /**
+     * Restrict instantiation
+     */
+    private Properties() {}
 
     /**
      * The canonical way to give the type of a resource. It is very common that

@@ -23,7 +23,12 @@ import org.apache.sling.installer.api.InstallableResource;
  *
  * @author Rupert Westenthaler
  */
-public class BundleInstallerConstants {
+public final class BundleInstallerConstants {
+
+    /**
+     * Restrict instantiation
+     */
+    private BundleInstallerConstants() {}
 
     /**
      * The name of the header field used for the 

@@ -18,7 +18,12 @@ package org.apache.stanbol.enhancer.servicesapi.rdf;
 
 import org.apache.clerezza.rdf.core.UriRef;
 
-public class Enhancer {
+public final class Enhancer {
+
+    /**
+     * Restrict instantiation
+     */
+    private Enhancer() {}
 
     public static final UriRef CONTENT_ITEM = new UriRef(NamespaceEnum.enhancer+"ContentItem");
     public static final UriRef ENHANCEMENT_ENGINE = new UriRef(NamespaceEnum.enhancer+"EnhancementEngine");

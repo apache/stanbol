@@ -17,7 +17,12 @@
 package org.apache.stanbol.ontologymanager.servicesapi.util;
 
 @Deprecated
-public class OntologyConstants {
+public final class OntologyConstants {
+
+    /**
+     * Restrict instantiation
+     */
+    private OntologyConstants() {}
 
     public static final String NS_STANBOL = "http://stanbol.apache.org/";
 

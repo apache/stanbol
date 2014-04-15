@@ -37,10 +37,14 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ManagementUtils {
-    
-    
+public final class ManagementUtils {
+
     /**
+     * Private constructor to restrict instantiation
+     */
+    private ManagementUtils() {}
+
+   /**
      * The logger
      */
     private static final Logger log = LoggerFactory.getLogger(ManagementUtils.class);

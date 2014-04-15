@@ -21,7 +21,12 @@ import javax.servlet.ServletContext;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
-public class ContextHelper {
+public final class ContextHelper {
+
+    /**
+     * Restrict instantiation
+     */
+    private ContextHelper() {}
 
     // TODO: turn the following into a annotation that derives from the JAX-RS @Context annotation
     /**

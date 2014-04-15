@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-public class SolrCoreManager {
+public final class SolrCoreManager {
 
     private static final Logger log = LoggerFactory.getLogger(SolrCoreManager.class);
     private static SolrCoreManager instance;

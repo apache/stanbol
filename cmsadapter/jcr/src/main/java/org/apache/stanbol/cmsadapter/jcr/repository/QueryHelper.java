@@ -21,7 +21,12 @@ import java.util.List;
 
 import javax.jcr.query.Query;
 
-public class QueryHelper {
+public final class QueryHelper {
+
+    /**
+     * Restrict instantiation
+     */
+    private QueryHelper() {}
 
     public static final String JCR_ITEM_BY_PATH = "SELECT * from nt:base WHERE jcr:path = '%s'";
     public static final String JCR_ITEM_BY_ID = "SELECT * from nt:base WHERE jcr:id = '%s'";

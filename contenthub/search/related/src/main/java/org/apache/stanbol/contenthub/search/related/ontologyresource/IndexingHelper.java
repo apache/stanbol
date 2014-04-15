@@ -32,7 +32,12 @@ import com.hp.hpl.jena.vocabulary.RDF;
 /**
  * This class is created to create LARQ index of external ontology provided for the search operation
  */
-public class IndexingHelper {
+public final class IndexingHelper {
+
+    /**
+     * Restrict instantiation
+     */
+    private IndexingHelper() {}
 
     /**
      * Represents the special property which is used by Lucene while creating the index. At the beginning of a

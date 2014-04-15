@@ -34,7 +34,12 @@ import org.apache.stanbol.commons.web.base.CorsHelper;
 /**
  * Utility class for REST services
  */
-public class RestUtil {
+public final class RestUtil {
+
+    /**
+     * Restrict instantiation
+     */
+    private RestUtil() {}
 
     public static final Set<String> supportedMediaTypes;
     static {

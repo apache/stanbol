@@ -25,7 +25,13 @@ import org.apache.chemistry.opencmis.client.api.Property;
 import org.apache.chemistry.opencmis.commons.enums.PropertyType;
 import org.apache.clerezza.rdf.core.UriRef;
 
-public class CMISUtils {
+public final class CMISUtils {
+
+    /**
+     * Restrict instantiation
+     */
+    private CMISUtils() {}
+
     public static final String RDF_METADATA_DOCUMENT_EXTENSION = "_metadata";
 
     /**

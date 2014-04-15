@@ -19,8 +19,14 @@ package org.apache.stanbol.cmsadapter.web.utils;
 /**
  * Utility class for REST services
  */
-public class RestUtil {
+public final class RestUtil {
+
     /**
+     * Restrict instantiation
+     */
+    private RestUtil() {}
+
+   /**
      * @param parameter
      *            parameter to be checked
      * @return <code>null</code> if parameter has an empty content, otherwise trimmed <code>parameter</code>

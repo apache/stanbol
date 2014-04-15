@@ -29,7 +29,13 @@ import com.hp.hpl.jena.rdf.model.ResourceFactory;
  * @author suat
  * 
  */
-public class CMSAdapterVocabulary {
+public final class CMSAdapterVocabulary {
+
+    /**
+     * Restrict instantiation
+     */
+    private CMSAdapterVocabulary() {}
+
     private static final String PATH_DELIMITER = "/";
 
     public static final String DEFAULT_NS_URI = "http://www.apache.org/stanbol";

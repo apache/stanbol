@@ -61,9 +61,14 @@ import com.hp.hpl.jena.rdf.model.Model;
  * 
  */
 
-public class OWLAPIToClerezzaConverter {
+public final class OWLAPIToClerezzaConverter {
 
-    private static Logger log = LoggerFactory.getLogger(OWLAPIToClerezzaConverter.class);
+    /**
+     * Restrict instantiation
+     */
+    private OWLAPIToClerezzaConverter() {}
+
+   private static Logger log = LoggerFactory.getLogger(OWLAPIToClerezzaConverter.class);
 
     /**
      * 

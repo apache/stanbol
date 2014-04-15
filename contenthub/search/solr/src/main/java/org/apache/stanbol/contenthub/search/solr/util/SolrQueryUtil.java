@@ -47,7 +47,12 @@ import org.slf4j.LoggerFactory;
  *   {@link org.apache.stanbol.contenthub.servicesapi.search.solr.SolrQueryUtil}
  */
 @Deprecated
-public class SolrQueryUtil {
+public final class SolrQueryUtil {
+
+    /**
+     * Restrict instantiation
+     */
+    private SolrQueryUtil() {}
 
     private final static Logger log = LoggerFactory.getLogger(SolrQueryUtil.class);
 

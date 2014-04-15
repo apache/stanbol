@@ -28,7 +28,12 @@ import java.util.List;
  * @author anil.sinaci
  * 
  */
-public class SolrVocabulary {
+public final class SolrVocabulary {
+
+    /**
+     * Restrict instantiation
+     */
+    private SolrVocabulary() {}
 
     public static final String STANBOLRESERVED_PREFIX = "stanbolreserved_";
 

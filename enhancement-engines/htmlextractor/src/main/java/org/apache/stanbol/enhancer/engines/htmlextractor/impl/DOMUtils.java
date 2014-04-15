@@ -58,7 +58,12 @@ import org.xml.sax.SAXParseException;
  */
 public final class DOMUtils {
 
-  /** 
+    /**
+     * Restrict instantiation
+     */
+    private DOMUtils() {}
+
+   /**
    * This prints the specified node and all of its children to a PrintStream.
    * 
    * @param node a DOM <code>Node</code>

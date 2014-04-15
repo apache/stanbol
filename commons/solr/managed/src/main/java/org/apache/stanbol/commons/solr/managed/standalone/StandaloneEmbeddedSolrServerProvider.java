@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  *
  */
-public class StandaloneEmbeddedSolrServerProvider {
+public final class StandaloneEmbeddedSolrServerProvider {
     
     private static StandaloneEmbeddedSolrServerProvider instance;
     

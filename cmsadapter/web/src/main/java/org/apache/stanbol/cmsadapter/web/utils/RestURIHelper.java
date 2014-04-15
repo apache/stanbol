@@ -16,8 +16,14 @@
  */
 package org.apache.stanbol.cmsadapter.web.utils;
 
-public class RestURIHelper {
-	private static final String ONTOLOGY = "ontology";
+public final class RestURIHelper {
+
+   /**
+    * Restrict instantiation
+    */
+   private RestURIHelper() {}
+
+   private static final String ONTOLOGY = "ontology";
 	private static final String CLASSES = "classes";
 	private static final String INDIVIDUALS = "individuals";
 	private static final String DATATYPE_PROPERTIES = "datatypeProperties";

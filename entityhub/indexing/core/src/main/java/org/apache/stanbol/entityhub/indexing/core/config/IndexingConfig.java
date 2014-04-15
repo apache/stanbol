@@ -1092,7 +1092,7 @@ public class IndexingConfig {
         }
         return configs;
     }
-    private class ConfigEntry {
+    private final class ConfigEntry {
         private String configString;
         private String className;
         private Map<String,String> params;

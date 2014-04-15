@@ -1086,7 +1086,7 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
      */
     private class IndexUpdateDaemon extends Thread {
 
-        private class IndexActionInfo {
+        private final class IndexActionInfo {
             public final ArchiveInputStream ais;
             public final IndexMetadata metadata;
             public final ManagedIndexState action;

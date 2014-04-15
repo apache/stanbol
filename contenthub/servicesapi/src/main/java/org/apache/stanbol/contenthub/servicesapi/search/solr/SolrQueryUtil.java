@@ -45,7 +45,12 @@ import org.slf4j.LoggerFactory;
  * @author anil.pacaci
  * 
  */
-public class SolrQueryUtil {
+public final class SolrQueryUtil {
+
+    /**
+     * Restrict instantiation
+     */
+    private SolrQueryUtil() {}
 
     private final static Logger log = LoggerFactory.getLogger(SolrQueryUtil.class);
 
