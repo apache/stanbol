@@ -971,7 +971,7 @@ public abstract class RepresentationTest {
         Representation rep = initNaturalLanguageTest(field);
         Set<String> textSet = new HashSet<String>(NL_TEST_all);
         // remove a string value by parsing an empty list of languages
-        rep.removeNaturalText(field, NL_TEST_string, new String[] {});
+        rep.removeNaturalText(field, NL_TEST_string);
         textSet.addAll(Arrays.asList(NL_TEST_string, NL_TEST_noLang, NL_TEST_en, NL_TEST_en2, NL_TEST_de,
             NL_TEST_de_AT));
         for (Iterator<Text> texts = rep.getText(field); texts.hasNext(); textSet.remove(texts.next()
@@ -1085,7 +1085,7 @@ public abstract class RepresentationTest {
         String testReference = "http://www.test.org/test";
         rep.addReference(field, testReference);
         // test removal of all natural language values by parsing an empty language array
-        rep.removeAllNaturalText(field, new String[] {});
+        rep.removeAllNaturalText(field);
         Iterator<Text> texts = rep.get(field, (String[]) null);
         assertFalse(texts.hasNext());
         assertTrue(rep.get(field).hasNext()); // text of the added reference is still present

@@ -71,10 +71,10 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 
     static {
         try {
-            getIDMethod = RdfEntity.class.getMethod("getId", new Class<?>[]{});
-            toString = Object.class.getMethod("toString", new Class<?>[]{});
-            equals = Object.class.getMethod("equals", new Class<?>[]{Object.class});
-            hashCode = Object.class.getMethod("hashCode", new Class<?>[]{});
+            getIDMethod = RdfEntity.class.getMethod("getId");
+            toString = Object.class.getMethod("toString");
+            equals = Object.class.getMethod("equals", Object.class);
+            hashCode = Object.class.getMethod("hashCode");
         } catch (SecurityException e) {
             throw new IllegalStateException("Unable to access getId Method in the "+RdfEntity.class+" Interface",e);
         } catch (NoSuchMethodException e) {
