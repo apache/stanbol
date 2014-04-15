@@ -63,7 +63,7 @@ public final class Utils {
 
     
     public static NodeSelector<Resource> parseSelector(String path) throws ParseException {
-        return parseSelector(path, (Map<String,String>)null);
+        return parseSelector(path, null);
     }
     public static NodeSelector<Resource> parseSelector(String path, Map<String,String> additionalNamespaceMappings) throws ParseException {
         LdPathParser<Resource> parser = new LdPathParser<Resource>(

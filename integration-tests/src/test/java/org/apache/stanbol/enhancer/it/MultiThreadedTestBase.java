@@ -627,7 +627,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
         }
 
         void succeed(Request request, UriRef contentItemUri, TripleCollection results, Long rtt, int size) {
-            ExecutionMetadata em = ExecutionMetadata.parseFrom(results, (UriRef) contentItemUri);
+            ExecutionMetadata em = ExecutionMetadata.parseFrom(results, contentItemUri);
             results.clear(); // we no longer need the results
             if (em != null) {
                 synchronized (statistics) {

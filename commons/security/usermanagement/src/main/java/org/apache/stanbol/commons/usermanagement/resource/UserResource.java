@@ -262,7 +262,7 @@ public class UserResource {
                     .filter(null, PLATFORM.userName, userName);
 
             //     if (userTriples.hasNext()) {
-            NonLiteral userNode = (NonLiteral) userTriples.next()
+            NonLiteral userNode = userTriples.next()
                     .getSubject();
 
             UriRef predicateUriRef = (UriRef) inputGraph

@@ -50,9 +50,9 @@ public class Resource2ValueAdapter<T extends Resource> implements Adapter<T,Obje
     @Override
     public final Object adapt(T value, Class<Object> type) {
         if (value instanceof UriRef) {
-            return valueFactory.createReference((UriRef) value);
+            return valueFactory.createReference(value);
         } else if (value instanceof PlainLiteral) {
-            return valueFactory.createText((Literal) value);
+            return valueFactory.createText(value);
         } else if (value instanceof TypedLiteral) {
             TypedLiteral literal = (TypedLiteral) value;
             if (literal.getDataType() == null) { // if no dataType is defined

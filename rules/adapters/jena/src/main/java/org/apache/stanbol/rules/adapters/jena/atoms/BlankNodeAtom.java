@@ -50,8 +50,8 @@ public class BlankNodeAtom extends AbstractAdaptableAtom {
         IObjectAtom argument1 = tmp.getArgument1();
         IObjectAtom argument2 = tmp.getArgument2();
 
-        ClauseEntry argument1CE = (ClauseEntry) adapter.adaptTo(argument1, Rule.class);
-        ClauseEntry argument2CE = (ClauseEntry) adapter.adaptTo(argument2, Rule.class);
+        ClauseEntry argument1CE = adapter.adaptTo(argument1, Rule.class);
+        ClauseEntry argument2CE = adapter.adaptTo(argument2, Rule.class);
 
         Node arg1Node;
         Node arg2Node;

@@ -55,8 +55,8 @@ public class LetAtom extends AbstractAdaptableAtom {
         StringFunctionAtom parameterFunctionAtom = tmp.getParameterFunctionAtom();
         IObjectAtom variableIObjectAtom = tmp.getVariable();
 
-        ClauseEntry parameterClauseEntry = (ClauseEntry) adapter.adaptTo(parameterFunctionAtom, Rule.class);
-        ClauseEntry variableClauseEntry = (ClauseEntry) adapter.adaptTo(variableIObjectAtom, Rule.class);
+        ClauseEntry parameterClauseEntry = adapter.adaptTo(parameterFunctionAtom, Rule.class);
+        ClauseEntry variableClauseEntry = adapter.adaptTo(variableIObjectAtom, Rule.class);
 
         List<ClauseEntry> clauseEntries = new ArrayList<ClauseEntry>();
 

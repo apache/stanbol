@@ -56,7 +56,7 @@ public class ContentFunction extends ContentItemFunction {
     
     @Override
     public Collection<Resource> apply(ContentItemBackend backend, Resource context, Collection<Resource>... args) throws IllegalArgumentException {
-        ContentItem ci = ((ContentItemBackend)backend).getContentItem();
+        ContentItem ci = backend.getContentItem();
         Set<String> mimeTypes;
         if(args == null || args.length < 1){
             mimeTypes = null;

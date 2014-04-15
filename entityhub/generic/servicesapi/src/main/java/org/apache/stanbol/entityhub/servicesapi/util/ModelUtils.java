@@ -89,7 +89,7 @@ public final class ModelUtils {
             return score1 == null && score2 == null ? 0 :
                 score2 == null ? -1 :
                     score1 == null ? 1 :
-                        ((Comparable)score2).compareTo((Comparable)score1);
+                        ((Comparable)score2).compareTo(score1);
         }};
     /**
      * Processes a value parsed as object to the representation.

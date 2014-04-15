@@ -52,9 +52,9 @@ public class DatavaluedPropertyAtom extends AbstractAdaptableAtom {
 
         RuleAtom argument2 = tmp.getArgument2();
 
-        ClauseEntry argument2ClauseEntry = (ClauseEntry) adapter.adaptTo(argument2, Rule.class);
-        ClauseEntry argument1ClauseEntry = (ClauseEntry) adapter.adaptTo(argument1, Rule.class);
-        ClauseEntry datatypePropertyClauseEntry = (ClauseEntry) adapter.adaptTo(datatypeProperty, Rule.class);
+        ClauseEntry argument2ClauseEntry = adapter.adaptTo(argument2, Rule.class);
+        ClauseEntry argument1ClauseEntry = adapter.adaptTo(argument1, Rule.class);
+        ClauseEntry datatypePropertyClauseEntry = adapter.adaptTo(datatypeProperty, Rule.class);
 
         Node subjectNode = null;
         Node predicateNode = null;

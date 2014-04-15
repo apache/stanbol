@@ -492,7 +492,7 @@ public class IndexedGraphTest  extends MGraphTest {
                 tc.add(new TripleImpl(subject, predicate, bnode));
             } else { //UriRef
                 tc.add(new TripleImpl(subject, predicate,
-                        new UriRef(URI_PREFIX + (int) count * random)));
+                        new UriRef(URI_PREFIX + count * random)));
             }
         }        
     }

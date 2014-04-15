@@ -78,7 +78,7 @@ public final class YardSite implements ManagedSite {
         this.siteMetadata = extractSiteMetadata(config,InMemoryValueFactory.getInstance());
         //all entities of managed sites are locally cached - so we can add this
         //to the site metadata
-        this.siteMetadata.put(RdfResourceEnum.isChached.getUri(), (Object)Boolean.TRUE);
+        this.siteMetadata.put(RdfResourceEnum.isChached.getUri(), Boolean.TRUE);
         fieldMapper = new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
         if(config.getFieldMappings() != null){
             log.debug(" > Initialise configured field mappings");

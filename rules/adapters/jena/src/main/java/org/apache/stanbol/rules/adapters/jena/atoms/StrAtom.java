@@ -53,7 +53,7 @@ public class StrAtom extends AbstractAdaptableAtom {
 
         IObjectAtom iObjectAtom = tmp.getUriResource();
 
-        ClauseEntry iObjectClauseEntry = (ClauseEntry) adapter.adaptTo(iObjectAtom, Rule.class);
+        ClauseEntry iObjectClauseEntry = adapter.adaptTo(iObjectAtom, Rule.class);
 
         if (iObjectClauseEntry instanceof NodeClauseEntry) {
             Node node = ((NodeClauseEntry) iObjectClauseEntry).getNode();

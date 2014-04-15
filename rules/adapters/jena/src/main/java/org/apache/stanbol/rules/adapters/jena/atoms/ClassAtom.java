@@ -51,8 +51,8 @@ public class ClassAtom extends AbstractAdaptableAtom {
         IObjectAtom argument1 = tmp.getArgument1();
         IObjectAtom classResource = tmp.getClassResource();
 
-        ClauseEntry argumentClauseEntry = (ClauseEntry) adapter.adaptTo(argument1, Rule.class);
-        ClauseEntry classClauseEntry = (ClauseEntry) adapter.adaptTo(classResource, Rule.class);
+        ClauseEntry argumentClauseEntry = adapter.adaptTo(argument1, Rule.class);
+        ClauseEntry classClauseEntry = adapter.adaptTo(classResource, Rule.class);
 
         Node argumnetNode;
         Node classNode;

@@ -592,7 +592,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
         // reintroduce check?).
         // if (!hasOntology(ontologyIri)) return null;
         OWLOntology o;
-        o = (OWLOntology) ontologyProvider.getStoredOntology(ontologyId, OWLOntology.class, merge);
+        o = ontologyProvider.getStoredOntology(ontologyId, OWLOntology.class, merge);
 
         if (merge) {
             final Set<OWLOntology> set = new HashSet<OWLOntology>();

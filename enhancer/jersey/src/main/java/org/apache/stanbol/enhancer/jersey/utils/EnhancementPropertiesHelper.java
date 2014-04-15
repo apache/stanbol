@@ -194,6 +194,6 @@ public final class EnhancementPropertiesHelper {
      * @throws ClassCastException if the value is not an {@link Collections}
      */
     public static String getRdfFormat(Map<String,Object> enhancementProperties){
-        return (String) get(enhancementProperties,RDF_FORMAT,String.class);
+        return get(enhancementProperties,RDF_FORMAT,String.class);
     }
 }

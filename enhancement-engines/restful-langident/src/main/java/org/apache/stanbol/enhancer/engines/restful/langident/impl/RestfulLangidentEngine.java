@@ -283,11 +283,11 @@ public class RestfulLangidentEngine extends AbstractEnhancementEngine<IOExceptio
                 JsonNode root = mapper.readTree(jsonFactory.createJsonParser(new InputStreamReader(in,charset)));
                 if(root.isArray()){
                     List<LangSuggestion> detected = new ArrayList<LangSuggestion>(
-                            ((ArrayNode)root).size());
-                    for(int i=0;i<((ArrayNode)root).size();i++){
+                            root.size());
+                    for(int i=0;i< root.size();i++){
                         String lang;
                         double prob;
-                        JsonNode entry = ((ArrayNode)root).get(i);
+                        JsonNode entry = root.get(i);
                         if(entry.isObject()){
                             JsonNode field = entry.path("lang");
                             if(field.isTextual()){

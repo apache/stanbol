@@ -232,7 +232,7 @@ public class LanguageDetectionEnhancementEngine
             languages = languageIdentifier.getLanguages(text);
             log.debug("language identified: {}",languages);
         } catch (LangDetectException e) {
-            Enum<?> errorCode = (Enum<?>)e.getCode();
+            Enum<?> errorCode = e.getCode();
             //NOTE: https://code.google.com/p/language-detection/issues/detail?id=49
             //ErrorCode enumeration is not visible. This engine wants to silently
             //ignore " 0 - NoTextError" and "5 - CantDetectError"

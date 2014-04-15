@@ -69,6 +69,6 @@ public final class KeywordTokenizer implements Tokenizer {
                 start = -1;
             }
         }
-        return (Span[]) tokens.toArray(new Span[tokens.size()]);
+        return tokens.toArray(new Span[tokens.size()]);
     }
 }

@@ -305,7 +305,7 @@ public class ClerezzaYard extends AbstractYard implements Yard {
     private MGraph extractRepresentation(TripleCollection source,MGraph target, NonLiteral node, Set<BNode> visited){
         //we need all the outgoing relations and also want to follow bNodes until
         //the next UriRef. However we are not interested in incoming relations!
-        Iterator<Triple> outgoing = source.filter((NonLiteral) node, null, null);
+        Iterator<Triple> outgoing = source.filter(node, null, null);
         while (outgoing.hasNext()) {
             Triple triple = outgoing.next();
             target.add(triple);
@@ -526,7 +526,7 @@ public class ClerezzaYard extends AbstractYard implements Yard {
             log.error("SPARQL Query: "+sparqlQueryString);
             throw new YardException("Unable to parse SPARQL SELECT query generated for the parse FieldQuery",e);
         }
-        return tcManager.executeSparqlQuery((SelectQuery)sparqlQuery, graph);
+        return tcManager.executeSparqlQuery(sparqlQuery, graph);
     }
     @Override
     public QueryResultList<Representation> findRepresentation(FieldQuery parsedQuery) throws YardException, IllegalArgumentException {

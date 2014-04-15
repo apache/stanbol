@@ -211,7 +211,7 @@ public class RegisteredSolrServerTracker extends ServiceTracker {
     @Override
     public SolrServer getService() {
         ServiceReference ref = getServiceReference();
-        return ref == null ? null : (SolrServer)getService(ref);
+        return ref == null ? null : getService(ref);
     }
     
     /**

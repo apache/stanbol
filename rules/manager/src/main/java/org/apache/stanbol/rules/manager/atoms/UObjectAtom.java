@@ -55,7 +55,7 @@ public class UObjectAtom extends StringFunctionAtom {
                 argumentString = (String) argument;
                 break;
             case 1:
-                argumentString = ((Integer) argument).toString();
+                argumentString = argument.toString();
                 break;
             case 2:
                 argumentString = "?" + argument.toString().replace(Symbols.variablesPrefix, "");
