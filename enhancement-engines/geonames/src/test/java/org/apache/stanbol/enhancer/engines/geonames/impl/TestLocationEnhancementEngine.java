@@ -123,7 +123,7 @@ public class TestLocationEnhancementEngine {
         Integer start = content.indexOf(name);
         if (start < 0) { //if not found in the content
             //set some random numbers for start/end
-            start = (int) Math.random() * 100;
+            start = (int) (Math.random() * 100);
         }
         testAnnotation.setStart(start);
         testAnnotation.setEnd(start + name.length());

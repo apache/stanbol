@@ -178,7 +178,7 @@ public class TestEntityLinkingEnhancementEngine {
         Integer start = content.indexOf(name);
         if (start < 0){ //if not found in the content
             //set some random numbers for start/end
-            start = (int)Math.random()*100;
+            start = (int) (Math.random() * 100);
         }
         textAnnotation.setStart(start);
         textAnnotation.setEnd(start+name.length());
