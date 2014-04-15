@@ -292,7 +292,7 @@ public class SolrYard extends AbstractYard implements Yard {
                 throw RuntimeException.class.cast(e);
             }
         }
-        if(query.getRequestHandler() == SolrQueryFactory.MLT_QUERY_TYPE){
+        if(SolrQueryFactory.MLT_QUERY_TYPE.equals(query.getRequestHandler())){
             log.debug("{}",response);
         }
         long queryTime = System.currentTimeMillis();
