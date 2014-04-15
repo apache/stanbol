@@ -45,7 +45,12 @@ import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
  *
  * @author ogrisel
  */
-public class ContentItemHelper {
+public final class ContentItemHelper {
+
+    /**
+     * Restrict instantiation
+     */
+    private ContentItemHelper() {}
 
     public static final String DEFAULT_CONTENT_ITEM_PREFIX = "urn:content-item-";
 

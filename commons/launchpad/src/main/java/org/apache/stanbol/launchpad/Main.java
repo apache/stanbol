@@ -29,7 +29,12 @@ import java.util.Map;
 
 import static org.apache.sling.launchpad.base.shared.SharedConstants.SLING_HOME;
 
-public class Main {
+public final class Main {
+
+    /**
+     * Restrict instantiation
+     */
+    private Main() {}
 
     public static final String DEFAULT_STANBOL_HOME = "stanbol";
     /**

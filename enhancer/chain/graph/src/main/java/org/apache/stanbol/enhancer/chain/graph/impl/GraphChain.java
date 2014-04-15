@@ -422,7 +422,7 @@ public class GraphChain extends AbstractChain implements Chain {
      * @author Rupert Westenthaler
      *
      */
-    private class ListConfigExecutionPlan implements Chain {
+    private final class ListConfigExecutionPlan implements Chain {
 
         private final Graph executionPlan;
         private final Set<String> engines;

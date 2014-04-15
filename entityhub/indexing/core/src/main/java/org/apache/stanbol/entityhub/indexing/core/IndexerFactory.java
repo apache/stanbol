@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  *
  */
-public class IndexerFactory {
+public final class IndexerFactory {
     private static final Logger log = LoggerFactory.getLogger(IndexerFactory.class);
     /**
      * singleton instance

@@ -26,7 +26,12 @@ import org.apache.clerezza.rdf.core.UriRef;
  * @author anuzzolese
  * 
  */
-public class Symbols {
+public final class Symbols {
+
+    /**
+     * Restrict instantiation
+     */
+    private Symbols() {}
 
     public static String NS = "http://incubator.apache.org/stanbol/rules/";
 

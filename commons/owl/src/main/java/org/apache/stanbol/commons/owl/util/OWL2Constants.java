@@ -22,7 +22,12 @@ package org.apache.stanbol.commons.owl.util;
  * @author alexdma
  * 
  */
-public class OWL2Constants {
+public final class OWL2Constants {
+   
+    /**
+     * Restrict instantiation
+     */
+    private OWL2Constants() {}
 
     /**
      * The namespace for the OWL language vocabulary.

@@ -36,8 +36,13 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  *
  */
-public class ClerezzaQueryUtils {
-    
+public final class ClerezzaQueryUtils {
+
+    /**
+     * Restrict instantiation
+     */
+    private ClerezzaQueryUtils() {}
+
     private static final Logger log = LoggerFactory.getLogger(ClerezzaQueryUtils.class);
 
     private static final RdfValueFactory valueFavtory = RdfValueFactory.getInstance();

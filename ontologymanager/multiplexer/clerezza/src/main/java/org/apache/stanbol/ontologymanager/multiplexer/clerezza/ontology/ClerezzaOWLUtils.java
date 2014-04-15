@@ -31,7 +31,12 @@ import org.slf4j.LoggerFactory;
  * @author alexdma
  * 
  */
-public class ClerezzaOWLUtils {
+public final class ClerezzaOWLUtils {
+
+    /**
+     * Restrict instantiation
+     */
+    private ClerezzaOWLUtils() {}
 
     private static Logger log = LoggerFactory.getLogger(ClerezzaOWLUtils.class);
 

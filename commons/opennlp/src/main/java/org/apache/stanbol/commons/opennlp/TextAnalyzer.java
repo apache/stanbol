@@ -401,7 +401,7 @@ public class TextAnalyzer {
     /**
      * @deprecated replaced by STANBOL-733 (stanbol nlp processing module
      */
-    public class AnalysedText {
+    public final class AnalysedText {
         //NOTE: Members are protected to allow the JVM direct access
         /**
          * The analysed sentence
@@ -556,7 +556,7 @@ public class TextAnalyzer {
         /**
          * @deprecated replaced by STANBOL-733 (stanbol nlp processing module
          */
-        public class Token {
+        public final class Token {
             //NOTE: Members are protected to allow the JVM direct access
             protected final Span span;
             protected String token;
@@ -649,7 +649,7 @@ public class TextAnalyzer {
         /**
          * @deprecated replaced by STANBOL-733 (stanbol nlp processing module
          */
-        public class Chunk {
+        public final class Chunk {
             //NOTE: Members are protected to allow the JVM direct access
             /**
              * The span over the char offset of this chunk within the 

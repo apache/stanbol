@@ -16,12 +16,17 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OsgiResourceLoaderUtil {
+public final class OsgiResourceLoaderUtil {
 
-    /*
-     * static members form the SolrResourceLoader that are not visible to this
-     * class
-     */
+   /**
+    * Restrict instantiation
+    */
+    private OsgiResourceLoaderUtil() {}
+
+   /*
+        * static members form the SolrResourceLoader that are not visible to this
+        * class
+        */
     static final String project = "solr";
     static final String base = "org.apache" + "." + project;
     private static final Pattern legacyAnalysisPattern = Pattern.compile("((\\Q" + base

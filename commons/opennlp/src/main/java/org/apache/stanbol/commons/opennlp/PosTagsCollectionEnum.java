@@ -263,7 +263,7 @@ public enum PosTagsCollectionEnum {
      * @author Rupert Westenthaler
      *
      */
-    private static class CollectionType {
+    private static final class CollectionType {
         protected String lang;
         protected PosTypeCollectionType type;
 

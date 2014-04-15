@@ -20,10 +20,14 @@ import static org.apache.commons.lang.StringUtils.getLevenshteinDistance;
 
 import org.apache.commons.lang.StringUtils;
 
-public class Utils {
+public final class Utils {
 
-    
-    /**
+   /**
+     * Restrict instantiation
+     */
+    private Utils() {}
+
+   /**
      * Compares two strings (after {@link StringUtils#trim(String) trimming} 
      * by using the Levenshtein's Edit Distance of the two
      * strings. Does not return the {@link Integer} number of changes but

@@ -359,7 +359,7 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
      *
      * @param <T>
      */
-    private class RdfProxyPropertyCollection<T> extends AbstractCollection<T> {
+    private final class RdfProxyPropertyCollection<T> extends AbstractCollection<T> {
 
         //private final NonLiteral resource;
         private final UriRef property;

@@ -48,7 +48,12 @@ import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
  * @author Rupert Westenthaler
  * @author ogrisel (original utility)
  */
-public class EnhancementRDFUtils {
+public final class EnhancementRDFUtils {
+
+    /**
+     * Restrict instantiation
+     */
+    private EnhancementRDFUtils() {}
 
     /**
      * @param literalFactory

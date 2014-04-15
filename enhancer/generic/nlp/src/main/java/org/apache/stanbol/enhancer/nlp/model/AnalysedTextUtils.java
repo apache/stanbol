@@ -43,8 +43,13 @@ import org.slf4j.helpers.SubstituteLoggerFactory;
 
 import com.ibm.icu.lang.UCharacter.SentenceBreak;
 
-public class AnalysedTextUtils {
-    
+public final class AnalysedTextUtils {
+
+    /**
+     * Restrict instantiation
+     */
+    private AnalysedTextUtils() {}
+
     private static final Logger log = LoggerFactory.getLogger(AnalysedTextUtils.class);
 
     /**

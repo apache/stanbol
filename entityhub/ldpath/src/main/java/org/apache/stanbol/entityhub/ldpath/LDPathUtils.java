@@ -22,8 +22,14 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 
-public class LDPathUtils {
+public final class LDPathUtils {
+
     /**
+     * Restrict instantiation
+     */
+    private LDPathUtils() {}
+
+   /**
      * Utility method that creates a reader over the parsed String using UTF-8 
      * as encoding.<p> This is necessary because currently LDPath only accepts
      * Reader as parameter for parsing {@link Program}s

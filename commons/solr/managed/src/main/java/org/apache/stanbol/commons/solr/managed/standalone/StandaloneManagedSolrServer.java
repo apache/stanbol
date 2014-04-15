@@ -68,7 +68,7 @@ import org.xml.sax.SAXException;
  * @author Rupert Westenthaler
  *
  */
-public class StandaloneManagedSolrServer implements ManagedSolrServer {
+public final class StandaloneManagedSolrServer implements ManagedSolrServer {
 
     private static final String DEFAULT_SERVER_NAME = "default";
     private final Logger log = LoggerFactory.getLogger(StandaloneManagedSolrServer.class);

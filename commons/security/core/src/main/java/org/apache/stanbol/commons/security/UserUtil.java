@@ -36,9 +36,14 @@ import org.apache.stanbol.commons.security.auth.PrincipalImpl;
  *
  * @author mir, tio
  */
-public class UserUtil {
+public final class UserUtil {
 
-	/**
+   /**
+    * Restrict instantiation
+    */
+   private UserUtil() {}
+
+   /**
 	 *
 	 * @return the name of user which is associated to the 
 	 * <code>AccessControlContext</code> of the current thread.

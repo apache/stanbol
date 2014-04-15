@@ -165,7 +165,7 @@ public final class QueryUtils {
      * @author Rupert Westenthaler
      *
      */
-    public static class QueryTerm {
+    public static final class QueryTerm {
         public final boolean hasWildcard;
         public final boolean needsQuotes;
         public final String term;

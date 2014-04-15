@@ -336,7 +336,7 @@ public class VcardIndexingSource implements EntityDataIterable, ResourceImporter
         }
     }
     
-    private class VCardIterator implements EntityDataIterator {
+    private final class VCardIterator implements EntityDataIterator {
         Map<EntityType,Map<String,Set<String>>> entityMap;
         Iterator<File> files = vcardFiles.iterator(); 
         @SuppressWarnings("unchecked")

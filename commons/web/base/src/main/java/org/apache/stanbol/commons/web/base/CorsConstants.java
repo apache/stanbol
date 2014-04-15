@@ -16,8 +16,12 @@
  */
 package org.apache.stanbol.commons.web.base;
 
-public class CorsConstants {
+public final class CorsConstants {
 
+    /**
+     * Restrict instantiation
+     */
+    private CorsConstants() {}
 
     public static final String CORS_ORIGIN = "org.apache.stanbol.commons.web.cors.origin";
 

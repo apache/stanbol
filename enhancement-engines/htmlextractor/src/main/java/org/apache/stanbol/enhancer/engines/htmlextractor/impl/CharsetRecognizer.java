@@ -35,7 +35,12 @@ import com.ibm.icu.text.CharsetMatch;
  * @author <a href="mailto:kasper@dfki.de">Walter Kasper</a>
  *
  */
-public class CharsetRecognizer {
+public final class CharsetRecognizer {
+
+    /**
+     * Restrict instantiation
+     */
+    private CharsetRecognizer() {}
 
     /**
      * This contains the logger.

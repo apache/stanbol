@@ -1005,7 +1005,7 @@ public abstract class YardTest {
      * @author Rupert Westenthaler
      *
      */
-    protected class FieldQueryTestData {
+    protected final class FieldQueryTestData {
         /**
          * The field used for {@link Text} values
          */

@@ -28,7 +28,7 @@ import org.apache.stanbol.entityhub.yard.solr.impl.SolrYard;
  * @author Rupert Westenthaler
  *
  */
-public class QueryConst {
+public final class QueryConst {
     private QueryConst(){/*do not allow instances*/}
     
     /**

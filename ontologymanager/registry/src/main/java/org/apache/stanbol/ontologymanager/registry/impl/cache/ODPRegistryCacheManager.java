@@ -52,10 +52,16 @@ import org.slf4j.LoggerFactory;
  * @author Enrico Daga
  * 
  */
-public class ODPRegistryCacheManager {
+public final class ODPRegistryCacheManager {
+
     /**
-	 * 
-	 */
+     * Restrict instantiation
+     */
+    private ODPRegistryCacheManager() {}
+
+    /**
+	  *
+	  */
     private static final long serialVersionUID = 1L;
 
     /*

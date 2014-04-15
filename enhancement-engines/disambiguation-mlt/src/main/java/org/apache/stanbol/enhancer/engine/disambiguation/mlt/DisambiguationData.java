@@ -47,7 +47,7 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
  * @author Kritarth
  * 
  */
-public class DisambiguationData {
+public final class DisambiguationData {
 
     /**
      * used by #c

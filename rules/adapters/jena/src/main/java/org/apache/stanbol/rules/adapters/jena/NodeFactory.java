@@ -32,7 +32,12 @@ import com.hp.hpl.jena.vocabulary.XSD;
  * @author anuzzolese
  * 
  */
-public class NodeFactory {
+public final class NodeFactory {
+
+    /**
+     * Restrict instantiation
+     */
+    private NodeFactory() {}
 
     /**
      * The argument is converted to a Jena {@link Node}

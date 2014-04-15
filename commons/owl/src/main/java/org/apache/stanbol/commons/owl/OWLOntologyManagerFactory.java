@@ -26,7 +26,12 @@ import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
 
-public class OWLOntologyManagerFactory {
+public final class OWLOntologyManagerFactory {
+
+    /**
+     * Restrict instantiation
+     */
+    private OWLOntologyManagerFactory() {}
 
     /**
      * 

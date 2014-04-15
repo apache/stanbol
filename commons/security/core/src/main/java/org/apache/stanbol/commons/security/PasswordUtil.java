@@ -26,9 +26,14 @@ import java.security.NoSuchAlgorithmException;
  * Utility methods for converting passwords.
  *
  */
-public class PasswordUtil {
+public final class PasswordUtil {
 
-	private static final char[] HEXDIGITS = "0123456789abcdef".toCharArray();
+   /**
+    * Restrict instantiation
+    */
+   private PasswordUtil() {}
+
+   private static final char[] HEXDIGITS = "0123456789abcdef".toCharArray();
 	
 	/**
 	 * @param bytes

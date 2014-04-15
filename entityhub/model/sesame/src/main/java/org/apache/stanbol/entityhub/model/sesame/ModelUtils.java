@@ -36,9 +36,14 @@ import org.openrdf.model.vocabulary.XMLSchema;
  * @author Rupert Westenthaler
  *
  */
-public class ModelUtils {
+public final class ModelUtils {
 
     /**
+     * Restrict instantiation
+     */
+    private ModelUtils() {}
+
+   /**
      * Transforms typed literals with datatype {@link XMLSchema#STRING} to
      * {@link Text} instances as required by some {@link Representation}
      * methods. This transformer is usually used in front of the

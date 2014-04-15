@@ -31,7 +31,7 @@ import opennlp.tools.util.StringUtil;
  * 
  * @author Rupert Westenthaler
  */
-public class KeywordTokenizer implements Tokenizer {
+public final class KeywordTokenizer implements Tokenizer {
 
     public static final KeywordTokenizer INSTANCE;
 

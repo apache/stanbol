@@ -31,7 +31,13 @@ import org.apache.stanbol.entityhub.indexing.core.IndexerFactory;
  * @author Rupert Westenthaler
  *
  */
-public class Main {
+public final class Main {
+
+    /**
+     * Restrict instantiation
+     */
+    private Main() {}
+
     private static final Options options;
     static {
         options = new Options();

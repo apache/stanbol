@@ -28,7 +28,7 @@ import org.apache.clerezza.rdf.core.UriRef;
  *
  * @author ogrisel@nuxeo.com
  */
-public class OntologicalClasses {
+public final class OntologicalClasses {
 
     public static final UriRef DBPEDIA_PERSON = new UriRef(
             NamespaceEnum.dbpedia_ont+"Person");

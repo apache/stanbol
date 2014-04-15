@@ -35,7 +35,7 @@ import org.apache.stanbol.enhancer.nlp.pos.Pos;
  * @author Rupert Westenthaler
  *
  */
-public class PhraseTagSetRegistry {
+public final class PhraseTagSetRegistry {
     private static PhraseTagSetRegistry instance = new PhraseTagSetRegistry();
     
     private PhraseTagSetRegistry(){}

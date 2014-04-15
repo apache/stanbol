@@ -38,7 +38,12 @@ import org.slf4j.LoggerFactory;
 /**
  * A set of utility methods for the manipulation of OWL API objects.
  */
-public class OWLUtils {
+public final class OWLUtils {
+
+    /**
+     * Restrict instantiation
+     */
+    private OWLUtils() {}
 
     private static int _LOOKAHEAD_LIMIT_DEFAULT = 1024;
 

@@ -44,7 +44,12 @@ import org.slf4j.LoggerFactory;
  * @author alexdma
  * 
  */
-public class ScopeSetRenderer {
+public final class ScopeSetRenderer {
+
+    /**
+     * Restrict instantiation
+     */
+    private ScopeSetRenderer() {}
 
     private static OWLDataFactory __factory = OWLManager.getOWLDataFactory();
 

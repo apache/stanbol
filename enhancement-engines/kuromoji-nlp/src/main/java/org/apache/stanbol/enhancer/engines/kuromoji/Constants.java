@@ -29,10 +29,14 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
  * by the Stanbol NLP processing module
  * @author Rupert Westenthaler
  */
-public class Constants {
+public final class Constants {
 
-    
     /**
+     * Restrict instantiation
+     */
+    private Constants() {}
+
+   /**
      * set of part of speech tags as defined in the {@link ToStringUtil} class.
      * Descriptions are taken from the 
      * <a herf="http://lucene-gosen.googlecode.com/svn/trunk/example/stoptags_ja.txt">

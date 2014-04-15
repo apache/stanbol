@@ -70,9 +70,14 @@ import org.slf4j.LoggerFactory;
 /**
  * Shared utilities for the Spotlight Enhancement Engines.
  */
-public class SpotlightEngineUtils {
+public final class SpotlightEngineUtils {
 
-	private static final Logger log = LoggerFactory.getLogger(SpotlightEngineUtils.class);
+    /**
+     * Restrict instantiation
+     */
+    private SpotlightEngineUtils() {}
+
+    private static final Logger log = LoggerFactory.getLogger(SpotlightEngineUtils.class);
 	
 	private static final LiteralFactory literalFactory = LiteralFactory.getInstance();
 	

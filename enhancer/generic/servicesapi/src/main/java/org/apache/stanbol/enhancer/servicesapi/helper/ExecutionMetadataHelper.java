@@ -73,8 +73,13 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan;
  * @author Rupert Westenthaler
  *
  */
-public class ExecutionMetadataHelper {
-    
+public final class ExecutionMetadataHelper {
+
+    /**
+     * Restrict instantiation
+     */
+    private ExecutionMetadataHelper() {}
+
     private static final LiteralFactory lf = LiteralFactory.getInstance();
     
     public static NonLiteral createChainExecutionNode(MGraph graph, NonLiteral executionPlan, 

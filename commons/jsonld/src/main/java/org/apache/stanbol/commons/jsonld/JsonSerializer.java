@@ -29,7 +29,12 @@ import org.codehaus.jettison.json.JSONException;
  * 
  * @author Fabian Christ
  */
-public class JsonSerializer {
+public final class JsonSerializer {
+   
+    /**
+     * Restrict instantiation
+     */
+    private JsonSerializer() {}
 
     public static String toString(Map<String,Object> jsonMap) {
         StringBuffer sb = new StringBuffer();

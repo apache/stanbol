@@ -67,7 +67,12 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.CONFIDENCE_LEVEL_ENUM;
 import org.junit.Assert;
 
-public class EnhancementStructureHelper {
+public final class EnhancementStructureHelper {
+
+   /**
+    * Restrict instantiation
+    */
+    private EnhancementStructureHelper() {}
 
     private static final LiteralFactory lf = LiteralFactory.getInstance();
     

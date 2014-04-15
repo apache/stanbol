@@ -259,7 +259,7 @@ public abstract class Mapping {
      * @author Rupert Westenthaler
      *
      */
-    protected static class MappingLogger{
+    protected static final class MappingLogger{
         
         private List<NonLiteral> subjects = new ArrayList<NonLiteral>();
         private UriRef predicate;
