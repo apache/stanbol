@@ -39,6 +39,7 @@ import org.apache.clerezza.rdf.core.Graph;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -249,7 +250,7 @@ public class BenchmarkServlet extends HttpServlet {
                 response.setStatus(404);
                 PrintWriter w = response.getWriter();
                 w.println("Unable to perform benchmark on EnhancementChain '"
-                    +chainName+"' because no chain with that name is active!");
+                    + StringEscapeUtils.escapeHtml(chainName) +"' because no chain with that name is active!");
                 IOUtils.closeQuietly(w);
                 return;
             }
