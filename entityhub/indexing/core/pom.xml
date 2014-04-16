@@ -135,8 +135,8 @@
     </dependency>
     <dependency>
       <groupId>biz.aQute</groupId> <!-- used to generate bundles -->
-      <artifactId>bndlib</artifactId>
-      <version>1.43.0</version>
+      <artifactId>bnd</artifactId>
+      <version>1.50.0</version>
     </dependency>    
     <!-- For Testing -->
     <dependency>
