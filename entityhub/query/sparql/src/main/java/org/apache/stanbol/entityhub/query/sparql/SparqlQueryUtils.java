@@ -23,7 +23,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,7 +59,7 @@ public final class SparqlQueryUtils {
 
     private static final Logger log = LoggerFactory.getLogger(SparqlQueryUtils.class);
 
-    private static final String XSD_DATE_TIME = "http://www.w3.org/2001/XMLSchema#dateTime";
+    //private static final String XSD_DATE_TIME = "http://www.w3.org/2001/XMLSchema#dateTime";
     //private static final DateFormat DATE_FORMAT = new W3CDateFormat();
 
     private SparqlQueryUtils() {}
@@ -757,36 +756,39 @@ public final class SparqlQueryUtils {
                     queryString.append(" \n").append(intend).append("  FILTER(");
                     filterAdded = true;
                     if (constraint.getPatternType() == PatternType.none) {
-                        if (constraint.isCaseSensitive()) {
-                            boolean first = true;
-                            if(constraint.getTexts().size() > 1){
-                                queryString.append('('); //start language filter group (STANBOL-1204)
+                        //as we want to match also single words in labels
+                        //we need also to use regex instead of string matching
+                        //in case of case sensitive matches (STANBOL-1277)
+//                        if (constraint.isCaseSensitive()) {
+//                            boolean first = true;
+//                            if(constraint.getTexts().size() > 1){
+//                                queryString.append('('); //start language filter group (STANBOL-1204)
+//                            }
+//                            for (String textConstraint : constraint.getTexts()) {
+//                                if (first) {
+//                                    first = false;
+//                                } else {
+//                                    queryString.append(" || ");
+//                                }
+//                                if (textConstraint != null && !textConstraint.isEmpty()) {
+//                                    queryString.append("(str(").append(var).append(") = \"");
+//                                    addGrammarEscapedValue(queryString, textConstraint);
+//                                    queryString.append("\")");
+//                                }
+//                            }
+//                            if(constraint.getTexts().size() > 1){
+//                                queryString.append(')'); //end language filter group (STANBOL-1204)
+//                            }
+//                        } else {
+                        Collection<String> regexQueryTexts = new ArrayList<String>(
+                                constraint.getTexts().size());
+                        for (String textConstraint : constraint.getTexts()) {
+                            if (textConstraint != null && !textConstraint.isEmpty()) {
+                                regexQueryTexts.add(PatternUtils.word2Regex(textConstraint));
                             }
-                            for (String textConstraint : constraint.getTexts()) {
-                                if (first) {
-                                    first = false;
-                                } else {
-                                    queryString.append(" || ");
-                                }
-                                if (textConstraint != null && !textConstraint.isEmpty()) {
-                                    queryString.append("(str(").append(var).append(") = \"");
-                                    addGrammarEscapedValue(queryString, textConstraint);
-                                    queryString.append("\")");
-                                }
-                            }
-                            if(constraint.getTexts().size() > 1){
-                                queryString.append(')'); //end language filter group (STANBOL-1204)
-                            }
-                        } else {
-                            Collection<String> regexQueryTexts = new ArrayList<String>(
-                                    constraint.getTexts().size());
-                            for (String textConstraint : constraint.getTexts()) {
-                                if (textConstraint != null && !textConstraint.isEmpty()) {
-                                    regexQueryTexts.add(PatternUtils.value2Regex(textConstraint));
-                                }
-                            }
-                            addRegexFilter(queryString, var, regexQueryTexts, constraint.isCaseSensitive());
                         }
+                        addRegexFilter(queryString, var, regexQueryTexts, constraint.isCaseSensitive());
+//                        }
                     } else if (constraint.getPatternType() == PatternType.wildcard) {
                         // parse false, because that is more in line with the
                         // expectations of users!
@@ -794,7 +796,7 @@ public final class SparqlQueryUtils {
                                 .size());
                         for (String textConstraint : constraint.getTexts()) {
                             if (textConstraint != null && !textConstraint.isEmpty()) {
-                                regexQueryTexts.add(PatternUtils.wildcardToRegex(textConstraint, false));
+                                regexQueryTexts.add(PatternUtils.wildcardWordToRegex(textConstraint));
                             }
                         }
                         addRegexFilter(queryString, var, regexQueryTexts, constraint.isCaseSensitive());
