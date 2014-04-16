@@ -165,12 +165,12 @@ public class RunSingleSPARQL {
     }
 
    /**
-     * To run a SPARQL query
-     *
-     * @param query {The query string without the declaration of the prefixes.}
-     * @return {Return a Jena Result Set Object.}
-     */
-    public ResultSet runSPARQL(String query){
+    * To create a SPARQL QueryExecution Object
+    *
+    * @param query {The query string without the declaration of the prefixes.}
+    * @return {Return a QueryExecution Object.}
+    */
+   public QueryExecution createSPARQLQueryExecutionFactory(String query){
 
         if(!sparqlprefix.isEmpty()){
 
@@ -183,10 +183,7 @@ public class RunSingleSPARQL {
             query = prefix+query;
 
             try{
-                QueryExecution qexec = QueryExecutionFactory.create(query,jenamodel);
-                ResultSet results = qexec.execSelect();
-
-                return results;
+                return QueryExecutionFactory.create(query,jenamodel);
             }catch (Exception e){
                 e.printStackTrace();
                 return null;
