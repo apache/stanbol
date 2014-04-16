@@ -1,0 +1,5 @@
+#Fri Mar 28 01:53:17 CET 2014
+Name=SolrIndex for dbpedia
+Synchronized=false
+Description=DBpedia.org 
+Index-Archive=dbpedia.solrindex.zip

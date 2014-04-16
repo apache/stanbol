@@ -255,24 +255,21 @@ public final class OsgiConfigurationUtil {
         try {
             builder.addClasspath(new File(config.getDestinationFolder(),CONFIG_ROOT));
         } catch (IOException e) {
-            log.warn("Unable to build OSGI Bundle for Indexed Referenced Site "+config.getName(),e);
+            log.warn("(builder.addClasspath) Unable to build OSGI Bundle for Indexed Referenced Site "+config.getName(),e);
             builder.close();
+            //?? why not throwing an exception here ??
             return;
         }
-        Jar jar;
         try {
-            jar = builder.build();
+            Jar jar = builder.build();
+            jar.write(new File(config.getDistributionFolder(),
+                CONFIG_PACKAGE+config.getName()+"-1.0.0.jar"));
         } catch (Exception e) {
-            log.warn("Unable to build OSGI Bundle for Indexed Referenced Site "+config.getName(),e);
+            log.warn("(builder.build) Unable to build OSGI Bundle for Indexed Referenced Site "+config.getName(),e);
+            //?? why not throwing an exception here ??
 			return;
 		} finally {
 			builder.close();
 		}
-        try {
-            jar.write(new File(config.getDistributionFolder(),
-                CONFIG_PACKAGE+config.getName()+"-1.0.0.jar"));
-        } catch (Exception e) {
-            log.warn("Unable to write OSGI Bundle for Indexed Referenced Site "+config.getName(),e); 
-        }
     }
 }
