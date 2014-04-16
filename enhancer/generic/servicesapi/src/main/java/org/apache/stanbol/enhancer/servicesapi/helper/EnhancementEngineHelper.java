@@ -323,14 +323,17 @@ public final class EnhancementEngineHelper {
     /**
      * Create a new enhancement instance in the metadata-graph of the content
      * item along with default properties (dc:creator and dc:created) and return
-     * the UriRef of the extraction so that engines can further add.
+     * the UriRef of the extraction so that engines can further add. <p>
+     * <i>NOTE:</i> This method was protected prior to <code>0.12.1</code> (see
+     * <a href="https://issues.apache.org/jira/browse/STANBOL-1321">STANBOL-1321</a>)
      *
      * @param ci the ContentItem being under analysis
      * @param engine the Engine performing the analysis
      *
      * @return the URI of the new enhancement instance
+     * @since 0.12.1
      */
-    protected static UriRef createEnhancement(MGraph metadata,
+    public static UriRef createEnhancement(MGraph metadata,
             EnhancementEngine engine, UriRef contentItemId){
         LiteralFactory literalFactory = LiteralFactory.getInstance();
 
