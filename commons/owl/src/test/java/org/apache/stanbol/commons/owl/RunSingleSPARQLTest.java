@@ -27,6 +27,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.hp.hpl.jena.query.QueryExecution;
 import org.apache.stanbol.commons.owl.RunSingleSPARQL;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -148,10 +149,10 @@ public class RunSingleSPARQLTest {
     }
 
     /**
-     * Test of runSPARQL method, of class RunSingleSPARQL.
+     * Tests of testCreateSPARQLQueryExecutionFactory method, of class RunSingleSPARQL.
      */
     @Test
-    public void testRunSPARQL() {
+    public void testCreateSPARQLQueryExecutionFactory() {
         Map<String,String> map = new HashMap<String,String>();
         map.put("rdfs","<http://www.w3.org/2000/01/rdf-schema#>");
         map.put("xsd","<http://www.w3.org/2000/01/rdf-schema#>");
@@ -160,7 +161,11 @@ public class RunSingleSPARQLTest {
         map.put("ex","<http://www.semanticweb.org/ontologies/2010/6/ProvaParent.owl#>");
         String query = "SELECT * WHERE {?p rdf:type ex:Person .}";
         RunSingleSPARQL instance = new RunSingleSPARQL(owl,map);
-        ResultSet result = instance.runSPARQL(query);
+        QueryExecution queryExecution = instance.createSPARQLQueryExecutionFactory(query);
+        if (queryExecution == null) {
+           fail("Some errors occurred in createSPARQLQueryExecutionFactory of KReSRunSPARQL");
+        }
+        ResultSet result = queryExecution.execSelect();
 
         if(result!=null){
             int m = 0;
@@ -168,10 +173,11 @@ public class RunSingleSPARQLTest {
                 result.next();
                 m++;
             }
+        queryExecution.close();
         assertEquals(3, m);
         // TODO review the generated test code and remove the default call to fail.
         }else{
-            fail("Some errors occur in runSPARQL of KReSRunSPARQL");
+            fail("Some errors occur in createSPARQLQueryExecutionFactory of KReSRunSPARQL");
         }
     }
 
