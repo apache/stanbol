@@ -54,7 +54,7 @@ public class NumberAtom extends AbstractAdaptableAtom {
 
             Number n = null;
             if (number.contains("\\.")) {
-                int indexOfPoint = number.indexOf(".");
+                int indexOfPoint = number.indexOf('.');
 
                 if (indexOfPoint == number.length() - 2) {
                     n = Float.parseFloat(number);

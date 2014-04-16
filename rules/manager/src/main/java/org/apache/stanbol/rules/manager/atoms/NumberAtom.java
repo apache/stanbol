@@ -42,7 +42,7 @@ public class NumberAtom extends NumericFunctionAtom {
     public Number getNumberValue() {
         Number number = null;
         if (numberString.contains("\\.")) {
-            int index = numberString.lastIndexOf(".");
+            int index = numberString.lastIndexOf('.');
             if (index + 1 == numberString.length() - 1) {
                 number = Float.valueOf(numberString);
             } else {

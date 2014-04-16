@@ -239,8 +239,8 @@ public class ClerezzaRuleStore implements RuleStore {
          * of the recipe.
          */
         String stanbolSyntax = rule.toString();
-        int indexOfLPar = stanbolSyntax.indexOf("[");
-        int indexOfRPar = stanbolSyntax.indexOf("]");
+        int indexOfLPar = stanbolSyntax.indexOf('[');
+        int indexOfRPar = stanbolSyntax.indexOf(']');
         stanbolSyntax = stanbolSyntax.substring(indexOfLPar + 1, indexOfRPar);
 
         String[] parts = stanbolSyntax.split("->");
