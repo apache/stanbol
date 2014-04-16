@@ -33,6 +33,7 @@ import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
 import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint.PatternType;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class SparqlQueryUtilsTest {
@@ -104,6 +105,34 @@ public class SparqlQueryUtilsTest {
     	assertTrue(queryRegex.contains(testString.replaceAll("\\\"", "\\\\\"")));
     }
 
-	
+    /**
+     * Tests word level matching for {@link TextConstraint}s (STANBOL-1277)
+     */
+    @Test
+	public void testMultiWordTextConstraints(){
+        //queries for a TextConstraint with {text1} or {text2} in the languages
+        // {lang1} or {lang2} are expected to look like:
+        //
+        //    select ?entity, ?label where {
+        //        ?entity rdfs:label ?label
+        //        FILTER((regex(str(?label),"\\b{text1}\\b","i") || regex(str(?label),"\\b{text2}\\b","i")) 
+        //            && ((lang(?label) = "{lang1}") || (lang(?label) = "{lang2}"))) . 
+        //    }
+        
+        //first test a pattern type NONE
+        SparqlFieldQuery query = SparqlFieldQueryFactory.getInstance().createFieldQuery();
+        query.setConstraint("urn:field4", new TextConstraint(Arrays.asList("Global","Toy"), PatternType.none, false, "en", null));
+        String queryString = SparqlQueryUtils.createSparqlSelectQuery(query, true, 0, SparqlEndpointTypeEnum.Standard);
+        Assert.assertTrue(queryString.contains("regex(str(?tmp1),\"\\\\bGlobal\\\\b\",\"i\") "
+            + "|| regex(str(?tmp1),\"\\\\bToy\\\\b\",\"i\")"));
+
+        //also test for pattern type WILDCARD
+        query = SparqlFieldQueryFactory.getInstance().createFieldQuery();
+        query.setConstraint("urn:field4", new TextConstraint(Arrays.asList("Glo?al","Toy"), PatternType.wildcard, false, "en", null));
+        queryString = SparqlQueryUtils.createSparqlSelectQuery(query, true, 0, SparqlEndpointTypeEnum.Standard);
+        Assert.assertTrue(queryString.contains("regex(str(?tmp1),\"\\\\bGlo.al\\\\b\",\"i\") "
+            + "|| regex(str(?tmp1),\"\\\\bToy\\\\b\",\"i\")"));
+
+    }
 
 }

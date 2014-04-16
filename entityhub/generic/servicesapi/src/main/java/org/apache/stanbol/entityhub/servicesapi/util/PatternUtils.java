@@ -34,6 +34,31 @@ public final class PatternUtils {
         if(strict){
             regex.append('^');
         }
+        encodeWildcard(wildcard, regex);
+        if(strict){
+            regex.append('$');
+        }
+        return regex.toString();
+    }
+
+    /**
+     * Converts a Wildcard search string to REGEX matching whole words in 
+     * the text. 
+     * @param wildcard the wildcard pattern
+     * @return the regex pattern for the parsed wildcard
+     * @since 0.12.1
+     */
+    public static String wildcardWordToRegex(String wildcard){
+        StringBuilder regex = new StringBuilder("\\b");
+        encodeWildcard(wildcard, regex);
+        return regex.append("\\b").toString();
+    }
+    /**
+     * Internally used to convert a wildcard to a regex
+     * @param wildcard
+     * @param regex
+     */
+    private static void encodeWildcard(String wildcard, StringBuilder regex) {
         for (char c : wildcard.toCharArray()) {
             switch(c) {
                 case '*':
@@ -52,28 +77,49 @@ public final class PatternUtils {
                     break;
             }
         }
-        if(strict){
-            regex.append('$');
-        }
-        return regex.toString();
     }
+    
     public static String value2Regex(String value){
         return '^'+escapeRegex(value)+'$';
     }
-    public static String escapeRegex(String wildcard){
-        StringBuilder escaped = new StringBuilder();
-        for (char c : wildcard.toCharArray()) {
+    /**
+     * Creates a regex that matches vales against whole words
+     * ('<code>\b{value}\b</code>)
+     * @param word the word to match
+     * @return the regex to match words
+     * @since 0.12.1
+     */
+    public static String word2Regex(String word){
+        return escapeRegex(word, new StringBuilder("\\b")).append("\\b").toString();
+    }
+    
+    public static String escapeRegex(String value){
+        return escapeRegex(value, null).toString();
+    }
+    /**
+     * 
+     * @param value the value to escape
+     * @param sb the {@link StringBuilder} or <code>null</code> if a new 
+     * instance should be created
+     * @return the parsed {@link StringBuilder} with the escaped value added.
+     * @since 0.12.1
+     */
+    public static StringBuilder escapeRegex(String value, StringBuilder sb){
+        if(sb == null){
+            sb = new StringBuilder();
+        }
+        for (char c : value.toCharArray()) {
             switch(c) {
                 case '*': case '?': case '(': case ')': case '[': case ']':
                 case '$': case '^': case '.': case '{': case '}': case '|':
                 case '\\':
-                    escaped.append("\\"); //add the escape char
+                    sb.append("\\"); //add the escape char
                 default:
-                    escaped.append(c); //add the char
+                    sb.append(c); //add the char
                     break;
             }
         }
-        return escaped.toString();
+        return sb;
     }
     public static final Pattern PREFIX_REGEX_PATTERN = Pattern.compile("[\\?\\*]");
     /**
