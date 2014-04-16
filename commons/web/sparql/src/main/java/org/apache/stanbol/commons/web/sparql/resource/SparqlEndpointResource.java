@@ -21,11 +21,7 @@ import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
 import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -183,14 +179,14 @@ public class SparqlEndpointResource extends BaseStanbolResource {
     }
 
     private TripleCollection getTripleCollection(String graphUri) throws InvalidSyntaxException {
-        LinkedHashMap<ServiceReference,TripleCollection> services = getServices(graphUri);
+        Map<ServiceReference,TripleCollection> services = getServices(graphUri);
         if (services != null && services.size() > 0) {
             return services.get(services.keySet().iterator().next());
         }
         return null;
     }
 
-    private void populateTripleCollectionList(LinkedHashMap<ServiceReference,TripleCollection> services) {
+    private void populateTripleCollectionList(Map<ServiceReference,TripleCollection> services) {
         if (services != null) {
             for (ServiceReference service : services.keySet()) {
                 Object graphUri = service.getProperty(GRAPH_URI);
@@ -208,8 +204,8 @@ public class SparqlEndpointResource extends BaseStanbolResource {
         }
     }
 
-    private LinkedHashMap<ServiceReference,TripleCollection> getServices(String graphUri) throws InvalidSyntaxException {
-        LinkedHashMap<ServiceReference,TripleCollection> registeredGraphs = new LinkedHashMap<ServiceReference,TripleCollection>();
+    private Map<ServiceReference,TripleCollection> getServices(String graphUri) throws InvalidSyntaxException {
+        Map<ServiceReference,TripleCollection> registeredGraphs = new LinkedHashMap<ServiceReference,TripleCollection>();
         BundleContext bundleContext = ContextHelper.getBundleContext(servletContext);
         ServiceReference[] refs = bundleContext.getServiceReferences(TripleCollection.class.getName(),
             getFilter(graphUri));

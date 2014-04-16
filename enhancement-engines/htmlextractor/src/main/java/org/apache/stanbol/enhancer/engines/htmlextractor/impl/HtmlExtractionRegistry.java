@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -55,8 +56,8 @@ public class HtmlExtractionRegistry {
     private static final Logger LOG =
         LoggerFactory.getLogger(HtmlExtractionRegistry.class);
 
-    private HashMap<String, HtmlExtractionComponent> registry;
-    private HashSet<String> activeExtractors;
+    private Map<String, HtmlExtractionComponent> registry;
+    private Set<String> activeExtractors;
 
 
     public HtmlExtractionRegistry() {
@@ -190,11 +191,11 @@ public class HtmlExtractionRegistry {
         }
     }
 
-    public HashMap<String, HtmlExtractionComponent> getRegistry() {
+    public Map<String, HtmlExtractionComponent> getRegistry() {
         return registry;
     }
 
-    public void setRegistry(HashMap<String, HtmlExtractionComponent> registry) {
+    public void setRegistry(Map<String, HtmlExtractionComponent> registry) {
         this.registry = registry;
     }
 
@@ -202,7 +203,7 @@ public class HtmlExtractionRegistry {
         return activeExtractors;
     }
 
-    public void setActiveExtractors(HashSet<String> activeExtractors) {
+    public void setActiveExtractors(Set<String> activeExtractors) {
         this.activeExtractors = activeExtractors;
     }
 

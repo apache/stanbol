@@ -25,6 +25,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.stanbol.commons.owl.RunSingleSPARQL;
 import org.junit.After;
@@ -76,7 +77,7 @@ public class RunSingleSPARQLTest {
     @Test
     public void testGetSPARQLprefix() {
 
-        HashMap<String,String> map = new HashMap();
+        Map<String,String> map = new HashMap<String,String>();
         map.put("rdfs","<http://www.w3.org/2000/01/rdf-schema#>");
         map.put("xsd","<http://www.w3.org/2000/01/rdf-schema#>");
         map.put("owl","<http://www.w3.org/2000/01/rdf-schema#>");
@@ -84,8 +85,8 @@ public class RunSingleSPARQLTest {
         map.put("ex","<http://www.w3.org/1999/02/22-rdf-syntax-ns#>");
 
         RunSingleSPARQL instance = new RunSingleSPARQL(owl,map);
-        HashMap expResult = map;
-        HashMap result = instance.getSPARQLprefix();
+        Map<String,String> expResult = map;
+        Map<String,String> result = instance.getSPARQLprefix();
         if(!result.isEmpty()){
             assertEquals(expResult, result);
         }else{
@@ -102,7 +103,7 @@ public class RunSingleSPARQLTest {
         
         String label = "mylabel";
         String prefix = "<http://prova.mylabel.org#>";
-        HashMap<String,String> map = new HashMap();
+        Map<String,String> map = new HashMap<String,String>();
         map.put("rdfs","http://www.w3.org/2000/01/rdf-schema#");
         map.put("xsd","<http://www.w3.org/2000/01/rdf-schema#>");
         map.put("owl","<http://www.w3.org/2000/01/rdf-schema#>");
@@ -112,7 +113,7 @@ public class RunSingleSPARQLTest {
         RunSingleSPARQL instance = new RunSingleSPARQL(owl,map);
         boolean result = instance.addSPARQLprefix(label, prefix);
         if(result){
-            HashMap<String, String> mymap = instance.getSPARQLprefix();
+            Map<String, String> mymap = instance.getSPARQLprefix();
       
             assertEquals(prefix, mymap.get(label));
             // TODO review the generated test code and remove the default call to fail.
@@ -127,7 +128,7 @@ public class RunSingleSPARQLTest {
     @Test
     public void testRemoveSPARQLprefix() {
 
-        HashMap<String,String> map = new HashMap();
+        Map<String,String> map = new HashMap<String,String>();
         map.put("rdfs","<http://www.w3.org/2000/01/rdf-schema#>");
         map.put("xsd","<http://www.w3.org/2000/01/rdf-schema#>");
         map.put("owl","<http://www.w3.org/2000/01/rdf-schema#>");
@@ -138,7 +139,7 @@ public class RunSingleSPARQLTest {
         boolean result = instance.removeSPARQLprefix("ex");
 
         if(result){
-            HashMap<String, String> mymap = instance.getSPARQLprefix();
+            Map<String, String> mymap = instance.getSPARQLprefix();
             assertEquals(false, mymap.containsKey("ex"));
             // TODO review the generated test code and remove the default call to fail.
         }else{
@@ -151,7 +152,7 @@ public class RunSingleSPARQLTest {
      */
     @Test
     public void testRunSPARQL() {
-        HashMap<String,String> map = new HashMap();
+        Map<String,String> map = new HashMap<String,String>();
         map.put("rdfs","<http://www.w3.org/2000/01/rdf-schema#>");
         map.put("xsd","<http://www.w3.org/2000/01/rdf-schema#>");
         map.put("owl","<http://www.w3.org/2000/01/rdf-schema#>");

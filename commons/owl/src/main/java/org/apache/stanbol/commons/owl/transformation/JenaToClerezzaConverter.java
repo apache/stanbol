@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Triple;
@@ -63,7 +64,7 @@ public final class JenaToClerezzaConverter {
 	 * @param model {@link Model}
 	 * @return an {@link ArrayList} that contains the generated Clerezza triples (see {@link Triple}) 
 	 */
-	public static ArrayList<Triple> jenaModelToClerezzaTriples(Model model){
+	public static List<Triple> jenaModelToClerezzaTriples(Model model){
 		
 		ArrayList<Triple> clerezzaTriples = new ArrayList<Triple>();
 		

@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Triple;
@@ -79,7 +80,7 @@ public final class OWLAPIToClerezzaConverter {
      *            {@link OWLOntology}
      * @return an {@link ArrayList} that contains the generated Clerezza triples (see {@link Triple})
      */
-    public static ArrayList<Triple> owlOntologyToClerezzaTriples(OWLOntology ontology) {
+    public static List<Triple> owlOntologyToClerezzaTriples(OWLOntology ontology) {
         ArrayList<Triple> clerezzaTriples = new ArrayList<Triple>();
         TripleCollection mGraph = owlOntologyToClerezzaMGraph(ontology);
         Iterator<Triple> tripleIterator = mGraph.iterator();

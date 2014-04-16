@@ -151,7 +151,7 @@ public class ContentItemResource extends BaseStanbolResource {
 
     private ChainExecution chainExecution;
 
-    private ArrayList<org.apache.stanbol.enhancer.servicesapi.helper.execution.Execution> engineExecutions;
+    private List<org.apache.stanbol.enhancer.servicesapi.helper.execution.Execution> engineExecutions;
 
     private EnhancementException enhancementException;
     

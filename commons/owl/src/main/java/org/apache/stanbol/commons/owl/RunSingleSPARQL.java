@@ -42,7 +42,7 @@ public class RunSingleSPARQL {
 
     private OWLOntology owlmodel;
     private OntModel jenamodel;
-    private HashMap<String,String> sparqlprefix;
+    private Map<String,String> sparqlprefix;
 
    /**
      * Constructor to create an OWLOntology object where run the SPARQL query.
@@ -57,7 +57,7 @@ public class RunSingleSPARQL {
         this.jenamodel = j2o.ModelOwlToJenaConvert(owlmodel,"RDF/XML");
         Iterator<String> iter = jenamodel.getNsPrefixMap().keySet().iterator();
         Map<String, String> map = jenamodel.getNsPrefixMap();
-        this.sparqlprefix = (HashMap<String, String>) map;
+        this.sparqlprefix = map;
    
         while(iter.hasNext()){
             String k = iter.next();
@@ -83,7 +83,7 @@ public class RunSingleSPARQL {
      * @param owl {The OWLOntology to be querying}
      * @param prefix {The map where the keys are the prefix label and the value the IRI of the prefix on the form: http://www.w3.org/2000/01/rdf-schema#.}
      */
-    public RunSingleSPARQL(OWLOntology owl, HashMap<String,String> prefix){
+    public RunSingleSPARQL(OWLOntology owl, Map<String,String> prefix){
         this.owlmodel = owl;
         JenaToOwlConvert j2o = new JenaToOwlConvert();
         this.jenamodel = j2o.ModelOwlToJenaConvert(owlmodel,"RDF/XML");
@@ -105,7 +105,7 @@ public class RunSingleSPARQL {
      *
      * @return {Return a prefix mapping.}
      */
-    public HashMap<String,String> getSPARQLprefix(){
+    public Map<String,String> getSPARQLprefix(){
         return this.sparqlprefix;
     }
 

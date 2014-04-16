@@ -19,19 +19,7 @@ package org.apache.stanbol.entityhub.ldpath.backend;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.marmotta.ldpath.api.backend.RDFBackend;
@@ -74,7 +62,7 @@ public abstract class AbstractBackend implements RDFBackend<Object> {
     private static final int LRU_CACHE_SIZE = 1000;
     
     @SuppressWarnings("serial")
-    private final LinkedHashMap<String,Representation> lru = 
+    private final Map<String,Representation> lru =
         new LinkedHashMap<String,Representation>(LRU_CACHE_SIZE+1, 0.75f, true){
         @Override
         protected boolean removeEldestEntry(java.util.Map.Entry<String,Representation> eldest) {

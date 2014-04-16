@@ -1045,7 +1045,7 @@ public class UserResource {
      * @param object
      * @return
      */
-    private ArrayList<Triple> filterToArray(NonLiteral subject, UriRef predicate, Resource object) {
+    private List<Triple> filterToArray(NonLiteral subject, UriRef predicate, Resource object) {
         Iterator<Triple> triples = systemGraph.filter(subject, predicate, object);
         ArrayList<Triple> buffer = new ArrayList<Triple>();
         Lock readLock = systemGraph.getLock().readLock();

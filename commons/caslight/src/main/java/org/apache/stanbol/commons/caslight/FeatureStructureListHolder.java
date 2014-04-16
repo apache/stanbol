@@ -18,6 +18,7 @@ package org.apache.stanbol.commons.caslight;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -26,7 +27,7 @@ import java.util.Set;
  */
 public class FeatureStructureListHolder {
     
-    private HashMap<String,List<FeatureStructure>> holder = new HashMap<String,List<FeatureStructure>>();
+    private Map<String,List<FeatureStructure>> holder = new HashMap<String,List<FeatureStructure>>();
     
     /**
      * Adds a new FeatureStructure List to this holder.

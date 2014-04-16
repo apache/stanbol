@@ -295,7 +295,7 @@ public final class ContentItemHelper {
      * @param clazz the class of the content part
      * @return the Map with the {@link UriRef id}s and the content as entries.
      */
-    public static <T> LinkedHashMap<UriRef,T> getContentParts(ContentItem ci, Class<T> clazz){
+    public static <T> Map<UriRef,T> getContentParts(ContentItem ci, Class<T> clazz){
         if(ci == null){
             throw new IllegalArgumentException("The parsed ContentItem MUST NOT be NULL!");
         }

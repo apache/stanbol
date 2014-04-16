@@ -81,7 +81,7 @@ public class LanguageIdentifier {
         return detector.detect();
     }
     
-    public ArrayList<Language> getLanguages(String text) throws LangDetectException {
+    public List<Language> getLanguages(String text) throws LangDetectException {
         Detector detector = DetectorFactory.create();
         detector.append(text);
         return detector.getProbabilities();
