@@ -150,7 +150,7 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
 
     private ChainExecution chainExecution;
 
-    private ArrayList<org.apache.stanbol.enhancer.servicesapi.helper.execution.Execution> engineExecutions;
+    private List<org.apache.stanbol.enhancer.servicesapi.helper.execution.Execution> engineExecutions;
 
     private EnhancementException enhancementException;
     private LayoutConfiguration layoutConfiguration;

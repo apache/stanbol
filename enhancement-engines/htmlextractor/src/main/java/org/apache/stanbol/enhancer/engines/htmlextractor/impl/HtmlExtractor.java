@@ -23,8 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
@@ -93,7 +93,7 @@ public class HtmlExtractor {
             encoding = charset.name();
         }
         Document doc = htmlParser.getDOM(input, encoding);
-        HashMap<String, HtmlExtractionComponent> extractors =
+        Map<String, HtmlExtractionComponent> extractors =
             registry.getRegistry();
         List<String> formats = new ArrayList<String>();
         long modelSize = result.size();

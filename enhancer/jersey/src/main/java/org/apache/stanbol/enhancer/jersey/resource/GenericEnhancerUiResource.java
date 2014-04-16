@@ -77,8 +77,8 @@ public class GenericEnhancerUiResource extends AbstractEnhancerResource {
      */
     //protected QueryEngine queryEngine;
     protected final Serializer serializer;
-    private LinkedHashSet<ExecutionNode> _executionNodes;
-    private LinkedHashSet<ExecutionNode> _activeNodes;
+    private Set<ExecutionNode> _executionNodes;
+    private Set<ExecutionNode> _activeNodes;
     protected final Chain chain;
     
     public GenericEnhancerUiResource(String chainName,

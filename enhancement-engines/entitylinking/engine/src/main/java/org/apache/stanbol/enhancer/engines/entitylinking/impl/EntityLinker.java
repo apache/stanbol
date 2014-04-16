@@ -96,7 +96,7 @@ public class EntityLinker {
 //    private int numLabels = 0;
     private long processingTime = -1;
 
-    private HashMap<List<String>,List<Entity>> lookupCache;
+    private Map<List<String>,List<Entity>> lookupCache;
 
 
     public EntityLinker(AnalysedText analysedText, String language,

@@ -61,7 +61,7 @@ public abstract class ContentItemImpl implements ContentItem {
     /**
      * Holds the content parts of this ContentItem
      */
-	private final LinkedHashMap<UriRef, Object> parts = new LinkedHashMap<UriRef, Object>();
+	private final Map<UriRef, Object> parts = new LinkedHashMap<UriRef, Object>();
 	/**
 	 * The uri of the ContentItem
 	 */
