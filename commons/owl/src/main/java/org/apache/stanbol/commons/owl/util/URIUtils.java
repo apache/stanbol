@@ -138,14 +138,14 @@ public final class URIUtils {
             else { // Strip the slash part
                 frag = uri.getPath();
                 if (frag != null && !frag.isEmpty()) {
-                    int i = frag.lastIndexOf("/");
+                    int i = frag.lastIndexOf('/');
                     boolean trimslash = false;
                     // If it ends with a slash, remove that too
                     if (i == frag.length() - 1) {
                         trimslash = true;
                         frag = frag.substring(0, i);
                     }
-                    index = tmpstr.length() - frag.length() + frag.lastIndexOf("/") + (trimslash ? -1 : 0);
+                    index = tmpstr.length() - frag.length() + frag.lastIndexOf('/') + (trimslash ? -1 : 0);
                 }
             }
         }
