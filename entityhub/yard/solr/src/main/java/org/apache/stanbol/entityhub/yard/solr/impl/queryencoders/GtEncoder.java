@@ -57,7 +57,7 @@ public class GtEncoder implements IndexConstraintTypeEncoder<Object> {
         }
         String geConstraint = String.format("{%s ",
             indexValue != null && indexValue.getValue() != null
-                    && !indexValue.getValue().toString().isEmpty() ? indexValue.getValue() : DEFAULT);
+                    && !indexValue.getValue().isEmpty() ? indexValue.getValue() : DEFAULT);
         constraint.addEncoded(POS, geConstraint);
     }
 

@@ -93,7 +93,7 @@ public abstract class Mapping {
         map.put(null,null);
         //Typed Literal values
         map.put(XSD.anyURI,URI.class);
-        map.put(XSD.base64Binary,new byte[]{}.getClass());
+        map.put(XSD.base64Binary, byte[].class);
         map.put(XSD.boolean_,Boolean.class);
         map.put(XSD.byte_,Byte.class);
         map.put(XSD.date,Date.class);

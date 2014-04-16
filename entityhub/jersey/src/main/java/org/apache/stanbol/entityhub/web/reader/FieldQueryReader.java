@@ -191,9 +191,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
                     continue;
                 }else if(query.isConstrained(fieldUri)){
                     parsingErrorMessages.append('\n');
-                    parsingErrorMessages.append(
-                        "The parsed Query defines multiple constraints fr the field '"
-                        +fieldUri+"'!\n");
+                    parsingErrorMessages.append("The parsed Query defines multiple constraints fr the field '").append(fieldUri).append("'!\n");
                     parsingErrorMessages.append("FieldQuery allows only a single Constraint for a field\n");
                     parsingErrorMessages.append("Parsed Constraints:\n");
                     parsingErrorMessages.append(constraints.toString(4));
@@ -608,7 +606,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
                 errorMessage.append(message).append('\n');
                 errorMessage.append("Parsed Constraint: \n");
                 errorMessage.append(jConstraint.toString(4));
-                throw new IllegalArgumentException(message.toString(),e);
+                throw new IllegalArgumentException(message,e);
             }
         } else {
             mode = null;

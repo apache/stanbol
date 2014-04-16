@@ -130,7 +130,7 @@ public class SPARQLAdpterTest {
 
             List<String> rules = (List<String>) ruleAdapter.adaptTo(recipeGood, List.class);
             for (String rule : rules) {
-                log.debug(rule.toString());
+                log.debug(rule);
                 Assert.fail("The adapter for SPARQL should not accept " + List.class.getCanonicalName()
                             + " objects.");
             }

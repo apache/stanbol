@@ -133,7 +133,7 @@ public class AnalyzedTextSerializerAndParserTest {
             0.5));
         
         //use index to create Tokens
-        int enhancerStart = sent1.getSpan().toString().indexOf("enhancer");
+        int enhancerStart = sent1.getSpan().indexOf("enhancer");
         Token enhancer = sent1.addToken(enhancerStart,enhancerStart+"enhancer".length());
         expectedTokens.put(enhancer, "enhancer");
         enhancer.addAnnotation(NlpAnnotations.POS_ANNOTATION, Value.value(

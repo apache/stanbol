@@ -55,7 +55,7 @@ public class ContentSourceTest {
         HEADERS.put("Accept-Language", Arrays.asList("en","de"));
     }
     protected static final String MT_WITH_PARAM = "text/plain; charset=UTF-8";
-    protected static final byte[] DATA = new String(TEST_STRING).getBytes(UTF8);
+    protected static final byte[] DATA = TEST_STRING.getBytes(UTF8);
     
     /*
      * Tests ensuring the IllegalArgumentExceptions if null is parsed as stream

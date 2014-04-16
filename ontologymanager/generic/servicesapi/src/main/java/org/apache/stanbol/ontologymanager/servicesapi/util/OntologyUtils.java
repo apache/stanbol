@@ -28,6 +28,7 @@ import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.stanbol.commons.owl.util.URIUtils;
@@ -96,8 +97,7 @@ public final class OntologyUtils {
 
     public static List<String> getPreferredFormats() {
         List<String> result = new ArrayList<String>();
-        for (String f : preferredFormats)
-            result.add(f);
+        Collections.addAll(result, preferredFormats);
         return result;
     }
 

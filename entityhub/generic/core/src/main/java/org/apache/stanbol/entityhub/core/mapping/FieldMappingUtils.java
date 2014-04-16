@@ -202,7 +202,7 @@ public final class FieldMappingUtils {
             if(mappingString != null && 
                     !mappingString.isEmpty() && //not an empty line
                     !(mappingString.charAt(0) == FieldMapping.COMMENT_CHAR)){ //not an comment
-                FieldMapping fieldMapping = parseFieldMapping(mappingString.toString(),nps);
+                FieldMapping fieldMapping = parseFieldMapping(mappingString,nps);
                 if(fieldMapping != null){
                     fieldMappings.add(fieldMapping);
                 } else {

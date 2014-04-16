@@ -365,11 +365,11 @@ public class UserResource {
                 continue;
             }
             if (userRoleNames.contains(role)) {
-                html.append("<input class=\"role\" type=\"checkbox\" id=\"" + role + "\" name=\"" + role + "\" value=\"" + role + "\" checked=\"checked\" />");
+                html.append("<input class=\"role\" type=\"checkbox\" id=\"").append(role).append("\" name=\"").append(role).append("\" value=\"").append(role).append("\" checked=\"checked\" />");
             } else {
-                html.append("<input class=\"role\" type=\"checkbox\" id=\"" + role + "\" name=\"" + role + "\" value=\"" + role + "\" />");
+                html.append("<input class=\"role\" type=\"checkbox\" id=\"").append(role).append("\" name=\"").append(role).append("\" value=\"").append(role).append("\" />");
             }
-            html.append("<label for=\"" + role + "\">" + role + "</label>");
+            html.append("<label for=\"").append(role).append("\">").append(role).append("</label>");
             html.append("<br />");
         }
         return Response.ok(html.toString()).build();

@@ -388,7 +388,7 @@ public class FstLinkingEngineComponent {
         if(value instanceof Boolean){
             skipAltTokensConfig = ((Boolean)value);
         } else if(value != null){
-            skipAltTokensConfig = new Boolean(value.toString());
+            skipAltTokensConfig = Boolean.valueOf(value.toString());
         } // else no config -> will use the default
         
         //(4) init the FST configuration

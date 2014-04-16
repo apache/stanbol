@@ -75,7 +75,7 @@ public class CorefFeatureSupportTest extends ValueTypeSupportTest {
         Token obama = sentence1.addToken(0, "Obama".length());
         
         Sentence sentence2 = at.addSentence(sentenceText1.indexOf(".") + 2, sentenceText2.indexOf(".") + 1);
-        int heStartIdx = sentence2.getSpan().toString().indexOf("He");
+        int heStartIdx = sentence2.getSpan().indexOf("He");
         Token he = sentence2.addToken(heStartIdx, heStartIdx + "He".length());
         
         Set<Span> obamaMentions = new HashSet<Span>();

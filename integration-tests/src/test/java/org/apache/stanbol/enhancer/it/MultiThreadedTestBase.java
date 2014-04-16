@@ -279,7 +279,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
     private Iterator<String> createRdfDataIterator(InputStream is, String mediaType, final String propertyString) {
         final SimpleMGraph graph = new SimpleMGraph();
         try {
-            rdfParser.parse(graph, is, mediaType.toString());
+            rdfParser.parse(graph, is, mediaType);
         } catch (UnsupportedFormatException e) {
             Assert.fail("The MimeType '"+mediaType+"' of the parsed testData "
                 + "is not supported. This utility supports plain text files as "
