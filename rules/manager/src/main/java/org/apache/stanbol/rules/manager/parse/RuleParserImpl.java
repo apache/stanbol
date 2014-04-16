@@ -461,7 +461,7 @@ public class RuleParserImpl implements RuleParserImplConstants {
   final public StringAtom stringAtom() throws ParseException {
  String obj;
     obj = getStringValue();
-                                 {if (true) return new StringAtom(obj.toString());}
+                                 {if (true) return new StringAtom(obj);}
     throw new Error("Missing return statement in function");
   }
 

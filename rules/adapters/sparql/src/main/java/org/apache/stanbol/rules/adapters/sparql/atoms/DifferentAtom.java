@@ -50,8 +50,8 @@ public class DifferentAtom extends AbstractAdaptableAtom {
         String argument1 = sparqlArgument1.getObject();
         String argument2 = sparqlArgument2.getObject();
 
-        argument1 = argument1.toString().replace(Symbols.variablesPrefix, "");
-        argument2 = argument2.toString().replace(Symbols.variablesPrefix, "");
+        argument1 = argument1.replace(Symbols.variablesPrefix, "");
+        argument2 = argument2.replace(Symbols.variablesPrefix, "");
 
         StringBuilder sb = new StringBuilder();
         sb.append("(");

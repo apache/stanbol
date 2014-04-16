@@ -165,7 +165,7 @@ public class ClerezzaAdpterTest {
 
             String query = "CONSTRUCT { ?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://kres.iks-project.eu/ontology.owl#OldPerson> . } WHERE { ?x <http://kres.iks-project.eu/ontology.owl#age> ?age . ?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://kres.iks-project.eu/ontology.owl#Person> . FILTER <http://www.w3.org/2005/xpath-functions#ends-with>(?t,\"string\") . FILTER ((?age) > (((\"70\"^^<http://www.w3.org/2001/XMLSchema#string>) - (?k)) + (?z))) }";
 
-            QueryParser.getInstance().parse(query.toString());
+            QueryParser.getInstance().parse(query);
 
             Assert.assertTrue(true);
         } catch (ParseException e) {

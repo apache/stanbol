@@ -934,7 +934,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 // batch over all the indexed topics
                 if (offset != null) {
                     query.addFilterQuery(conceptUriField + ":["
-                                         + ClientUtils.escapeQueryChars(offset.toString()) + " TO *]");
+                                         + ClientUtils.escapeQueryChars(offset) + " TO *]");
                 }
                 QueryResponse response = solrServer.query(query);
                 int count = 0;

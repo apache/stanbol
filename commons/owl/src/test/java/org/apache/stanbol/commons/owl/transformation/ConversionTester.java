@@ -193,7 +193,7 @@ public class ConversionTester extends TestCase {
             if (wp == null) {
                 fail("Some errors occur");
             } else {
-                assertEquals(wp.getIRI().toURI().toString(), jp.getURI().toString());
+                assertEquals(wp.getIRI().toURI().toString(), jp.getURI());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -214,7 +214,7 @@ public class ConversionTester extends TestCase {
             if (jp == null) {
                 fail("Some errors occur");
             } else {
-                assertEquals(wp.getIRI().toURI().toString(), jp.getURI().toString());
+                assertEquals(wp.getIRI().toURI().toString(), jp.getURI());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -233,7 +233,7 @@ public class ConversionTester extends TestCase {
             wc = j2o.ClassJenaToOwl(jc, RDFXML);
             if (wc == null) fail("Some problems accours");
             else {
-                assertEquals(wc.getIRI().toURI().toString(), jc.getURI().toString());
+                assertEquals(wc.getIRI().toURI().toString(), jc.getURI());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -276,7 +276,7 @@ public class ConversionTester extends TestCase {
             if (wp == null) {
                 fail("Some problem accours");
             } else {
-                assertEquals(wp.getIRI().toURI().toString(), jp.getURI().toString());
+                assertEquals(wp.getIRI().toURI().toString(), jp.getURI());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -440,7 +440,7 @@ public class ConversionTester extends TestCase {
             if (wp == null) {
                 fail("Some errors occurs");
             } else {
-                assertEquals(wp.getIRI().toURI().toString(), jp.getURI().toString());
+                assertEquals(wp.getIRI().toURI().toString(), jp.getURI());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -503,7 +503,7 @@ public class ConversionTester extends TestCase {
                 while (str.hasNext()) {
                     Statement stm = str.next();
                     Resource subject = stm.getSubject();
-                    if (SUBJECT.toString().equals(subject.getURI().toString())) count++;
+                    if (SUBJECT.toString().equals(subject.getURI())) count++;
                 }
 
                 if (count == owlaxiom.size()) {

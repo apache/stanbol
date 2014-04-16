@@ -31,7 +31,7 @@ public class NumberAtom extends NumericFunctionAtom {
     @Override
     public String toString() {
 
-        return numberString.toString();
+        return numberString;
     }
 
     @Override

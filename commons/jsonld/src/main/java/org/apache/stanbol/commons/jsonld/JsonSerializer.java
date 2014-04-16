@@ -179,7 +179,7 @@ public final class JsonSerializer {
                 default:
                     if (ch < ' ') {
                         String str = "000" + Integer.toHexString(ch);
-                        sb.append("\\u" + str.substring(str.length() - 4));
+                        sb.append("\\u").append(str.substring(str.length() - 4));
                     } else {
                         sb.append(ch);
                     }

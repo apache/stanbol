@@ -66,7 +66,7 @@ public final class RdfResourceUtils {
         Byte("byte",Integer.class),
         //Float("float",Double.class),
         Double("double",Double.class),
-        Base64Binary("base64Binary",new byte[0].getClass()),
+        Base64Binary("base64Binary", byte[].class),
         DateTime("dateTime",Date.class),
         //Date("date"),
         //Time("time"),

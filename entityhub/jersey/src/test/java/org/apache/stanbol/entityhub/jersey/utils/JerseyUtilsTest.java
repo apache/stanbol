@@ -42,7 +42,7 @@ public class JerseyUtilsTest {
     public void testType(){
         Assert.assertTrue(JerseyUtils.testType(Map.class, HashMap.class));
         Assert.assertFalse(JerseyUtils.testType(Map.class, HashSet.class));
-        Assert.assertTrue(JerseyUtils.testType(Map.class, new HashMap<String,String>().getClass()));
+        Assert.assertTrue(JerseyUtils.testType(Map.class, HashMap.class));
         Map<String,Collection<? extends Number>> genericMapTest = new TestMap();
         Assert.assertTrue(JerseyUtils.testType(Map.class, genericMapTest.getClass()));
         Assert.assertFalse(JerseyUtils.testType(Set.class, genericMapTest.getClass()));

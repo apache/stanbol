@@ -106,7 +106,7 @@ public class AnalysedTextTest {
         Token stanbol = sent1.addToken(4,11);
         expectedTokens.put(stanbol, "Stanbol");
         //use index to create Tokens
-        int enhancerStart = sent1.getSpan().toString().indexOf("enhancer");
+        int enhancerStart = sent1.getSpan().indexOf("enhancer");
         Token enhancer = sent1.addToken(enhancerStart,enhancerStart+"enhancer".length());
         expectedTokens.put(enhancer, "enhancer");
 
@@ -114,11 +114,11 @@ public class AnalysedTextTest {
         Chunk stanbolEnhancer = analysedTextWithData.addChunk(stanbol.getStart(), enhancer.getEnd());
         expectedChunks.put(stanbolEnhancer, "Stanbol enhancer");
         
-        int parisStart = sent1.getSpan().toString().indexOf("Paris");
+        int parisStart = sent1.getSpan().indexOf("Paris");
         Token paris = sent1.addToken(parisStart, parisStart+5);
         expectedTokens.put(paris, "Paris");
 
-        int bobMarleyStart = sent1.getSpan().toString().indexOf("Bob Marley");
+        int bobMarleyStart = sent1.getSpan().indexOf("Bob Marley");
         Chunk bobMarley = sent1.addChunk(bobMarleyStart, bobMarleyStart+10);
         expectedChunks.put(bobMarley, "Bob Marley");
         Token bob = bobMarley.addToken(0, 3);
@@ -131,7 +131,7 @@ public class AnalysedTextTest {
         Token disambiguation = sent2.addToken(5, 5+"disambiguation".length());
         expectedTokens.put(disambiguation, "disambiguation");
         
-        int comedianBobMarleyIndex = sent2.getSpan().toString().indexOf("Comedian");
+        int comedianBobMarleyIndex = sent2.getSpan().indexOf("Comedian");
         Chunk comedianBobMarley = sent2.addChunk(comedianBobMarleyIndex, 
             comedianBobMarleyIndex+"Comedian Bob Marley".length());
         expectedChunks.put(comedianBobMarley, "Comedian Bob Marley");
@@ -142,7 +142,7 @@ public class AnalysedTextTest {
         Token marleySent2 = comedianBobMarley.addToken(13, 13+"Marley".length());
         expectedTokens.put(marleySent2, "Marley");
 
-        int parisIndex = sent2.getSpan().toString().indexOf("Paris");
+        int parisIndex = sent2.getSpan().indexOf("Paris");
         Chunk parisInTexas = sent2.addChunk(parisIndex, parisIndex+"Paris in Texas".length());
         expectedChunks.put(parisInTexas, "Paris in Texas");
         Token parisSent2 = parisInTexas.addToken(0, "Paris".length());
@@ -151,8 +151,8 @@ public class AnalysedTextTest {
         Token in = parisInTexas.addToken(inIndex,
             inIndex+2);
         expectedTokens.put(in, "in");
-        Token texasSent2 = parisInTexas.addToken(parisInTexas.getSpan().toString().indexOf("Texas"),
-            parisInTexas.getSpan().toString().indexOf("Texas")+"Texas".length());
+        Token texasSent2 = parisInTexas.addToken(parisInTexas.getSpan().indexOf("Texas"),
+                parisInTexas.getSpan().indexOf("Texas")+"Texas".length());
         expectedTokens.put(texasSent2, "Texas");
         
     }
@@ -180,17 +180,17 @@ public class AnalysedTextTest {
         for(Entry<Sentence,String> sentEntry : expectedSentences.entrySet()){
             Sentence sent = sentences.next();
             Assert.assertEquals(sentEntry.getKey(), sent);
-            Assert.assertEquals(sentEntry.getValue(), sent.getSpan().toString());
+            Assert.assertEquals(sentEntry.getValue(), sent.getSpan());
         }
         for(Entry<Chunk,String> chunkEntry : expectedChunks.entrySet()){
             Chunk chunk = chunks.next();
             Assert.assertEquals(chunkEntry.getKey(), chunk);
-            Assert.assertEquals(chunkEntry.getValue(), chunk.getSpan().toString());
+            Assert.assertEquals(chunkEntry.getValue(), chunk.getSpan());
         }
         for(Entry<Token,String> tokenEntry : expectedTokens.entrySet()){
             Token token = tokens.next();
             Assert.assertEquals(tokenEntry.getKey(), token);
-            Assert.assertEquals(tokenEntry.getValue(), token.getSpan().toString());
+            Assert.assertEquals(tokenEntry.getValue(), token.getSpan());
         }
     }
     

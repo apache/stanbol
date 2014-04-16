@@ -539,7 +539,7 @@ public abstract class NEREngineCore
                 CharSequence previousSentence = sentenceSpans[i - 1].getCoveredText(text);
                 contextElements.add(previousSentence.toString().trim());
             }
-            contextElements.add(sentence.toString().trim());
+            contextElements.add(sentence.trim());
             if (i + 1 < sentenceSpans.length) {
                 CharSequence nextSentence = sentenceSpans[i + 1].getCoveredText(text);
                 contextElements.add(nextSentence.toString().trim());

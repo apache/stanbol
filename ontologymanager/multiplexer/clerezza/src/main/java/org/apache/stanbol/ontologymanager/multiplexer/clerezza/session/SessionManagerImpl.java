@@ -289,7 +289,7 @@ public class SessionManagerImpl implements
          * Throw the duplicate ID exception first, in case developers decide to reuse the existing session
          * before creating a new one.
          */
-        if (sessionsByID.containsKey(sessionID)) throw new DuplicateSessionIDException(sessionID.toString());
+        if (sessionsByID.containsKey(sessionID)) throw new DuplicateSessionIDException(sessionID);
         checkSessionLimit();
         IRI ns = IRI.create(getDefaultNamespace() + getID() + "/");
         Session session = new SessionImpl(sessionID, ns, ontologyProvider);

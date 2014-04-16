@@ -442,7 +442,7 @@ public class TextProcessingConfig {
     private static Boolean parseState(Map<String,String> config, String param){
         String value = config.get(param);
         return value == null && config.containsKey(param) ? Boolean.TRUE :
-            value != null ? new Boolean(value) : null;
+            value != null ? Boolean.valueOf(value) : null;
     }
     
     private static <T extends Number> T parseNumber(Map<String,String> config, 

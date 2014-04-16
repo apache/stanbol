@@ -61,7 +61,7 @@ public class TypedLiteralAtom extends AbstractAdaptableAtom {
 
         String xsdType = "<" + xsdTypeResource.getURI().toString() + ">";
 
-        return (T) new SPARQLFunction(value + "^^" + xsdType.toString());
+        return (T) new SPARQLFunction(value + "^^" + xsdType);
     }
 
 }

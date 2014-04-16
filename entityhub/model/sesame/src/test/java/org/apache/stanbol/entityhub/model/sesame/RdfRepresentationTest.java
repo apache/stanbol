@@ -107,7 +107,7 @@ public class RdfRepresentationTest extends RepresentationTest {
         assertTrue(enLangaugeTexts.hasNext());
         Text enLangageText = enLangaugeTexts.next();
         assertEquals(enLiteral.getLabel(), enLangageText.getText());
-        assertEquals(enLiteral.getLanguage().toString(), enLangageText.getLanguage());
+        assertEquals(enLiteral.getLanguage(), enLangageText.getLanguage());
         assertFalse(enLangaugeTexts.hasNext());//only a single result
         //3) test to get all natural language values
         Set<String> stringValues = new HashSet<String>();

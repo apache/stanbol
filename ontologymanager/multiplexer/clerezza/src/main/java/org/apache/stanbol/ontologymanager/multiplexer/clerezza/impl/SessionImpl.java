@@ -313,7 +313,7 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
 
     @Override
     public String toString() {
-        return getID().toString();
+        return getID();
     }
 
 }

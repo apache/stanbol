@@ -463,7 +463,7 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
                     if(floorConjunction != null && floorConjunction.compareTo(
                         Integer.valueOf(Math.max(verb.getKey()-conjuctionContext,sectionSpan[0]))) >= 0){
                         //search an other verb in the same direction
-                        floorVerb = verbs.floorEntry(Integer.valueOf(floorConjunction));
+                        floorVerb = verbs.floorEntry(floorConjunction);
                         if(floorVerb != null && floorVerb.getKey().compareTo(sectionSpan[0]) >= 0 &&
                                 //do not step over an noun
                                 (floorNoun == null || floorVerb.getKey().compareTo(floorNoun) >= 0)){
@@ -475,7 +475,7 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
                     if(ceilingConjunction != null && ceilingConjunction.compareTo(
                         Integer.valueOf(Math.min(verb.getKey()+conjuctionContext,sectionSpan[1]))) >= 0){
                         //search an other verb in the same direction
-                        ceilingVerb = verbs.floorEntry(Integer.valueOf(ceilingConjunction));
+                        ceilingVerb = verbs.floorEntry(ceilingConjunction);
                         if(ceilingVerb != null && ceilingVerb.getKey().compareTo(sectionSpan[1]) <= 0 &&
                                 //do not step over an noun
                                 (ceilingNoun == null || ceilingVerb.getKey().compareTo(ceilingNoun) <= 0)){

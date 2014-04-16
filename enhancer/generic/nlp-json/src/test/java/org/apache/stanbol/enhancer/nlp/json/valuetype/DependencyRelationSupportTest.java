@@ -117,10 +117,10 @@ public class DependencyRelationSupportTest extends ValueTypeSupportTest {
 		Sentence sentence = at.addSentence(0, text.indexOf(".") + 1);
         Token obama = sentence.addToken(0, "Obama".length());
         
-        int visitedStartIdx = sentence.getSpan().toString().indexOf("visited");
+        int visitedStartIdx = sentence.getSpan().indexOf("visited");
         Token visited = sentence.addToken(visitedStartIdx, visitedStartIdx + "visited".length());
         
-        int chinaStartIdx = sentence.getSpan().toString().indexOf("China");
+        int chinaStartIdx = sentence.getSpan().indexOf("China");
         Token china = sentence.addToken(chinaStartIdx, chinaStartIdx + "China".length());
         
         GrammaticalRelationTag nSubjGrammRelTag = new GrammaticalRelationTag(

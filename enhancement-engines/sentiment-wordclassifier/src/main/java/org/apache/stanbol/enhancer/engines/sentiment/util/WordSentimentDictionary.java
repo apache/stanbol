@@ -111,7 +111,7 @@ public class WordSentimentDictionary {
                         }
                     } //else already processed by special case size == 1
                 } else {
-                    old = entry.put(cat, Double.valueOf(sentiment));
+                    old = entry.put(cat, sentiment);
                 }
             } //else entry == null and sentiment == null ... nothing to do
             if(replace){ //we have changed the entry instance and need to put the word
