@@ -60,6 +60,7 @@
           <instructions>
             <Import-Package>
               !org.mitre.solr.tagger.*,
+              com.google.common.*; version="[14.0.0,18.0.0)",
               org.apache.stanbol.enhancer.servicesapi; provide:=true; version="[0.10,0.13)",
               org.apache.stanbol.enhancer.engines.entitylinking;version=${project.version}; provide:=true,
               *

@@ -101,7 +101,7 @@
     <bundle>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.2.1</version>
+      <version>3.3.2</version>
     </bundle>
     <bundle>
       <groupId>commons-collections</groupId>
@@ -116,37 +116,37 @@
     <bundle>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
-      <version>1.4.1</version>
+      <version>1.8</version>
     </bundle>
     <bundle> 
       <groupId>org.tukaani</groupId>
       <artifactId>xz</artifactId>
-      <version>1.2</version>
+      <version>1.5</version>
     </bundle>
     <bundle>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
-      <version>1.7</version>
+      <version>1.9</version>
     </bundle>
     <bundle>
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
-      <version>1.2.2</version>
+      <version>1.3.1</version>
     </bundle>
     <bundle> <!-- commons-beanutils as bundle provided by servicemix.apache.org -->
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.commons-beanutils</artifactId>
-      <version>1.8.3_1</version>
+      <version>1.8.3_2</version>
     </bundle>
     <bundle>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>14.0.1</version>
+      <version>16.0.1</version>
     </bundle>
     <bundle> <!-- used by Solr4 spatial -->
-      <groupId>org.apache.servicemix.bundles</groupId>
-      <artifactId>org.apache.servicemix.bundles.spatial4j</artifactId>
-      <version>0.3_2</version>
+      <groupId>com.spatial4j</groupId>
+      <artifactId>spatial4j</artifactId>
+      <version>0.4.1</version>
     </bundle>
     <bundle> <!-- used by Lucene core -->
       <groupId>com.googlecode.concurrentlinkedhashmap</groupId>
@@ -168,16 +168,6 @@
       <artifactId>httpclient-osgi</artifactId>
       <version>4.2.3</version>
     </bundle>
-    <!-- bundle> Stax is included in JDK 1.6+ 
-      <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.stax-api-1.0</artifactId>
-      <version>2.1.0</version>
-    </bundle -->
-    <!-- bundle> - no longer used by Stanbol -
-      <groupId>org.codehaus.woodstox</groupId>
-      <artifactId>woodstox-core-asl</artifactId>
-      <version>4.2.0</version>
-    </bundle -->
     <bundle> <!-- jarkata regexp as bundle provided by servicemix.apache.org -->
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.regexp</artifactId>
@@ -192,22 +182,22 @@
     <bundle> <!-- used for simple JSON parsing/writing in Stanbol -->
       <groupId>org.codehaus.jettison</groupId>
       <artifactId>jettison</artifactId>
-      <version>1.3.3</version>
+      <version>1.3.5</version>
     </bundle>
     <bundle> <!-- used for stream parsing/serialization -->
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-core-asl</artifactId>
-      <version>1.9.12</version>
+      <version>1.9.13</version>
     </bundle>
     <bundle> <!--  JSON Tree model and JSON - Object mappings -->
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-mapper-asl</artifactId>
-      <version>1.9.12</version>
+      <version>1.9.13</version>
     </bundle>
     <bundle> <!-- for JAX-RS integration -->
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-jaxrs</artifactId>
-      <version>1.9.12</version>
+      <version>1.9.13</version>
     </bundle>
     <!-- Velocity -->
     <!-- only used by Enhancer Benchmarking (org.apache.stanbol.enhancer.benchmark) -->
@@ -224,7 +214,7 @@
     <bundle>
       <groupId>javax.mail</groupId>
       <artifactId>mail</artifactId>
-      <version>1.4.5</version>
+      <version>1.4.7</version>
     </bundle>
   </startLevel>
   <!-- Jersey -->
@@ -235,37 +225,37 @@
     <bundle>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>
-      <version>1.15</version>
+      <version>1.18.1</version>
     </bundle>
   </startLevel>
   <startLevel level="25">
     <bundle>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
-      <version>1.15</version>
+      <version>1.18.1</version>
     </bundle>
     <bundle>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-servlet</artifactId>
-      <version>1.15</version>
+      <version>1.18.1</version>
     </bundle>
     <!-- needed to read data from mime multipart requests -->
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>jaxrs.utils</artifactId>
-      <version>0.7</version>
+      <version>0.8</version>
     </bundle>
     <!-- still used in many places also it only runs on jersey and the code is not portable across jax-rs implementations -->
     <bundle>
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-multipart</artifactId>
-      <version>1.15</version>
+      <version>1.18.1</version>
     </bundle>
     <!-- dependency of jersey-multipart -->
     <bundle>
       <groupId>org.jvnet</groupId>
       <artifactId>mimepull</artifactId>
-      <version>1.4</version>
+      <version>1.6</version>
     </bundle>
     <!-- MessageBodyReaders and Writers for Clereza RDF entities -->
     <bundle>
@@ -325,7 +315,7 @@
     <bundle>
       <groupId>org.wymiwyg</groupId>
       <artifactId>wymiwyg-commons-core</artifactId>
-      <version>0.7.5</version>
+      <version>0.7.6</version>
     </bundle>
     <!-- ICU is an bundle in the meantime
       bundle>
