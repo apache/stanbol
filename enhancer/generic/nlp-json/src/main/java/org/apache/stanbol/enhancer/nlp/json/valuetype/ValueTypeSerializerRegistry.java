@@ -168,19 +168,21 @@ public class ValueTypeSerializerRegistry {
         @Override
         public Object addingService(ServiceReference reference) {
             ValueTypeSerializer<?> service = (ValueTypeSerializer<?>)bc.getService(reference);
-            serializerLock.writeLock().lock();
-            try {
-                List<ServiceReference> refs = valueTypeSerializerRefs.get(service.getType());
-                if(refs == null){
-                    refs = new ArrayList<ServiceReference>(2);
-                    valueTypeSerializerRefs.put(service.getType(), refs);
+            if(service != null){
+                serializerLock.writeLock().lock();
+                try {
+                    List<ServiceReference> refs = valueTypeSerializerRefs.get(service.getType());
+                    if(refs == null){
+                        refs = new ArrayList<ServiceReference>(2);
+                        valueTypeSerializerRefs.put(service.getType(), refs);
+                    }
+                    refs.add(reference);
+                    if(refs.size() > 1){
+                        Collections.sort(refs);
+                    }
+                } finally {
+                    serializerLock.writeLock().unlock();
                 }
-                refs.add(reference);
-                if(refs.size() > 1){
-                    Collections.sort(refs);
-                }
-            } finally {
-                serializerLock.writeLock().unlock();
             }
             return service;
         }

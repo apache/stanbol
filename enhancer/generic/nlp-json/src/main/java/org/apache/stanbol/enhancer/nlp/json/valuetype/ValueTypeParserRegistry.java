@@ -179,19 +179,21 @@ public class ValueTypeParserRegistry {
         @Override
         public Object addingService(ServiceReference reference) {
             ValueTypeParser<?> service = (ValueTypeParser<?>)bc.getService(reference);
-            parserLock.writeLock().lock();
-            try {
-                List<ServiceReference> refs = valueTypeParserRefs.get(service.getType());
-                if(refs == null){
-                    refs = new ArrayList<ServiceReference>(2);
-                    valueTypeParserRefs.put(service.getType(), refs);
+            if(service != null){
+                parserLock.writeLock().lock();
+                try {
+                    List<ServiceReference> refs = valueTypeParserRefs.get(service.getType());
+                    if(refs == null){
+                        refs = new ArrayList<ServiceReference>(2);
+                        valueTypeParserRefs.put(service.getType(), refs);
+                    }
+                    refs.add(reference);
+                    if(refs.size() > 1){
+                        Collections.sort(refs);
+                    }
+                } finally {
+                    parserLock.writeLock().unlock();
                 }
-                refs.add(reference);
-                if(refs.size() > 1){
-                    Collections.sort(refs);
-                }
-            } finally {
-                parserLock.writeLock().unlock();
             }
             return service;
         }

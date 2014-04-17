@@ -48,6 +48,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,8 +80,23 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
     /** List of past events, up to maxEvents in size */
     private final List<DataFileProviderEvent> events = new LinkedList<DataFileProviderEvent>();
     
-    /** Tracks providers to which we can delegate */
+    /** 
+     * Tracks providers to which we can delegate. <i>NOTE:</i> this tracker is
+     * lazily opened by {@link #getSortedServiceRefs()} as this can not be
+     * done during {@link #activate(ComponentContext) activation} as it would
+     * result in <code>org.osgi.framework.ServiceException: 
+     * ServiceFactory.getService() resulted in a cycle.</code>
+     * @see #providersTrackerOpen
+     * @see #getSortedServiceRefs()
+     */
     private ServiceTracker providersTracker;
+    /**
+     * Used to track if {@link ServiceTracker#open()} was already called on
+     * {@link #providersTracker}
+     * @see #providersTracker
+     * @see #getSortedServiceRefs()
+     */
+    private boolean providersTrackerOpen = false; //used for lazily open the tracker
     
     @Activate
     protected void activate(ComponentContext ctx) throws ConfigurationException {
@@ -99,9 +115,11 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
             throw new ConfigurationException(DATA_FILES_FOLDER_PROP, "The configured DataFile directory "+dataFilesFolder+" does already exists but is not a directory!");
         } //else exists and is a directory!
         maxEvents = requireProperty(ctx.getProperties(), MAX_EVENTS_PROP, Integer.class).intValue();
-        
         providersTracker = new ServiceTracker(ctx.getBundleContext(), DataFileProvider.class.getName(), null);
-        providersTracker.open();
+        providersTrackerOpen = false;
+        //NOTE: do not call apen in activate as this do cause a 
+        //org.osgi.framework.ServiceException: ServiceFactory.getService() resulted in a cycle.
+        //providersTracker.open();
         log.info("Activated, max.events {}, data files folder {}", 
             maxEvents, dataFilesFolder.getAbsolutePath());
     }
@@ -109,7 +127,10 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
     @Deactivate
     protected void deactivate(ComponentContext ctx) {
         if(providersTracker != null) {
-            providersTracker.close();
+            synchronized (providersTracker) {
+                providersTrackerOpen = false;
+                providersTracker.close();
+            }
             providersTracker = null;
         }
     }
@@ -162,8 +183,7 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
         // ordered by service ranking
         if(dataFile == null) {
             // Sort providers by service ranking
-            final List<ServiceReference> refs = Arrays.asList(providersTracker.getServiceReferences());
-            Collections.sort(refs);
+            final List<ServiceReference> refs = getSortedServiceRefs();
             for(ServiceReference ref: refs) {
                 final Object o = providersTracker.getService(ref);
                 if(o == this) {
@@ -224,6 +244,28 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
         return result;
     }
 
+    /**
+     * Getter for the sorted list of service References. THis also lazily
+     * opens the {@link ServiceTracker} on the first call.
+     * @return the sorted list of service references
+     */
+    private List<ServiceReference> getSortedServiceRefs() {
+        ServiceTracker providersTracker = this.providersTracker;
+        if(providersTracker == null){ //already deactivated
+            return Collections.emptyList();
+        }
+        if(!providersTrackerOpen){ //check if we need to open the service tracker
+            synchronized (providersTracker) { //sync
+                if(!providersTrackerOpen){ //and check again
+                    providersTracker.open(); //we need to open it
+                }
+            }
+        }
+        final List<ServiceReference> refs = Arrays.asList(providersTracker.getServiceReferences());
+        Collections.sort(refs);
+        return refs;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public boolean isAvailable(String bundleSymbolicName, String filename, Map<String,String> comments) {
@@ -233,7 +275,7 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
         // ordered by service ranking
         if(dataFile == null) {
             // Sort providers by service ranking
-            final List<ServiceReference> refs = Arrays.asList(providersTracker.getServiceReferences());
+            final List<ServiceReference> refs = getSortedServiceRefs();
             Collections.sort(refs);
             for(ServiceReference ref: refs) {
                 final Object o = providersTracker.getService(ref);
