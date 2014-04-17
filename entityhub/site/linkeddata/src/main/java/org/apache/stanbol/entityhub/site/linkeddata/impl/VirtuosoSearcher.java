@@ -44,15 +44,9 @@ import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.site.EntitySearcher;
 import org.slf4j.LoggerFactory;
 
-@Component(name = "org.apache.stanbol.entityhub.searcher.VirtuosoSearcher", factory = "org.apache.stanbol.entityhub.searcher.VirtuosoSearcherFactory", policy = ConfigurationPolicy.REQUIRE, // the
-// queryUri
-// and
-// the
-// SPARQL
-// Endpoint
-// are
-// required
-specVersion = "1.1")
+@Component(name = "org.apache.stanbol.entityhub.searcher.VirtuosoSearcher", 
+    factory = "org.apache.stanbol.entityhub.searcher.VirtuosoSearcherFactory", 
+    policy = ConfigurationPolicy.OPTIONAL, specVersion = "1.1")
 public class VirtuosoSearcher extends AbstractEntitySearcher implements EntitySearcher {
     @Reference
     private Parser parser;

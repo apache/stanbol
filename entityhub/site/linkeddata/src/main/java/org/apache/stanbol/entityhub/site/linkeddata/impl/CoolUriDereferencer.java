@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 @Component(
         name="org.apache.stanbol.entityhub.dereferencer.CoolUriDereferencer",
         factory="org.apache.stanbol.entityhub.dereferencer.CoolUriDereferencerFactory",
-        policy=ConfigurationPolicy.REQUIRE, //the baseUri is required!
+        policy=ConfigurationPolicy.OPTIONAL,
         specVersion="1.1"
         )
 public class CoolUriDereferencer extends AbstractEntityDereferencer implements EntityDereferencer{
