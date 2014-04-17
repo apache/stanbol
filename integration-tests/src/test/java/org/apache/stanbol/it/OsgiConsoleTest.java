@@ -28,7 +28,7 @@ public class OsgiConsoleTest extends StanbolTestBase {
                 "bundles",
                 "components",
                 "configMgr",
-                "config",
+                //"config", No longer available with Felix Webconsole 4.2.2
                 "licenses",
                 "logs",
                 "memoryusage",
