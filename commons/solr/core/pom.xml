@@ -89,6 +89,7 @@
               org.restlet;resolution:=optional,
               org.restlet.*;resolution:=optional,
               org.apache.hadoop.*;resolution:=optional,
+              com.google.common.*; version="[14.0.0,18.0.0)",
               *
             </Import-Package>
             <DynamicImport-Package>*</DynamicImport-Package>

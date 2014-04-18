@@ -58,6 +58,7 @@
         <configuration>
           <instructions>
             <Import-Package>
+              com.google.common.*; version="[14.0.0,18.0.0)",
               org.apache.stanbol.enhancer.engines.dereference;version=${project.version}; provide:=true,
               *
             </Import-Package>

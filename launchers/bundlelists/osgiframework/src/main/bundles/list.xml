@@ -172,6 +172,8 @@
       <artifactId>org.apache.felix.webconsole.plugins.memoryusage</artifactId>
       <version>1.0.4</version>
     </bundle>
+  </startLevel>
+  <startLevel level="20">
     <!-- required by org.apache.felix.webconsole.plugins.packageadmin -->
     <bundle>
       <groupId>commons-io</groupId>
@@ -181,7 +183,7 @@
     <bundle>
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
-      <version>1.3</version>
+      <version>1.3.1</version>
     </bundle>
   </startLevel>
 </bundles>
