@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -84,18 +85,37 @@ public class ValueTypeSerializerRegistry {
         if(!inOsgi && valueTypeSerializers == null){
             initValueTypeSerializer(); //running outside OSGI
         }
-        serializerLock.readLock().lock();
-        try {
-            if(!inOsgi){
+        if(!inOsgi){
+            serializerLock.readLock().lock();
+            try {
                 return (ValueTypeSerializer<T>)valueTypeSerializers.get(type);
-            } else {
+            } finally {
+                serializerLock.readLock().unlock();
+            }
+        } else {
+            ServiceTracker serializerTracker = this.serializerTracker;
+            //check if we need to lazily open the ServiceTracker
+            if(valueTypeSerializerRefs == null && serializerTracker != null){
+                synchronized (serializerTracker) {
+                    if(valueTypeSerializerRefs == null){
+                        valueTypeSerializerRefs = new HashMap<Class<?>,List<ServiceReference>>();
+                        //NOTE: do not open within activate(..) because of
+                        //  org.apache.stanbol.enhancer.nlp.json FrameworkEvent 
+                        //  ERROR (org.osgi.framework.ServiceException: 
+                        //  ServiceFactory.getService() resulted in a cycle.) 
+                        serializerTracker.open();
+                    }
+                }
+            }
+            serializerLock.readLock().lock();
+            try {
                 List<ServiceReference> refs = valueTypeSerializerRefs.get(type);
                 return refs == null || refs.isEmpty() ? null :
                     (ValueTypeSerializer<T>) serializerTracker.getService(
                         refs.get(refs.size()-1));
+            } finally {
+                serializerLock.readLock().unlock();
             }
-        } finally {
-            serializerLock.readLock().unlock();
         }
     }
     
@@ -103,10 +123,13 @@ public class ValueTypeSerializerRegistry {
     protected void activate(ComponentContext ctx){
         inOsgi = true;
         final BundleContext bc = ctx.getBundleContext();
-        valueTypeSerializerRefs = new HashMap<Class<?>,List<ServiceReference>>();
         serializerTracker = new ServiceTracker(bc, ValueTypeSerializer.class.getName(), 
             new SerializerTracker(bc));
-        serializerTracker.open();
+        //NOTE: do not open within activate(..) because of
+        //  org.apache.stanbol.enhancer.nlp.json FrameworkEvent 
+        //  ERROR (org.osgi.framework.ServiceException: 
+        //  ServiceFactory.getService() resulted in a cycle.) 
+        //serializerTracker.open();
     }
     
     @Deactivate
@@ -119,6 +142,10 @@ public class ValueTypeSerializerRegistry {
             if(valueTypeSerializers != null){
                 valueTypeSerializers.clear();
                 valueTypeSerializers = null;
+            }
+            if(valueTypeSerializerRefs != null){
+                valueTypeSerializerRefs.clear();
+                valueTypeSerializerRefs = null;
             }
         } finally {
             serializerLock.writeLock().unlock();

@@ -82,18 +82,37 @@ public class ValueTypeParserRegistry {
         if(!inOsgi && valueTypeParsers == null){
             initValueTypeParser(); //running outside OSGI
         }
-        parserLock.readLock().lock();
-        try {
-            if(!inOsgi){
+        if(!inOsgi){
+            parserLock.readLock().lock();
+            try {
                 return (ValueTypeParser<T>)valueTypeParsers.get(type);
-            } else {
+            } finally {
+                parserLock.readLock().unlock();
+            }
+        } else {
+            ServiceTracker parserTracker = this.parserTracker;
+            //check if we need to lazily open the ServiceTracker
+            if(valueTypeParserRefs == null && parserTracker != null){
+                synchronized (parserTracker) {
+                    if(valueTypeParserRefs == null){ 
+                        valueTypeParserRefs = new HashMap<Class<?>,List<ServiceReference>>();
+                        //NOTE: do not open within activate(..) because of
+                        //  org.apache.stanbol.enhancer.nlp.json FrameworkEvent 
+                        //  ERROR (org.osgi.framework.ServiceException: 
+                        //  ServiceFactory.getService() resulted in a cycle.) 
+                        parserTracker.open();
+                    }
+                }
+            }
+            parserLock.readLock().lock();
+            try {
                 List<ServiceReference> refs = valueTypeParserRefs.get(type);
                 return refs == null || refs.isEmpty() ? null :
                     (ValueTypeParser<T>) parserTracker.getService(
                         refs.get(refs.size()-1));
+            } finally {
+                parserLock.readLock().unlock();
             }
-        } finally {
-            parserLock.readLock().unlock();
         }
     }
     
@@ -101,22 +120,30 @@ public class ValueTypeParserRegistry {
     protected void activate(ComponentContext ctx){
         inOsgi = true;
         final BundleContext bc = ctx.getBundleContext();
-        valueTypeParserRefs = new HashMap<Class<?>,List<ServiceReference>>();
         parserTracker = new ServiceTracker(bc, ValueTypeParser.class.getName(), 
             new ParserTracker(bc));
-        parserTracker.open();
+        //NOTE: do not open within activate(..) because of
+        //  org.apache.stanbol.enhancer.nlp.json FrameworkEvent 
+        //  ERROR (org.osgi.framework.ServiceException: 
+        //  ServiceFactory.getService() resulted in a cycle.) 
     }
     
     @Deactivate
     protected void deactivate(ComponentContext ctx){
         inOsgi = false;
-        parserTracker.close();
-        parserTracker = null;
+        if(parserTracker != null){
+            parserTracker.close();
+            parserTracker = null;
+        }
         parserLock.writeLock().lock();
         try {
             if(valueTypeParsers != null){
                 valueTypeParsers.clear();
                 valueTypeParsers = null;
+            }
+            if(valueTypeParserRefs != null){
+                valueTypeParserRefs.clear();
+                valueTypeParserRefs = null;
             }
         } finally {
             parserLock.writeLock().unlock();
