@@ -142,7 +142,7 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
                 + "Collections, String[] and String values)!");
         }
         for(String filterConfigLine : values){
-            if(filterConfigLine == null || filterConfigLine.isEmpty() || DEFAULT_CLASS_NAME_CONFIG.equals(value)){
+            if(filterConfigLine == null || filterConfigLine.isEmpty() || DEFAULT_CLASS_NAME_CONFIG.equals(filterConfigLine)){
                 continue; //ignore null, empty and the default value
             }
             Entry<String,Map<String,String>> filterConfig = parseConfigLine(
