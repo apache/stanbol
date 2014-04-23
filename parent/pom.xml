@@ -61,7 +61,7 @@
     <solr-version>4.4.0</solr-version>
     <pax-exam-version>2.3.0.M1</pax-exam-version>
     <sesame-version>2.7.7</sesame-version>
-    <marmotta-version>3.2.0-SNAPSHOT</marmotta-version>
+    <marmotta-version>3.2.0</marmotta-version>
     <ldpath-version>${marmotta-version}</ldpath-version>
     <tika-version>1.5</tika-version>
     <sourceReleaseAssemblyDescriptor>stanbol-source-release-zip-tar</sourceReleaseAssemblyDescriptor>    
