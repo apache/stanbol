@@ -38,14 +38,14 @@
     <bundle> <!-- Apache Tika core (required by the LangId and TikaEngine) -->
         <groupId>org.apache.tika</groupId>
         <artifactId>tika-core</artifactId>
-        <version>1.2</version>
+        <version>1.5</version>
     </bundle>
   </startLevel>
   <startLevel level="27">
-    <bundle> <!-- Apache Tika bundle (required by the TikaEngine) -->
-        <groupId>org.apache.tika</groupId>
-        <artifactId>tika-bundle</artifactId>
-        <version>1.2</version>
+    <bundle> <!-- Stanbol version of the Apache Tika bundle -->
+        <groupId>org.apache.stanbol</groupId>
+        <artifactId>org.apache.stanbol.commons.tikabundle</artifactId>
+        <version>0.12.1-SNAPSHOT</version>
     </bundle>
   </startLevel>
   <!-- Stanbol Enhancer infrastructure and required libraries -->

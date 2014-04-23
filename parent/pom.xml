@@ -65,6 +65,7 @@
     <sesame-version>2.7.7</sesame-version>
     <marmotta-version>3.2.0-SNAPSHOT</marmotta-version>
     <ldpath-version>${marmotta-version}</ldpath-version>
+    <tika-version>1.5</tika-version>
     <sourceReleaseAssemblyDescriptor>stanbol-source-release-zip-tar</sourceReleaseAssemblyDescriptor>    
   </properties>
 
@@ -1329,17 +1330,17 @@
     <dependency>
       <groupId>org.apache.tika</groupId>
       <artifactId>tika-core</artifactId>
-      <version>1.2</version>
+      <version>${tika-version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.tika</groupId>
       <artifactId>tika-parsers</artifactId>
-      <version>1.2</version>
+      <version>${tika-version}</version>
     </dependency>
     <!-- dependency>
       <groupId>org.apache.tika</groupId>
       <artifactId>tika-xmp</artifactId>
-      <version>1.4</version>
+      <version>${tika-version}</version>
     </dependency -->
     <!-- Aperture -->
     <dependency>

@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
+    <version>4.1-SNAPSHOT</version>
+    <relativePath>../../parent</relativePath>
+  </parent>
+
+  <artifactId>org.apache.stanbol.commons.tikabundle</artifactId>
+  <version>0.12.1-SNAPSHOT</version>
+  <packaging>bundle</packaging>
+
+  <name>Apache Stanbol Commons Tika Bundle</name>
+  <description>
+    Alternative Bundle for the Tika Parsers
+  </description>
+
+  <inceptionYear>2014</inceptionYear>
+  <licenses>
+    <license>
+      <name>Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>  
+
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/tika
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-0.12/commons/tika
+    </developerConnection>
+    <url>http://stanbol.apache.org</url>
+  </scm>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-Activator>
+              org.apache.tika.parser.internal.Activator
+            </Bundle-Activator>
+            <Embed-Dependency>
+              tika-parsers;inline=true,
+              pdfbox,fontbox,jempbox,bcmail-jdk15,bcprov-jdk15,
+              poi,poi-scratchpad,poi-ooxml,poi-ooxml-schemas,
+              xmlbeans, dom4j,
+              tagsoup,
+              asm-debug-all,
+              juniversalchardet,
+              vorbis-java-core, vorbis-java-tika,
+              isoparser, aspectjrt,
+              metadata-extractor,
+              boilerpipe, rome,
+              apache-mime4j-core, apache-mime4j-dom,
+              jhighlight, netcdf, xmpcore
+            </Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive>
+            <Bundle-DocURL>${project.url}</Bundle-DocURL>
+            <Export-Package>
+              !org.apache.tika.parser,
+              !org.apache.tika.parser.external,
+              org.apache.tika.parser.*; version=${tika-version}
+            </Export-Package>
+            <Import-Package>
+              *,
+              com.adobe.xmp;resolution:=optional,
+              com.adobe.xmp.properties;resolution:=optional,
+              com.google.protobuf;resolution:=optional,
+              com.ibm.icu.text;resolution:=optional,
+              com.sleepycat.je;resolution:=optional,
+              com.sun.javadoc;resolution:=optional,
+              com.sun.msv.datatype;resolution:=optional,
+              com.sun.msv.datatype.xsd;resolution:=optional,
+              com.sun.tools.javadoc;resolution:=optional,
+              edu.wisc.ssec.mcidas;resolution:=optional,
+              edu.wisc.ssec.mcidas.adde;resolution:=optional,
+              javax.activation;resolution:=optional,
+              javax.mail;resolution:=optional,
+              javax.mail.internet;resolution:=optional,
+              javax.xml.bind;resolution:=optional,
+              javax.xml.stream;version="[1.0,2)";resolution:=optional,
+              javax.xml.stream.events;version="[1.0,2)";resolution:=optional,
+              javax.xml.stream.util;version="[1.0,2)";resolution:=optional,
+              junit.framework;resolution:=optional,
+              junit.textui;resolution:=optional,
+              net.sf.ehcache;resolution:=optional,
+              nu.xom;resolution:=optional,
+              opendap.dap;resolution:=optional,
+              opendap.dap.parser;resolution:=optional,
+              org.apache.commons.httpclient;resolution:=optional,
+              org.apache.commons.httpclient.auth;resolution:=optional,
+              org.apache.commons.httpclient.methods;resolution:=optional,
+              org.apache.commons.httpclient.params;resolution:=optional,
+              org.apache.commons.httpclient.protocol;resolution:=optional,
+              org.apache.crimson.jaxp;resolution:=optional,
+              org.apache.tools.ant;resolution:=optional,
+              org.apache.tools.ant.taskdefs;resolution:=optional,
+              org.apache.tools.ant.types;resolution:=optional,
+              org.apache.xerces.parsers;resolution:=optional,
+              org.apache.xerces.util;resolution:=optional,
+              org.apache.xerces.xni;resolution:=optional,
+              org.apache.xerces.xni.parser;resolution:=optional,
+              org.apache.xml.resolver;resolution:=optional,
+              org.apache.xml.resolver.tools;resolution:=optional,
+              org.apache.xmlbeans.impl.xpath.saxon;resolution:=optional,
+              org.apache.xmlbeans.impl.xquery.saxon;resolution:=optional,
+              org.cyberneko.html.xercesbridge;resolution:=optional,
+              org.gjt.xpp;resolution:=optional,
+              org.jaxen;resolution:=optional,
+              org.jaxen.dom4j;resolution:=optional,
+              org.jaxen.pattern;resolution:=optional,
+              org.jaxen.saxpath;resolution:=optional,
+              org.jdom;resolution:=optional,
+              org.jdom.input;resolution:=optional,
+              org.jdom.output;resolution:=optional,
+              org.openxmlformats.schemas.officeDocument.x2006.math;resolution:=optional,
+              org.openxmlformats.schemas.schemaLibrary.x2006.main;resolution:=optional,
+              org.osgi.framework;resolution:=optional,
+              org.w3c.dom;resolution:=optional,
+              org.relaxng.datatype;resolution:=optional,
+              org.xml.sax;resolution:=optional,
+              org.xml.sax.ext;resolution:=optional,
+              org.xml.sax.helpers;resolution:=optional,
+              org.xmlpull.v1;resolution:=optional,
+              schemasMicrosoftComOfficePowerpoint;resolution:=optional,
+              schemasMicrosoftComOfficeWord;resolution:=optional,
+              ucar.grib;resolution:=optional,
+              ucar.grib.grib1;resolution:=optional,
+              ucar.grib.grib2;resolution:=optional,
+              ucar.grid;resolution:=optional,
+              visad;resolution:=optional,
+              visad.data;resolution:=optional,
+              visad.data.vis5d;resolution:=optional,
+              visad.jmet;resolution:=optional,
+              visad.util;resolution:=optional
+            </Import-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-parsers</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency> <!-- avoids ClassNotFoundException: com.adobe.xmp.XMPException not found -->
+      <groupId>com.adobe.xmp</groupId>
+      <artifactId>xmpcore</artifactId>
+      <version>5.1.2</version>
+    </dependency>
+  </dependencies>
+
+</project>
