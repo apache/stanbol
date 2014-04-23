@@ -366,7 +366,7 @@ public class TikaEngineTest {
             new UriRef(NamespaceEnum.media+"Track"),
             new UriRef(NamespaceEnum.media+"AudioTrack"));
         //properties
-        verifyValue(ci, audioTrack, new UriRef(NamespaceEnum.media+"hasFormat"), XSD.string, "Stereo");
+        verifyValue(ci, audioTrack, new UriRef(NamespaceEnum.media+"hasFormat"), XSD.string, "Mono");
         verifyValue(ci, audioTrack, new UriRef(NamespaceEnum.media+"samplingRate"), XSD.int_, "44100");
         verifyValue(ci, audioTrack, new UriRef(NamespaceEnum.media+"hasCompression"), XSD.string, "MP3");
     }

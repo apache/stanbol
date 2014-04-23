@@ -1,0 +1,14 @@
+This is an alternative OSGI Bundle for the [Apache Tika](http://tika.apache.org/)
+parsers.
+
+This replaces 
+
+    <dependency>
+        <groupId>org.apache.tika</groupId>
+        <artifactId>tika-bundle</artifactId>
+        <version>${tika-version}</version>
+    </dependency>
+
+`${tika-version}` of this release is set to `1.5`
+
+__TODO:__ add Jira issue for Apache Tika related to the issues fixed by this bundle
