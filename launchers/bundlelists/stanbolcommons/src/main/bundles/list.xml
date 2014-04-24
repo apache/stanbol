@@ -512,17 +512,17 @@
     <bundle> <!-- LD Path -->
       <groupId>org.apache.marmotta</groupId>
       <artifactId>ldpath-api</artifactId>
-      <version>3.2.0-SNAPSHOT</version>
+      <version>3.2.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.marmotta</groupId>
       <artifactId>ldpath-core-bundle</artifactId>
-      <version>3.2.0-SNAPSHOT</version>
+      <version>3.2.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.marmotta</groupId>
       <artifactId>ldpath-template</artifactId>
-      <version>3.2.0-SNAPSHOT</version>
+      <version>3.2.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
