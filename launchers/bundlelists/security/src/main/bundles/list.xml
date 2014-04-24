@@ -20,6 +20,11 @@
   <startLevel level="27">
     <bundle>
       <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.file.storage</artifactId>
+      <version>0.4-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.clerezza</groupId>
       <artifactId>platform.config</artifactId>
       <version>0.4-SNAPSHOT</version>
     </bundle>
