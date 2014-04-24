@@ -15,11 +15,15 @@
  */
 package org.apache.stanbol.commons.web.sparql;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 
 /**
  *
  */
+@Component
+@Service(NavigationLink.class)
 public class SparqlMenuItem extends NavigationLink {
     
    private static final String htmlDescription = "This is the <strong>SPARQL endpoint</strong> for the Stanbol store."+
