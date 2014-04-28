@@ -797,6 +797,9 @@ public class UserResource {
             }
         }
 
+	//refresh the policy so it will recheck the permissions
+	Policy.getPolicy().refresh();
+
         // showSystem();
 
         URI pageUri = uriInfo.getBaseUriBuilder()
