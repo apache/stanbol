@@ -19,6 +19,7 @@ package org.apache.stanbol.enhancer.engines.dereference;
 import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.clerezza.rdf.core.Triple;
+import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 
 /**
  * Define configuration parameters for Dereference engines
@@ -61,6 +62,14 @@ public interface DereferenceConstants {
      * By default {@link #FILTER_ACCEPT_LANGUAGES} is activated
      */
     boolean DEFAULT_FILTER_ACCEPT_LANGUAGES = true;
+    
+    /**
+     * Property used to configure the properties linking entities. If not present
+     * the {@link Properties#ENHANCER_ENTITY_REFERENCE} will be used. If present
+     * this property is not automatically added.<p>
+     * @since 0.12.1 (<a href="https://issues.apache.org/jira/browse/STANBOL-1334">STANBOL-1334</a>)
+     */
+    String ENTITY_REFERENCES = "enhancer.engines.dereference.references";
     
     /**
      * Property used to configure the fields that should be dereferenced.<p>

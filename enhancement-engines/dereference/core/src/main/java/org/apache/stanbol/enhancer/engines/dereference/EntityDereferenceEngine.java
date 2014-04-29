@@ -251,20 +251,24 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
             //parse the referenced entities from the graph
             //(2) read all Entities we need to dereference from the parsed contentItem
             Set<UriRef> checked = new HashSet<UriRef>();
-            Iterator<Triple> entityReferences = metadata.filter(null, ENHANCER_ENTITY_REFERENCE, null);
-            while(entityReferences.hasNext()){
-                Triple triple = entityReferences.next();
-                Resource entityReference = triple.getObject();
-                if((entityReference instanceof UriRef) && //only URIs
-                		checked.add((UriRef)entityReference) && //do not check a URI twice
-                		chekcFallbackMode((UriRef)entityReference, metadata) && //fallback mode
-                		checkURI((UriRef)entityReference)){ //URI prefixes and patterns
-                    boolean added = referencedEntities.add((UriRef)entityReference);
-                    if(added && log.isTraceEnabled()){
-                        log.trace("  ... schedule Entity {}", entityReference);
+            for(UriRef referenceProperty : config.getEntityReferences()){
+                Iterator<Triple> entityReferences = metadata.filter(null, referenceProperty, null);
+                while(entityReferences.hasNext()){
+                    Triple triple = entityReferences.next();
+                    Resource entityReference = triple.getObject();
+                    if((entityReference instanceof UriRef) && //only URIs
+                    		checked.add((UriRef)entityReference) && //do not check a URI twice
+                    		chekcFallbackMode((UriRef)entityReference, metadata) && //fallback mode
+                    		checkURI((UriRef)entityReference)){ //URI prefixes and patterns
+                        boolean added = referencedEntities.add((UriRef)entityReference);
+                        if(added && log.isTraceEnabled()){
+                            log.trace("  ... schedule Entity {} (referenced-by: {})", 
+                                entityReference, referenceProperty);
+                        }
+                    } else if(log.isTraceEnabled()){
+                        log.trace(" ... ignore Entity {} (referenced-by: {})",
+                            entityReferences, referenceProperty);
                     }
-                } else if(log.isTraceEnabled()){
-                    log.trace(" ... ignore Entity {}",entityReferences);
                 }
             }
         } finally {

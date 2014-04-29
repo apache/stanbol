@@ -82,6 +82,11 @@
       <artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
       <version>0.9.0-incubating</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.namespaceprefix.service</artifactId>
+      <version>0.11.0</version>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.stanbol</groupId>
