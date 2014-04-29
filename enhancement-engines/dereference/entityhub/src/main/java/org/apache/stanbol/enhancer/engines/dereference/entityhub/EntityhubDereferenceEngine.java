@@ -151,7 +151,7 @@ public class EntityhubDereferenceEngine implements ServiceTrackerCustomizer {
         bundleContext = ctx.getBundleContext();
         log.info("> activate {}",getClass().getSimpleName());
         //get the metadata later set to the enhancement engine
-        DereferenceEngineConfig engineConfig = new DereferenceEngineConfig(properties);
+        DereferenceEngineConfig engineConfig = new DereferenceEngineConfig(properties, prefixService);
         log.debug(" - engineName: {}", engineConfig.getEngineName());
         //parse the Entityhub Site used for dereferencing
         Object value = properties.get(SITE_ID);
