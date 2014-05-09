@@ -46,7 +46,7 @@ public class SparqlEndpointWebFragment implements WebFragment {
 
     private static final String NAME = "sparql";
 
-    private BundleContext bundleContext;
+    //private BundleContext bundleContext;
 
 	private String htmlDescription = "This is the <strong>SPARQL endpoint</strong> for the Stanbol store."+
 			"<a href=\"http://en.wikipedia.org/wiki/Sparql\">SPARQL</a> is the"+
@@ -58,10 +58,10 @@ public class SparqlEndpointWebFragment implements WebFragment {
         return NAME;
     }
 
-    @Activate
-    protected void activate(ComponentContext ctx) {
-        this.bundleContext = ctx.getBundleContext();
-    }
+//    @Activate
+//    protected void activate(ComponentContext ctx) {
+//        this.bundleContext = ctx.getBundleContext();
+//    }
 
     @Override
     public Set<Class<?>> getJaxrsResourceClasses() {

@@ -140,26 +140,32 @@ public class SparqlEndpointResource extends BaseStanbolResource {
     @Produces({TEXT_HTML + ";qs=2", "application/sparql-results+xml", "application/rdf+xml"})
     public Response sparql(@QueryParam(value = "graphuri") String graphUri,
                            @QueryParam(value = "query") String sparqlQuery,
-                           @Context HttpHeaders headers) throws ParseException, InvalidSyntaxException {
+                           @Context HttpHeaders headers) throws InvalidSyntaxException {
         if (sparqlQuery == null) {
             populateTripleCollectionList(getServices(null));
             return Response.ok(new Viewable("index", this), TEXT_HTML).build();
         }
 
-        Query query = QueryParser.getInstance().parse(sparqlQuery);
-        String mediaType = "application/sparql-results+xml";
-        if (query instanceof DescribeQuery || query instanceof ConstructQuery) {
-            mediaType = "application/rdf+xml";
-        }
-
-        TripleCollection tripleCollection = getTripleCollection(graphUri);
         ResponseBuilder rb;
-        if (tripleCollection != null) {
-            Object result = tcManager.executeSparqlQuery(query, tripleCollection);
-            rb = Response.ok(result, mediaType);
-        } else {
-            rb = Response.status(Status.NOT_FOUND).entity(
-                String.format("There is no registered graph with given uri: %s", graphUri));
+        Query query;
+        try {
+            query = QueryParser.getInstance().parse(sparqlQuery);
+            String mediaType = "application/sparql-results+xml";
+            if (query instanceof DescribeQuery || query instanceof ConstructQuery) {
+                mediaType = "application/rdf+xml";
+            }
+    
+            TripleCollection tripleCollection = getTripleCollection(graphUri);
+            if (tripleCollection != null) {
+                Object result = tcManager.executeSparqlQuery(query, tripleCollection);
+                rb = Response.ok(result, mediaType);
+            } else {
+                rb = Response.status(Status.NOT_FOUND).entity(
+                    String.format("There is no registered graph with given uri: %s", graphUri));
+            }
+        } catch (ParseException e) {
+            rb = Response.status(Response.Status.BAD_REQUEST)
+                    .entity(e.getMessage());
         }
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
@@ -174,7 +180,7 @@ public class SparqlEndpointResource extends BaseStanbolResource {
     @Produces({"application/sparql-results+xml", "application/rdf+xml"})
     public Response postSparql(@FormParam("graphuri") String graphUri,
                                @FormParam("query") String sparqlQuery,
-                               @Context HttpHeaders headers) throws ParseException, InvalidSyntaxException {
+                               @Context HttpHeaders headers) throws InvalidSyntaxException {
         return sparql(graphUri, sparqlQuery, headers);
     }
 
