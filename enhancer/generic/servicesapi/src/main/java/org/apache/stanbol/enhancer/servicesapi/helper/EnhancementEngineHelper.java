@@ -25,16 +25,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
-import java.util.Set;
 import java.util.UUID;
 
+import org.apache.clerezza.rdf.core.BNode;
 import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
@@ -51,6 +51,8 @@ import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan;
+import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -778,23 +780,55 @@ public final class EnhancementEngineHelper {
      * NOTE: in 1.0.0 those are obsolete as EnhancementProperties will be parsed
      * as additional parameter to the computeEnhancement method.
      */
+    private static final String EHPROP_NS = NamespaceEnum.ehprop.getNamespace();
+    private static final int EHPROP_NS_LENGTH = EHPROP_NS.length();
+
     /**
      * Retrieves the Enhancement Properties for the parsed Engine from the ContentItem.
      * <p>
-     * The returned map will contain: <ul>
-     * <li> all properties with a key that does NOT include a '<code>:</code>'
-     * <li> all properties with a key starting with '<code>{engine-name}:</code>'
+     * The returned map will contain: <ol>
+     * <li> Request scoped properties defined for the parsed enhancement engines
+     * <li> Request scoped properties defined for chain
+     * <li> Chain scoped properties defined for the parsed enhancement engine
+     * <li> Chain scoped properties defined for the chain.
+     * </ol>
+     * NOTES: <ul>
+     * <li> The specification (see <a href="https://issues.apache.org/jira/browse/STANBOL-488">STANBOL-488</a>)
+     * required properties to start with '<code>enhancer.</code>'. While this
+     * implementation does not enforce this requirement non compliant properties
+     * will most likely get filtered earlier and not be part of the returned map.
+     * <li> Properties of an higher priority do override those with an lower one.
      * </ul>
-     * NOTE: that only properties containing '<code>enhancer.</code>' will get 
-     * parsed from Enhancement Requests.<p>
-     * See <a href="https://issues.apache.org/jira/browse/STANBOL-488">STANBOL-488</a> 
-     * for the specification of Enhancement Properties and 
-     * <a href="https://issues.apache.org/jira/browse/STANBOL-1280">STANBOL-1280</a> 
-     * for the list of features supported inStanbol version <code>0.12.1+</code>
      * @param engine the enhancement engine requesting the properties
      * @param ci the content item (representing the enhancement request).
      * @return The enhancement properties. This is a read/write copy of the
-     * read-only content part.
+     * read-only configuration.
+     * @see #getEnhancementPropertyDict(EnhancementEngine, ContentItem)
+     */
+    public static Dictionary<String,Object> getEnhancementPropertyDict(EnhancementEngine engine, ContentItem ci){
+        return new DictionaryAdapter<String,Object>(getEnhancementProperties(engine, ci));
+    }
+    /**
+     * Retrieves the Enhancement Properties for the parsed Engine from the ContentItem.
+     * <p>
+     * The returned map will contain: <ol>
+     * <li> Request scoped properties defined for the parsed enhancement engines
+     * <li> Request scoped properties defined for chain
+     * <li> Chain scoped properties defined for the parsed enhancement engine
+     * <li> Chain scoped properties defined for the chain.
+     * </ol>
+     * NOTES: <ul>
+     * <li> The specification (see <a href="https://issues.apache.org/jira/browse/STANBOL-488">STANBOL-488</a>)
+     * required properties to start with '<code>enhancer.</code>'. While this
+     * implementation does not enforce this requirement non compliant properties
+     * will most likely get filtered earlier and not be part of the returned map.
+     * <li> Properties of an higher priority do override those with an lower one.
+     * </ul>
+     * @param engine the enhancement engine requesting the properties
+     * @param ci the content item (representing the enhancement request).
+     * @return The enhancement properties. This is a read/write copy of the
+     * read-only configuration.
+     * @see #getEnhancementPropertyDict(EnhancementEngine, ContentItem)
      */
     public static Map<String,Object> getEnhancementProperties(EnhancementEngine engine, ContentItem ci){
         if(engine == null){
@@ -803,40 +837,136 @@ public final class EnhancementEngineHelper {
         if(ci == null){
             throw new IllegalArgumentException("The parsed ContentItem MUST NOT be NULL");
         }
-        Map<String,Object> epContentPart = ContentItemHelper.getEnhancementPropertiesContentPart(ci);
-        if(epContentPart == null){
-            log.debug("no EnhancementProperties for ContentItem",ci.getUri());
-            return Collections.emptyMap();
+        //(1) retrieve Chain scope Enhancement Properties
+        Map<String,Object> chainExProps = new HashMap<String,Object>();
+        Map<String,Object> engineExProps = new HashMap<String,Object>();
+        ci.getLock().readLock().lock();
+        try{
+            MGraph em = ExecutionMetadataHelper.getExecutionMetadata(ci);
+            //(1.a) retrieve EnhancementProperties from the ep:ExecutionPlan
+            log.debug("> extract EnhancementProperties form the ExecutionPlan");
+            NonLiteral executionPlanNode = ExecutionMetadataHelper.getExecutionPlanNode(em, 
+                ExecutionMetadataHelper.getChainExecution(em, ci.getUri()));
+            extractEnhancementProperties(chainExProps, em, executionPlanNode, "Chain Execution");
+            //(1.b) retrieve Enhancement Properties from the ep:ExectutionNode
+            //      for the parsed EnhancementEngine
+            log.debug("> extract EnhancementProperties form the ExecutionNode of Engine {}",
+                engine.getName());
+            Iterator<Triple> engineExecutions = em.filter(null, ExecutionPlan.ENGINE, new PlainLiteralImpl(engine.getName()));
+            //NOTE: we expect only a single execution node for an engine, but if
+            //      there are multiple we will merge the properties of those
+            while(engineExecutions.hasNext()){
+                NonLiteral engineExecution = engineExecutions.next().getSubject();
+                if(em.contains(new TripleImpl(executionPlanNode, ExecutionPlan.HAS_EXECUTION_NODE, engineExecution))){
+                    extractEnhancementProperties(engineExProps,em, engineExecution, "Engine Execution");
+                } //else engine execution of a different execution plan
+            }
+        } finally {
+            ci.getLock().readLock().unlock();
         }
-        String prefix = new StringBuilder(engine.getName()).append(':').toString();
-        Map<String,Object> properties = new HashMap<String,Object>();
-        log.debug("Retrieve EnhancementProperties for Engine {} and ContentItem {}", 
-            engine.getName(), ci.getUri());
-        Set<String> engineKeys = new HashSet<String>();
-        for(Entry<String,Object> entry : epContentPart.entrySet()){
-            String key = entry.getKey();
-            int sepIndex = key.indexOf(':');
-            if(sepIndex < 0){
-                if(!engineKeys.contains(key)){
-                    log.debug(" - include chain property '{}'",key);
-                    properties.put(key, entry.getValue());
-                } else {
-                    log.debug(" - exclude chain property '{}' because property is "
-                        + "present in engine level.", key);
+        //(2) retrieve Request specific EnhancementProperties
+        //TODO: in future Stanbol version request specific EnhancementProperties
+        //      will get stored in the ExecutionMetadata. Chain level properties
+        //      with the `em:ChainExecution` node and engine specific properties
+        //      with the `em:EngineExecution` node.
+        //      So this code will need to be refactored similar to the above one
+        Map<String,Object> epContentPart = ContentItemHelper.getEnhancementPropertiesContentPart(ci);
+        Map<String,Object> chainProperties = new HashMap<String,Object>();
+        Map<String,Object> engineProperties = new HashMap<String,Object>();
+        if(epContentPart != null){
+            String enginePrefix = new StringBuilder(engine.getName()).append(':').toString();
+            log.debug("Retrieve EnhancementProperties for Engine {} and ContentItem {}", 
+                engine.getName(), ci.getUri());
+            //Set<String> engineKeys = new HashSet<String>();
+            for(Entry<String,Object> entry : epContentPart.entrySet()){
+                String key = entry.getKey();
+                int sepIndex = key.indexOf(':');
+                if(sepIndex < 0){
+                    log.debug(" ... add chain request level property {}='{}'", key,entry.getValue());
+                    chainProperties.put(key, entry.getValue());
+                } else if(key.startsWith(enginePrefix) && key.length() > enginePrefix.length()){
+                    key = key.substring(enginePrefix.length(),key.length());
+                    log.debug(" ... add engine request level property {}='{}'", key,entry.getValue());
+                    engineProperties.put(key, entry.getValue());
+                } // else not a enhancement property for the current engine.
+            }
+        } else {
+            log.debug(" - no Request scope EnhancementProperties for ContentItem",ci.getUri());
+        }
+        //Now we need to merge the properties based on the Enhancement Properties Precedence
+        //defined by STANBOL-488
+        // engineProp > engineEx > chainProp > chainExProp
+        Map<String,Object> properties = new HashMap<String,Object>(chainExProps);
+        properties.putAll(engineExProps);
+        properties.putAll(chainProperties);
+        properties.putAll(engineProperties);
+        return properties;
+    }
+
+    /**
+     * Extracts all EnhancementProperties from the parsed Node and adds them to
+     * the parsed map
+     * @param properties The Map to add the extracted properties. extracted values
+     * are appended to existing values.
+     * @param graph the RDF graph containing the data
+     * @param node the node to extract the properties from
+     * @param level the name of the level (only used for logging)
+     */
+    private static void extractEnhancementProperties(Map<String,Object> properties, TripleCollection graph,
+            NonLiteral node, String level) {
+        log.debug(" - extract {} properties from {}", level, node);
+        Iterator<Triple> props = graph.filter(node, null, null);
+        while(props.hasNext()){
+            Triple t = props.next();
+            String propUri =  t.getPredicate().getUnicodeString();
+            if(propUri.startsWith(EHPROP_NS)){
+                String prop = propUri.substring(EHPROP_NS_LENGTH);
+                Resource resource = t.getObject();
+                Object value = extractEnhancementPropertyValue(resource);
+                if(value != null && !prop.isEmpty()){
+                    Object current = properties.get(prop);
+                    if(log.isDebugEnabled()){
+                        if(current != null){
+                            log.debug(" ... append {} property '{}' to {}='{}'", 
+                                new Object[]{level, value, prop,current});
+                        } else {
+                            log.debug(" ... add {} property {}='{}'", 
+                                new Object[]{level, prop, value});
+                        }
+                    }
+                    if(current instanceof Collection<?>){
+                        ((Collection) current).add(value);
+                    } else if(current != null){
+                        Collection<Object> col = new ArrayList<Object>(4);
+                        col.add(current);
+                        col.add(value);
+                        properties.put(prop, col);
+                    } else {
+                        properties.put(prop, value);
+                    }
                 }
-            } else if(key.startsWith(prefix) && key.length() > prefix.length()){
-                key = key.substring(prefix.length(),key.length());
-                log.debug(" - include engine property '{}'",key);
-                engineKeys.add(key);
-                Object value = properties.put(key, entry.getValue());
-                if(value != null && log.isDebugEnabled()){
-                    log.debug("    ... overrides Chain level value: {}",value);
-                }
-            } else {
-                log.debug(" - exclude engine property '{}'",key);
             }
         }
-        return properties;
+    }
+
+    /**
+     * Extracts the EnhancementProperty value from the parsed Resource.<p>
+     * Currently this will return {@link UriRef#getUnicodeString()} or
+     * {@link Literal#getLexicalForm()}. For {@link BNode}s <code>null</code> 
+     * is returned.
+     * @param r the resource to parse the value form
+     * @return the parsed value
+     */
+    private static Object extractEnhancementPropertyValue(Resource r) {
+        Object value;
+        if(r instanceof UriRef){
+            value = ((UriRef)r).getUnicodeString();
+        } else if(r instanceof Literal){
+            value = ((Literal) r).getLexicalForm();
+        } else {
+            value = null;
+        }
+        return value;
     }
     
     

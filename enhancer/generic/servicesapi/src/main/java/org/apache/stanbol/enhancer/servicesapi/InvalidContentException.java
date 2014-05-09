@@ -25,20 +25,51 @@ package org.apache.stanbol.enhancer.servicesapi;
 public class InvalidContentException extends EngineException {
 
     private static final long serialVersionUID = 1L;
-
+    
+    /**
+     * 
+     * @param message
+     * @deprecated All EngineExceptions should parse the Engine and the 
+     * ContentItem
+     */
+    @Deprecated
     public InvalidContentException(String message) {
         super(message);
     }
-
+    /**
+     * 
+     * @param message
+     * @param cause
+     * @deprecated All EngineExceptions should parse the Engine and the 
+     * ContentItem
+     */
+    @Deprecated
     public InvalidContentException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * A EngineException caused by an invalid ContentItem
+     * @param ee the enhancement engine
+     * @param ci the content item
+     * @param cause the root cause
+     */
     public InvalidContentException(EnhancementEngine ee, ContentItem ci,
             Throwable cause) {
-        super(String.format("'%s' failed to process invalid content item '%s'"
-                + " with type '%s': %s", ee.getClass().getSimpleName(),
-                ci.getUri().getUnicodeString(), ci.getMimeType(), cause.getMessage()), cause);
+        this(ee,ci, null,cause);
+    }
+    /**
+     * 
+     * @param ee the enhancement engine
+     * @param ci the content item
+     * @param message a custom message why the parsed content item was invalid
+     * @param cause the root cause
+     * @since 0.12.1
+     */
+    public InvalidContentException(EnhancementEngine ee, ContentItem ci,
+            String message, Throwable cause) {
+        super(ee,ci, message == null ? "Invalid ContentItem" : message,
+            cause);
     }
 
 }

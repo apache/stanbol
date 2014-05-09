@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.helper.ConfigUtils;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractChain;
 import org.apache.stanbol.enhancer.servicesapi.impl.EnginesTracker;
 import org.osgi.framework.Constants;
@@ -76,10 +78,13 @@ import org.slf4j.LoggerFactory;
  * engine is not required.
  * </ul>
  * 
+ * <i>NOTE:</i> Since <code>0.12.1</code> this supports EnhancementProperties
+ * as described by <a href="https://issues.apache.org/jira/browse/STANBOL-488"></a>
+ * 
  * @author Rupert Westenthaler
  *
  */
-@Component(inherit=true,configurationFactory=true,metatype=true,
+@Component(configurationFactory=true,metatype=true,
 policy=ConfigurationPolicy.REQUIRE)
 @Properties(value={
     @Property(name=Chain.PROPERTY_NAME),
@@ -96,9 +101,17 @@ public class WeightedChain extends AbstractChain implements Chain, ServiceTracke
      * based on there weights. 
      */
     public static final String PROPERTY_CHAIN = "stanbol.enhancer.chain.weighted.chain";
-    
+    /**
+     * the Chain configuration as parsed in the {@link #activate(ComponentContext)} method
+     */
     private Map<String,Map<String,List<String>>> chain;
-    
+    /**
+     * Do hold chain scope EnhancementProperties of the configured chain.
+     */
+    private Map<String,Map<String,Object>> chainScopedEnhProps;
+    /**
+     * Tracks the engines defined in the {@link #chain}
+     */
     private EnginesTracker tracker;
     
     /**
@@ -138,6 +151,17 @@ public class WeightedChain extends AbstractChain implements Chain, ServiceTracke
             throw new ConfigurationException(PROPERTY_CHAIN, 
                 "The configured chain MUST at least contain a single valid entry!");
         }
+        //init the chain scoped enhancement properties
+        chainScopedEnhProps = new HashMap<String,Map<String,Object>>();
+        if(getChainProperties() != null){
+            chainScopedEnhProps.put(null, getChainProperties());
+        }
+        for(Entry<String,Map<String,List<String>>> entry : chain.entrySet()){
+            Map<String,Object> enhProp = ConfigUtils.getEnhancementProperties(entry.getValue());
+            if(enhProp != null){
+                chainScopedEnhProps.put(entry.getKey(), enhProp);
+            }
+        }
         //start tracking the engines of the configured chain
         tracker = new EnginesTracker(ctx.getBundleContext(), chain.keySet(),this);
         tracker.open();
@@ -147,6 +171,7 @@ public class WeightedChain extends AbstractChain implements Chain, ServiceTracke
     protected void deactivate(ComponentContext ctx) {
         tracker.close();
         tracker = null;
+        chainScopedEnhProps = null;
         chain = null;
         super.deactivate(ctx);
     }
@@ -174,6 +199,10 @@ public class WeightedChain extends AbstractChain implements Chain, ServiceTracke
      * configured {@link #chain} is not active.
      */
     private Graph createExecutionPlan() throws ChainException {
+        Map<String,Map<String,Object>> chainScopedEnhancementProperties = new HashMap<String,Map<String,Object>>();
+        if(getChainProperties() != null){
+            chainScopedEnhancementProperties.put(null, getChainProperties());
+        }
         List<EnhancementEngine> availableEngines = new ArrayList<EnhancementEngine>(chain.size());
         Set<String> optionalEngines = new HashSet<String>();
         Set<String> missingEngines = new HashSet<String>();
@@ -193,7 +222,8 @@ public class WeightedChain extends AbstractChain implements Chain, ServiceTracke
 //            throw new ChainException("This Chain is missing the following " +
 //            		"required Engines "+missingEngines);
 //        }
-        return calculateExecutionPlan(getName(),availableEngines,optionalEngines, missingEngines);
+        return calculateExecutionPlan(getName(),availableEngines,optionalEngines, 
+            missingEngines,chainScopedEnhancementProperties);
     }
 
     @Override

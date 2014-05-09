@@ -16,11 +16,18 @@
 */
 package org.apache.stanbol.enhancer.servicesapi.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
+import org.apache.stanbol.enhancer.servicesapi.helper.ConfigUtils;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -48,12 +55,22 @@ import org.osgi.service.component.ComponentContext;
 @Service
 public abstract class AbstractChain implements Chain {
     
+    /**
+     * Property used to configure chain scoped enhancement properties as described
+     * by <a herf="https://issues.apache.org/jira/browse/STANBOL-488">STANBOL-488</a></p>
+     * Properties defined by this will get parsed to all enhancement engines in the
+     * chain.
+     */
+    public static final String PROPERTY_CHAIN_PROPERTIES = "stanbol.enhancer.chain.chainproperties";
+
     private String name;
     /**
      * The {@link ComponentContext} set in the {@link #activate(ComponentContext)}
      * and reset in the {@link #deactivate(ComponentContext)} method.
      */
     protected ComponentContext context;
+
+    private Map<String,Object> chainProperties;
     
     protected void activate(ComponentContext ctx) throws ConfigurationException {
         this.context = ctx;
@@ -71,6 +88,28 @@ public abstract class AbstractChain implements Chain {
                     "The name of a Chain MUST be an non empty String " +
                     "(type: "+value.getClass()+" value: "+value+")");
         }
+        value = ctx.getProperties().get(PROPERTY_CHAIN_PROPERTIES);
+        Collection<String> chainPropsConfig;
+        if(value instanceof String[]){
+            chainPropsConfig = Arrays.asList((String[])value);
+        } else if(value instanceof Collection<?>){
+            chainPropsConfig = new ArrayList<String>(((Collection<?>)value).size());
+            for(Object o : (Collection<?>)value){
+                if(o != null){
+                    chainPropsConfig.add(o.toString());
+                }
+            }
+        } else if(value instanceof String){
+            chainPropsConfig = Collections.singleton((String)value);
+        } else if (value != null){
+            throw new ConfigurationException(PROPERTY_CHAIN_PROPERTIES, 
+                "Chain level EnhancementProperties can be parsed as String[],"
+                + "Collection<String> or String (single value). The actually "
+                + "parsed type was "+value.getClass().getName());
+        } else {
+            chainPropsConfig = Collections.emptyList();
+        }
+        chainProperties = ConfigUtils.getEnhancementProperties(chainPropsConfig);
     }
     protected void deactivate(ComponentContext ctx){
         this.context = null;
@@ -80,6 +119,10 @@ public abstract class AbstractChain implements Chain {
     @Override
     public final String getName(){
         return name;
+    }
+    
+    protected Map<String,Object> getChainProperties(){
+        return chainProperties;
     }
 
 }

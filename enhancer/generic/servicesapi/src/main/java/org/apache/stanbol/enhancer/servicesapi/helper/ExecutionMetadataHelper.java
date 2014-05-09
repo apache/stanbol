@@ -243,6 +243,25 @@ public final class ExecutionMetadataHelper {
             return null;
         }
     }
+    /**
+     * Getter for the execution metadata content part.
+     * @param contentItem the content item
+     * @return the content part
+     * @throws NoSuchPartException if no execution metadata are present in the
+     * content part
+     * @since 0.12.1
+     */
+    public static MGraph getExecutionMetadata(ContentItem contentItem) {
+        if(contentItem == null) {
+            throw new IllegalArgumentException("The parsed ContentItme MUST NOT be NULL!");
+        }
+        contentItem.getLock().readLock().lock();
+        try{
+            return contentItem.getPart(CHAIN_EXECUTION, MGraph.class);
+        }finally{
+            contentItem.getLock().readLock().unlock();
+        }
+    }
     
     /**
      * Getter/Initialiser for the execution metadata content part of the parsed
