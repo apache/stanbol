@@ -128,6 +128,15 @@
       <type>partialbundlelist</type>
     </dependency>
 
+    <!-- Clerezza RDF bundles -->
+    <dependency>
+      <groupId>org.apache.clerezza.provisioning</groupId>
+      <artifactId>rdf</artifactId>
+      <version>0.1-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- Stanbol Commons Bundle List -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
