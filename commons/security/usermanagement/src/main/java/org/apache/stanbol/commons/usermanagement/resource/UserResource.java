@@ -16,11 +16,7 @@
  */
 package org.apache.stanbol.commons.usermanagement.resource;
 
-import com.sun.jersey.multipart.FormDataParam;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.security.Policy;
@@ -30,9 +26,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -41,13 +37,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+
 import org.apache.clerezza.platform.config.SystemConfig;
 import org.apache.clerezza.rdf.core.BNode;
 import org.apache.clerezza.rdf.core.Graph;
@@ -75,8 +71,6 @@ import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.clerezza.rdf.ontologies.SIOC;
 import org.apache.clerezza.rdf.utils.GraphNode;
-import org.apache.clerezza.rdf.utils.MGraphUtils;
-import org.apache.clerezza.rdf.utils.MGraphUtils.NoSuchSubGraphException;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -798,8 +792,8 @@ public class UserResource {
             }
         }
 
-	//refresh the policy so it will recheck the permissions
-	Policy.getPolicy().refresh();
+        //refresh the policy so it will recheck the permissions
+        Policy.getPolicy().refresh();
 
         // showSystem();
 
