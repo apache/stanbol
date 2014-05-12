@@ -54,7 +54,10 @@ limitations under the License.
 <script>
         
     $(function() {   
-        $.ajaxSetup({dataType:"html"}); // set default
+        $.ajaxSetup({
+            dataType:"html",
+            traditional: true //this prevents [] to be added to array parameter name with jquery > 1.4
+        }); // set default
         $("#tabs").tabs();
         showUserList();
         showRoleList();
