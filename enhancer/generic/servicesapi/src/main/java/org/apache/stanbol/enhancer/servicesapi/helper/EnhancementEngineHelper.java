@@ -50,6 +50,7 @@ import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
@@ -861,6 +862,8 @@ public final class EnhancementEngineHelper {
                     extractEnhancementProperties(engineExProps,em, engineExecution, "Engine Execution");
                 } //else engine execution of a different execution plan
             }
+        } catch(NoSuchPartException e){ //no execution metadata are present
+            log.debug("  - no ExecutionMetadata are present ...");
         } finally {
             ci.getLock().readLock().unlock();
         }

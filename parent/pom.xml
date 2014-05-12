@@ -702,7 +702,46 @@
         <artifactId>sesame-rio-api</artifactId>
         <version>${sesame-version}</version>
       </dependency>
-      
+      <dependency>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-repository-contextaware</artifactId>
+        <version>${sesame-version}</version>
+      </dependency>
+
+
+      <!-- Apache Marmotta -->
+      <dependency>
+        <groupId>org.apache.marmotta</groupId>
+        <artifactId>kiwi-triplestore</artifactId>
+        <version>${marmotta-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.marmotta</groupId>
+        <artifactId>marmotta-util-tripletable</artifactId>
+        <version>${marmotta-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.marmotta</groupId>
+        <artifactId>kiwi-sparql</artifactId>
+        <version>${marmotta-version}</version>
+      </dependency>
+      <!-- Caching dependencies -->
+      <dependency>
+        <groupId>org.apache.marmotta</groupId>
+        <artifactId>kiwi-caching-infinispan</artifactId>
+        <version>${marmotta-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.marmotta</groupId>
+        <artifactId>kiwi-caching-ehcache</artifactId>
+        <version>${marmotta-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.marmotta</groupId>
+        <artifactId>kiwi-caching-hazelcast</artifactId>
+        <version>${marmotta-version}</version>
+      </dependency>
+
       <!-- Commons -->
       <dependency>
         <groupId>commons-io</groupId>
