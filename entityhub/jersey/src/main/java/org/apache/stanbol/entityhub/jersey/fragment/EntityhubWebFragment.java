@@ -102,11 +102,7 @@ public class EntityhubWebFragment implements WebFragment {
     
     @Override
     public List<NavigationLink> getNavigationLinks() {
-        List<NavigationLink> navList = new ArrayList<NavigationLink>();
-        navList.add(new NavigationLink("entityhub", "/entityhub", 
-            "The Entityhub allows to manage controlled vocabularies (e.g. used "
-            + "for EntityLinking by the Stanbol Enhancer Component)", 30));
-        return navList;
+    	return Collections.emptyList();
     }
     
     @Override

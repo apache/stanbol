@@ -36,15 +36,12 @@ import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
 public class SiteManagerReconcileResource extends BaseGoogleRefineReconcileResource {
 
     @Reference
-    SiteManager _siteManager;
+    SiteManager siteManager;
     
 
-    private SiteManager getSiteManager(){
-        return _siteManager;
-    }
     @Override
     protected QueryResultList<Representation> performQuery(String siteId, FieldQuery query) throws SiteException {
-        return getSiteManager().find(query);
+        return siteManager.find(query);
     }
 
     @Override

@@ -16,9 +16,7 @@
  */
 package org.apache.stanbol.entityhub.jersey.resource.reconcile;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.Context;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -36,8 +34,6 @@ import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 @Path("/entityhub/reconcile")
 public class EntityhubReconcileResource extends BaseGoogleRefineReconcileResource {
 
-    private Entityhub _entityhub;
-    
     public EntityhubReconcileResource() {
         super();
     }

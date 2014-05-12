@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
@@ -45,18 +44,19 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import org.apache.felix.scr.annotations.Component;
 
+import org.apache.felix.scr.annotations.Component;
 import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
-import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
+import org.apache.stanbol.commons.web.viewable.Viewable;
 import org.apache.stanbol.entityhub.jersey.grefine.ReconcileProperty;
 import org.apache.stanbol.entityhub.jersey.grefine.ReconcileQuery;
 import org.apache.stanbol.entityhub.jersey.grefine.ReconcileValue;
 import org.apache.stanbol.entityhub.jersey.grefine.Utils;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
+import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
 import org.apache.stanbol.entityhub.servicesapi.defaults.SpecialFieldEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
@@ -286,9 +286,9 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
         //hold all references for @references special property
         HashSet<String> references = new HashSet<String>();
         //holds all texts for @fullText special property
-        List<String> fullText = new ArrayList<String>();
+        List<String> fullText = null;
         //holds the context for the @similarity special property
-        StringBuilder similarityContext = new StringBuilder();
+        Collection<String> similarityContext = null;
         //the field used for the @similarity special property
         HashSet<String> similarityFields = new LinkedHashSet<String>();
         
@@ -326,9 +326,7 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
                     if(property.getParameter() != null){
                         log.warn("parameters are not supported for @fullText -> ignore '{}'",property.getParameter());
                     }
-                    for(String text : texts){ //add the values
-                        fullText.add(text);
-                    }
+                    fullText = texts;
                 } else if(property.getName().equalsIgnoreCase("similarity")){
                     String propUri = property.getParameter() != null ? 
                             nsPrefixService.getFullName(property.getParameter()) :
@@ -342,9 +340,7 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
                             NamespaceMappingUtils.getPrefix(property.getParameter()),property);
                         similarityFields.add(SpecialFieldEnum.fullText.getUri());
                     }
-                    for(String text : texts){ //Append the text values to the context
-                        similarityContext.append(text).append(' ');
-                    }
+                    similarityContext = texts;
                 } else {
                     //TODO: implement LDPATH support
                     log.warn("ignore unsupported special property {}",property);
@@ -377,7 +373,6 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
             }
             //clean up
             ids.clear();
-            texts.clear();
             values.clear();
         }
         //now add constraints for the collected special properties
@@ -386,12 +381,12 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
             ReferenceConstraint refConstraint = new ReferenceConstraint(references, MODE.all);
             query.setConstraint(SpecialFieldEnum.references.getUri(), refConstraint);
         }
-        if(!fullText.isEmpty()){
+        if(fullText != null && !fullText.isEmpty()){
             TextConstraint textConstraint = new TextConstraint(fullText);
             query.setConstraint(SpecialFieldEnum.fullText.getUri(), textConstraint);
             //add full text constraint
         }
-        if(similarityContext.length() > 0 && !similarityFields.isEmpty()){
+        if(similarityContext != null && !similarityContext.isEmpty()){
             //add similarity constraint
             Iterator<String> fieldIt = similarityFields.iterator();
             String field = fieldIt.next();
@@ -401,9 +396,9 @@ public abstract class BaseGoogleRefineReconcileResource extends BaseStanbolResou
                 while(fieldIt.hasNext()){
                     addFields.add(fieldIt.next());
                 }
-                simConstraint = new SimilarityConstraint(similarityContext.toString(),addFields);
+                simConstraint = new SimilarityConstraint(similarityContext,DataTypeEnum.Text, addFields);
             } else {
-                simConstraint = new SimilarityConstraint(similarityContext.toString());
+                simConstraint = new SimilarityConstraint(similarityContext,DataTypeEnum.Text);
             }
             query.setConstraint(field, simConstraint);
         }

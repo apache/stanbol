@@ -24,7 +24,8 @@ import java.util.Set;
  * Interface to be implemented by bundles that want to customize the stanbol web interface and REST API by
  * contributing static resources, JAX-RS resources and Freemarker views.
  * 
- * @deprecated The whiteboard pattern should be used for registering OSGi components and navigations links, Links and ScriptResource should be in the template
+ * @deprecated The whiteboard pattern should be used for registering OSGi components 
+ * and navigations links, Links and ScriptResource should be in the template
  * TODO: add some kind of ordering information
  */
 @Deprecated

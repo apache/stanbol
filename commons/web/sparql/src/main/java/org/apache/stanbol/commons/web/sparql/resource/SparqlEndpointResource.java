@@ -38,16 +38,12 @@ import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
-import org.apache.clerezza.rdf.core.sparql.QueryParser;
-import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
-import org.apache.clerezza.rdf.core.sparql.query.DescribeQuery;
-import org.apache.clerezza.rdf.core.sparql.query.Query;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.viewable.Viewable;
+import org.apache.stanbol.commons.web.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -80,29 +76,6 @@ import org.osgi.framework.ServiceReference;
 @Path("/sparql")
 public class SparqlEndpointResource extends BaseStanbolResource {
 
-    private static final Comparator<ServiceReference> SERVICE_RANKING_COMPARATOR = new Comparator<ServiceReference>() {
-        
-        public int compare(ServiceReference ref1, ServiceReference ref2) {
-            int r1,r2;
-            Object tmp = ref1.getProperty(Constants.SERVICE_RANKING);
-            r1 = tmp != null ? ((Integer)tmp).intValue() : 0;
-            tmp = ref2.getProperty(Constants.SERVICE_RANKING);
-            r2 = tmp != null ? ((Integer)tmp).intValue() : 0;
-            if(r1 == r2){
-                tmp = ref1.getProperty(Constants.SERVICE_ID);
-                long id1 = tmp != null ? ((Long)tmp).longValue() : Long.MAX_VALUE;
-                tmp = ref2.getProperty(Constants.SERVICE_ID);
-                long id2 = tmp != null ? ((Long)tmp).longValue() : Long.MAX_VALUE;
-                //the lowest id must be first -> id1 < id2 -> [id1,id2] -> return -1
-                return id1 < id2 ? -1 : id2 == id1 ? 0 : 1; 
-            } else {
-                //the highest ranking MUST BE first -> r1 < r2 -> [r2,r1] -> return 1
-                return r1 < r2 ? 1:-1;
-            }
-        }        
-        
-    };
-    
     @Reference
     protected TcManager tcManager;
 
@@ -145,23 +118,27 @@ public class SparqlEndpointResource extends BaseStanbolResource {
     @Produces({TEXT_HTML + ";qs=2", "application/sparql-results+xml", "application/rdf+xml"})
     public Response sparql(@QueryParam(value = "graphuri") String graphUri,
                            @QueryParam(value = "query") String sparqlQuery,
-                           @Context HttpHeaders headers) throws ParseException, InvalidSyntaxException {
+                           @Context HttpHeaders headers) throws InvalidSyntaxException {
         if (sparqlQuery == null) {
             populateTripleCollectionList(getServices(null));
             return Response.ok(new Viewable("index", this), TEXT_HTML).build();
         }
-
-        Query query = QueryParser.getInstance().parse(sparqlQuery);
+        
         String mediaType = "application/sparql-results+xml";
-        if (query instanceof DescribeQuery || query instanceof ConstructQuery) {
-            mediaType = "application/rdf+xml";
-        }
 
         TripleCollection tripleCollection = getTripleCollection(graphUri);
         ResponseBuilder rb;
         if (tripleCollection != null) {
-            Object result = tcManager.executeSparqlQuery(query, tripleCollection);
-            rb = Response.ok(result, mediaType);
+            Object result;
+			try {
+				result = tcManager.executeSparqlQuery(sparqlQuery, tripleCollection);
+		        if (result instanceof TripleCollection) {
+		            mediaType = "application/rdf+xml";
+		        }
+	            rb = Response.ok(result, mediaType);
+			} catch (ParseException e) {
+				rb = Response.status(Status.BAD_REQUEST).entity(e.getMessage());
+			}
         } else {
             rb = Response.status(Status.NOT_FOUND).entity(
                 String.format("There is no registered graph with given uri: %s", graphUri));
@@ -179,7 +156,7 @@ public class SparqlEndpointResource extends BaseStanbolResource {
     @Produces({"application/sparql-results+xml", "application/rdf+xml"})
     public Response postSparql(@FormParam("graphuri") String graphUri,
                                @FormParam("query") String sparqlQuery,
-                               @Context HttpHeaders headers) throws ParseException, InvalidSyntaxException {
+                               @Context HttpHeaders headers) throws InvalidSyntaxException {
         return sparql(graphUri, sparqlQuery, headers);
     }
 
@@ -215,7 +192,7 @@ public class SparqlEndpointResource extends BaseStanbolResource {
             getFilter(graphUri));
         if (refs != null) {
             if (refs.length > 1) {
-                Arrays.sort(refs, SERVICE_RANKING_COMPARATOR);
+                Arrays.sort(refs);
             }
             for (ServiceReference ref : refs) {
                 registeredGraphs.put(ref, (TripleCollection) bundleContext.getService(ref));
