@@ -328,14 +328,20 @@ limitations under the License.
                 $("#editUserForm").html(data);
                 $("#password-label").html("<label for='password' id='password-label'>Password (leave blank to retain existing password)</label>");
                 
+
+                $.ajax({url: "/user-management/users/"+userName+"/rolesCheckboxes"}).done(
+                            function(data){
+                                $("#roles-checkboxes").html(data);
+                            });
+                /* for some reason this cause: Error: cannot call methods on dialog prior to initialization; attempted to call method 'destroy'
                 $.get("/user-management/users/"+userName+"/rolesCheckboxes",
-                function(data){
+                            function(data){
                     $("#roles-checkboxes").html(data);
-                }, "text/html");
+                }, "text/html");*/
                 
                 $("#editUserForm").dialog("open");
-            }
-        });
+                }
+            });
 
         
     }
