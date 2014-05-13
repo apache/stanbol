@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.enhancer.jersey.writers;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA_TYPE;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
@@ -89,10 +88,15 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
     private static final MediaType MULTIPART = MediaType.valueOf(MULTIPART_FORM_DATA_TYPE.getType()+"/*");
     private static final String CONTENT_ITEM_BOUNDARY = "contentItem";
     private static final Charset UTF8 = Charset.forName("UTF-8");
+    /**
+     * The media type for JSON-LD (<code>application/ld+json</code>)
+     */
+    private static String APPLICATION_LD_JSON = "application/ld+json";
+    private static MediaType APPLICATION_LD_JSON_TYPE = MediaType.valueOf(APPLICATION_LD_JSON);
     private static final MediaType DEFAULT_RDF_FORMAT = new MediaType(
-        APPLICATION_JSON_TYPE.getType(),
-        APPLICATION_JSON_TYPE.getSubtype(),
-        Collections.singletonMap("charset", UTF8.toString()));
+        APPLICATION_LD_JSON_TYPE.getType(), 
+        APPLICATION_LD_JSON_TYPE.getSubtype(), 
+        Collections.singletonMap("charset", UTF8.name()));
     
     private Serializer __serializer;
     
@@ -156,17 +160,19 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
         if(!MULTIPART.isCompatible(mediaType)){ //two possible cases
             if(!omitMetadata){ //  (1) just return the RDF data
                 //(1.a) Backward support for default dataType if no Accept header is set
+                StringBuilder ctb = new StringBuilder();
                 if (mediaType.isWildcardType() || 
                         TEXT_PLAIN_TYPE.isCompatible(mediaType) || 
                         APPLICATION_OCTET_STREAM_TYPE.isCompatible(mediaType)) {
-                    		mediaType = new MediaType(APPLICATION_JSON_TYPE.getType(), 
-                    		APPLICATION_JSON_TYPE.getSubtype(),
-                    		//Clerezza serialisers are hard coded to use UTF-8
-                    		Collections.singletonMap("charset", UTF8.toString()));
-                    		httpHeaders.putSingle("Content-Type", mediaType.toString());
+                    ctb.append(APPLICATION_LD_JSON);
+                } else {
+                    ctb.append(mediaType.getType()).append('/').append(mediaType.getSubtype());
                 }
+                ctb.append(";charset=").append(UTF8.name());
+                String contentType = ctb.toString();
+                httpHeaders.putSingle(HttpHeaders.CONTENT_TYPE, contentType);
                 try {
-                	getSerializer().serialize(entityStream, ci.getMetadata(), mediaType.toString());
+                	getSerializer().serialize(entityStream, ci.getMetadata(), contentType);
                 } catch (UnsupportedSerializationFormatException e) {
                     throw new WebApplicationException(
                             Response.status(Response.Status.NOT_ACCEPTABLE)

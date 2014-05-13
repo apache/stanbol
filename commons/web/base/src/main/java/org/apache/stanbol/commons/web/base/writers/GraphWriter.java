@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.commons.web.base.writers;
 
+import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -37,6 +39,7 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
@@ -52,6 +55,13 @@ import org.slf4j.LoggerFactory;
 // @Produces({TEXT_PLAIN, N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE, RDF_JSON, APPLICATION_JSON})
 public class GraphWriter implements MessageBodyWriter<TripleCollection> {
 
+    /**
+     * The media type for JSON-LD (<code>application/ld+json</code>)
+     */
+    private static String APPLICATION_LD_JSON = "application/ld+json";
+    
+    private static final Charset UTF8 = Charset.forName("UTF-8");
+    
     private final Logger log = LoggerFactory.getLogger(GraphWriter.class);
     public static final Set<String> supportedMediaTypes;
     static {
@@ -65,6 +75,7 @@ public class GraphWriter implements MessageBodyWriter<TripleCollection> {
         types.add(RDF_JSON);
         types.add(APPLICATION_JSON);
         types.add(APPLICATION_OCTET_STREAM);
+        types.add(APPLICATION_LD_JSON);
         supportedMediaTypes = Collections.unmodifiableSet(types);
     }
 
@@ -98,15 +109,15 @@ public class GraphWriter implements MessageBodyWriter<TripleCollection> {
                         MultivaluedMap<String,Object> httpHeaders,
                         OutputStream entityStream) throws IOException, WebApplicationException {
 
-        long start = System.currentTimeMillis();
         String mediaTypeString = mediaType.getType() + '/' + mediaType.getSubtype();
         if (mediaType.isWildcardType() || TEXT_PLAIN.equals(mediaTypeString)
             || APPLICATION_OCTET_STREAM.equals(mediaTypeString)) {
-            httpHeaders.putSingle("Content-Type", APPLICATION_JSON);
-            getSerializer().serialize(entityStream, t, APPLICATION_JSON);
-        } else {
-            getSerializer().serialize(entityStream, t, mediaTypeString);
+            mediaTypeString = APPLICATION_LD_JSON;
         }
+        httpHeaders.putSingle(CONTENT_TYPE, mediaTypeString + ";charset=" + UTF8.name());
+        
+        long start = System.currentTimeMillis();
+        getSerializer().serialize(entityStream, t, mediaTypeString);
         log.debug("Serialized {} in {}ms", t.size(), System.currentTimeMillis() - start);
     }
 }
