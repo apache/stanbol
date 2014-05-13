@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.enhancer.jersey.writers;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA_TYPE;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
@@ -120,19 +119,35 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
      */
     private static final MediaType MULTIPART = MediaType.valueOf(MULTIPART_FORM_DATA_TYPE.getType()+"/*");
     private static final Charset UTF8 = Charset.forName("UTF-8");
+    /**
+     * The media type for JSON-LD (<code>application/ld+json</code>)
+     */
+    private static String APPLICATION_LD_JSON = "application/ld+json";
+    private static MediaType APPLICATION_LD_JSON_TYPE = MediaType.valueOf(APPLICATION_LD_JSON);
     private static final MediaType DEFAULT_RDF_FORMAT = new MediaType(
-        APPLICATION_JSON_TYPE.getType(),
-        APPLICATION_JSON_TYPE.getSubtype(),
-        Collections.singletonMap("charset", UTF8.toString()));
+        APPLICATION_LD_JSON_TYPE.getType(), 
+        APPLICATION_LD_JSON_TYPE.getSubtype(), 
+        Collections.singletonMap("charset", UTF8.name()));
     
     @Reference
     private Serializer serializer;
     
-    protected Serializer getSerializer(){
-        return serializer;
-    }
-    
-    @Override
+    /**
+     * Default Constructor used by OSGI. This expects that the {@link #serializer}
+     * is injected
+     */
+    public ContentItemWriter(){};
+    /**
+     * Creates a {@link ContentItemWriter} by using the parsed Clerezza
+     * {@link Serializer}. Intended to be used by unit tests or when running not
+     * in an OSGI environment.
+     * @param serializer
+     */
+    public ContentItemWriter(Serializer serializer) {
+		this.serializer = serializer;
+	}
+
+	@Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
         return //MediaType.MULTIPART_FORM_DATA_TYPE.isCompatible(mediaType) &&
                 ContentItem.class.isAssignableFrom(type);
@@ -162,17 +177,19 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
         if(!MULTIPART.isCompatible(mediaType)){ //two possible cases
             if(!omitMetadata){ //  (1) just return the RDF data
                 //(1.a) Backward support for default dataType if no Accept header is set
+                StringBuilder ctb = new StringBuilder();
                 if (mediaType.isWildcardType() || 
                         TEXT_PLAIN_TYPE.isCompatible(mediaType) || 
                         APPLICATION_OCTET_STREAM_TYPE.isCompatible(mediaType)) {
-                    mediaType = new MediaType(APPLICATION_JSON_TYPE.getType(), 
-                        APPLICATION_JSON_TYPE.getSubtype(),
-                        //Clerezza serialisers are hard coded to use UTF-8
-                        Collections.singletonMap("charset", UTF8.toString()));
-                    httpHeaders.putSingle("Content-Type", mediaType.toString());
+                    ctb.append(APPLICATION_LD_JSON);
+                } else {
+                    ctb.append(mediaType.getType()).append('/').append(mediaType.getSubtype());
                 }
+                ctb.append(";charset=").append(UTF8.name());
+                String contentType = ctb.toString();
+                httpHeaders.putSingle(HttpHeaders.CONTENT_TYPE, contentType);
                 try {
-                	getSerializer().serialize(entityStream, ci.getMetadata(), mediaType.toString());
+                	serializer.serialize(entityStream, ci.getMetadata(), contentType);
                 } catch (UnsupportedSerializationFormatException e) {
                     throw new WebApplicationException("The enhancement results "
                         + "cannot be serialized in the requested media type: "
@@ -525,7 +542,7 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
 
         @Override
         public void writeTo(OutputStream out) throws IOException {
-            getSerializer().serialize(out, graph, getMediaType()+'/'+getSubType());
+            serializer.serialize(out, graph, getMediaType()+'/'+getSubType());
         }
     }
     

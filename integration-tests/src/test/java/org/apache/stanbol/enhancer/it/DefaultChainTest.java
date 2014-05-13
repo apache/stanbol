@@ -16,6 +16,8 @@
  */
 package org.apache.stanbol.enhancer.it;
 
+import java.nio.charset.Charset;
+
 import org.apache.stanbol.commons.testing.http.RequestDocumentor;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -25,6 +27,8 @@ import org.slf4j.LoggerFactory;
 public class DefaultChainTest extends EnhancerTestBase {
     
     private final Logger log = LoggerFactory.getLogger(DefaultChainTest.class);
+    
+    protected final static Charset UTF8 = Charset.forName("UTF-8");
     
     private final RequestDocumentor documentor = new RequestDocumentor(getClass().getName());
     /**
@@ -71,6 +75,7 @@ public class DefaultChainTest extends EnhancerTestBase {
             .withContent("The Stanbol enhancer can detect famous cities such as Paris and people such as Bob Marley.")
         )
         .assertStatus(200)
+        .assertCharset(UTF8.name())
         .assertContentRegexp(
                 //check execution metadata
                 "http://stanbol.apache.org/ontology/enhancer/executionmetadata#executionPart",
@@ -109,6 +114,7 @@ public class DefaultChainTest extends EnhancerTestBase {
             .withContent("The Stanbol enhancer can detect famous cities such as Paris and people such as Bob Marley.")
         )
         .assertStatus(200)
+        .assertCharset(UTF8.name())
         .assertContentRegexp(
                 "<http://fise.iks-project.eu/ontology/extracted-from> <"+uri+"> ."
         );
@@ -123,6 +129,7 @@ public class DefaultChainTest extends EnhancerTestBase {
                     .withContent("Nothing")
             )
             .assertStatus(200)
+            .assertCharset(UTF8.name())
             .assertContentType(ACCEPT_FORMAT_TEST_DATA[i+1])
             .assertContentRegexp(ACCEPT_FORMAT_TEST_DATA[i+2])
             .generateDocumentation(documentor,
