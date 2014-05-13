@@ -17,6 +17,7 @@
 package org.apache.stanbol.enhancer.chain.graph.impl;
 
 import static org.apache.commons.io.FilenameUtils.getExtension;
+import static org.apache.stanbol.enhancer.servicesapi.helper.ConfigUtils.getEnhancementProperties;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ConfigUtils.getParameters;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ConfigUtils.getState;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ConfigUtils.getValue;
@@ -84,12 +85,12 @@ import org.slf4j.LoggerFactory;
  * empty. Otherwise the {@link #PROPERTY_CHAIN_LIST} will be ignored regardless
  * if the graph resource is available or not.
  * </ol>
- * TODO: Maybe split this up into two chains - one for each configuration
- * possibility.
+ * <i>NOTE:</i> Since <code>0.12.1</code> this supports EnhancementProperties
+ * as described by <a href="https://issues.apache.org/jira/browse/STANBOL-488"></a>
  * 
  * @author Rupert Westenthaler
  */
-@Component(inherit=true,configurationFactory=true,metatype=true,
+@Component(configurationFactory=true,metatype=true,
     policy=ConfigurationPolicy.REQUIRE)
 @Service
 @Properties(value={
@@ -234,7 +235,7 @@ public class GraphChain extends AbstractChain implements Chain {
                     "The configured execution plan MUST at least contain a single " +
                     "valid execution node!");
             }
-            internalChain = new ListConfigExecutionPlan(config);
+            internalChain = new ListConfigExecutionPlan(config,getChainProperties());
             mode = MODE.LIST;
         } else { //both PROPERTY_CHAIN_LIST and PROPERTY_GRAPH_RESOURCE are null
             throw new ConfigurationException(PROPERTY_GRAPH_RESOURCE, 
@@ -431,7 +432,8 @@ public class GraphChain extends AbstractChain implements Chain {
          * Parses the execution plan form the configuration.
          * @param config
          */
-        private ListConfigExecutionPlan(Map<String,Map<String,List<String>>> config){
+        private ListConfigExecutionPlan(Map<String,Map<String,List<String>>> config,
+                Map<String,Object> chainProperties){
             if(config == null || config.isEmpty()){
                 throw new IllegalArgumentException("The parsed execution plan " +
                 		"confiuguration MUST NOT be NULL nor empty");
@@ -443,7 +445,7 @@ public class GraphChain extends AbstractChain implements Chain {
             }
             engines = Collections.unmodifiableSet(new HashSet<String>(config.keySet()));
             MGraph graph = new SimpleMGraph();
-            NonLiteral epNode = createExecutionPlan(graph, getName());
+            NonLiteral epNode = createExecutionPlan(graph, getName(), chainProperties);
             //caches the String name -> {NonLiteral node, List<Stirng> dependsOn} mappings
             Map<String,Object[]> name2nodes = new HashMap<String,Object[]>();
             //1. write the nodes (without dependencies)
@@ -454,7 +456,8 @@ public class GraphChain extends AbstractChain implements Chain {
                         writeExecutionNode(graph, epNode, 
                             node.getKey(), 
                             getState(node.getValue(), "optional"),
-                            null),
+                            null,
+                            getEnhancementProperties(node.getValue())),
                         node.getValue().get("dependsOn")}); //dependsOn
             }
             //2. write the dependencies

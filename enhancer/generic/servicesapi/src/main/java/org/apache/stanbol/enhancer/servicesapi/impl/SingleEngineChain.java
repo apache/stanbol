@@ -20,6 +20,7 @@ import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.writeExecutionNode;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.Graph;
@@ -49,15 +50,30 @@ public class SingleEngineChain implements Chain {
     private final EnhancementEngine engine;
     private final String name;
     
+    /**
+     * Creates a {@link Chain} for a single {@link EnhancementEngine}
+     * @param engine the engine
+     */
     public SingleEngineChain(EnhancementEngine engine){
+        this(engine,null);
+    }
+    /**
+     * Creates a {@link Chain} for a single {@link EnhancementEngine} including
+     * optional chain scoped enhancement properties
+     * @param engine the engine
+     * @param enhProps chain scoped enhancement properties or <code>null</code>
+     * if none.
+     * @since 0.12.1
+     */
+    public SingleEngineChain(EnhancementEngine engine, Map<String,Object> enhProps){
         if(engine == null){
             throw new IllegalArgumentException("The parsed EnhancementEngine MUST NOT be NULL!");
         }
         this.engine = engine;
         this.name = engine.getName()+"Chain";
         MGraph graph = new IndexedMGraph();
-        writeExecutionNode(graph, createExecutionPlan(graph, name),
-            engine.getName(), false, null);
+        writeExecutionNode(graph, createExecutionPlan(graph, name, null),
+            engine.getName(), false, null, enhProps);
         executionPlan = graph.getGraph();
     }
     

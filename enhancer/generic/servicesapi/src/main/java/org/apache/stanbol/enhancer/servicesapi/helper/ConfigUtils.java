@@ -17,6 +17,7 @@
 package org.apache.stanbol.enhancer.servicesapi.helper;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -150,6 +151,51 @@ public final class ConfigUtils {
         String[] elements = line.split(";");
         return Collections.singletonMap(elements[0].trim(), getParameters(elements,1))
             .entrySet().iterator().next();
+    }
+    
+    /**
+     * Utility that extracts enhancement properties from the parsed parameter maps.
+     * This will only consider keys starting with '<code>enhancer.</code>' as
+     * defined by <a href="https://issues.apache.org/jira/browse/STANBOL-488">STANBOL-488</a>
+     * @param parameters the paraemters (e.g. as returned as values by
+     * {@link #parseConfig(Iterator)})
+     * @return The enhancement properties extracted from the parsed parameters
+     * @since 0.12.1
+     */
+    public static Map<String,Object> getEnhancementProperties(Map<String, List<String>> parameters){
+        Map<String,Object> props = new HashMap<String,Object>();
+        for(Entry<String,List<String>> entry : parameters.entrySet()){
+            if(entry.getKey().startsWith("enhancer.")){
+                Object value;
+                if(entry.getValue().size() == 1){
+                    value = entry.getValue().get(0);
+                } else {
+                    value = entry.getValue();
+                }
+                if(value != null){
+                    props.put(entry.getKey(), value);
+                }
+            }
+        }
+        return props;
+    }
+    /**
+     * Utility that extracts enhancement properties from a configuration line
+     * using the syntax
+     * <pre>
+     *     {prop}={value-1},{value-2},..,{value-n}
+     * </pre>
+     * @param line the configuration of a single enhancement property
+     * @return The enhancement properties extracted from the parsed parameters
+     * @since 0.12.1
+     */
+    public static Map<String,Object> getEnhancementProperties(Collection<String> lines){
+        if(lines == null || lines.isEmpty()){
+            return null;
+        } else {
+            return getEnhancementProperties(getParameters(
+                lines.toArray(new String[lines.size()]), 0));
+        }
     }
     
     /**

@@ -16,6 +16,7 @@
 */
 package org.apache.stanbol.enhancer.chain.list.impl;
 
+import static org.apache.stanbol.enhancer.servicesapi.helper.ConfigUtils.getEnhancementProperties;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ConfigUtils.getState;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.createExecutionPlan;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.writeExecutionNode;
@@ -75,14 +76,17 @@ import org.slf4j.LoggerFactory;
  * engine is not required.
  * </ul>
  * 
+ * <i>NOTE:</i> Since <code>0.12.1</code> this supports EnhancementProperties
+ * as described by <a href="https://issues.apache.org/jira/browse/STANBOL-488"></a>
+ * 
  * @author Rupert Westenthaler
  *
  */
-@Component(inherit=true,configurationFactory=true,metatype=true,
-policy=ConfigurationPolicy.REQUIRE)
+@Component(configurationFactory=true,metatype=true, policy=ConfigurationPolicy.REQUIRE)
 @Properties(value={
     @Property(name=Chain.PROPERTY_NAME),
     @Property(name=ListChain.PROPERTY_ENGINE_LIST, cardinality=1000),
+    @Property(name=AbstractChain.PROPERTY_CHAIN_PROPERTIES,cardinality=1000),
     @Property(name=Constants.SERVICE_RANKING, intValue=0)
 })
 @Service(value=Chain.class)
@@ -94,7 +98,7 @@ public class ListChain extends AbstractChain implements Chain {
      * The list of Enhancement Engine names used to build the Execution Plan
      */
     public static final String PROPERTY_ENGINE_LIST = "stanbol.enhancer.chain.list.enginelist";
-    
+
     private Set<String> engineNames;
     
     private Graph executionPlan;
@@ -122,7 +126,7 @@ public class ListChain extends AbstractChain implements Chain {
         Set<String> engineNames = new HashSet<String>(configuredChain.size());
         NonLiteral last = null;
         MGraph ep = new SimpleMGraph();
-        NonLiteral epNode = createExecutionPlan(ep, getName());
+        NonLiteral epNode = createExecutionPlan(ep, getName(), getChainProperties());
         log.debug("Parse ListChain config:");
         for(String line : configuredChain){
             try {
@@ -135,7 +139,8 @@ public class ListChain extends AbstractChain implements Chain {
                 boolean optional = getState(parsed.getValue(), "optional");
                 log.debug(" > Engine: {} ({})",parsed.getKey(),optional? "optional" : "required");
                 last = writeExecutionNode(ep, epNode, parsed.getKey(), optional, 
-                    last == null ? null : Collections.singleton(last));
+                    last == null ? null : Collections.singleton(last),
+                    getEnhancementProperties(parsed.getValue()));
             } catch (IllegalArgumentException e) {
                 throw new ConfigurationException(PROPERTY_ENGINE_LIST, "Unable to parse Chain Configuraiton (message: '"+
                         e.getMessage()+"')!",e);

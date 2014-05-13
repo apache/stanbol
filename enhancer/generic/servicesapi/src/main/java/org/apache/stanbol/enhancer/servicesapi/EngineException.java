@@ -29,15 +29,33 @@ package org.apache.stanbol.enhancer.servicesapi;
 public class EngineException extends EnhancementException {
 
     private static final long serialVersionUID = 1L;
-
+    private EnhancementEngine enhancementEngine;
+    private ContentItem contentItem;
+    /**
+     * 
+     * @param message
+     * @deprecated use the constructor with {@link EnhancementEngine} and 
+     * {@link ContentItem} instead
+     */
     public EngineException(String message) {
         super(message);
     }
-
+    /**
+     * 
+     * @param message
+     * @param cause
+     * @deprecated use the constructor with {@link EnhancementEngine} and 
+     * {@link ContentItem} instead
+     */
     public EngineException(String message, Throwable cause) {
         super(message, cause);
     }
-
+    /**
+     * 
+     * @param cause
+     * @deprecated use the constructor with {@link EnhancementEngine} and 
+     * {@link ContentItem} instead
+     */
     public EngineException(Throwable cause) {
         super(cause);
     }
@@ -50,5 +68,26 @@ public class EngineException extends EnhancementException {
                 "'%s' failed to process content item '%s' with type '%s': %s",
                 ee.getClass().getSimpleName(), ci.getUri().getUnicodeString(), ci.getMimeType(),
                 message == null ? cause : message), cause);
+        this.enhancementEngine = ee;
+        this.contentItem = ci;
+        
+    }
+    
+    /**
+     * The EnhancementEngine parsed to the Exception
+     * @return
+     * @since 0.12.1
+     */
+    public EnhancementEngine getEnhancementEngine() {
+        return enhancementEngine;
+    }
+    
+    /**
+     * The ContentITem parsed to the Exception
+     * @return
+     * @since 0.12.1
+     */
+    public ContentItem getContentItem() {
+        return contentItem;
     }
 }

@@ -116,7 +116,20 @@ public interface DereferenceConstants {
      * enhancement results.
      */
     String FALLBACK_MODE = "enhancer.engines.dereference.fallback";
-    
+    /**
+     * By default {@link #FALLBACK_MODE} is enabled
+     */
     boolean DEFAULT_FALLBACK_MODE = true;
+    
+    /**
+     * Parameter allowing users to define a list of languages to be dereferenced.
+     * An empty string is used for literals that do not have an language tag.
+     */
+    String DEREFERENCE_ENTITIES_LANGUAGES = "enhancer.engines.dereference.languages";
+    
+    /**
+     * Language key used for configuring literals without language tag
+     */
+    String NO_LANGUAGE_KEY = "none";
     
 }

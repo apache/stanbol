@@ -97,7 +97,12 @@ public enum NamespaceEnum {
      * Namespace for Disambiguation related properties and classes (added with
      * STANBOL-1053)
      */
-    dis("http://stanbol.apache.org/ontology/disambiguation/disambiguation#")
+    dis("http://stanbol.apache.org/ontology/disambiguation/disambiguation#"), 
+    /**
+     * Namespace used for EnhancementProperties
+     * @since 0.12.1
+     */
+    ehprop("http://stanbol.apache.org/ontology/enhancementproperties#")
     ;
     
     String ns;

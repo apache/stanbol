@@ -1,7 +1,6 @@
 package org.apache.stanbol.enhancer.engines.dereference;
 
-import static org.apache.stanbol.enhancer.engines.dereference.DereferenceConstants.DEREFERENCE_ENTITIES_FIELDS;
-import static org.apache.stanbol.enhancer.engines.dereference.DereferenceConstants.DEREFERENCE_ENTITIES_LDPATH;
+import static org.apache.stanbol.enhancer.engines.dereference.DereferenceConstants.NO_LANGUAGE_KEY;
 import static org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils.getConfiguredUri;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
 
@@ -10,8 +9,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.lang.StringUtils;
@@ -335,4 +337,51 @@ public class DereferenceEngineConfig implements DereferenceConstants {
     	}
     	return values;
 	}
+	/**
+	 * Getter for Literal languages that should be dereferenced.
+	 * @return
+	 */
+	public Collection<String> getLanaguages(){
+	    Object value = config.get(DEREFERENCE_ENTITIES_LANGUAGES);
+	    if(value == null){
+	        return null;
+	    } else {
+            Set<String> languages = new HashSet<String>();
+            if(value instanceof String){
+                addLanguage(languages, (String)value);
+            } else if(value instanceof String[]){
+                for(String lang : (String[])value){
+                    addLanguage(languages, lang);
+                }
+            } else if(value instanceof Collection<?>){
+                for(Object lang : (Collection<?>)value){
+                    if(lang instanceof String){
+                        addLanguage(languages, (String)lang);
+                    }
+                }           
+            }
+            if(languages.isEmpty()){
+                return null;
+            } else {
+                return languages;
+            }
+	    }
+	}
+	
+    /**
+     * Parses a language from the parsed languate string and adds it to the
+     * parsed languages set. This converts languages to lower case and also
+     * checks for the {@link DereferenceConstants#NO_LANGUAGE_KEY} value.
+     * @param languages the set holding the languages
+     * @param lang the language
+     */
+    private void addLanguage(Set<String> languages, String lang) {
+        if(!StringUtils.isBlank(lang)){
+            if(NO_LANGUAGE_KEY.equalsIgnoreCase(lang)){
+                languages.add(null);
+            } else {
+                languages.add(lang.toLowerCase(Locale.ROOT));
+            }
+        }
+    }
 }

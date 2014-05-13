@@ -49,7 +49,6 @@ import org.apache.stanbol.entityhub.core.mapping.DefaultFieldMapperImpl;
 import org.apache.stanbol.entityhub.core.mapping.FieldMappingUtils;
 import org.apache.stanbol.entityhub.core.mapping.ValueConverterFactory;
 import org.apache.stanbol.entityhub.ldpath.EntityhubLDPath;
-import org.apache.stanbol.entityhub.ldpath.backend.AbstractBackend;
 import org.apache.stanbol.entityhub.model.clerezza.RdfReference;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
@@ -59,8 +58,6 @@ import org.apache.stanbol.entityhub.servicesapi.mapping.FieldMapping;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
-import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
-import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.util.ModelUtils;
 import org.osgi.framework.BundleContext;
@@ -204,24 +201,7 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
             //however we would like to parse/validate the parsed LDPath program
             //So we will create a pseudo RDFBackend sufficient to be used with the
             //parser
-            final RDFBackend<Object> parseBackend = new AbstractBackend() {
-                @Override
-                protected QueryResultList<String> query(FieldQuery query) throws EntityhubException {
-                    throw new UnsupportedOperationException("Not expected to be called");
-                }
-                @Override
-                protected ValueFactory getValueFactory() {
-                    return valueFactory;
-                }
-                @Override
-                protected Representation getRepresentation(String id) throws EntityhubException {
-                    throw new UnsupportedOperationException("Not expected to be called");
-                }
-                @Override
-                protected FieldQuery createQuery() {
-                    throw new UnsupportedOperationException("Not expected to be called");
-                }
-            };
+            final RDFBackend<Object> parseBackend = new ParseBackend<T>(valueFactory);
             //NOTE: calling execute(..) an this parseLdPath or even the 
             //ldpathProgram will result in UnsupportedOperationException
             //but parsing is OK
@@ -254,6 +234,28 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
     public Set<String> getDereferencedFields() {
         return dereferencedFields;
     }
+        
+    /**
+     * Getter for the FieldMapper used for the {@link #getDereferencedFields()}
+     * @return the fieldMapper or <code>null</code> of the dereferenced fields
+     * are set
+     */
+    public FieldMapper getFieldMapper(){
+        return fieldMapper;
+    }
+    
+    /**
+     * Getter for the LDPath {@link Program} parsed form the
+     * {@link #getLdPath}
+     * @return
+     */
+    public Program<Object> getLdPathProgram(){
+        return ldpathProgram;
+    }
+    
+    public ValueFactory getValueFactory(){
+        return valueFactory;
+    }
     
     /**
      * Starts the tracking by calling {@link ServiceTracker#open()}
@@ -281,12 +283,13 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
     }
     
     @Override
-    public final boolean dereference(UriRef uri, MGraph graph, Lock writeLock, DereferenceContext derefContext) throws DereferenceException {
+    public final boolean dereference(UriRef uri, MGraph graph, Lock writeLock, DereferenceContext dc) throws DereferenceException {
         T service = getService();
         if(service == null){
             throw new DereferenceException(uri, serviceClass.getClass().getSimpleName() 
                 + "service is currently not available");
         }
+        EntityhubDereferenceContext derefContext = (EntityhubDereferenceContext)dc;
         Representation rep;
         try {
             rep = getRepresentation(service, uri.getUnicodeString(), derefContext.isOfflineMode());
@@ -295,18 +298,20 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
         }
         //we need the languages as strings
         final Set<String> langs = derefContext.getLanguages();
-        
+        final FieldMapper fieldMapper = derefContext.getFieldMapper();
+        final Program<Object>ldpathProgram = derefContext.getProgram();
         if(rep != null){
-            if(fieldMapper == null && ldpathProgram == null && langs.isEmpty()){
+            if(fieldMapper == null && ldpathProgram == null && 
+                    (langs == null || langs.isEmpty())){
                 copyAll(uri, rep, graph, writeLock);
             } else { //we need to apply some filters while dereferencing
                 if(fieldMapper != null || !langs.isEmpty()){
                     //this considers speficied fields and included languages
-                    copyMapped(uri, rep, langs, graph, writeLock);
+                    copyMapped(uri, rep, fieldMapper, langs, graph, writeLock);
                 }
                 if(ldpathProgram != null){
                     //this executes LDPath statements
-                    copyLdPath(uri, getRdfBackend(service), langs, graph, writeLock);
+                    copyLdPath(uri, getRdfBackend(service), ldpathProgram, langs, graph, writeLock);
                 }
             }
             return true;
@@ -319,13 +324,14 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
      * writes the the results to the parsed Graph
      * @param uri the context
      * @param rdfBackend the RdfBackend the LDPath program is executed on
+     * @param ldpathProgram The {@link Program} parsed via the dereference context
      * @param langs the set of languages to dereference
      * @param graph the graph to store the results
      * @param writeLock the write lock for the graph
      * @throws DereferenceException on any {@link EntityhubException} while
      * executing the LDPath program
      */
-    private void copyLdPath(UriRef uri, RDFBackend<Object> rdfBackend, 
+    private void copyLdPath(UriRef uri, RDFBackend<Object> rdfBackend, Program<Object> ldpathProgram,
             Set<String> langs, MGraph graph, Lock writeLock) throws DereferenceException {
         //A RdfReference needs to be used as context
         RdfReference context = valueFactory.createReference(uri);
@@ -394,26 +400,25 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
      * in the graph
      * @param uri the uri of the entity to dereference
      * @param rep the data for the entity as in the entityhub
+     * @param fieldMapper the {@link FieldMapper} parsed from the dereference context
      * @param langs the set of languages to dereference
      * @param graph the graph to store the mapping results
      * @param writeLock the write lock for the graph
      */
-    private void copyMapped(UriRef uri, Representation rep, Set<String> langs, 
+    private void copyMapped(UriRef uri, Representation rep, FieldMapper fieldMapper, Set<String> langs, 
             MGraph graph, Lock writeLock) {
-        //init the fieldMapper
-        FieldMapper fieldMapper;
-        if(!langs.isEmpty()){ //if we need to filter for specific languages
-            //we need to modify the field and add a global filter for the
-            //languages. NOTE that the field might be null. In that case we
-            //need just filter literals by language
-            //TODO: maybe cache fieldMappers for sets of languages
-            fieldMapper = this.fieldMapper != null ? this.fieldMapper.clone() :
-                new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
-            fieldMapper.addMapping(new FieldMapping(new TextConstraint(
-                (String)null, langs.toArray(new String[graph.size()]))));
-        } else { //just use the fieldMapper as parsed in the config
-            fieldMapper = this.fieldMapper;
-        }
+        //NOTE: The fieldMapper parsed via the context does already have a
+        //      filter for the parsed languages. Because of that the old code
+        //      adding such a language filter is no longer needed
+//        FieldMapper fieldMapper;
+//        if(!langs.isEmpty()){ //if we need to filter for specific languages
+//            fieldMapper = this.fieldMapper != null ? this.fieldMapper.clone() :
+//                new DefaultFieldMapperImpl(ValueConverterFactory.getDefaultInstance());
+//            fieldMapper.addMapping(new FieldMapping(new TextConstraint(
+//                (String)null, langs.toArray(new String[langs.size()]))));
+//        } else { //just use the fieldMapper as parsed in the config
+//            fieldMapper = this.fieldMapper;
+//        }
         //execute the field mappings
         writeLock.lock();
         try {
@@ -485,3 +490,4 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
     }
     
 }
+ 

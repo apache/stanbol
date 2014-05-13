@@ -16,7 +16,6 @@
  */
 package org.apache.stanbol.enhancer.engines.dereference;
 
-import static org.apache.stanbol.enhancer.engines.dereference.DereferenceConstants.URI_PATTERN;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
 
@@ -37,20 +36,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementPropertyException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
-import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +68,8 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
     protected final EntityDereferencer dereferencer;
     
     protected final DereferenceEngineConfig config;
+    
+    protected final DereferenceContextFactory contextFactory;
     
     protected final String name;
     
@@ -96,6 +95,10 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
     private final Map<String,Object> unmodServiceProperties = Collections.unmodifiableMap(serviceProperties);
     
     public EntityDereferenceEngine(EntityDereferencer dereferencer, DereferenceEngineConfig config){
+        this(dereferencer,config,null);
+    }
+    public EntityDereferenceEngine(EntityDereferencer dereferencer, DereferenceEngineConfig config,
+            DereferenceContextFactory contextFactory){
         if(config == null){
             throw new IllegalArgumentException("The parsed DereferenceEngineConfig MUST NOT be NULL!");
         }
@@ -110,6 +113,7 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
             throw new IllegalArgumentException("The parsed EntityDereferencer MUST NOT be NULL!");
         }
         this.dereferencer = dereferencer;
+        this.contextFactory = contextFactory != null ? contextFactory : new ContextFactory();
         log.debug(" - dereferenced {} (type: {})", dereferencer, dereferencer.getClass().getName());
         //init the default ordering
         this.fallbackMode = config.isFallbackMode();
@@ -156,11 +160,11 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
      * of this Engine implementation
      * @param mode the offline mode
      */
-    public void setOfflineMode(boolean mode){
+    public final void setOfflineMode(boolean mode){
         this.offline = mode;
     }
     
-    public boolean isOfflineMode(){
+    public final boolean isOfflineMode(){
         return offline;
     }
     /**
@@ -169,12 +173,12 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
      * @param ordering The ordering or <code>null</code> to set the 
      * {@value #DEFAULT_ENGINE_ORDERING default} for this engine.
      */
-    public void setEngineOrdering(Integer ordering){
+    public final void setEngineOrdering(Integer ordering){
         serviceProperties.put(ServiceProperties.ENHANCEMENT_ENGINE_ORDERING, 
             ordering == null ? DEFAULT_ENGINE_ORDERING : ordering);
     }
     
-    public Integer getEngineOrdering(){
+    public final Integer getEngineOrdering(){
         return (Integer)serviceProperties.get(ENHANCEMENT_ENGINE_ORDERING);
     }
 
@@ -182,17 +186,21 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
      * Getter for the config of this engine
      * @return the Dereference Engine Configuration
      */
-    public DereferenceEngineConfig getConfig() {
+    public final DereferenceEngineConfig getConfig() {
         return config;
     }
     
+    public final EntityDereferencer getDereferencer(){
+        return dereferencer;
+    }
+    
     @Override
-    public Map<String,Object> getServiceProperties() {
+    public final Map<String,Object> getServiceProperties() {
         return unmodServiceProperties;
     }
 
     @Override
-    public int canEnhance(ContentItem ci) throws EngineException {
+    public final int canEnhance(ContentItem ci) throws EngineException {
         if(offline && !dereferencer.supportsOfflineMode()){
             return CANNOT_ENHANCE;
         } else {
@@ -201,28 +209,47 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
     }
 
     @Override
-    public void computeEnhancements(ContentItem ci) throws EngineException {
+    public final void computeEnhancements(ContentItem ci) throws EngineException {
         if(offline && !dereferencer.supportsOfflineMode()){
             //entity dereferencer does no longer support offline mode
             return;
         }
         log.debug("> dereference Entities for ContentItem {}", ci.getUri());
         long start = System.nanoTime();
-        final DereferenceContext derefContext = new DereferenceContext(offline);
-        Set<String> includedLangs = new HashSet<String>();
-        //TODO: parse accept languages as soon as Enhancement properties are implemented
+        Map<String,Object> enhancemntProps = EnhancementEngineHelper.getEnhancementProperties(this, ci);
+        final DereferenceContext derefContext;
         final MGraph metadata = ci.getMetadata();
         Set<UriRef> referencedEntities = new HashSet<UriRef>();
-        //(1) read all Entities we need to dereference from the parsed contentItem
         ci.getLock().readLock().lock();
         try {
-            //parse the languages detected for the content
+            //(1) Create the DereferenceContext
             if(filterContentLanguages){
+                //parse the languages detected for the content
+                Set<String> contentLanguages = new HashSet<String>();
                 for(NonLiteral langAnno : EnhancementEngineHelper.getLanguageAnnotations(metadata)){
-                    includedLangs.add(EnhancementEngineHelper.getString(metadata, langAnno, DC_LANGUAGE));
+                    contentLanguages.add(EnhancementEngineHelper.getString(metadata, langAnno, DC_LANGUAGE));
                 }
+                enhancemntProps.put(DereferenceContext.INTERNAL_CONTENT_LANGUAGES, contentLanguages);
             } //no content language filtering - leave contentLanguages empty
+            
+            //TODO: parse accept languages as soon as Request headers are available
+            //      via Enhancement properties
+            
+            //create the dereference context and handle possible configuration exceptions
+            try {
+                derefContext = contextFactory.createContext(this, enhancemntProps);
+                derefContext.setOfflineMode(offline);
+            } catch (DereferenceConfigurationException e){
+                StringBuilder message = new StringBuilder("Unsupported Derefernece Configuarion ");
+                if(e.getProperty() != null){
+                    message.append("for property '").append(e.getProperty()).append("' ");
+                }
+                message.append(" parsed via the EnhancementProperties of this request!");
+                throw new EnhancementPropertyException(this, ci, e.getProperty(), message.toString(), e);
+            }
+            
             //parse the referenced entities from the graph
+            //(2) read all Entities we need to dereference from the parsed contentItem
             Set<UriRef> checked = new HashSet<UriRef>();
             for(UriRef referenceProperty : config.getEntityReferences()){
                 Iterator<Triple> entityReferences = metadata.filter(null, referenceProperty, null);
@@ -248,11 +275,6 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
             ci.getLock().readLock().unlock();
         }
         long schedule = System.nanoTime();
-        if(!includedLangs.isEmpty()){
-            includedLangs.add(null); //also include literals without language
-            //and set the list to the dereference context
-            derefContext.setLanguages(includedLangs);
-        } //else no filterLanguages set ... nothing to do
 
         final Lock writeLock = ci.getLock().writeLock();
         log.trace(" - scheduled {} Entities for dereferencing", 
@@ -406,12 +428,28 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
     	return false; //no match
     }
     
+    /**
+     * {@link DereferenceContextFactory} implementation used if <code>null</code>
+     * is parsed as factory.
+     * 
+     * @author Rupert Westenthaler
+     */
+    class ContextFactory implements DereferenceContextFactory {
+
+        @Override
+        public DereferenceContext createContext(EntityDereferenceEngine engine, 
+                Map<String,Object> enhancementProperties) {
+            return new DereferenceContext(engine, enhancementProperties);
+        }
+        
+    }
+
     
     /**
      * Used both as {@link Callable} submitted to the {@link ExecutorService}
      * and as object to {@link #await()} the completion of the task.
+     * 
      * @author Rupert Westenthaler
-     *
      */
     class DereferenceJob implements Callable<Boolean> {
         

@@ -261,8 +261,9 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
             parsedContentIds.add(contentItem.getPartUri(0).getUnicodeString());
         }
         //set the parsed contentIDs to the EnhancementProperties
-        getEnhancementProperties(contentItem).put(PARSED_CONTENT_URIS, 
-            Collections.unmodifiableSet(parsedContentIds));
+        Map<String,Object> ep = getEnhancementProperties(contentItem);
+        parseEnhancementPropertiesFromParameters(ep);
+        ep.put(PARSED_CONTENT_URIS, Collections.unmodifiableSet(parsedContentIds));
         return contentItem;
     }
     /**
@@ -308,6 +309,45 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
         }
         return ciUri == null ? null : new UriRef(ciUri);
     }
+    
+    /**
+     * Parsed EnhancementProperties from the request parameters. <p>
+     * This does NOT override existing values in the parsed map.
+     * @param ep the map to add the properties
+     */
+    private void parseEnhancementPropertiesFromParameters(Map<String,Object> ep){
+        if(uriInfo == null) {
+            return; //for unit tests
+        }
+        MultivaluedMap<String,String> parameters = uriInfo.getQueryParameters();
+        log.debug("read EnhancementPropertis from Request Parameters:");
+        for(Entry<String,List<String>> entry : parameters.entrySet()){
+            if(entry.getKey().contains("enhancer.")){
+                if(!ep.containsKey(entry.getKey())){
+                    log.debug(" + {}",entry.getKey());
+                    Object value;
+                    if(entry.getValue() == null || entry.getValue().isEmpty()){
+                        value = null;
+                    } if(entry.getValue().size() == 1){
+                        value = entry.getValue().get(0);
+                    } else {
+                    	//we do want our own read-only copy!
+                        value = Collections.unmodifiableList(
+                        		new ArrayList<String>(entry.getValue()));
+                    }
+                    log.debug("      value: {}", value);
+                    ep.put(entry.getKey(), value);
+                } else if(log.isDebugEnabled()){
+                    log.debug(" - ignore key {} because it is already present");
+                    log.debug("   current value: {}",ep.get(entry.getKey()));
+                    log.debug("   request value: {} (ignored)", entry.getValue());
+                }
+            } else {
+                log.debug(" - {}", entry.getKey());
+            }
+        }
+    }
+    
     /**
      * Creates a ContentItem
      * @param id the ID or <code>null</code> if not known

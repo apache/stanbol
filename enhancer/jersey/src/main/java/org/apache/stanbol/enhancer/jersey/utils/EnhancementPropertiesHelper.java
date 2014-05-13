@@ -29,6 +29,7 @@ import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata;
 import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan;
 
@@ -39,14 +40,10 @@ public final class EnhancementPropertiesHelper {
 
     private EnhancementPropertiesHelper(){/* no instances allowed*/}
     /**
-     * URI used to register an {@link ContentItem#getPart(int, Class) contentPart}
-     * of the type {@link Map Map&lt;String,Objext&gt;} that contains properties
-     * for the enhancement process. <p>
-     * TODO: This might move to servicesapi and also accessible to enhancement
-     * engines
+     * @see ContentItemHelper#ENHANCEMENT_PROPERTIES_URI
      */
-    public static final UriRef ENHANCEMENT_PROPERTIES_URI = new UriRef(
-            "urn:apache.org:stanbol.web:enhancement.properties");
+    public static final UriRef ENHANCEMENT_PROPERTIES_URI =
+            ContentItemHelper.ENHANCEMENT_PROPERTIES_URI;
     /**
      * Boolean switch parsed as {@link QueryParam} tha allows to deactivate the
      * inclusion of the {@link ContentItem#getMetadata()} in the Response
@@ -97,26 +94,14 @@ public final class EnhancementPropertiesHelper {
     public static final String PARSED_CONTENT_URIS = "stanbol.enhancer.web.parsedContentURIs";
     
     /**
-     * Getter for the EnhancementProperties for an {@link ContentItem}. If they
-     * do not already exist they are created and added to the ContentItem as
-     * contentPart with the URI {@link #ENHANCEMENT_PROPERTIES_URI}
+     * Inits (get or creates) the content part holding the EnhancementProperties
      * @param ci the contentItem MUST NOT be NULL
      * @return the enhancement properties
      * @throws IllegalArgumentException if <code>null</code> is parsed as {@link ContentItem}.
+     * @see ContentItemHelper#initEnhancementPropertiesContentPart(ContentItem)
      */
-    @SuppressWarnings("unchecked")
     public static Map<String,Object> getEnhancementProperties(ContentItem ci){
-        if(ci == null){
-            throw new IllegalArgumentException("The parsed ContentItem MUST NOT be NULL!");
-        }
-        Map<String,Object> enhancementProperties;
-        try {
-            enhancementProperties = ci.getPart(ENHANCEMENT_PROPERTIES_URI, Map.class);
-        } catch (RuntimeException e) {
-           enhancementProperties = new HashMap<String,Object>();
-           ci.addPart(ENHANCEMENT_PROPERTIES_URI, enhancementProperties);
-        }
-        return enhancementProperties;
+        return ContentItemHelper.initEnhancementPropertiesContentPart(ci);
     }
     
     

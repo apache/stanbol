@@ -123,11 +123,7 @@ public class ContentItemReaderWriterTest {
         final Serializer serializer = new Serializer();
         serializer.bindSerializingProvider(new JenaSerializerProvider());
         serializer.bindSerializingProvider(new JsonLdSerializerProvider());
-        ciWriter = new ContentItemWriter() {
-            protected org.apache.clerezza.rdf.core.serializedform.Serializer getSerializer() {
-                return serializer;
-            };
-        };
+        ciWriter = new ContentItemWriter(serializer);
 
         final Parser parser = new Parser();
         parser.bindParsingProvider(new JenaParserProvider());

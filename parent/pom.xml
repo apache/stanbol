@@ -720,51 +720,90 @@
         <version>${sesame-version}</version>
       </dependency>
       <dependency>
-	    <groupId>org.openrdf.sesame</groupId>
-	    <artifactId>sesame-rio-trig</artifactId>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-rio-trig</artifactId>
         <version>${sesame-version}</version>
       </dependency>
-	  <dependency>
-		<groupId>org.openrdf.sesame</groupId>
-		<artifactId>sesame-rio-trix</artifactId>
+	    <dependency>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-rio-trix</artifactId>
         <version>${sesame-version}</version>
-	  </dependency>
-	  <dependency>
-		<groupId>org.openrdf.sesame</groupId>
-		<artifactId>sesame-rio-rdfxml</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-rio-rdfxml</artifactId>
         <version>${sesame-version}</version>
-	  </dependency>
-	  <dependency>
-		<groupId>org.openrdf.sesame</groupId>
-		<artifactId>sesame-rio-rdfjson</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-rio-rdfjson</artifactId>
         <version>${sesame-version}</version>
-	  </dependency>
-	  <dependency>
-		<groupId>org.openrdf.sesame</groupId>
-		<artifactId>sesame-rio-nquads</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-rio-nquads</artifactId>
         <version>${sesame-version}</version>
-	  </dependency>
-	  <dependency>
-		<groupId>org.openrdf.sesame</groupId>
-		<artifactId>sesame-rio-ntriples</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-rio-ntriples</artifactId>
         <version>${sesame-version}</version>
-	  </dependency>
-	  <dependency>
-		<groupId>org.openrdf.sesame</groupId>
-		<artifactId>sesame-rio-n3</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-rio-n3</artifactId>
         <version>${sesame-version}</version>
-	  </dependency>
-	  <dependency>
-		<groupId>org.openrdf.sesame</groupId>
-		<artifactId>sesame-rio-binary</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-rio-binary</artifactId>
         <version>${sesame-version}</version>
-	  </dependency>
+      </dependency>
       <dependency>
         <groupId>org.openrdf.sesame</groupId>
         <artifactId>sesame-rio-turtle</artifactId>
         <version>${sesame-version}</version>
       </dependency>
-      
+      <dependency>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-repository-contextaware</artifactId>
+        <version>${sesame-version}</version>
+      </dependency>
+
+
+      <!-- Apache Marmotta -->
+      <dependency>
+        <groupId>org.apache.marmotta</groupId>
+        <artifactId>kiwi-triplestore</artifactId>
+        <version>${marmotta-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.marmotta</groupId>
+        <artifactId>marmotta-util-tripletable</artifactId>
+        <version>${marmotta-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.marmotta</groupId>
+        <artifactId>kiwi-sparql</artifactId>
+        <version>${marmotta-version}</version>
+      </dependency>
+      <!-- Caching dependencies -->
+      <dependency>
+        <groupId>org.apache.marmotta</groupId>
+        <artifactId>kiwi-caching-infinispan</artifactId>
+        <version>${marmotta-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.marmotta</groupId>
+        <artifactId>kiwi-caching-ehcache</artifactId>
+        <version>${marmotta-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.marmotta</groupId>
+        <artifactId>kiwi-caching-hazelcast</artifactId>
+        <version>${marmotta-version}</version>
+      </dependency>
+
       <!-- Commons -->
       <dependency>
         <groupId>commons-io</groupId>
@@ -1481,7 +1520,7 @@
 
     <!-- Apache James -->
     <!-- do we need this?
-<dependency>
+    <dependency>
       <groupId>org.apache.james</groupId>
       <artifactId>apache-mime4j</artifactId>
       <version>0.6</version>
