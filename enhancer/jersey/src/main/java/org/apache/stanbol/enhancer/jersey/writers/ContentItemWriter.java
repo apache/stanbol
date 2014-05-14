@@ -20,13 +20,13 @@ import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA_TYPE;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
 import static javax.ws.rs.core.MediaType.WILDCARD_TYPE;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.ENHANCEMENT_PROPERTIES_URI;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.getEnhancementProperties;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.getOutputContent;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.getOutputContentParts;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.getParsedContentURIs;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.isOmitMetadata;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.isOmitParsedContent;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.ENHANCEMENT_PROPERTIES_URI;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.getOutputContent;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.getOutputContentParts;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.getParsedContentURIs;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.getRdfFormat;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.isOmitMetadata;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.isOmitParsedContent;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper.getBlob;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper.getContentParts;
 
@@ -77,9 +77,9 @@ import org.apache.http.entity.mime.content.AbstractContentBody;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.ContentDescriptor;
 import org.apache.http.entity.mime.content.InputStreamBody;
-import org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -172,8 +172,8 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
                         OutputStream entityStream) throws IOException, WebApplicationException {
 
         //(0) handle default dataType
-        Map<String,Object> properties = getEnhancementProperties(ci);
-        boolean omitMetadata = isOmitMetadata(properties);
+        Map<String,Object> reqProp = ContentItemHelper.getRequestPropertiesContentPart(ci);
+        boolean omitMetadata = isOmitMetadata(reqProp);
         if(!MULTIPART.isCompatible(mediaType)){ //two possible cases
             if(!omitMetadata){ //  (1) just return the RDF data
                 //(1.a) Backward support for default dataType if no Accept header is set
@@ -230,7 +230,7 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
             final String charsetName = mediaType.getParameters().get("charset");
             final Charset charset = charsetName != null ? Charset.forName(charsetName) : UTF8;
             MediaType rdfFormat;
-            String rdfFormatString = EnhancementPropertiesHelper.getRdfFormat(properties);
+            String rdfFormatString = getRdfFormat(reqProp);
             if(rdfFormatString == null || rdfFormatString.isEmpty()){
                 rdfFormat = DEFAULT_RDF_FORMAT;
             } else {
@@ -257,7 +257,7 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
             entityBuilder.setBoundary(CONTENT_ITEM_BOUNDARY);
             //HttpMultipart entity = new HttpMultipart("from-data", charset ,CONTENT_ITEM_BOUNDARY);
             //(2) serialising the metadata
-            if(!isOmitMetadata(properties)){
+            if(!isOmitMetadata(reqProp)){
                 entityBuilder.addPart("metadata", new ClerezzaContentBody(
                     ci.getUri().getUnicodeString(), ci.getMetadata(), rdfFormat));
 //                entity.addBodyPart(new FormBodyPart("metadata", new ClerezzaContentBody(
@@ -266,7 +266,7 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
             }
             //(3) serialising the Content (Bloby)
             //(3.a) Filter based on parameter
-            List<Entry<UriRef,Blob>> includedBlobs = filterBlobs(ci, properties);
+            List<Entry<UriRef,Blob>> includedBlobs = filterBlobs(ci, reqProp);
             //(3.b) Serialise the filtered
             if(!includedBlobs.isEmpty()) {
                 Map<String,ContentBody> contentParts = new LinkedHashMap<String,ContentBody>();
@@ -284,17 +284,17 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
                 entityBuilder.addPart("content", new MultipartContentBody(contentParts,
                     CONTENT_PARTS_BOUNDERY, MULTIPART_ALTERNATE));
             } //else no content to include
-            Set<String> includeContentParts = getIncludedContentPartURIs(properties);
+            Set<String> includeContentParts = getIncludedContentPartURIs(reqProp);
             if(includeContentParts != null){
-                //(4) serialise EnhancementProperties
+                //(4) serialise the Request Properties
                 if(includeContentParts.isEmpty() || includeContentParts.contains(
                     ENHANCEMENT_PROPERTIES_URI.getUnicodeString())) {
                     JSONObject object;
                     try {
-                        object = toJson(properties);
+                        object = toJson(reqProp);
                     } catch (JSONException e) {
-                        String message = "Unable to convert EnhancementProperties " 
-                                + "to JSON (values : "+properties+")!";
+                        String message = "Unable to convert Request Properties " 
+                                + "to JSON (values : "+reqProp+")!";
                         log.error(message,e);
                         throw new WebApplicationException(message, Response.Status.INTERNAL_SERVER_ERROR);
                     }

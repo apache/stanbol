@@ -873,7 +873,7 @@ public final class EnhancementEngineHelper {
         //      with the `em:ChainExecution` node and engine specific properties
         //      with the `em:EngineExecution` node.
         //      So this code will need to be refactored similar to the above one
-        Map<String,Object> epContentPart = ContentItemHelper.getEnhancementPropertiesContentPart(ci);
+        Map<String,Object> epContentPart = ContentItemHelper.getRequestPropertiesContentPart(ci);
         Map<String,Object> chainProperties = new HashMap<String,Object>();
         Map<String,Object> engineProperties = new HashMap<String,Object>();
         if(epContentPart != null){

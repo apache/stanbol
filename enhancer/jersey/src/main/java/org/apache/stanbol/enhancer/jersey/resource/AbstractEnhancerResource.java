@@ -25,13 +25,12 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XM
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 import static org.apache.stanbol.commons.web.base.utils.MediaTypeUtil.JSON_LD;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.INCLUDE_EXECUTION_METADATA;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.OMIT_METADATA;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.OMIT_PARSED_CONTENT;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.OUTPUT_CONTENT;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.OUTPUT_CONTENT_PART;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.RDF_FORMAT;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.getEnhancementProperties;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.INCLUDE_EXECUTION_METADATA;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.OMIT_METADATA;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.OMIT_PARSED_CONTENT;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.OUTPUT_CONTENT;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.OUTPUT_CONTENT_PART;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.RDF_FORMAT;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -59,7 +58,7 @@ import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.resource.LayoutConfiguration;
 import org.apache.stanbol.commons.web.base.resource.TemplateLayoutConfiguration;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
-import org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper;
+import org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.ChainManager;
@@ -70,6 +69,7 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
+import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata;
 
 /**
@@ -179,12 +179,12 @@ public abstract class AbstractEnhancerResource extends TemplateLayoutConfigurati
             @QueryParam(value = "omitMetadata") boolean omitMetadata,
             @QueryParam(value = "rdfFormat") String rdfFormat,
             @Context HttpHeaders headers) throws EnhancementException, IOException {
-        Map<String,Object> enhancementProperties = getEnhancementProperties(ci);
-        enhancementProperties.put(INCLUDE_EXECUTION_METADATA, inclExecMetadata);
+        Map<String,Object> reqProp = ContentItemHelper.initRequestPropertiesContentPart(ci);
+        reqProp.put(INCLUDE_EXECUTION_METADATA, inclExecMetadata);
         if(mediaTypes != null && !mediaTypes.isEmpty()){
-            enhancementProperties.put(OUTPUT_CONTENT, mediaTypes);
+            reqProp.put(OUTPUT_CONTENT, mediaTypes);
         }
-        enhancementProperties.put(OMIT_PARSED_CONTENT, omitParsed);
+        reqProp.put(OMIT_PARSED_CONTENT, omitParsed);
         if(contentParts != null && !contentParts.isEmpty()){
             Set<UriRef> outputContentParts = new HashSet<UriRef>();
             for(String contentPartUri : contentParts){
@@ -196,12 +196,12 @@ public abstract class AbstractEnhancerResource extends TemplateLayoutConfigurati
                     }
                 }
             }
-            enhancementProperties.put(OUTPUT_CONTENT_PART, outputContentParts);
+            reqProp.put(OUTPUT_CONTENT_PART, outputContentParts);
         }
-        enhancementProperties.put(OMIT_METADATA, omitMetadata);
+        reqProp.put(OMIT_METADATA, omitMetadata);
         if(rdfFormat != null && !rdfFormat.isEmpty()){
             try {
-                enhancementProperties.put(RDF_FORMAT,MediaType.valueOf(rdfFormat).toString());
+                reqProp.put(RDF_FORMAT,MediaType.valueOf(rdfFormat).toString());
             } catch (IllegalArgumentException e) {
                 throw new WebApplicationException(e, 
                     Response.status(Response.Status.BAD_REQUEST)
@@ -210,7 +210,7 @@ public abstract class AbstractEnhancerResource extends TemplateLayoutConfigurati
                     .build());
             }
         }
-        enhance(ci);
+        enhance(ci,reqProp);
         ResponseBuilder rb = Response.ok(ci);
         MediaType mediaType = MediaTypeUtil.getAcceptableMediaType(headers, null);
         if (mediaType != null) {
@@ -223,15 +223,15 @@ public abstract class AbstractEnhancerResource extends TemplateLayoutConfigurati
     /**
      * Enhances the parsed ContentItem
      * @param ci the content item to enhance
+     * @param reqProp the request properties or <code>null</code> if none
      * @throws EnhancementException
      */
-    protected void enhance(ContentItem ci) throws EnhancementException {
-        Map<String,Object> enhancementPropertis = EnhancementPropertiesHelper.getEnhancementProperties(ci);
+    protected void enhance(ContentItem ci, Map<String,Object> reqProp) throws EnhancementException {
         if (jobManager != null) {
             jobManager.enhanceContent(ci, getChain());
         }
         MGraph graph = ci.getMetadata();
-        Boolean includeExecutionMetadata = (Boolean)enhancementPropertis.get(INCLUDE_EXECUTION_METADATA);
+        Boolean includeExecutionMetadata = RequestPropertiesHelper.isIncludeExecutionMetadata(reqProp);
         if (includeExecutionMetadata != null && includeExecutionMetadata.booleanValue()) {
             try {
                 graph.addAll(ci.getPart(ExecutionMetadata.CHAIN_EXECUTION, TripleCollection.class));

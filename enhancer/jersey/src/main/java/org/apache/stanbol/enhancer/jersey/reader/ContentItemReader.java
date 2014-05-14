@@ -17,9 +17,8 @@
 package org.apache.stanbol.enhancer.jersey.reader;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.ENHANCEMENT_PROPERTIES_URI;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.PARSED_CONTENT_URIS;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.getEnhancementProperties;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.ENHANCEMENT_PROPERTIES_URI;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.PARSED_CONTENT_URIS;
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.randomUUID;
 
 import java.io.ByteArrayInputStream;
@@ -68,6 +67,7 @@ import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.StreamSource;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -174,12 +174,12 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
                         contentItem = createContentItem(contentItemId, metadata, fis, parsedContentIds);
                     } else if(fis.getFieldName().equals("properties") ||
                             fis.getFieldName().equals(ENHANCEMENT_PROPERTIES_URI.getUnicodeString())){
-                        //parse the enhancementProperties
+                        //parse the RequestProperties
                         if(contentItem == null){
                             throw new WebApplicationException(
                                 Response.status(Response.Status.BAD_REQUEST)
                                 .entity("Multipart MIME parts for " +
-                                		"EnhancementProperties MUST BE after the " +
+                                		"Request Properties MUST BE after the " +
                                 		"MIME parts for 'metadata' AND 'content'")
                                 .build());
                         }
@@ -187,7 +187,7 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
                         if(!APPLICATION_JSON_TYPE.isCompatible(propMediaType)){
                             throw new WebApplicationException(
                                 Response.status(Response.Status.BAD_REQUEST)
-                                .entity("EnhancementProperties (Multipart MIME parts" +
+                                .entity("Request Properties (Multipart MIME parts" +
                                 		"with the name '"+fis.getFieldName()+"') MUST " +
                                 		"BE encoded as 'appicaltion/json' (encountered: '" +
                                 		fis.getContentType()+"')!")
@@ -197,14 +197,15 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
                         if(propCharset == null){
                             propCharset = "UTF-8";
                         }
-                        Map<String,Object> enhancementProperties = getEnhancementProperties(contentItem); 
+                        Map<String,Object> reqProp = 
+                                ContentItemHelper.initRequestPropertiesContentPart(contentItem); 
                         try {
-                            enhancementProperties.putAll(toMap(new JSONObject(
+                            reqProp.putAll(toMap(new JSONObject(
                                 IOUtils.toString(fis.openStream(),propCharset))));
                         } catch (JSONException e) {
                             throw new WebApplicationException(e,
                                 Response.status(Response.Status.BAD_REQUEST)
-                                .entity("Unable to parse EnhancementProperties from" +
+                                .entity("Unable to parse Request Properties from" +
                                 		"Multipart MIME parts with the name 'properties'!")
                                 .build());
                         }
@@ -261,7 +262,7 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
             parsedContentIds.add(contentItem.getPartUri(0).getUnicodeString());
         }
         //set the parsed contentIDs to the EnhancementProperties
-        Map<String,Object> ep = getEnhancementProperties(contentItem);
+        Map<String,Object> ep = ContentItemHelper.initRequestPropertiesContentPart(contentItem);
         parseEnhancementPropertiesFromParameters(ep);
         ep.put(PARSED_CONTENT_URIS, Collections.unmodifiableSet(parsedContentIds));
         return contentItem;

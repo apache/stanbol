@@ -135,7 +135,7 @@ public class GenericEnhancerUiResource extends AbstractEnhancerResource {
         } else { //enhance and build the AJAX response
             EnhancementException enhancementException;
             try {
-                enhance(ci);
+                enhance(ci, null);
                 enhancementException = null;
             } catch (EnhancementException e){
                 enhancementException = e;

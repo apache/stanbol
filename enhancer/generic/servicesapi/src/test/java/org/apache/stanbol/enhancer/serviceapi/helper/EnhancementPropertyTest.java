@@ -245,7 +245,7 @@ public class EnhancementPropertyTest {
         initExecutionMetadata(new TestChain("test", engines));
         
         //(1) test a a enhancement property overridden with a engine specific one
-        Map<String,Object> ep = ContentItemHelper.initEnhancementPropertiesContentPart(contentItem);
+        Map<String,Object> ep = ContentItemHelper.initRequestPropertiesContentPart(contentItem);
         assertNotNull("EnhancementProperties ContentPart was not initialised",ep);
         ep.put(PROPERTY_MAX_SUGGESTIONS, "5"); //global property
 
@@ -264,7 +264,7 @@ public class EnhancementPropertyTest {
 
         Collection<String> derefernceLanguages = Arrays.asList("en","de");
         //(1) test a a enhancement property overridden with a engine specific one
-        Map<String,Object> ep = ContentItemHelper.initEnhancementPropertiesContentPart(contentItem);
+        Map<String,Object> ep = ContentItemHelper.initRequestPropertiesContentPart(contentItem);
         assertNotNull("EnhancementProperties ContentPart was not initialised",ep);
         ep.put(PROPERTY_DEREFERENCE_LANGUAGES, derefernceLanguages); //global property
 
@@ -284,7 +284,7 @@ public class EnhancementPropertyTest {
         Collection<String> derefernceLanguages = Arrays.asList("en","de");
         String maxSuggestions = "5";
         //(1) test a a enhancement property overridden with a engine specific one
-        Map<String,Object> ep = ContentItemHelper.initEnhancementPropertiesContentPart(contentItem);
+        Map<String,Object> ep = ContentItemHelper.initRequestPropertiesContentPart(contentItem);
         assertNotNull("EnhancementProperties ContentPart was not initialised",ep);
         ep.put(linking.getName()+':'+PROPERTY_MAX_SUGGESTIONS, maxSuggestions);
         ep.put(dereference.getName()+':'+PROPERTY_DEREFERENCE_LANGUAGES, derefernceLanguages);
@@ -317,7 +317,7 @@ public class EnhancementPropertyTest {
 
         //(1) test a a enhancement property overridden with a engine specific one
         String specific = linking.getName();
-        Map<String,Object> ep = ContentItemHelper.initEnhancementPropertiesContentPart(contentItem);
+        Map<String,Object> ep = ContentItemHelper.initRequestPropertiesContentPart(contentItem);
         assertNotNull("EnhancementProperties ContentPart was not initialised",ep);
         ep.put(PROPERTY_MAX_SUGGESTIONS, "5"); //global property
         ep.put(specific+':'+PROPERTY_MAX_SUGGESTIONS, "10");//engine specific
@@ -518,7 +518,7 @@ public class EnhancementPropertyTest {
 
         initExecutionMetadata(new TestChain("test", engines, enhancementProperties));
         
-        Map<String,Object> ep = ContentItemHelper.initEnhancementPropertiesContentPart(contentItem);
+        Map<String,Object> ep = ContentItemHelper.initRequestPropertiesContentPart(contentItem);
         assertNotNull("EnhancementProperties ContentPart was not initialised",ep);
         ep.put(linking.getName()+':'+PROPERTY_MAX_SUGGESTIONS, requestMaySuggestion);
         ep.put(dereference.getName()+':'+PROPERTY_DEREFERENCE_LANGUAGES, requestDerefLang);

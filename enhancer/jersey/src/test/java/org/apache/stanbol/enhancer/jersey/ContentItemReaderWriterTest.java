@@ -16,14 +16,14 @@
  */
 package org.apache.stanbol.enhancer.jersey;
 
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.ENHANCEMENT_PROPERTIES_URI;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.OUTPUT_CONTENT;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.OUTPUT_CONTENT_PART;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.PARSED_CONTENT_URIS;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.RDF_FORMAT;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.getEnhancementProperties;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.getOutputContent;
-import static org.apache.stanbol.enhancer.jersey.utils.EnhancementPropertiesHelper.getParsedContentURIs;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.ENHANCEMENT_PROPERTIES_URI;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.OUTPUT_CONTENT;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.OUTPUT_CONTENT_PART;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.PARSED_CONTENT_URIS;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.RDF_FORMAT;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.getOutputContent;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.getParsedContentURIs;
+import static org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper.initRequestPropertiesContentPart;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper.initExecutionMetadata;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper.initExecutionMetadataContentPart;
 import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.createExecutionPlan;
@@ -111,14 +111,14 @@ public class ContentItemReaderWriterTest {
             new UriRef("urn:test"), RDF.type, new UriRef("urn:types:Document")));
         //mark the main content as parsed and also that all 
         //contents and contentparts should be included
-        Map<String,Object> properties = getEnhancementProperties(contentItem);
+        Map<String,Object> properties = initRequestPropertiesContentPart(contentItem);
         properties.put(PARSED_CONTENT_URIS, Collections.singleton(contentItem.getPartUri(0).getUnicodeString()));
         properties.put(OUTPUT_CONTENT, Collections.singleton("*/*"));
         properties.put(OUTPUT_CONTENT_PART, Collections.singleton("*"));
         properties.put(RDF_FORMAT, "application/rdf+xml");
         MGraph em = initExecutionMetadataContentPart(contentItem);
-        NonLiteral ep = createExecutionPlan(em, "testChain");
-        writeExecutionNode(em, ep, "testEngine", true, null);
+        NonLiteral ep = createExecutionPlan(em, "testChain",null);
+        writeExecutionNode(em, ep, "testEngine", true, null,null);
         initExecutionMetadata(em, em, contentItem.getUri(), "testChain", false);
         final Serializer serializer = new Serializer();
         serializer.bindSerializingProvider(new JenaSerializerProvider());
@@ -239,10 +239,11 @@ public class ContentItemReaderWriterTest {
         assertNotNull(readExecutionMetadata);
         assertEquals(executionMetadata.size(), readExecutionMetadata.size());
         //validate EnhancemetnProperties
-        Map<String,Object> properties = getEnhancementProperties(ci);
+        Map<String,Object> reqProp = ContentItemHelper.getRequestPropertiesContentPart(ci);
+        assertNotNull(reqProp);
         //the parsed value MUST BE overridden by the two content parts parsed
-        assertEquals(expectedParsedContentIds, getParsedContentURIs(properties));
-        Collection<String> outputContent = getOutputContent(properties);
+        assertEquals(expectedParsedContentIds, getParsedContentURIs(reqProp));
+        Collection<String> outputContent = getOutputContent(reqProp);
         assertEquals(1, outputContent.size());
         assertEquals(outputContent.iterator().next(), "*/*");
         Collection<String> outputContentPart = Collections.singleton("*");

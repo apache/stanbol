@@ -368,12 +368,12 @@ public final class ContentItemHelper {
             "urn:apache.org:stanbol.web:enhancement.properties");
 
     /**
-     * Getter for the EnhancementProperties content part
+     * Getter for the content part holding the request scoped EnhancementProperties.
      * @param ci the content item
      * @return the content part or <code>null</code> if not present.
      */
     @SuppressWarnings("unchecked")
-    public static Map<String,Object> getEnhancementPropertiesContentPart(ContentItem ci){
+    public static Map<String,Object> getRequestPropertiesContentPart(ContentItem ci){
         if(ci == null){
             throw new IllegalArgumentException("The parsed ContentItem MUST NOT be NULL!");
         }
@@ -389,7 +389,7 @@ public final class ContentItemHelper {
     }
     
     /**
-     * Initialises the EnhancementProperties ContentPart for an {@link ContentItem}.
+     * Initialises the ContentPart holding the request scoped EnhancementProperties.
      * If the content part is already present it will just return the existing. If
      * not it will register an empty one. The content part is registered with
      * the URI {@link #ENHANCEMENT_PROPERTIES_URI}
@@ -398,7 +398,7 @@ public final class ContentItemHelper {
      * @throws IllegalArgumentException if <code>null</code> is parsed as {@link ContentItem}.
      */
     @SuppressWarnings("unchecked")
-    public static Map<String,Object> initEnhancementPropertiesContentPart(ContentItem ci){
+    public static Map<String,Object> initRequestPropertiesContentPart(ContentItem ci){
         if(ci == null){
             throw new IllegalArgumentException("The parsed ContentItem MUST NOT be NULL!");
         }
@@ -424,6 +424,45 @@ public final class ContentItemHelper {
         } //else was already present
         return enhancementProperties;
     }
-    
+    /**
+     * Sets a request scoped EnhancementProperty to the parsed contentItem. If
+     * <code>null</code> is parsed as value the property is removed.<p>
+     * This Method will retrieve the RequestProperties contentPart from the
+     * parsed {@link ContentItem} and adds the parsed property by applying the
+     * <code>[{engine-name}:]{key}</code> encoding to the key.<p>
+     * This method acquires a write lock on the ContentItem when writing
+     * the enhancement property.
+     * @param ci the ContentItem to set the enhancement property. MUST NOT be
+     * <code>null</code>
+     * @param engineName the engine or <code>null</code> to set the property for the
+     * chain.
+     * @param key the key of the property. MUST NOT be <code>null</code>
+     * @param value the value or <code>null</code> to remove the property
+     * @return the old value or <code>null</code> if the property was not present
+     * @throws IllegalArgumentException if <code>null</code> is parsed as
+     * {@link ContentItem} or key.
+     */
+    public static Object setRequestProperty(ContentItem ci, String engineName, String key, Object value){
+        if(ci == null){
+             throw new IllegalArgumentException("The parsed ContentItem MUST NOT be NULL!");
+        }
+        if(key == null || key.isEmpty()){
+            throw new IllegalArgumentException("The parsed Enhancement Property key MUST NOT be NULL nor empty!");
+        }
+        Map<String,Object> enhProp = initRequestPropertiesContentPart(ci);
+        if(engineName != null){
+            key = new StringBuilder(engineName).append(':').append(key).toString();
+        }
+        ci.getLock().writeLock().lock();
+        try {
+            if(value == null){
+                return enhProp.remove(key);
+            } else {
+                return enhProp.put(key, value);
+            }
+        } finally {
+            ci.getLock().writeLock().unlock();
+        }
+    }
     
 }

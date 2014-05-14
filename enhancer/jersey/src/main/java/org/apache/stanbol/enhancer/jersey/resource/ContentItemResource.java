@@ -97,11 +97,8 @@ import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.execution.ChainExecution;
 import org.apache.stanbol.enhancer.servicesapi.helper.execution.Execution;
 import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata;
-import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
-import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
-import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.CONFIDENCE_LEVEL_ENUM;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
