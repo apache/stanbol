@@ -293,10 +293,9 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         this.solrYardConfig = createSolrYardConfig(yardName, parsedSolrLocation);
         //init the manages solr directory relative to the working directory
         File managedDirectory = new File(System.getProperty("user.dir"), DEFAULT_SOLR_INDEX_DIRECTORY);
-        File distDirectory = new File(System.getProperty("user.dir"),"dist");
         //init the solr directory and validate the parsed values
         File[] solrDirectories = initSolrDirectories(parsedSolrLocation, solrConfig, 
-            managedDirectory,distDirectory);
+            managedDirectory);
         this.solrIndexLocation = solrDirectories[0];
         this.solrIndexConfig = solrDirectories[1];
         this.solrArchive = solrDirectories[2];
@@ -335,8 +334,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
      */
     private File[] initSolrDirectories(final String parsedSolrLocation,
                                    final String solrConfig,
-                                   File managedDirectory,
-                                   File distDirectory) {
+                                   File managedDirectory) {
         File solrIndexLocation;
         File solrConfigLocation;
         File solrIndexArchive;
@@ -361,11 +359,6 @@ public class SolrYardIndexingDestination implements IndexingDestination {
             File parsedSolrLocationFile = new File(parsedSolrLocation);
             if(parsedSolrLocationFile.isAbsolute()){ //if absolute 
                 //-> assume an already configured Solr index
-                if(distDirectory == null){ //check that a dist dir is configured
-                    throw new IllegalStateException("In case the Solr index location"+
-                        "points to a local directory the Distribution Directory" +
-                        "MUST NOT BE NULL!");
-                }
                 solrIndexLocation = parsedSolrLocationFile;
                 if(solrConfig != null){
                     throw new IllegalArgumentException(String.format(
@@ -397,13 +390,6 @@ public class SolrYardIndexingDestination implements IndexingDestination {
                     //otherwise an exception will be thrown in initialise().
                 } else {
                     solrConfigLocation = null; //no configuration parsed
-                }
-            }
-            //for all local indexes configure the distribution file names
-            if(distDirectory != null && !distDirectory.isDirectory()){
-                if(!distDirectory.mkdirs()){
-                    throw new IllegalStateException("Unable to create distribution "+
-                        "Directory"+distDirectory.getAbsolutePath());
                 }
             }
             solrIndexArchive = new File(solrIndexLocation.getName()+SOLR_INDEX_ARCHIVE_EXTENSION);
@@ -480,7 +466,7 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         }
         File managedDirectory = new File(indexingConfig.getDestinationFolder(),solrDir);
         File[] solrDirectories = initSolrDirectories(indexName, solrConfig, 
-            managedDirectory,indexingConfig.getDistributionFolder());
+            managedDirectory);
         this.solrIndexLocation = solrDirectories[0];
         this.solrIndexConfig = solrDirectories[1];
         this.solrArchive = solrDirectories[2];
@@ -773,6 +759,17 @@ public class SolrYardIndexingDestination implements IndexingDestination {
         
         //if a indexing config is present we need to create the distribution files
         if(indexingConfig != null){
+        	//first check if the distribution folder needs to be created and is valid
+        	File distFolder = indexingConfig.getDistributionFolder();
+        	if(!distFolder.exists()){
+        		if(!distFolder.mkdirs()){
+        			throw new IllegalStateException("Unable to create distribution folder " +
+        					distFolder.getAbsolutePath());
+        		}
+        	} else if(!distFolder.isDirectory()){
+        		throw new IllegalStateException("Distribution folder" + distFolder.getAbsolutePath()
+        				+ "is not a Directory!");
+        	}
             //zip the index and copy it over to distribution
             log.info(" ... build Solr index archive");
             if(solrArchive != null){
