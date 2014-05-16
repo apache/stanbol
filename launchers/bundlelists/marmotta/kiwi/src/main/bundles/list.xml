@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ (c) 2013 Redlink GmbH. All rights reserved.
+ -->
+<bundles>
+  <!-- logback logging is used by Sesame and Marmotta -->
+  <startLevel level="10">
+    <bundle>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <version>0.9.30</version> <!-- sesame expects version < 1.0.0 -->
+    </bundle>
+    <bundle>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>0.9.30</version> <!-- sesame expects version < 1.0.0 -->
+    </bundle>
+ </startLevel>
+  
+  <startLevel level="21">
+    <bundle>
+      <groupId>org.apache.geronimo.bundles</groupId>
+      <artifactId>commons-digester</artifactId>
+      <version>1.8_1</version>
+    </bundle>
+    <bundle>
+      <groupId>commons-validator</groupId>
+      <artifactId>commons-validator</artifactId>
+      <version>1.4.0</version>
+    </bundle>
+    <!-- <bundle>  Infinispan Hotrod dependency
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro</artifactId>
+      <version>1.7.6</version>
+    </bundle>
+    <bundle> - Apache Avro (indirect Infinispan Hotrod) -
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.paranamer</artifactId>
+      <version>2.6_1</version>
+    </bundle>
+    <bundle> - Infinispan Hotrod dependency -
+      <groupId>org.apache.directory.studio</groupId>
+      <artifactId>org.apache.commons.pool</artifactId>
+      <version>1.6</version>
+    </bundle>  -->
+    <bundle>
+      <groupId>com.fasterxml.uuid</groupId>
+      <artifactId>java-uuid-generator</artifactId>
+      <version>3.1.3</version>
+    </bundle>
+    <bundle> <!-- opencsv version 2.1 -->
+      <groupId>org.ow2.bundles</groupId>
+      <artifactId>ow2-bundles-externals-opencsv</artifactId>
+      <version>1.0.36</version>
+    </bundle>
+    <bundle>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.3.1</version>
+    </bundle>
+  </startLevel>
+  
+  <startLevel level="5">
+    <bundle>
+      <groupId>org.jboss.spec.javax.transaction</groupId>
+      <artifactId>jboss-transaction-api_1.1_spec</artifactId>
+      <version>1.0.1.Final</version>
+    </bundle>
+  </startLevel>
+  
+  <!-- Marmotta Bundles -->
+  <startLevel level="21">
+    <!-- Kiwi and the entityhub sesame bundles requires Sesame -->
+    <bundle>
+      <groupId>org.openrdf.sesame</groupId>
+      <artifactId>sesame-runtime-osgi</artifactId>
+      <version>2.7.11</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.marmotta</groupId>
+      <artifactId>marmotta-commons</artifactId>
+      <version>3.2.0</version>
+    </bundle>
+  </startLevel>
+  
+  <!-- Kiwi Caching dependencies -->
+  <startLevel level="21">
+    <!-- Google Guava Caching -->
+    <!-- Commented as this is already provided by the stanbolcommons bundlelist
+     <bundle>
+       <groupId>com.google.guava</groupId>
+       <artifactId>guava</artifactId>
+       <version>16.0.1</version>
+     </bundle> -->
+    
+    <!-- Hazlecast Caching -->
+    <bundle>
+      <groupId>com.hazelcast</groupId>
+      <artifactId>hazelcast</artifactId>
+      <version>3.1.6</version>
+    </bundle>
+    
+    <!-- EHCache Caching
+    <bundle>
+      <groupId>net.sf.ehcache</groupId>
+      <artifactId>ehcache</artifactId>
+      <version>2.8.2</version>
+    </bundle> -->
+    
+    <!-- Infinispan Caching -->
+    <!-- NOTE: Infinispan has also some additional commons-lib dependencies -->
+    <!-- bundle>
+      <groupId>org.infinispan</groupId>
+      <artifactId>infinispan-core</artifactId>
+      <version>6.0.1.Final</version>
+    </bundle>
+    <bundle>
+      <groupId>org.infinispan</groupId>
+      <artifactId>infinispan-commons</artifactId>
+      <version>6.0.1.Final</version>
+    </bundle>
+    <bundle>
+      <groupId>org.infinispan</groupId>
+      <artifactId>infinispan-client-hotrod</artifactId>
+      <version>6.0.1.Final</version>
+    </bundle>
+    
+    <bundle>
+      <groupId>org.jgroups</groupId>
+      <artifactId>jgroups</artifactId>
+      <version>3.4.1.Final</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
+      <version>1_2</version>
+    </bundle>
+    <bundle>
+      <groupId>org.jboss.marshalling</groupId>
+      <artifactId>jboss-marshalling-osgi</artifactId>
+      <version>1.4.2.Final</version>
+    </bundle>
+    <bundle>
+      <groupId>org.jboss.logging</groupId>
+      <artifactId>jboss-logging</artifactId>
+      <version>3.1.3.GA</version>
+    </bundle -->
+    
+  </startLevel>
+
+  <!-- Database driver -->
+  <startLevel level="22">
+    <!-- H2 database -->
+    <bundle>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>1.4.178</version>
+    </bundle>
+    <bundle>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.enterprise</artifactId>
+      <version>4.2.0</version>
+    </bundle>
+    
+    <!-- Postgres -->
+    <!-- embedded in org.apache.stanbol.commons.marmotta.kiwi -->
+    
+    <!-- MySQL -->
+    <!-- bundle>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>5.1.21</version>
+    </bundle -->
+  </startLevel>
+
+  <!-- The Redlink Kiwi Repository Service -->
+  <!-- Allows to configure a KiWi Repository and registers the Sesame Repository
+       as OSGI service. -->
+  <startLevel level="28">
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.marmotta.kiwi</artifactId>
+      <version>0.12.1-SNAPSHOT</version>
+    </bundle>
+  </startLevel>
+  
+  <!-- The Sesame Entityhub support -->
+  <!-- Only required when using the KiWi Repo as backend for the Stanbol Entityhub -->
+  <startLevel level="30">
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.model.sesame</artifactId>
+      <version>0.12.1-SNAPSHOT</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.yard.sesame</artifactId>
+      <version>0.12.1-SNAPSHOT</version>
+    </bundle>
+  </startLevel>
+
+</bundles>

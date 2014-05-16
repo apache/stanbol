@@ -255,10 +255,18 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- Stanbol Entityhub Bundle List -->
+    <!-- Stanbol Entityhub Bundle List(s) -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.entityhub</artifactId>
+      <version>0.12.1-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+    <!-- Marmotta integration with the Entityhub -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.marmotta.kiwi</artifactId>
       <version>0.12.1-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
