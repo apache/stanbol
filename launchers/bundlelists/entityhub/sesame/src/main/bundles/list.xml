@@ -41,7 +41,7 @@
     <bundle>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-      <version>2.3.0</version>
+      <version>2.3.1</version>
     </bundle>
   </startLevel>
   
@@ -50,7 +50,7 @@
     <bundle>
       <groupId>org.openrdf.sesame</groupId>
       <artifactId>sesame-runtime-osgi</artifactId>
-      <version>2.7.8</version>
+      <version>2.7.11</version>
     </bundle>
   </startLevel>
 

@@ -78,6 +78,9 @@
     <module>ontologymanager</module>
     <module>reasoners</module>
     <module>rules</module> 
+    
+    <!-- Stanbol Marmotta integration -->
+    <module>marmotta/kiwi</module>
 
     <!-- Specific features -->
     <module>security</module>
