@@ -97,6 +97,7 @@ import org.slf4j.LoggerFactory;
     @Property(name=Chain.PROPERTY_NAME),
     @Property(name=GraphChain.PROPERTY_GRAPH_RESOURCE),
     @Property(name=GraphChain.PROPERTY_CHAIN_LIST, cardinality=1000),
+    @Property(name=AbstractChain.PROPERTY_CHAIN_PROPERTIES,cardinality=1000),
     @Property(name=Constants.SERVICE_RANKING, intValue=0)
 })
 public class GraphChain extends AbstractChain implements Chain {

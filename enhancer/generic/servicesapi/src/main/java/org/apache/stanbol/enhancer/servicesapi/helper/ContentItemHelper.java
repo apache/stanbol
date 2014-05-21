@@ -363,10 +363,19 @@ public final class ContentItemHelper {
      * URI used to register an {@link ContentItem#getPart(int, Class) contentPart}
      * of the type {@link Map Map&lt;String,Objext&gt;} containing the
      * EnhancementEngine properties <p>
+     * @since 0.12.1
      */
-    public static final UriRef ENHANCEMENT_PROPERTIES_URI = new UriRef(
-            "urn:apache.org:stanbol.web:enhancement.properties");
+    public static final UriRef REQUEST_PROPERTIES_URI = new UriRef(
+        "urn:apache.org:stanbol.enhancer:request.properties");
 
+    /**
+     * URI used to register the {@link #REQUEST_PROPERTIES_URI} until
+     * <code>0.12.0</code>
+     */
+    @Deprecated
+    private static final UriRef WEB_ENHANCEMENT_PROPERTIES_URI = new UriRef(
+        "urn:apache.org:stanbol.web:enhancement.properties");
+    
     /**
      * Getter for the content part holding the request scoped EnhancementProperties.
      * @param ci the content item
@@ -379,9 +388,14 @@ public final class ContentItemHelper {
         }
         ci.getLock().readLock().lock();
         try {
-            return ci.getPart(ENHANCEMENT_PROPERTIES_URI, Map.class);
+            return ci.getPart(REQUEST_PROPERTIES_URI, Map.class);
         } catch (NoSuchPartException e) {
-            return null;
+            //fallback to support pre 0.12.1 modules (remove with 1.0.0)
+            try {
+                return ci.getPart(WEB_ENHANCEMENT_PROPERTIES_URI, Map.class);
+            } catch (NoSuchPartException e2) {
+                return null;
+            }
         } finally{
             ci.getLock().readLock().unlock();
         }
@@ -392,7 +406,7 @@ public final class ContentItemHelper {
      * Initialises the ContentPart holding the request scoped EnhancementProperties.
      * If the content part is already present it will just return the existing. If
      * not it will register an empty one. The content part is registered with
-     * the URI {@link #ENHANCEMENT_PROPERTIES_URI}
+     * the URI {@link #REQUEST_PROPERTIES_URI}
      * @param ci the contentItem MUST NOT be NULL
      * @return the enhancement properties
      * @throws IllegalArgumentException if <code>null</code> is parsed as {@link ContentItem}.
@@ -405,7 +419,7 @@ public final class ContentItemHelper {
         Map<String,Object> enhancementProperties;
         ci.getLock().readLock().lock();
         try {
-            enhancementProperties = ci.getPart(ENHANCEMENT_PROPERTIES_URI, Map.class);
+            enhancementProperties = ci.getPart(REQUEST_PROPERTIES_URI, Map.class);
         } catch (NoSuchPartException e) {
             enhancementProperties = null;
         } finally{
@@ -414,10 +428,17 @@ public final class ContentItemHelper {
         if(enhancementProperties == null){
             ci.getLock().writeLock().lock();
             try { //check again ... maybe an other thread has added this part
-                enhancementProperties = ci.getPart(ENHANCEMENT_PROPERTIES_URI, Map.class);
+                enhancementProperties = ci.getPart(REQUEST_PROPERTIES_URI, Map.class);
             } catch (NoSuchPartException e) {
-                enhancementProperties = new HashMap<String,Object>();
-                ci.addPart(ENHANCEMENT_PROPERTIES_URI, enhancementProperties);
+                //fallback to support pre 0.12.1 modules (remove with 1.0.0)
+                try { //NOTE: if the old is present we register it also with the new URI
+                    enhancementProperties = ci.getPart(WEB_ENHANCEMENT_PROPERTIES_URI, Map.class);
+                } catch (NoSuchPartException e2) { /*ignore*/}
+                //END fallback
+                if(enhancementProperties == null) { //the old is not present
+                    enhancementProperties = new HashMap<String,Object>(); //create
+                }
+                ci.addPart(REQUEST_PROPERTIES_URI, enhancementProperties);
             } finally{
                 ci.getLock().writeLock().unlock();
             }

@@ -41,10 +41,10 @@ public final class RequestPropertiesHelper {
 
     private RequestPropertiesHelper(){/* no instances allowed*/}
     /**
-     * @see ContentItemHelper#ENHANCEMENT_PROPERTIES_URI
+     * @see ContentItemHelper#REQUEST_PROPERTIES_URI
      */
-    public static final UriRef ENHANCEMENT_PROPERTIES_URI =
-            ContentItemHelper.ENHANCEMENT_PROPERTIES_URI;
+    public static final UriRef REQUEST_PROPERTIES_URI =
+            ContentItemHelper.REQUEST_PROPERTIES_URI;
     /**
      * Boolean switch parsed as {@link QueryParam} tha allows to deactivate the
      * inclusion of the {@link ContentItem#getMetadata()} in the Response
@@ -57,7 +57,7 @@ public final class RequestPropertiesHelper {
      * returned set contains '*' than all such content parts need to be returned.<p>
      * NOTE: This can also be used to include the Request Properties
      * as "applciation/json" in the Response by adding this
-     * {@link RequestPropertiesHelper#ENHANCEMENT_PROPERTIES_URI uri}.
+     * {@link RequestPropertiesHelper#REQUEST_PROPERTIES_URI uri}.
      */
     public static final String OUTPUT_CONTENT_PART = "stanbol.enhancer.web.outputContentPart";
     /**

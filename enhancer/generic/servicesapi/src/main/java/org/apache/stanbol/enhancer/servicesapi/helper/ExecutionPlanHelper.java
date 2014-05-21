@@ -308,7 +308,7 @@ public final class ExecutionPlanHelper {
                         engineName == null ? "" : engineName});
             } else {
                 writeEnhancementProperty(ep, node,
-                    new UriRef(NamespaceEnum.ehprop + enhprop.getKey()),
+                    new UriRef(NamespaceEnum.ehp + enhprop.getKey()),
                     enhprop.getValue());
             }
         }

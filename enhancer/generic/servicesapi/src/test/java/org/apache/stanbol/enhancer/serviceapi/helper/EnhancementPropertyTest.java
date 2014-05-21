@@ -349,8 +349,8 @@ public class EnhancementPropertyTest {
         Collection<String> derefernceLanguages = Arrays.asList("en","de");
         Integer maxSuggestions = Integer.valueOf(5);
         
-        UriRef maxSuggestionsProperty = new UriRef(NamespaceEnum.ehprop + PROPERTY_MAX_SUGGESTIONS);
-        UriRef dereferenceLanguagesProperty = new UriRef(NamespaceEnum.ehprop + PROPERTY_DEREFERENCE_LANGUAGES);
+        UriRef maxSuggestionsProperty = new UriRef(NamespaceEnum.ehp + PROPERTY_MAX_SUGGESTIONS);
+        UriRef dereferenceLanguagesProperty = new UriRef(NamespaceEnum.ehp + PROPERTY_DEREFERENCE_LANGUAGES);
 
         //set up the map with the enhancement properties we want to set for the
         //Enhancement Chain

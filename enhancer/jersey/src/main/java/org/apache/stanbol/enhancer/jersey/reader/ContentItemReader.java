@@ -17,9 +17,10 @@
 package org.apache.stanbol.enhancer.jersey.reader;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.ENHANCEMENT_PROPERTIES_URI;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.REQUEST_PROPERTIES_URI;
 import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.PARSED_CONTENT_URIS;
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.randomUUID;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -43,6 +44,7 @@ import java.util.Set;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -52,6 +54,7 @@ import javax.ws.rs.ext.Provider;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
@@ -59,6 +62,7 @@ import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.RequestContext;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -68,6 +72,7 @@ import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
+import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.StreamSource;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -95,6 +100,11 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
      */
     @Context
     UriInfo uriInfo;
+    /**
+     * Used to access the Content-Language header for STANBOL-660
+     */
+    @Context
+    HttpHeaders headers;
     
     public static final MediaType MULTIPART = MediaType.valueOf(MediaType.MULTIPART_FORM_DATA_TYPE.getType()+"/*");
 
@@ -173,7 +183,7 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
                     } else if(fis.getFieldName().equals("content")){
                         contentItem = createContentItem(contentItemId, metadata, fis, parsedContentIds);
                     } else if(fis.getFieldName().equals("properties") ||
-                            fis.getFieldName().equals(ENHANCEMENT_PROPERTIES_URI.getUnicodeString())){
+                            fis.getFieldName().equals(REQUEST_PROPERTIES_URI.getUnicodeString())){
                         //parse the RequestProperties
                         if(contentItem == null){
                             throw new WebApplicationException(
@@ -265,6 +275,13 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
         Map<String,Object> ep = ContentItemHelper.initRequestPropertiesContentPart(contentItem);
         parseEnhancementPropertiesFromParameters(ep);
         ep.put(PARSED_CONTENT_URIS, Collections.unmodifiableSet(parsedContentIds));
+        
+        //STANBOL-660: set the language of the content if explicitly parsed in the request
+        String contentLanguage = getContentLanguage();
+        if(!StringUtils.isBlank(contentLanguage)){
+            EnhancementEngineHelper.set(contentItem.getMetadata(), contentItem.getUri(), 
+                DC_LANGUAGE, new PlainLiteralImpl(contentLanguage));
+        }
         return contentItem;
     }
     /**
@@ -309,6 +326,27 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
             }
         }
         return ciUri == null ? null : new UriRef(ciUri);
+    }
+    /**
+     * Getter for the <code>Content-Language</code> header
+     * @return the language of the content as parsed in the request or 
+     * <code>null</code> if the header is not present.
+     */
+    private String getContentLanguage(){
+        if(headers != null){
+        	List<String> languages = headers.getRequestHeader(HttpHeaders.CONTENT_LANGUAGE);
+        	if(languages != null && !languages.isEmpty()){
+        		if(languages.size() > 1){
+        			log.warn(" ... only single valued Content-Language headers are "
+        					+ "supported (will use first language of {})", languages);
+        		}
+        		return languages.get(0);
+        	} else {
+        		return null;
+        	}
+        } else {
+        	return null;
+        }
     }
     
     /**

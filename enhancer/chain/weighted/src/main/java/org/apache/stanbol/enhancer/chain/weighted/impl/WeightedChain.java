@@ -89,6 +89,7 @@ policy=ConfigurationPolicy.REQUIRE)
 @Properties(value={
     @Property(name=Chain.PROPERTY_NAME),
     @Property(name=WeightedChain.PROPERTY_CHAIN, cardinality=1000),
+    @Property(name=AbstractChain.PROPERTY_CHAIN_PROPERTIES,cardinality=1000),
     @Property(name=Constants.SERVICE_RANKING, intValue=0)
 })
 @Service(value=Chain.class)
