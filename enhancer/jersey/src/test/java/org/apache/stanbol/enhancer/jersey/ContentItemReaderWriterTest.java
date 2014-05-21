@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.enhancer.jersey;
 
-import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.ENHANCEMENT_PROPERTIES_URI;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.REQUEST_PROPERTIES_URI;
 import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.OUTPUT_CONTENT;
 import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.OUTPUT_CONTENT_PART;
 import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.PARSED_CONTENT_URIS;
@@ -184,7 +184,7 @@ public class ContentItemReaderWriterTest {
             "This is a ContentItem to Mime Multipart test!",
             "--contentParts--",
             "--"+contentType.getParameters().get("boundary"),
-            "Content-Disposition: form-data; name=\""+ENHANCEMENT_PROPERTIES_URI.getUnicodeString()+"\"",
+            "Content-Disposition: form-data; name=\""+REQUEST_PROPERTIES_URI.getUnicodeString()+"\"",
             "Content-Type: application/json; charset=UTF-8",
             "--"+contentType.getParameters().get("boundary"),
             "Content-Disposition: form-data; name=\""+CHAIN_EXECUTION.getUnicodeString()+"\"",

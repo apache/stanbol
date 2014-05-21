@@ -219,7 +219,12 @@ public enum DefaultNamespaceMappingsEnum{
      * for freebase topics (entities) on external sites (e.g. musicbrainz, 
      * wikipedia ...).
      */
-    key("http://rdf.freebase.com/key/")
+    key("http://rdf.freebase.com/key/"),
+    /**
+     * The EnhancementProperties namespace as introduced by <a 
+     * href="https://issues.apache.org/jira/browse/STANBOL-488">STANBOL-488</<>
+     */
+    ehp("http://stanbol.apache.org/ontology/enhancementproperties#"),
     ;
     private String namespace;
     private String prefix;

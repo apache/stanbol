@@ -102,7 +102,7 @@ public enum NamespaceEnum {
      * Namespace used for EnhancementProperties
      * @since 0.12.1
      */
-    ehprop("http://stanbol.apache.org/ontology/enhancementproperties#")
+    ehp("http://stanbol.apache.org/ontology/enhancementproperties#")
     ;
     
     String ns;

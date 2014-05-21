@@ -41,11 +41,17 @@ public final class EnhancementPropertiesHelper {
 
     private EnhancementPropertiesHelper(){/* no instances allowed*/}
     /**
-     * @see ContentItemHelper#ENHANCEMENT_PROPERTIES_URI
-     * @deprecated use {@link RequestPropertiesHelper#ENHANCEMENT_PROPERTIES_URI}
+     * 
+     * @see ContentItemHelper#REQUEST_PROPERTIES_URI
+     * @deprecated use {@link RequestPropertiesHelper#REQUEST_PROPERTIES_URI}.
+     * <b>NOTE</b> this URI has changed with <code>0.12.1</code> from 
+     * <code>urn:apache.org:stanbol.web:enhancement.properties</code> to
+     * <code>urn:apache.org:stanbol.enhancer:request.properties</code>. The
+     * {@link #getEnhancementProperties(ContentItem)} support content parts
+     * registered with both URIs.
      */
     public static final UriRef ENHANCEMENT_PROPERTIES_URI =
-            RequestPropertiesHelper.ENHANCEMENT_PROPERTIES_URI;
+            RequestPropertiesHelper.REQUEST_PROPERTIES_URI;
     /**
      * Boolean switch parsed as {@link QueryParam} tha allows to deactivate the
      * inclusion of the {@link ContentItem#getMetadata()} in the Response

@@ -20,7 +20,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA_TYPE;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
 import static javax.ws.rs.core.MediaType.WILDCARD_TYPE;
-import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.ENHANCEMENT_PROPERTIES_URI;
+import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.REQUEST_PROPERTIES_URI;
 import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.getOutputContent;
 import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.getOutputContentParts;
 import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.getParsedContentURIs;
@@ -267,7 +267,7 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
             if(includeContentParts != null){
                 //(4) serialise the Request Properties
                 if(includeContentParts.isEmpty() || includeContentParts.contains(
-                    ENHANCEMENT_PROPERTIES_URI.getUnicodeString())) {
+                    REQUEST_PROPERTIES_URI.getUnicodeString())) {
                     JSONObject object;
                     try {
                         object = toJson(reqProp);
@@ -278,7 +278,7 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
                             		"JSON (values : "+reqProp+")!").build());
                     }
                     entity.addBodyPart(new FormBodyPart(
-                        ENHANCEMENT_PROPERTIES_URI.getUnicodeString(), 
+                        REQUEST_PROPERTIES_URI.getUnicodeString(), 
                         new StringBody(object.toString(),MediaType.APPLICATION_JSON,UTF8)));
                 }
                 //(5) additional RDF metadata stored in contentParts

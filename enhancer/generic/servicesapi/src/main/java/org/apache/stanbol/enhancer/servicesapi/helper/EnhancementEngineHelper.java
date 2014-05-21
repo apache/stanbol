@@ -20,7 +20,11 @@ import static java.util.Collections.singleton;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.*;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.*;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -56,6 +60,8 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.ibm.icu.impl.CalendarAstronomer.Equatorial;
 
 
 public final class EnhancementEngineHelper {
@@ -781,7 +787,7 @@ public final class EnhancementEngineHelper {
      * NOTE: in 1.0.0 those are obsolete as EnhancementProperties will be parsed
      * as additional parameter to the computeEnhancement method.
      */
-    private static final String EHPROP_NS = NamespaceEnum.ehprop.getNamespace();
+    private static final String EHPROP_NS = NamespaceEnum.ehp.getNamespace();
     private static final int EHPROP_NS_LENGTH = EHPROP_NS.length();
 
     /**
@@ -972,5 +978,198 @@ public final class EnhancementEngineHelper {
         return value;
     }
     
-    
+    /**
+     * Extracts multiple Configuration values from the parsed Object value.
+     * This does support arrays and {@link Collection}s for multiple values.
+     * In any other case a single value collection will be returned. <code>NULL</code>
+     * value contained in the parsed value will be silently removed.
+     * @param value the value. {@link Collection}s and Arrays are supported for
+     * multiple values. If the parsed value is of an other type a single value
+     * is assumed.
+     * @param type the desired type of the configuration values. The parsed type
+     * MUST define a {@link Constructor} taking a {@link String} as only parameter.
+     * @return the configuration values as parsed from the parsed value
+     * @throws NullPointerException if the parsed type is <code>null</code>
+     * @throws IllegalArgumentException if the parsed type does not have a
+     * {@link Constructor} that takes a {@link String} as only parameter; if the
+     * {@link Constructor} is not visible or can not be instantiated (e.g.
+     * because the parsed type is an Interface or an abstract class).
+     * @throws IllegalStateException if the parsed type can not be instantiated
+     * if one of the parsed values (e.g. if {@link Float} is used as type and
+     * one of the parsed values is not a valid float.
+     * @since 0.12.1
+     */
+    public static <T> Collection<T> getConfigValues(Object value, Class<T> type){
+        return getConfigValues(value, type, false);
+    }
+    /**
+     * Extracts multiple Configuration values from the parsed Object value.
+     * This does support arrays and {@link Collection}s for multiple values.
+     * In any other case a single value collection will be returned.
+     * @param value the value. {@link Collection}s and Arrays are supported for
+     * multiple values. If the parsed value is of an other type a single value
+     * is assumed.
+     * @param type the desired type of the configuration values. The parsed type
+     * MUST define a {@link Constructor} taking a {@link String} as only parameter.
+     * @param preseveNullValues if <code>null</code> values in the parsed
+     * value should be preserved or removed.
+     * @return the configuration values as parsed from the parsed value
+     * @throws NullPointerException if the parsed type is <code>null</code>
+     * @throws IllegalArgumentException if the parsed type does not have a
+     * {@link Constructor} that takes a {@link String} as only parameter; if the
+     * {@link Constructor} is not visible or can not be instantiated (e.g.
+     * because the parsed type is an Interface or an abstract class).
+     * @throws IllegalStateException if the parsed type can not be instantiated
+     * if one of the parsed values (e.g. if {@link Float} is used as type and
+     * one of the parsed values is not a valid float.
+     * @since 0.12.1
+     */
+    public static <T> Collection<T> getConfigValues(Object value, Class<T> type,
+        boolean preseveNullValues){
+        if(value == null){
+            return null;
+        }
+        final Collection<?> values;
+        if(value instanceof Collection<?>){
+            values = (Collection<?>)value;
+        } else if(value.getClass().isArray()){
+            Class<?> componentType = value.getClass().getComponentType();
+            if(componentType.isPrimitive()){
+               int len = Array.getLength(value);
+               List<Object> av = new ArrayList<Object>(len);
+               for(int i = 0; i < len;i++){
+                   av.add(Array.get(value, i));
+               }
+               values = av;
+            } else {
+                values = Arrays.asList((Object[])value);
+            }
+        } else {
+            values = Collections.singleton(value);
+        }
+        final Constructor<T> constructor = getConstigTypeConstructor(type);
+        Collection<T> configValues = new ArrayList<T>(values.size());
+        for(Object o : values){
+            if(o == null){
+                if(preseveNullValues){
+                    configValues.add(null);
+                } //else skip 
+            } else {
+                configValues.add(getConfigValue(o, type, constructor));
+            }
+        }
+        return configValues;
+    }
+
+    /**
+     * Extracts a single Configuration values from the parsed Object value.
+     * In case the parsed value is an Array or a Collection it will take the
+     * first non <code>null</code> value.
+     * @param value the value. In case of an Array or a Collection it will take
+     * the first non <code>null</code> value
+     * @param type the desired type of the configuration values. The parsed type
+     * MUST define a {@link Constructor} taking a {@link String} as only parameter.
+     * @param preseveNullValues if <code>null</code> values in the parsed
+     * value should be preserved or removed.
+     * @return the configuration value as parsed from the parsed value
+     * @throws NullPointerException if the parsed type is <code>null</code>
+     * @throws IllegalArgumentException if the parsed type does not have a
+     * {@link Constructor} that takes a {@link String} as only parameter; if the
+     * {@link Constructor} is not visible or can not be instantiated (e.g.
+     * because the parsed type is an Interface or an abstract class).
+     * @throws IllegalStateException if the parsed type can not be instantiated
+     * if one of the parsed values (e.g. if {@link Float} is used as type and
+     * one of the parsed values is not a valid float.
+     * @since 0.12.1
+     */
+    public static final <T> T getFirstConfigValue(Object value, Class<T> type){
+        if(value == null){
+            return null;
+        }
+        Object first = null;
+        if(value instanceof Collection<?>){
+            Collection<?> c = (Collection<?>)value;
+            if(c.isEmpty()){
+                return null;
+            } else {
+                Iterator<?> it = c.iterator();
+                while(first == null && it.hasNext()){
+                    first = it.next();
+                }
+            }
+        } else if(value.getClass().isArray()){
+            Class<?> componentType = value.getClass().getComponentType();
+            int len = Array.getLength(value);
+            if(len < 1){
+                return null;
+            } else {
+                if(componentType.isPrimitive()){
+                   first = Array.get(value, 0);
+                } else {
+                   for(int i=0; first == null && i < len; i++){
+                       first = Array.get(value, i);
+                   }
+                }
+            }
+        } else {
+            first = value;
+        }
+        return getConfigValue(first, type, getConstigTypeConstructor(type));
+    }
+
+    /**
+     * Internally used to get the config value for the parsed value and type.
+     * @param value
+     * @param type
+     * @param constructor the constructor typically retrieved by calling
+     * {@link #getConstigTypeConstructor(Class)} for the type
+     * @return the value
+     */
+    private static <T> T getConfigValue(Object value, Class<T> type, final Constructor<T> constructor) {
+        if(value == null){
+            return null;
+        }
+        T configValue;
+        if(constructor == null){
+            configValue = type.cast(value.toString());
+        } else {
+            try {
+                configValue = constructor.newInstance(value.toString());
+            } catch (InstantiationException e) {
+                throw new IllegalArgumentException("Unable to instantiate the "
+                    + "parsed value type '" + type.getClass().getName() +"'!", e);
+            } catch (IllegalAccessException e) {
+                throw new IllegalArgumentException("Unable to access the "
+                        + "constructor of the parsed value type '" 
+                        + type.getClass().getName() + "'!", e);
+            } catch (InvocationTargetException e) {
+                throw new IllegalStateException("Unable to instantiate the "
+                        + "parsed value type '" + type.getClass().getName() 
+                        + "' with the String value '"+value+ "'!", e);
+            }
+        }
+        return configValue;
+    }
+
+    /**
+     * Internally used to get the String parameter constructor for the parsed
+     * config value type
+     * @param type
+     * @return
+     */
+    private static <T> Constructor<T> getConstigTypeConstructor(Class<T> type) {
+        final Constructor<T> constructor;
+        if(String.class.equals(type)){
+            constructor = null;
+        } else {
+            try {
+                constructor = type.getConstructor(String.class);
+            } catch (NoSuchMethodException e) {
+                throw new IllegalArgumentException("Parsed config value type '"
+                    + type.getClass().getName()+ "' does not define a Constructor "
+                    + "that takes a String as only parameter!", e);
+            }
+        }
+        return constructor;
+    }
 }
