@@ -73,7 +73,7 @@ public class ContentItemMentionBuilder extends InMemoryEntityIndex implements Li
             //      Nouns for the co-mention resolution. In such cases this might result
             //      in additional extractions.
             String[] tokens = tokenizer.tokenize(selectedText, language);
-            if(tokens.length > 1){ //TODO make configurable
+            if(tokens != null && tokens.length > 1){ //TODO make configurable
                 Double confidence = EnhancementEngineHelper.get(metadata,textAnnotation,ENHANCER_CONFIDENCE,Double.class,lf);
                 if(confidence == null || confidence > 0.85){ //TODO make configurable
                     Integer start = EnhancementEngineHelper.get(metadata,textAnnotation,ENHANCER_START,Integer.class,lf);
@@ -81,6 +81,9 @@ public class ContentItemMentionBuilder extends InMemoryEntityIndex implements Li
                     registerMention(new EntityMention(textAnnotation,metadata, ENHANCER_SELECTED_TEXT, DC_TYPE, 
                         start != null && end != null ? new Integer[]{start,end} : null));
                 } // else confidence to low
+            } else if(tokens == null){
+                log.warn("Unable to tokenize \"{}\"@{} via tokenizer {} (class: {})!", new Object []{
+                    selectedText,language,tokenizer, tokenizer.getClass().getName()});
             } //else ignore Tokens with a single token
         } // else no selected text
     }
