@@ -86,8 +86,10 @@ import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -155,8 +157,7 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
     @Reference
     protected NamespacePrefixService prefixService;
     
-    @Reference 
-    protected LabelTokenizer labelTokenizer; 
+    private ServiceTracker labelTokenizerTracker;
 
     private double confidenceAdjustmentFactor;
     
@@ -226,6 +227,9 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
         }
         confidenceAdjustmentFactor = 1 - confidenceAdjustment;
         //get the metadata later set to the enhancement engine
+        final BundleContext bc = ctx.getBundleContext();
+        labelTokenizerTracker = new ServiceTracker(bc, LabelTokenizer.class.getName(), null); 
+        labelTokenizerTracker.open();
     }
     /**
      * Deactivates this components. 
@@ -235,6 +239,10 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
         log.info("deactivate {}[name:{}]",getClass().getSimpleName(),getName());
         textProcessingConfig = null;
         linkerConfig = null;
+        if(labelTokenizerTracker != null){
+            labelTokenizerTracker.close();
+            labelTokenizerTracker = null;
+        }
         super.deactivate(ctx);
     }
     
@@ -267,6 +275,11 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
             log.debug("compute co-mentions for ContentItem {} language {}  text={}", 
                 new Object []{ci.getUri().getUnicodeString(), language, StringUtils.abbreviate(at.getSpan(), 100)});
         }
+        LabelTokenizer labelTokenizer = (LabelTokenizer)labelTokenizerTracker.getService();
+        if(labelTokenizer == null){
+            throw new EngineException(this, ci, "No LabelTokenizer available!",null);
+        }
+
         //create the in-memory database for the mentioned Entities
         ContentItemMentionBuilder entityMentionIndex = new ContentItemMentionBuilder(
             labelTokenizer, language, linkerConfig.getDefaultLanguage());
@@ -283,7 +296,7 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
             ci.getLock().readLock().unlock();
         }
         EntityLinker entityLinker = new EntityLinker(at,language, 
-            languageConfig, entityMentionIndex, linkerConfig, labelTokenizer,entityMentionIndex);
+            languageConfig, entityMentionIndex, linkerConfig, labelTokenizer ,entityMentionIndex);
         //process
         try {
             entityLinker.process();

@@ -19,7 +19,6 @@ package org.apache.stanbol.enhancer.engines.entitylinking.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,28 +54,6 @@ public class MainLabelTokenizer implements LabelTokenizer {
     private final Logger log = LoggerFactory.getLogger(MainLabelTokenizer.class);
     
     private ServiceTracker labelTokenizerTracker;
-    
-    private static final Comparator<ServiceReference> RANKING_COMPARATOR = new Comparator<ServiceReference>() {
-        
-        public int compare(ServiceReference ref1, ServiceReference ref2) {
-            int r1,r2;
-            Object tmp = ref1.getProperty(Constants.SERVICE_RANKING);
-            r1 = tmp != null ? ((Integer)tmp).intValue() : 0;
-            tmp = ref2.getProperty(Constants.SERVICE_RANKING);
-            r2 = tmp != null ? ((Integer)tmp).intValue() : 0;
-            if(r1 == r2){
-                tmp = ref1.getProperty(Constants.SERVICE_ID);
-                long id1 = tmp != null ? ((Long)tmp).longValue() : Long.MAX_VALUE;
-                tmp = ref2.getProperty(Constants.SERVICE_ID);
-                long id2 = tmp != null ? ((Long)tmp).longValue() : Long.MAX_VALUE;
-                //the lowest id must be first -> id1 < id2 -> [id1,id2] -> return -1
-                return id1 < id2 ? -1 : id2 == id1 ? 0 : 1; 
-            } else {
-                //the highest ranking MUST BE first -> r1 < r2 -> [r2,r1] -> return 1
-                return r1 < r2 ? 1:-1;
-            }
-        }        
-    };
     
     private Map<ServiceReference,LanguageConfiguration> ref2LangConfig = 
             Collections.synchronizedMap(new HashMap<ServiceReference,LanguageConfiguration>());
@@ -185,6 +162,7 @@ public class MainLabelTokenizer implements LabelTokenizer {
     }
 
     
+    @SuppressWarnings("unchecked")
     private List<ServiceReference> initTokenizers(String language) {
         List<ServiceReference> tokenizers = new ArrayList<ServiceReference>();
         if(labelTokenizerTracker.getServiceReferences() != null){
@@ -196,7 +174,7 @@ public class MainLabelTokenizer implements LabelTokenizer {
             }
         }
         if(tokenizers.size() > 1){
-            Collections.sort(tokenizers,RANKING_COMPARATOR);
+            Collections.sort(tokenizers);
         }
         this.langTokenizers.put(language, tokenizers);
         return tokenizers;
