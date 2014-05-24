@@ -120,20 +120,20 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.indexing.core</artifactId>
-      <version>0.12.0</version>
+      <version>0.12.1-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.indexing.source.jenatdb</artifactId>
-      <version>0.12.0</version>
+      <version>0.12.1-SNAPSHOT</version>
       <scope>runtime</scope>
     </dependency>
     <!-- dependencies of the solr yard destination -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.indexing.destination.solryard</artifactId>
-      <version>0.12.0</version>
+      <version>0.12.1-SNAPSHOT</version>
       <scope>runtime</scope>
     </dependency>
 
@@ -141,34 +141,34 @@
     <dependency> <!-- provides the default Stanbol mappings -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
-      <version>0.11.0</version>
+      <version>0.12.0</version>
     </dependency>
     <dependency> <!-- provides the prefix.cc mappings -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.prefixcc</artifactId>
-      <version>0.11.0</version>
+      <version>0.12.0</version>
     </dependency>
     
     <!-- additional Solr modules -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.extras.icu</artifactId>
-      <version>0.12.0</version>
+      <version>0.12.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.extras.smartcn</artifactId>
-      <version>0.12.0</version>
+      <version>0.12.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.extras.kuromoji</artifactId>
-      <version>0.12.0</version>
+      <version>0.12.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.extras.stempel</artifactId>
-      <version>0.12.0</version>
+      <version>0.12.1-SNAPSHOT</version>
     </dependency>
 
     <dependency> <!-- for the Main (command line utility) -->
@@ -198,11 +198,6 @@
     <dependency> <!-- we use log4j 1.2 -->
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency> <!-- see also the log4j.properties in src/main/resources -->
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
       <scope>runtime</scope>
     </dependency>
 
