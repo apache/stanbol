@@ -54,14 +54,14 @@ import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementPropertyException;
 import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
+import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.ibm.icu.impl.CalendarAstronomer.Equatorial;
 
 
 public final class EnhancementEngineHelper {
@@ -979,6 +979,81 @@ public final class EnhancementEngineHelper {
     }
     
     /**
+     * Getter for all configuration values for the parsed property.<p>
+     * This does support arrays and {@link Collection}s for multiple values.
+     * In any other case a single value collection will be returned. <code>NULL</code>
+     * value contained in the parsed value will be silently removed.
+     * @param config the OSGI component configuration.
+     * @param property the configuration property
+     * @param type the desired type of the configuration values. The parsed type
+     * MUST define a {@link Constructor} taking a {@link String} as only parameter.
+     * @return the configuration values for the parsed property or <code>null</code>
+     * if the property was not contained in the parsed configuration
+     * @throws NullPointerException if the parsed type is <code>null</code>
+     * @throws IllegalArgumentException if the parsed type does not have a
+     * {@link Constructor} that takes a {@link String} as only parameter; if the
+     * {@link Constructor} is not visible or can not be instantiated (e.g.
+     * because the parsed type is an Interface or an abstract class).
+     * @throws ConfigurationException if the parsed type can not be instantiated
+     * if one of the parsed values (e.g. if {@link Float} is used as type and
+     * one of the parsed values is not a valid float).
+     * @since 0.12.1
+     */
+    public static <T> Collection<T> getConfigValues(Dictionary<String,Object> config,
+        String property, Class<T> type) throws ConfigurationException {
+        if(config == null){
+            throw new NullPointerException("The parsed Dictionary with the configuration MUST NOT be NULL!");
+        }
+        if(property == null){
+            throw new NullPointerException("The parsed configuration property MUST NOT be NULL!");
+        }
+        try {
+            return parseConfigValues(config.get(property),type);
+        } catch (IllegalStateException e){
+            throw new ConfigurationException(property, e.getMessage(),e);
+        }
+    }
+    /**
+     * Getter for all configuration values for the parsed enhancement property.<p>
+     * This does support arrays and {@link Collection}s for multiple values.
+     * In any other case a single value collection will be returned. <code>NULL</code>
+     * value contained in the parsed value will be silently removed.
+     * @param ee the enhancement engine (only used to report errors
+     * @param ci the content item (only used to report errors)
+     * @param enhProps the enhancement properties as parsed the the engine with
+     * the parsed content item
+     * @param enhProp the enhancement property
+     * @param type the desired type of the configuration values. The parsed type
+     * MUST define a {@link Constructor} taking a {@link String} as only parameter.
+     * @return the configuration values for the parsed property or <code>null</code>
+     * if the property was not contained in the parsed enhancement properties
+     * @throws NullPointerException if the parsed type is <code>null</code>
+     * @throws IllegalArgumentException if the parsed type does not have a
+     * {@link Constructor} that takes a {@link String} as only parameter; if the
+     * {@link Constructor} is not visible or can not be instantiated (e.g.
+     * because the parsed type is an Interface or an abstract class).
+     * @throws EnhancementPropertyException if the parsed type can not be instantiated
+     * if one of the parsed values (e.g. if {@link Float} is used as type and
+     * one of the parsed values is not a valid float).
+     * @since 0.12.1
+     */
+    public static <T> Collection<T> getConfigValues(EnhancementEngine ee,
+        ContentItem ci, Map<String,Object> enhProps, String enhProp, Class<T> type)
+        throws EnhancementPropertyException {
+        if(enhProp == null){
+            throw new NullPointerException("The parsed EnhancementProperty MUST NOT be NULL");
+        }
+        if(enhProps == null){
+            throw new NullPointerException("The parsed Map with the EnhancementProperties MUST NOT be NULL");
+        }
+        try {
+            return parseConfigValues(enhProps.get(enhProp), type);
+        } catch(IllegalStateException e){
+            throw new EnhancementPropertyException(ee, ci, enhProp, e.getMessage(),e);
+        }
+    }
+    
+    /**
      * Extracts multiple Configuration values from the parsed Object value.
      * This does support arrays and {@link Collection}s for multiple values.
      * In any other case a single value collection will be returned. <code>NULL</code>
@@ -999,9 +1074,87 @@ public final class EnhancementEngineHelper {
      * one of the parsed values is not a valid float.
      * @since 0.12.1
      */
-    public static <T> Collection<T> getConfigValues(Object value, Class<T> type){
-        return getConfigValues(value, type, false);
+    public static <T> Collection<T> parseConfigValues(Object value, Class<T> type){
+        return parseConfigValues(value, type, false);
     }
+    
+    /**
+     * Getter for all configuration values for the parsed property.<p>
+     * This does support arrays and {@link Collection}s for multiple values.
+     * In any other case a single value collection will be returned.
+     * @param config the OSGI component configuration.
+     * @param property the configuration property
+     * @param type the desired type of the configuration values. The parsed type
+     * MUST define a {@link Constructor} taking a {@link String} as only parameter.
+     * @param preseveNullValues if <code>null</code> values in the parsed
+     * value should be preserved or removed.
+     * @return the configuration values for the parsed property or <code>null</code>
+     * if the property was not contained in the parsed configuration
+     * @throws NullPointerException if the parsed type is <code>null</code>
+     * @throws IllegalArgumentException if the parsed type does not have a
+     * {@link Constructor} that takes a {@link String} as only parameter; if the
+     * {@link Constructor} is not visible or can not be instantiated (e.g.
+     * because the parsed type is an Interface or an abstract class).
+     * @throws ConfigurationException if the parsed type can not be instantiated
+     * if one of the parsed values (e.g. if {@link Float} is used as type and
+     * one of the parsed values is not a valid float).
+     * @since 0.12.1
+     */
+    public static <T> Collection<T> getConfigValues(Dictionary<String,Object> config,
+        String property, Class<T> type, boolean preserveNullValues) throws ConfigurationException {
+        if(config == null){
+            throw new NullPointerException("The parsed Dictionary with the configuration MUST NOT be NULL!");
+        }
+        if(property == null){
+            throw new NullPointerException("The parsed configuration property MUST NOT be NULL!");
+        }
+        try {
+            return parseConfigValues(config.get(property),type, preserveNullValues);
+        } catch (IllegalStateException e){
+            throw new ConfigurationException(property, e.getMessage(),e);
+        }
+    }
+    /**
+     * Getter for all configuration values for the parsed enhancement property.<p>
+     * This does support arrays and {@link Collection}s for multiple values.
+     * In any other case a single value collection will be returned.
+     * @param ee the enhancement engine (only used to report errors
+     * @param ci the content item (only used to report errors)
+     * @param enhProps the enhancement properties as parsed the the engine with
+     * the parsed content item
+     * @param enhProp the enhancement property
+     * @param type the desired type of the configuration values. The parsed type
+     * MUST define a {@link Constructor} taking a {@link String} as only parameter.
+     * @param preseveNullValues if <code>null</code> values in the parsed
+     * value should be preserved or removed.
+     * @return the configuration values for the parsed property or <code>null</code>
+     * if the property was not contained in the parsed enhancement properties.
+     * @throws NullPointerException if the parsed type is <code>null</code>
+     * @throws IllegalArgumentException if the parsed type does not have a
+     * {@link Constructor} that takes a {@link String} as only parameter; if the
+     * {@link Constructor} is not visible or can not be instantiated (e.g.
+     * because the parsed type is an Interface or an abstract class).
+     * @throws EnhancementPropertyException if the parsed type can not be instantiated
+     * if one of the parsed values (e.g. if {@link Float} is used as type and
+     * one of the parsed values is not a valid float).
+     * @since 0.12.1
+     */
+    public static <T> Collection<T> getConfigValues(EnhancementEngine ee,
+        ContentItem ci, Map<String,Object> enhProps, String enhProp, Class<T> type,
+        boolean preserveNullValues) throws EnhancementPropertyException {
+        if(enhProp == null){
+            throw new NullPointerException("The parsed EnhancementProperty MUST NOT be NULL");
+        }
+        if(enhProps == null){
+            throw new NullPointerException("The parsed Map with the EnhancementProperties MUST NOT be NULL");
+        }
+        try {
+            return parseConfigValues(enhProps.get(enhProp), type, preserveNullValues);
+        } catch(IllegalStateException e){
+            throw new EnhancementPropertyException(ee, ci, enhProp, e.getMessage(),e);
+        }
+    }
+    
     /**
      * Extracts multiple Configuration values from the parsed Object value.
      * This does support arrays and {@link Collection}s for multiple values.
@@ -1024,8 +1177,225 @@ public final class EnhancementEngineHelper {
      * one of the parsed values is not a valid float.
      * @since 0.12.1
      */
-    public static <T> Collection<T> getConfigValues(Object value, Class<T> type,
+    public static <T> Collection<T> parseConfigValues(Object value, Class<T> type,
         boolean preseveNullValues){
+        return parseConfigValues(value,type,  null, preseveNullValues);
+    }
+    /**
+     * Getter for all configuration values for the parsed property.<p>
+     * This does support arrays and {@link Collection}s for multiple values.
+     * In any other case a single value collection will be returned. <code>NULL</code>
+     * value contained in the parsed value will be silently removed.
+     * @param config the OSGI component configuration.
+     * @param property the configuration property
+     * @param type the desired type of the configuration values. The parsed type
+     * MUST define a {@link Constructor} taking a {@link String} as only parameter.
+     * @param configValues The collection to add the parsed configuration values
+     * to. If <code>null</code> an {@link ArrayList} will be used.
+     * @return the configuration values for the parsed property or <code>null</code>
+     * if the property was not contained in the parsed configuration
+     * @throws NullPointerException if the parsed type is <code>null</code>
+     * @throws IllegalArgumentException if the parsed type does not have a
+     * {@link Constructor} that takes a {@link String} as only parameter; if the
+     * {@link Constructor} is not visible or can not be instantiated (e.g.
+     * because the parsed type is an Interface or an abstract class).
+     * @throws ConfigurationException if the parsed type can not be instantiated
+     * if one of the parsed values (e.g. if {@link Float} is used as type and
+     * one of the parsed values is not a valid float).
+     * @since 0.12.1
+     */
+    public static <T> Collection<T> getConfigValues(Dictionary<String,Object> config,
+        String property, Class<T> type, Collection<T> configValues) throws ConfigurationException {
+        if(config == null){
+            throw new NullPointerException("The parsed Dictionary with the configuration MUST NOT be NULL!");
+        }
+        if(property == null){
+            throw new NullPointerException("The parsed configuration property MUST NOT be NULL!");
+        }
+        try {
+            return parseConfigValues(config.get(property),type, configValues);
+        } catch (IllegalStateException e){
+            throw new ConfigurationException(property, e.getMessage(),e);
+        }
+    }
+    /**
+     * Getter for all configuration values for the parsed enhancement property.<p>
+     * This does support arrays and {@link Collection}s for multiple values.
+     * In any other case a single value collection will be returned. <code>NULL</code>
+     * value contained in the parsed value will be silently removed.
+     * @param ee the enhancement engine (only used to report errors
+     * @param ci the content item (only used to report errors)
+     * @param enhProps the enhancement properties as parsed the the engine with
+     * the parsed content item
+     * @param enhProp the enhancement property
+     * @param type the desired type of the configuration values. The parsed type
+     * MUST define a {@link Constructor} taking a {@link String} as only parameter.
+     * @param configValues The collection to add the parsed configuration values
+     * to. If <code>null</code> an {@link ArrayList} will be used.
+     * @return the configuration values for the parsed property or <code>null</code>
+     * if the property was not contained in the parsed enhancement properties
+     * @throws NullPointerException if the parsed type is <code>null</code>
+     * @throws IllegalArgumentException if the parsed type does not have a
+     * {@link Constructor} that takes a {@link String} as only parameter; if the
+     * {@link Constructor} is not visible or can not be instantiated (e.g.
+     * because the parsed type is an Interface or an abstract class).
+     * @throws EnhancementPropertyException if the parsed type can not be instantiated
+     * if one of the parsed values (e.g. if {@link Float} is used as type and
+     * one of the parsed values is not a valid float).
+     * @since 0.12.1
+     */
+    public static <T> Collection<T> getConfigValues(EnhancementEngine ee,
+        ContentItem ci, Map<String,Object> enhProps, String enhProp, Class<T> type
+        ,Collection<T> configValues) throws EnhancementPropertyException {
+        if(enhProp == null){
+            throw new NullPointerException("The parsed EnhancementProperty MUST NOT be NULL");
+        }
+        if(enhProps == null){
+            throw new NullPointerException("The parsed Map with the EnhancementProperties MUST NOT be NULL");
+        }
+        try {
+            return parseConfigValues(enhProps.get(enhProp), type, configValues);
+        } catch(IllegalStateException e){
+            throw new EnhancementPropertyException(ee, ci, enhProp, e.getMessage(),e);
+        }
+    }
+
+    /**
+     * Extracts multiple Configuration values from the parsed Object value.
+     * This does support arrays and {@link Collection}s for multiple values.
+     * In any other case a single value collection will be returned.
+     * @param value the value. {@link Collection}s and Arrays are supported for
+     * multiple values. If the parsed value is of an other type a single value
+     * is assumed.
+     * @param type the desired type of the configuration values. The parsed type
+     * MUST define a {@link Constructor} taking a {@link String} as only parameter.
+     * @param configValues The collection to add the parsed configuration values
+     * to. If <code>null</code> an {@link ArrayList} will be used.
+     * @return the configuration values as parsed from the parsed value. 
+     * <code>null</code> if the parsed value was <code>null</code>.
+     * @throws NullPointerException if the parsed type is <code>null</code>
+     * @throws IllegalArgumentException if the parsed type does not have a
+     * {@link Constructor} that takes a {@link String} as only parameter; if the
+     * {@link Constructor} is not visible or can not be instantiated (e.g.
+     * because the parsed type is an Interface or an abstract class).
+     * @throws IllegalStateException if the parsed type can not be instantiated
+     * if one of the parsed values (e.g. if {@link Float} is used as type and
+     * one of the parsed values is not a valid float.
+     * @since 0.12.1
+     */
+    public static <T> Collection<T> parseConfigValues(Object value, 
+        Class<T> type, Collection<T> configValues){
+        return parseConfigValues(value, type, configValues,false);
+    }
+    
+    /**
+     * Getter for all configuration values for the parsed property.<p>
+     * This does support arrays and {@link Collection}s for multiple values.
+     * In any other case a single value collection will be returned.
+     * @param config the OSGI component configuration.
+     * @param property the configuration property
+     * @param type the desired type of the configuration values. The parsed type
+     * MUST define a {@link Constructor} taking a {@link String} as only parameter.
+     * @param configValues The collection to add the parsed configuration values
+     * to. If <code>null</code> an {@link ArrayList} will be used.
+     * @param preseveNullValues if <code>null</code> values in the parsed
+     * value should be preserved or removed.
+     * @return the configuration values for the parsed property or <code>null</code>
+     * if the property was not contained in the parsed configuration
+     * @throws NullPointerException if the parsed type is <code>null</code>
+     * @throws IllegalArgumentException if the parsed type does not have a
+     * {@link Constructor} that takes a {@link String} as only parameter; if the
+     * {@link Constructor} is not visible or can not be instantiated (e.g.
+     * because the parsed type is an Interface or an abstract class).
+     * @throws ConfigurationException if the parsed type can not be instantiated
+     * if one of the parsed values (e.g. if {@link Float} is used as type and
+     * one of the parsed values is not a valid float).
+     * @since 0.12.1
+     */
+    public static <T> Collection<T> getConfigValues(Dictionary<String,Object> config,
+        String property, Class<T> type, Collection<T> configValues, boolean preserveNullValues) 
+                throws ConfigurationException {
+        if(config == null){
+            throw new NullPointerException("The parsed Dictionary with the configuration MUST NOT be NULL!");
+        }
+        if(property == null){
+            throw new NullPointerException("The parsed configuration property MUST NOT be NULL!");
+        }
+        try {
+            return parseConfigValues(config.get(property),type, configValues, preserveNullValues);
+        } catch (IllegalStateException e){
+            throw new ConfigurationException(property, e.getMessage(),e);
+        }
+    }
+    /**
+     * Getter for all configuration values for the parsed enhancement property.<p>
+     * This does support arrays and {@link Collection}s for multiple values.
+     * In any other case a single value collection will be returned.
+     * @param ee the enhancement engine (only used to report errors
+     * @param ci the content item (only used to report errors)
+     * @param enhProps the enhancement properties as parsed the the engine with
+     * the parsed content item
+     * @param enhProp the enhancement property
+     * @param type the desired type of the configuration values. The parsed type
+     * MUST define a {@link Constructor} taking a {@link String} as only parameter.
+     * @param configValues The collection to add the parsed configuration values
+     * to. If <code>null</code> an {@link ArrayList} will be used.
+     * @param preseveNullValues if <code>null</code> values in the parsed
+     * value should be preserved or removed.
+     * @return the configuration values for the parsed property or <code>null</code>
+     * if the property was not contained in the parsed enhancement properties
+     * @throws NullPointerException if the parsed type is <code>null</code>
+     * @throws IllegalArgumentException if the parsed type does not have a
+     * {@link Constructor} that takes a {@link String} as only parameter; if the
+     * {@link Constructor} is not visible or can not be instantiated (e.g.
+     * because the parsed type is an Interface or an abstract class).
+     * @throws EnhancementPropertyException if the parsed type can not be instantiated
+     * if one of the parsed values (e.g. if {@link Float} is used as type and
+     * one of the parsed values is not a valid float).
+     * @since 0.12.1
+     */
+    public static <T> Collection<T> getConfigValues(EnhancementEngine ee,
+        ContentItem ci, Map<String,Object> enhProps, String enhProp, Class<T> type
+        ,Collection<T> configValues, boolean preserveNullValues) throws EnhancementPropertyException {
+        if(enhProp == null){
+            throw new NullPointerException("The parsed EnhancementProperty MUST NOT be NULL");
+        }
+        if(enhProps == null){
+            throw new NullPointerException("The parsed Map with the EnhancementProperties MUST NOT be NULL");
+        }
+        try {
+            return parseConfigValues(enhProps.get(enhProp), type, configValues, preserveNullValues);
+        } catch(IllegalStateException e){
+            throw new EnhancementPropertyException(ee, ci, enhProp, e.getMessage(),e);
+        }
+    }
+    /**
+     * Extracts multiple Configuration values from the parsed Object value.
+     * This does support arrays and {@link Collection}s for multiple values.
+     * In any other case a single value collection will be returned.
+     * @param value the value. {@link Collection}s and Arrays are supported for
+     * multiple values. If the parsed value is of an other type a single value
+     * is assumed.
+     * @param type the desired type of the configuration values. The parsed type
+     * MUST define a {@link Constructor} taking a {@link String} as only parameter.
+     * @param configValues The collection to add the parsed configuration values
+     * to. If <code>null</code> an {@link ArrayList} will be used.
+     * @param preseveNullValues if <code>null</code> values in the parsed
+     * value should be preserved or removed.
+     * @return the configuration values as parsed from the parsed value. 
+     * <code>null</code> if the parsed value was <code>null</code>.
+     * @throws NullPointerException if the parsed type is <code>null</code>
+     * @throws IllegalArgumentException if the parsed type does not have a
+     * {@link Constructor} that takes a {@link String} as only parameter; if the
+     * {@link Constructor} is not visible or can not be instantiated (e.g.
+     * because the parsed type is an Interface or an abstract class).
+     * @throws IllegalStateException if the parsed type can not be instantiated
+     * if one of the parsed values (e.g. if {@link Float} is used as type and
+     * one of the parsed values is not a valid float.
+     * @since 0.12.1
+     */
+    public static <T> Collection<T>  parseConfigValues(Object value, 
+        Class<T> type, Collection<T> configValues, boolean preseveNullValues){
         if(value == null){
             return null;
         }
@@ -1047,20 +1417,94 @@ public final class EnhancementEngineHelper {
         } else {
             values = Collections.singleton(value);
         }
-        final Constructor<T> constructor = getConstigTypeConstructor(type);
-        Collection<T> configValues = new ArrayList<T>(values.size());
+        final Constructor<T> constructor = getConfigTypeConstructor(type);
+        if(configValues == null){
+            //no idea why I have to cast to C ...
+            configValues = new ArrayList<T>(values.size());
+        }
         for(Object o : values){
             if(o == null){
                 if(preseveNullValues){
                     configValues.add(null);
                 } //else skip 
             } else {
-                configValues.add(getConfigValue(o, type, constructor));
+                configValues.add(parseConfigValue(o, type, constructor));
             }
         }
         return configValues;
     }
-
+    /**
+     * Getter for the first configuration value
+     * @param config the OSGI component configuration
+     * @param property the configuration property
+     * @param type the desired type of the configuration values. The parsed type
+     * MUST define a {@link Constructor} taking a {@link String} as only parameter.
+     * @param preseveNullValues if <code>null</code> values in the parsed
+     * value should be preserved or removed.
+     * @return the configuration value as parsed from the parsed value
+     * @throws ConfigurationException if the parsed type can not be instantiated
+     * if one of the parsed values (e.g. if {@link Float} is used as type and
+     * one of the parsed values is not a valid float.
+     * @throws NullPointerException if the parsed {@link Dictionary} with the component
+     * configuration, the configuration property or the type is <code>null</code>
+     * @throws IllegalArgumentException if the parsed type does not have a
+     * {@link Constructor} that takes a {@link String} as only parameter; if the
+     * {@link Constructor} is not visible or can not be instantiated (e.g.
+     * because the parsed type is an Interface or an abstract class).
+     * @since 0.12.1
+     */
+    public static final <T> T getFirstConfigValue(Dictionary<String,Object> config,
+            String property,Class<T> type) throws ConfigurationException {
+        if(config == null){
+            throw new NullPointerException("The parsed configuration MUST NOT be NULL!");
+        }
+        if(property == null){
+            throw new NullPointerException("The pased configuration property MUST NOT be NULL!");
+        }
+        try {
+            return parseFirstConfigValue(config.get(property), type);
+        } catch(IllegalStateException e){
+            throw new ConfigurationException(property, e.getMessage(),e);
+        }
+    }
+    /**
+     * Getter for the first value of an EnhancementProperty
+     * @param ee the enhancement engine (only used for reporting errors)
+     * @param ci the content item (only used for reporting errors)
+     * @param enhProps the map with the enhancement properties
+     * @param enhProp the enhancement property
+     * @param type the desired type of the configuration values. The parsed type
+     * MUST define a {@link Constructor} taking a {@link String} as only parameter.
+     * @param preseveNullValues if <code>null</code> values in the parsed
+     * value should be preserved or removed.
+     * @return the configuration value as parsed from the parsed value
+     * @throws EnhancementPropertyException if the parsed type can not be instantiated
+     * if one of the parsed values (e.g. if {@link Float} is used as type and
+     * one of the parsed values is not a valid float.
+     * @throws NullPointerException if the parsed {@link Map} with the enhancement
+     * properties, the enhancement property or the type is <code>null</code>
+     * @throws IllegalArgumentException if the parsed type does not have a
+     * {@link Constructor} that takes a {@link String} as only parameter; if the
+     * {@link Constructor} is not visible or can not be instantiated (e.g.
+     * because the parsed type is an Interface or an abstract class).
+     * @since 0.12.1
+     */
+    public static final <T> T getFirstConfigValue(EnhancementEngine ee, 
+            ContentItem ci, Map<String,Object> enhProps,
+            String enhProp, Class<T> type) throws EnhancementPropertyException {
+        if(enhProp == null){
+            throw new NullPointerException("The parsed EnhancementProperty MUST NOT be NULL");
+        }
+        if(enhProps == null){
+            throw new NullPointerException("The parsed Map with the EnhancementProperties MUST NOT be NULL");
+        }
+        try {
+            return parseFirstConfigValue(enhProps.get(enhProp), type);
+        } catch(IllegalStateException e){
+            throw new EnhancementPropertyException(ee, ci, enhProp, e.getMessage(),e);
+        }
+    }
+    
     /**
      * Extracts a single Configuration values from the parsed Object value.
      * In case the parsed value is an Array or a Collection it will take the
@@ -1082,7 +1526,7 @@ public final class EnhancementEngineHelper {
      * one of the parsed values is not a valid float.
      * @since 0.12.1
      */
-    public static final <T> T getFirstConfigValue(Object value, Class<T> type){
+    public static final <T> T parseFirstConfigValue(Object value, Class<T> type){
         if(value == null){
             return null;
         }
@@ -1114,7 +1558,7 @@ public final class EnhancementEngineHelper {
         } else {
             first = value;
         }
-        return getConfigValue(first, type, getConstigTypeConstructor(type));
+        return parseConfigValue(first, type, getConfigTypeConstructor(type));
     }
 
     /**
@@ -1122,10 +1566,10 @@ public final class EnhancementEngineHelper {
      * @param value
      * @param type
      * @param constructor the constructor typically retrieved by calling
-     * {@link #getConstigTypeConstructor(Class)} for the type
+     * {@link #getConfigTypeConstructor(Class)} for the type
      * @return the value
      */
-    private static <T> T getConfigValue(Object value, Class<T> type, final Constructor<T> constructor) {
+    private static <T> T parseConfigValue(Object value, Class<T> type, final Constructor<T> constructor) {
         if(value == null){
             return null;
         }
@@ -1157,7 +1601,7 @@ public final class EnhancementEngineHelper {
      * @param type
      * @return
      */
-    private static <T> Constructor<T> getConstigTypeConstructor(Class<T> type) {
+    private static <T> Constructor<T> getConfigTypeConstructor(Class<T> type) {
         final Constructor<T> constructor;
         if(String.class.equals(type)){
             constructor = null;

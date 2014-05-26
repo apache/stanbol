@@ -19,6 +19,7 @@ package org.apache.stanbol.enhancer.engines.dereference;
 import static org.apache.stanbol.enhancer.engines.dereference.DereferenceConstants.DEREFERENCE_ENTITIES_LANGUAGES;
 import static org.apache.stanbol.enhancer.engines.dereference.DereferenceConstants.NO_LANGUAGE_KEY;
 
+import java.io.ObjectInputStream.GetField;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,8 +29,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.lang.StringUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
+import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
+import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +64,7 @@ public class DereferenceContext {
     private Set<String> languages;
     private List<String> fields;
     private String program;
+    private HashSet<UriRef> entityReferences;
     
     
     
@@ -79,8 +85,37 @@ public class DereferenceContext {
             ep == null ? null : (Collection<String>)ep.get(INTERNAL_ACCEPT_LANGUAGES));
         parseFields(ep == null ? null : ep.get(DereferenceConstants.DEREFERENCE_ENTITIES_FIELDS));
         parseLDPath(ep == null ? null : ep.get(DereferenceConstants.DEREFERENCE_ENTITIES_LDPATH));
+        parseEntityReferences(ep == null ? null : ep.get(DereferenceConstants.ENTITY_REFERENCES));
         //call the initialisation callback
         initialise();
+    }
+    
+    private void parseEntityReferences(Object value) throws DereferenceConfigurationException {
+        Collection<String> entityRefProps;
+        try{
+            entityRefProps = EnhancementEngineHelper.parseConfigValues(value, String.class);
+        } catch (IllegalStateException e){
+            throw new DereferenceConfigurationException(e,
+                engine.getDereferencer().getClass(), 
+                DereferenceConstants.ENTITY_REFERENCES);
+        }
+        //start with the references present in the config
+        this.entityReferences = new HashSet<UriRef>(getConfig().getEntityReferences());
+        if(entityRefProps != null && !entityRefProps.isEmpty()){
+            NamespacePrefixService nps = engine.getConfig().getNsPrefixService();
+            for(String prop : entityRefProps){
+                if(!StringUtils.isBlank(prop)){
+                    try {
+                        entityReferences.add(new UriRef(
+                            NamespaceMappingUtils.getConfiguredUri(nps, prop)));
+                    } catch(IllegalArgumentException e){
+                        throw new DereferenceConfigurationException(e, 
+                            engine.getDereferencer().getClass(), 
+                            DereferenceConstants.ENTITY_REFERENCES);
+                    }
+                }
+            }
+        }
     }
     /**
      * Parses the {@link DereferenceConstants#DEREFERENCE_ENTITIES_LANGUAGES}
@@ -260,6 +295,16 @@ public class DereferenceContext {
      */
     public final String getLdPathProgram() {
         return program;
+    }
+    /**
+     * The property URIs that may refer to Entities that need to be dereferenced.
+     * This is the union view over properties parsed as EnhancementProperties
+     * with properties configured with the engine
+     * @return the entity reference properties
+     * @see DereferenceEngineConfig#getEntityReferences()
+     */
+    public HashSet<UriRef> getEntityReferences() {
+        return entityReferences;
     }
     
     /**
