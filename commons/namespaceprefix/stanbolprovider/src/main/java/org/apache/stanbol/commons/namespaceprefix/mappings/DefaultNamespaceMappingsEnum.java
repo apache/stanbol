@@ -105,7 +105,7 @@ public enum DefaultNamespaceMappingsEnum{
     georss("http://www.georss.org/georss/"),
     gml("http://www.opengis.net/gml/"),
     dcElements("dc-elements","http://purl.org/dc/elements/1.1/"),
-    dcTerms("dc","http://purl.org/dc/terms/"), // Entityhub prefers DC-Terms, therefore use the "dc" prefix for the terms name space
+    dcTerms("dct","http://purl.org/dc/terms/"),
     foaf("http://xmlns.com/foaf/0.1/"),
     vCal("http://www.w3.org/2002/12/cal#"),
     vCard("http://www.w3.org/2001/vcard-rdf/3.0#"),
@@ -225,6 +225,29 @@ public enum DefaultNamespaceMappingsEnum{
      * href="https://issues.apache.org/jira/browse/STANBOL-488">STANBOL-488</<>
      */
     ehp("http://stanbol.apache.org/ontology/enhancementproperties#"),
+    /*
+     * Added several mappings form prefix.cc for namespaces defined above
+     */
+    /**
+     * Alternative to {@link #dcElements}
+     */
+    dce("http://purl.org/dc/elements/1.1/"),
+    /**
+     * Alternative for {@link #dbpedia_ont}
+     */
+    dbo("http://dbpedia.org/ontology/"),
+    /**
+     * DBpedia resources
+     */
+    dbr("http://dbpedia.org/resource/"),
+    /**
+     * Alternative to {@link #dbpediaProp}
+     */
+    dbp("http://dbpedia.org/property/"),
+    /**
+     * Alternative to {@link #geonames}
+     */
+    gn("http://www.geonames.org/ontology#")
     ;
     private String namespace;
     private String prefix;
