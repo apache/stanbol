@@ -19,6 +19,7 @@ package org.apache.stanbol.enhancer.serviceapi.helper;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 
 import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.LiteralFactory;
@@ -119,132 +120,160 @@ public class EnhancementEngineHelperTest {
             metadata, ta,Properties.ENHANCER_SELECTION_TAIL));
     }
     /**
-     * Tests positive cases for {@link EnhancementEngineHelper#getConfigValues(Object, Class, boolean)}
+     * Tests positive cases for {@link EnhancementEngineHelper#parseConfigValues(Object, Class, boolean)}
      */
     @Test
     public void testConfigValues(){
         Object value = new String[]{"23","27.25","-23"};
         Assert.assertEquals(
             Arrays.asList(Float.valueOf(23),Float.valueOf(27.25f),Float.valueOf(-23)), 
-            EnhancementEngineHelper.getConfigValues(value, Float.class));
+            EnhancementEngineHelper.parseConfigValues(value, Float.class));
         Assert.assertEquals(
             Arrays.asList(Double.valueOf(23),Double.valueOf(27.25f),Double.valueOf(-23)), 
-            EnhancementEngineHelper.getConfigValues(value, Double.class));
+            EnhancementEngineHelper.parseConfigValues(value, Double.class));
         Assert.assertEquals(
             Arrays.asList("23","27.25","-23"), 
-            EnhancementEngineHelper.getConfigValues(value, String.class));
+            EnhancementEngineHelper.parseConfigValues(value, String.class));
+        
         
         value = new float[]{23f,27.25f,-23f};
         Assert.assertEquals(
             Arrays.asList(Float.valueOf(23),Float.valueOf(27.25f),Float.valueOf(-23)), 
-            EnhancementEngineHelper.getConfigValues(value, Float.class));
+            EnhancementEngineHelper.parseConfigValues(value, Float.class));
         Assert.assertEquals(
             Arrays.asList(Double.valueOf(23),Double.valueOf(27.25f),Double.valueOf(-23)), 
-            EnhancementEngineHelper.getConfigValues(value, Double.class));
+            EnhancementEngineHelper.parseConfigValues(value, Double.class));
         Assert.assertEquals(
             Arrays.asList("23.0","27.25","-23.0"), 
-            EnhancementEngineHelper.getConfigValues(value, String.class));
+            EnhancementEngineHelper.parseConfigValues(value, String.class));
 
     
         value = new String[]{"23","27.25",null,"-23"};
         Assert.assertEquals(
             Arrays.asList(Float.valueOf(23),Float.valueOf(27.25f),Float.valueOf(-23)), 
-            EnhancementEngineHelper.getConfigValues(value, Float.class));
+            EnhancementEngineHelper.parseConfigValues(value, Float.class));
         Assert.assertEquals(
             Arrays.asList(Float.valueOf(23),Float.valueOf(27.25f),null,Float.valueOf(-23)), 
-            EnhancementEngineHelper.getConfigValues(value, Float.class,true));
+            EnhancementEngineHelper.parseConfigValues(value, Float.class,true));
 
         value = "23";
         Assert.assertEquals(Arrays.asList(Integer.valueOf(23)), 
-            EnhancementEngineHelper.getConfigValues(value, Integer.class));
+            EnhancementEngineHelper.parseConfigValues(value, Integer.class));
         Assert.assertEquals(Arrays.asList(Float.valueOf(23)), 
-            EnhancementEngineHelper.getConfigValues(value, Float.class));
+            EnhancementEngineHelper.parseConfigValues(value, Float.class));
         Assert.assertEquals(Arrays.asList("23"), 
-            EnhancementEngineHelper.getConfigValues(value, String.class));
+            EnhancementEngineHelper.parseConfigValues(value, String.class));
         
         value = null;
-        Assert.assertNull(EnhancementEngineHelper.getConfigValues(value, String.class));
-        Assert.assertNull(EnhancementEngineHelper.getConfigValues(value, Double.class));
+        Assert.assertNull(EnhancementEngineHelper.parseConfigValues(value, String.class));
+        Assert.assertNull(EnhancementEngineHelper.parseConfigValues(value, Double.class));
+
+        //This tests parsing an Set
+        value = new String[]{"23","27","-23","27"};
+        Assert.assertEquals(
+            new HashSet<Integer>(Arrays.asList(Integer.valueOf(23),Integer.valueOf(27),Integer.valueOf(-23))), 
+            EnhancementEngineHelper.parseConfigValues(value, Integer.class, new HashSet<Integer>(),false));
+        Assert.assertEquals(
+            new HashSet<String>(Arrays.asList("23","27","-23")), 
+            EnhancementEngineHelper.parseConfigValues(value, String.class, new HashSet<String>(),false));
+
+        //This tests parsing a Set the the config values method that allows to parse
+        //a custom collection
+        value = new String[]{"23","27",null,"-23","27", null};
+        Assert.assertEquals(
+            new HashSet<Integer>(Arrays.asList(Integer.valueOf(23),Integer.valueOf(27),Integer.valueOf(-23))), 
+            EnhancementEngineHelper.parseConfigValues(value, Integer.class, new HashSet<Integer>()));
+        Assert.assertEquals(
+            new HashSet<String>(Arrays.asList("23","27","-23")), 
+            EnhancementEngineHelper.parseConfigValues(value, String.class, new HashSet<String>()));
+
+        Assert.assertEquals(
+            new HashSet<Integer>(Arrays.asList(null, Integer.valueOf(23),Integer.valueOf(27),Integer.valueOf(-23))), 
+            EnhancementEngineHelper.parseConfigValues(value, Integer.class, new HashSet<Integer>(),true));
+        Assert.assertEquals(
+            new HashSet<String>(Arrays.asList(null,"23","27","-23")), 
+            EnhancementEngineHelper.parseConfigValues(value, String.class, new HashSet<String>(),true));
+
     }
     
     /**
-     * Tests positive cases for {@link EnhancementEngineHelper#getFirstConfigValue(Object, Class)}
+     * Tests positive cases for {@link EnhancementEngineHelper#parseFirstConfigValue(Object, Class)}
      */
     @Test
     public void testFirstConfigValue(){
         Object value = null;
-        Assert.assertNull(EnhancementEngineHelper.getFirstConfigValue(value, String.class));
-        Assert.assertNull(EnhancementEngineHelper.getFirstConfigValue(value, Double.class));
+        Assert.assertNull(EnhancementEngineHelper.parseFirstConfigValue(value, String.class));
+        Assert.assertNull(EnhancementEngineHelper.parseFirstConfigValue(value, Double.class));
         
         value = new String[]{null};
-        Assert.assertNull(EnhancementEngineHelper.getFirstConfigValue(value, String.class));
-        Assert.assertNull(EnhancementEngineHelper.getFirstConfigValue(value, Double.class));
+        Assert.assertNull(EnhancementEngineHelper.parseFirstConfigValue(value, String.class));
+        Assert.assertNull(EnhancementEngineHelper.parseFirstConfigValue(value, Double.class));
 
         value = new String[]{null,null,null};
-        Assert.assertNull(EnhancementEngineHelper.getFirstConfigValue(value, String.class));
-        Assert.assertNull(EnhancementEngineHelper.getFirstConfigValue(value, Double.class));
+        Assert.assertNull(EnhancementEngineHelper.parseFirstConfigValue(value, String.class));
+        Assert.assertNull(EnhancementEngineHelper.parseFirstConfigValue(value, Double.class));
 
         value = Arrays.asList((String)null);
-        Assert.assertNull(EnhancementEngineHelper.getFirstConfigValue(value, String.class));
-        Assert.assertNull(EnhancementEngineHelper.getFirstConfigValue(value, Double.class));
+        Assert.assertNull(EnhancementEngineHelper.parseFirstConfigValue(value, String.class));
+        Assert.assertNull(EnhancementEngineHelper.parseFirstConfigValue(value, Double.class));
 
         value = Arrays.asList(null,null,null);
-        Assert.assertNull(EnhancementEngineHelper.getFirstConfigValue(value, String.class));
-        Assert.assertNull(EnhancementEngineHelper.getFirstConfigValue(value, Double.class));
+        Assert.assertNull(EnhancementEngineHelper.parseFirstConfigValue(value, String.class));
+        Assert.assertNull(EnhancementEngineHelper.parseFirstConfigValue(value, Double.class));
 
         value = "23";
-        Assert.assertEquals("23", EnhancementEngineHelper.getFirstConfigValue(value, String.class));
-        Assert.assertEquals(Integer.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, Integer.class));
-        Assert.assertEquals(Double.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, Double.class));
-        Assert.assertEquals(BigInteger.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, BigInteger.class));
+        Assert.assertEquals("23", EnhancementEngineHelper.parseFirstConfigValue(value, String.class));
+        Assert.assertEquals(Integer.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, Integer.class));
+        Assert.assertEquals(Double.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, Double.class));
+        Assert.assertEquals(BigInteger.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, BigInteger.class));
         
         value = new String[]{"23"};
-        Assert.assertEquals("23", EnhancementEngineHelper.getFirstConfigValue(value, String.class));
-        Assert.assertEquals(Integer.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, Integer.class));
-        Assert.assertEquals(Double.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, Double.class));
-        Assert.assertEquals(BigInteger.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, BigInteger.class));
+        Assert.assertEquals("23", EnhancementEngineHelper.parseFirstConfigValue(value, String.class));
+        Assert.assertEquals(Integer.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, Integer.class));
+        Assert.assertEquals(Double.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, Double.class));
+        Assert.assertEquals(BigInteger.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, BigInteger.class));
 
         value = new int[]{23};
-        Assert.assertEquals("23", EnhancementEngineHelper.getFirstConfigValue(value, String.class));
-        Assert.assertEquals(Integer.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, Integer.class));
-        Assert.assertEquals(Double.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, Double.class));
-        Assert.assertEquals(BigInteger.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, BigInteger.class));
+        Assert.assertEquals("23", EnhancementEngineHelper.parseFirstConfigValue(value, String.class));
+        Assert.assertEquals(Integer.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, Integer.class));
+        Assert.assertEquals(Double.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, Double.class));
+        Assert.assertEquals(BigInteger.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, BigInteger.class));
 
         value = new String[]{"23","24"};
-        Assert.assertEquals("23", EnhancementEngineHelper.getFirstConfigValue(value, String.class));
-        Assert.assertEquals(Integer.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, Integer.class));
-        Assert.assertEquals(Double.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, Double.class));
-        Assert.assertEquals(BigInteger.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, BigInteger.class));
+        Assert.assertEquals("23", EnhancementEngineHelper.parseFirstConfigValue(value, String.class));
+        Assert.assertEquals(Integer.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, Integer.class));
+        Assert.assertEquals(Double.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, Double.class));
+        Assert.assertEquals(BigInteger.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, BigInteger.class));
 
         value = new int[]{23, 24};
-        Assert.assertEquals("23", EnhancementEngineHelper.getFirstConfigValue(value, String.class));
-        Assert.assertEquals(Integer.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, Integer.class));
-        Assert.assertEquals(Double.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, Double.class));
-        Assert.assertEquals(BigInteger.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, BigInteger.class));
+        Assert.assertEquals("23", EnhancementEngineHelper.parseFirstConfigValue(value, String.class));
+        Assert.assertEquals(Integer.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, Integer.class));
+        Assert.assertEquals(Double.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, Double.class));
+        Assert.assertEquals(BigInteger.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, BigInteger.class));
 
         value = new String[]{null,"23"};
-        Assert.assertEquals("23", EnhancementEngineHelper.getFirstConfigValue(value, String.class));
-        Assert.assertEquals(Integer.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, Integer.class));
-        Assert.assertEquals(Double.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, Double.class));
-        Assert.assertEquals(BigInteger.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, BigInteger.class));
+        Assert.assertEquals("23", EnhancementEngineHelper.parseFirstConfigValue(value, String.class));
+        Assert.assertEquals(Integer.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, Integer.class));
+        Assert.assertEquals(Double.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, Double.class));
+        Assert.assertEquals(BigInteger.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, BigInteger.class));
 
         value = Arrays.asList("23");
-        Assert.assertEquals("23", EnhancementEngineHelper.getFirstConfigValue(value, String.class));
-        Assert.assertEquals(Integer.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, Integer.class));
-        Assert.assertEquals(Double.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, Double.class));
-        Assert.assertEquals(BigInteger.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, BigInteger.class));
+        Assert.assertEquals("23", EnhancementEngineHelper.parseFirstConfigValue(value, String.class));
+        Assert.assertEquals(Integer.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, Integer.class));
+        Assert.assertEquals(Double.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, Double.class));
+        Assert.assertEquals(BigInteger.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, BigInteger.class));
 
         value = Arrays.asList("23","24");
-        Assert.assertEquals("23", EnhancementEngineHelper.getFirstConfigValue(value, String.class));
-        Assert.assertEquals(Integer.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, Integer.class));
-        Assert.assertEquals(Double.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, Double.class));
-        Assert.assertEquals(BigInteger.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, BigInteger.class));
+        Assert.assertEquals("23", EnhancementEngineHelper.parseFirstConfigValue(value, String.class));
+        Assert.assertEquals(Integer.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, Integer.class));
+        Assert.assertEquals(Double.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, Double.class));
+        Assert.assertEquals(BigInteger.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, BigInteger.class));
 
         value = Arrays.asList(null,"23");
-        Assert.assertEquals("23", EnhancementEngineHelper.getFirstConfigValue(value, String.class));
-        Assert.assertEquals(Integer.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, Integer.class));
-        Assert.assertEquals(Double.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, Double.class));
-        Assert.assertEquals(BigInteger.valueOf(23), EnhancementEngineHelper.getFirstConfigValue(value, BigInteger.class));
+        Assert.assertEquals("23", EnhancementEngineHelper.parseFirstConfigValue(value, String.class));
+        Assert.assertEquals(Integer.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, Integer.class));
+        Assert.assertEquals(Double.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, Double.class));
+        Assert.assertEquals(BigInteger.valueOf(23), EnhancementEngineHelper.parseFirstConfigValue(value, BigInteger.class));
     }
     
 }

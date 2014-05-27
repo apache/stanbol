@@ -2,15 +2,13 @@ package org.apache.stanbol.enhancer.engines.dereference;
 
 import static org.apache.stanbol.enhancer.engines.dereference.DereferenceConstants.NO_LANGUAGE_KEY;
 import static org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils.getConfiguredUri;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
+import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.getConfigValues;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -19,6 +17,7 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
@@ -26,10 +25,12 @@ import org.osgi.service.cm.ConfigurationException;
 public class DereferenceEngineConfig implements DereferenceConstants {
 
     private final NamespacePrefixService nsPrefixService;
+
     private final Dictionary<String,Object> config;
     private String ldpath;
     private List<String> dereferenced;
-    private List<UriRef> entityReferences;
+    private Set<String> languages;
+    private Set<UriRef> entityReferences;
 
     /**
      * Creates a DereferenceEngine configuration based on a Dictionary. Typically
@@ -50,6 +51,14 @@ public class DereferenceEngineConfig implements DereferenceConstants {
         validateRequired(config);
     }
     
+    /**
+     * Getter for the {@link NamespacePrefixService}
+     * @return the service or <code>null</code> if not available
+     * @since 0.12.1
+     */
+    public NamespacePrefixService getNsPrefixService() {
+        return nsPrefixService;
+    }
     /**
      * If filtering for non content language literals is active
      * @return the {@link DereferenceConstants#FILTER_CONTENT_LANGUAGES} state
@@ -85,6 +94,8 @@ public class DereferenceEngineConfig implements DereferenceConstants {
         }
         this.dereferenced = parseDereferenceFields();
         this.ldpath = parseLdPathProgram();
+        this.languages = parseLanguages();
+        //STANBOL-1334
         this.entityReferences = parseEntityReferences();
     }
 
@@ -116,54 +127,10 @@ public class DereferenceEngineConfig implements DereferenceConstants {
      * is present
      * @since 0.12.1 (<a href="https://issues.apache.org/jira/browse/STANBOL-1334">STANBOL-1334</a>)
      */
-    public List<UriRef> getEntityReferences() {
+    public Set<UriRef> getEntityReferences() {
         return entityReferences;
     }
-    /**
-     * Parses the list of properties used to reference Entities from the
-     * {@link DereferenceConstants#ENTITY_REFERENCES} property
-     * @return the list of properties used to reference entities. If none are
-     * present this returns a singleton list containing 
-     * {@link Properties#ENHANCER_ENTITY_REFERENCE}
-     * @since 0.12.1 (<a href="https://issues.apache.org/jira/browse/STANBOL-1334">STANBOL-1334</a>)
-     */
-    public List<UriRef> parseEntityReferences() throws ConfigurationException {
-        Object value = config.get(ENTITY_REFERENCES);
-        final List<String> fields;
-        if(value instanceof String[]){
-            fields = Arrays.asList((String[])value);
-        } else if(value instanceof Collection<?>){
-            fields = new ArrayList<String>(((Collection<?>)value).size());
-            for(Object field : (Collection<?>)value){
-                if(field != null){
-                    fields.add(field.toString());
-                }
-            }
-        } else if(value instanceof String){
-            fields = Collections.singletonList((String)value);
-        } else if(value != null){ //unsupported type 
-            throw new ConfigurationException(ENTITY_REFERENCES, 
-                "Entity References MUST BE parsed as String[], Collection<String> or "
-                + "String (single value). The actual value '"+value+"'(type: '"+value.getClass() 
-                + "') is NOT supported");
-        } else { //not specified return the default
-            return Collections.singletonList(ENHANCER_ENTITY_REFERENCE);
-        }
-        //convert configured fields (incl. 'ns:local-name' configurations) to 
-        //full UriRef instances
-        List<UriRef> references = new ArrayList<UriRef>(fields.size());
-        for(String field : fields){
-            if(!StringUtils.isBlank(field)){
-                references.add(new UriRef(getConfiguredUri(nsPrefixService, 
-                    ENTITY_REFERENCES, field.trim())));
-            }
-        }
-        if(references.isEmpty()){ //no valid configuration left ... return the default
-            return Collections.singletonList(ENHANCER_ENTITY_REFERENCE); 
-        } else {
-            return references;
-        }
-    }
+
     /**
      * Getter for the list of dereferenced fields as configured by the 
      * {@link DereferenceConstants#DEREFERENCE_ENTITIES_FIELDS} property.<p>
@@ -188,30 +155,31 @@ public class DereferenceEngineConfig implements DereferenceConstants {
      * @return the {@link List} with the unprocessed dereference fields as list
      */
     private List<String> parseDereferenceFields() throws ConfigurationException {
-        Object value = config.get(DEREFERENCE_ENTITIES_FIELDS);
-        final List<String> fields;
-        if(value instanceof String[]){
-            fields = Arrays.asList((String[])value);
-        } else if(value instanceof Collection<?>){
-            fields = new ArrayList<String>(((Collection<?>)value).size());
-            for(Object field : (Collection<?>)value){
-                if(field == null){
-                    fields.add(null);
-                } else {
-                    fields.add(field.toString());
+        List<String> fields = new ArrayList<String>();
+        getConfigValues(config, DEREFERENCE_ENTITIES_FIELDS, String.class, fields);
+        return fields;
+    }
+    /**
+     * Parses the URIs for the {@link DereferenceConstants#ENTITY_REFERENCE_PROPERTIES}
+     * @return
+     * @throws ConfigurationException
+     */
+    private Set<UriRef> parseEntityReferences() throws ConfigurationException {
+        Set<UriRef> entityRefPropUris;
+        Collection<String> entityProps = EnhancementEngineHelper.getConfigValues(
+            config, ENTITY_REFERENCES, String.class);
+        if(entityProps == null || entityProps.isEmpty()){
+            entityRefPropUris = DEFAULT_ENTITY_REFERENCES;
+        } else {
+            entityRefPropUris = new HashSet<UriRef>(entityProps.size());
+            for(String prop : entityProps){
+                if(!StringUtils.isBlank(prop)){
+                    entityRefPropUris.add(new UriRef(getConfiguredUri(nsPrefixService, 
+                        ENTITY_REFERENCES, prop.trim())));
                 }
             }
-        } else if(value instanceof String){
-            fields = Collections.singletonList((String)value);
-        } else if(value != null){
-            throw new ConfigurationException(DEREFERENCE_ENTITIES_FIELDS, 
-                "Dereference Entities Fields MUST BE parsed as String[], Collection<String> or "
-                + "String (single value). The actual value '"+value+"'(type: '"+value.getClass() 
-                + "') is NOT supported");
-        } else {//value == null
-            fields = Collections.emptyList();
         }
-        return fields;
+        return entityRefPropUris;
     }
     /**
      * Getter for the LDPath program as configured by the 
@@ -342,29 +310,23 @@ public class DereferenceEngineConfig implements DereferenceConstants {
 	 * @return
 	 */
 	public Collection<String> getLanaguages(){
-	    Object value = config.get(DEREFERENCE_ENTITIES_LANGUAGES);
-	    if(value == null){
+	    return languages;
+	}
+	/**
+	 * parses the {@link DereferenceConstants#DEREFERENCE_ENTITIES_LANGUAGES} property
+	 * @return
+	 */
+	private Set<String> parseLanguages() throws ConfigurationException {
+	    Collection<String> values = EnhancementEngineHelper.getConfigValues(
+	        config, DEREFERENCE_ENTITIES_LANGUAGES, String.class);
+	    if(values == null){
 	        return null;
 	    } else {
-            Set<String> languages = new HashSet<String>();
-            if(value instanceof String){
-                addLanguage(languages, (String)value);
-            } else if(value instanceof String[]){
-                for(String lang : (String[])value){
-                    addLanguage(languages, lang);
-                }
-            } else if(value instanceof Collection<?>){
-                for(Object lang : (Collection<?>)value){
-                    if(lang instanceof String){
-                        addLanguage(languages, (String)lang);
-                    }
-                }           
-            }
-            if(languages.isEmpty()){
-                return null;
-            } else {
-                return languages;
-            }
+            Set<String> languages = new HashSet<String>(values.size());
+	        for(String value : values){
+	            addLanguage(languages, value);
+	        }
+	        return languages;
 	    }
 	}
 	

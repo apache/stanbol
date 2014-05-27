@@ -16,9 +16,13 @@
  */
 package org.apache.stanbol.enhancer.engines.dereference;
 
+import java.util.Collections;
+import java.util.Set;
+
 import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 
 /**
@@ -27,7 +31,7 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
  *
  */
 public interface DereferenceConstants {
-    
+        
     /**
      * Property that allows to enable/disable the filtering of {@link Triple}s
      * with {@link PlainLiteral} {@link Triple#getObject() objects} based on
@@ -70,7 +74,14 @@ public interface DereferenceConstants {
      * @since 0.12.1 (<a href="https://issues.apache.org/jira/browse/STANBOL-1334">STANBOL-1334</a>)
      */
     String ENTITY_REFERENCES = "enhancer.engines.dereference.references";
-    
+    /**
+     * By default the {@link Properties#ENTITY_REFERENCES} is used for
+     * dereferencing entities.
+     * @since 0.12.1 (<a href="https://issues.apache.org/jira/browse/STANBOL-1334">STANBOL-1334</a>)
+     */
+    Set<UriRef> DEFAULT_ENTITY_REFERENCES = Collections.unmodifiableSet(
+        Collections.singleton(Properties.ENHANCER_ENTITY_REFERENCE));
+
     /**
      * Property used to configure the fields that should be dereferenced.<p>
      * DereferenceEngines need to support a list of URIs but may also support more

@@ -251,7 +251,8 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
             //parse the referenced entities from the graph
             //(2) read all Entities we need to dereference from the parsed contentItem
             Set<UriRef> checked = new HashSet<UriRef>();
-            for(UriRef referenceProperty : config.getEntityReferences()){
+            //since STANBOL-1334 the list of properties that refer to entities can be configured
+            for(UriRef referenceProperty : derefContext.getEntityReferences()){
                 Iterator<Triple> entityReferences = metadata.filter(null, referenceProperty, null);
                 while(entityReferences.hasNext()){
                     Triple triple = entityReferences.next();
@@ -267,7 +268,7 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
                         }
                     } else if(log.isTraceEnabled()){
                         log.trace(" ... ignore Entity {} (referenced-by: {})",
-                            entityReferences, referenceProperty);
+                            entityReference, referenceProperty);
                     }
                 }
             }
