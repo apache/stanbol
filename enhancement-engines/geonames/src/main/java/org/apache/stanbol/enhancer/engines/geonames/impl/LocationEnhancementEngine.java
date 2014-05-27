@@ -372,9 +372,10 @@ public class LocationEnhancementEngine
                 throw new EngineException(this, ci, e);
             }
             if (results != null) {
+                Double maxScore = results.isEmpty() ? null : results.get(0).getScore();
                 for (Toponym result : results) {
                     log.debug("process result {} {}",result.getGeoNameId(),result.getName());
-                    Double score = getToponymScore(result);
+                    Double score = getToponymScore(result,maxScore);
                     log.debug("  > score {}",score);
                     if (score != null) {
                         if (score < minScore) {
@@ -391,7 +392,7 @@ public class LocationEnhancementEngine
                     }
                     //write the enhancement!
                     NonLiteral locationEnhancement = writeEntityEnhancement(
-                            contentItemId, graph, literalFactory, result, entry.getValue(), null, null);
+                            contentItemId, graph, literalFactory, result, entry.getValue(), null, score);
                     log.debug("  > {}  >= {}",score,minHierarchyScore);
                     if (score != null && score >= minHierarchyScore) {
                         log.debug("  > getHierarchy for {} {}",result.getGeoNameId(),result.getName());
@@ -417,7 +418,7 @@ public class LocationEnhancementEngine
                                      * Currently is is set to the value of the suggested entry
                                      */
                                     writeEntityEnhancement(contentItemId, graph, literalFactory, hierarchyEntry,
-                                            null, Collections.singletonList(locationEnhancement), score);
+                                            null, Collections.singletonList(locationEnhancement), 1.0);
                                 }
                             }
                         } catch (Exception e) {
@@ -431,18 +432,18 @@ public class LocationEnhancementEngine
 
     /**
      * Getter for the socre in a range from [0..1]<p>
-     * NOTE (2010.11.16, rw): GeoNames previously returned the score in the
-     * range from [0..1]. It looks like that up from now they use the
-     * range [0..100]. Therefore I created this method to make the necessary
-     * adaptation.
-     * see also http://code.google.com/p/iks-project/issues/detail?id=89
+     * NOTE (2014.05.27, rw): as described by STANBOL-1303 the scores returned
+     * by Geonames changed. So this method was adapted to calculate scores
+     * relative to the highest returned one.
      *
      * @param toponym the toponym
+     * @param maxScore the highest score or <code>null</code> if no highest score
+     * is yet known (assuming that the parsed toponym is the highest score
      *
-     * @return the score in a range [0..1]
+     * @return the score in a range [0..1] (relative to the highest score)
      */
-    private Double getToponymScore(Toponym toponym) {
-        return toponym.getScore() == null ? null : toponym.getScore() / 100;
+    private Double getToponymScore(Toponym toponym, Double maxScore) {
+        return toponym.getScore() == null ? null : maxScore == null ? 1 : Math.log1p(toponym.getScore())/Math.log1p(maxScore);
     }
 
     /**
@@ -479,7 +480,7 @@ public class LocationEnhancementEngine
     private UriRef writeEntityEnhancement(UriRef contentItemId, MGraph graph,
             LiteralFactory literalFactory, Toponym toponym,
             Collection<NonLiteral> relatedEnhancements, Collection<NonLiteral> requiresEnhancements,
-            Double defaultScore) {
+            Double score) {
         UriRef entityRef = new UriRef("http://sws.geonames.org/" + toponym.getGeoNameId() + '/');
         FeatureClass featureClass = toponym.getFeatureClass();
         log.debug("  > featureClass " + featureClass);
@@ -500,10 +501,6 @@ public class LocationEnhancementEngine
         graph.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_REFERENCE, entityRef));
         log.debug("  > name " + toponym.getName());
         graph.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_LABEL, new PlainLiteralImpl(toponym.getName())));
-        Double score = getToponymScore(toponym);
-        if (score == null) { //use the default score as fallback
-            score = defaultScore;
-        }
         if (score != null) {
             graph.add(new TripleImpl(entityAnnotation, ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(score)));
         }
@@ -628,6 +625,5 @@ public class LocationEnhancementEngine
     public Double getMinHierarchyScore() {
         return minHierarchyScore;
     }
-
 
 }

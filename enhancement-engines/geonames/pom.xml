@@ -76,8 +76,8 @@
         <configuration>
           <excludes>
             <!-- Reactivated this test. If it fails because of geonames.org
-                 we might need to deactivate it again.  -->
-            <exclude>**/TestLocationEnhancementEngine*.java</exclude>
+                 we might need to deactivate it again.  
+            <exclude>**/TestLocationEnhancementEngine*.java</exclude> -->
           </excludes>
         </configuration>
       </plugin>
