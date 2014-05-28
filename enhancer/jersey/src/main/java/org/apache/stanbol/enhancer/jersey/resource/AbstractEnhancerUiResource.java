@@ -117,6 +117,19 @@ public abstract class AbstractEnhancerUiResource extends AbstractEnhancerResourc
                                     @Context HttpHeaders headers) throws EnhancementException,
                                                                          IOException {
         log.debug("enhance from From: " + content);
+        if(content == null){ //(STANBOL-1349) parsing content using 
+            // 'application/x-www-form-urlencoded' is not (officially) supported.
+            // ... unofficial it can be done by adding the content as value to the
+            //     content parameter
+            throw new WebApplicationException( 
+                Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
+                .entity("Parsing Content as 'application/x-www-form-urlencoded' is not supported!"
+                    + "Please directly POST the content and set the 'Content-Type' "
+                    + "header to the media type of the parsed content. 'application/"
+                    + "octet-stream' SHOULD BE used if the media type of the parsed "
+                    + "content is not known.\n")
+                .build());
+        }
         ContentItem ci = ciFactory.createContentItem(new StringSource(content));
         if(!buildAjaxview){ //rewrite to a normal EnhancementRequest
             return enhanceFromData(ci, false, null, false, null, false, null, headers);
