@@ -83,6 +83,13 @@
             <exclude>src/test/resources/testConfigs/simple/indexing/resources/testEntityScore.txt</exclude>
             <exclude>src/test/resources/indexerTests/dataIterating/indexing/config/indexerTestMappings.txt</exclude>
             <exclude>src/test/resources/indexerTests/idIterating/indexing/config/indexerTestMappings.txt</exclude>
+
+            <exclude>src/test/resources/testOsgiConfiguration/bundlebuild/indexing/config/dbpediamappings.txt</exclude>
+            <exclude>src/test/resources/testOsgiConfiguration/bundlebuild/indexing/config/indexfieldconfig.txt</exclude>
+            <exclude>src/test/resources/testOsgiConfiguration/bundlebuild/indexing/resources/testEntityScore.txt</exclude>
+            <exclude>src/test/resources/testOsgiConfiguration/bundlebuild/indexing/destination/config/org/apache/stanbol/data/site/dbpedia/dbpedia.solrindex.ref</exclude>
+            <exclude>src/test/resources/testOsgiConfiguration/bundlebuild/indexing/destination/config/org/apache/stanbol/data/site/dbpedia/org.apache.stanbol.entityhub.core.site.CacheImpl-dbpedia.config</exclude>
+            <exclude>src/test/resources/testOsgiConfiguration/bundlebuild/indexing/destination/config/org/apache/stanbol/data/site/dbpedia/org.apache.stanbol.entityhub.yard.solr.impl.SolrYard-dbpedia.config</exclude>
           </excludes>
         </configuration>
       </plugin>          

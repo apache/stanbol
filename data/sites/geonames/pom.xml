@@ -57,15 +57,12 @@
         <configuration>
           <instructions>
             <Bundle-Category>Stanbol Data</Bundle-Category>
-            <Bundle-DocURL>http://stanbol.apache.org</Bundle-DocURL>
-            <Bundle-Vendor>Apache Stanbol (Incubating)</Bundle-Vendor>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Install-Path>
               org/apache/stanbol/data
             </Install-Path>
-            <_versionpolicy>$${version;===;${@}}</_versionpolicy>
             <Export-Package>
-              org.apache.stanbol.data.site.geonames.*;version="${project.version}ion}"
+              org.apache.stanbol.data.site.geonames.*;version="${project.version}"
             </Export-Package>
           </instructions>
         </configuration>
