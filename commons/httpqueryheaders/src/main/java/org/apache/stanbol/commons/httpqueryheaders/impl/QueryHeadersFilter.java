@@ -19,7 +19,15 @@ package org.apache.stanbol.commons.httpqueryheaders.impl;
 import static org.apache.stanbol.commons.httpqueryheaders.Constants.HEARDER_PREFIX;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -55,17 +63,18 @@ public class QueryHeadersFilter implements Filter {
             return;
         }
         OverwriteableHeaderHttpServletRequest wrapped = null;
-        Enumeration<String> paramNames = request.getParameterNames();
-        while(paramNames.hasMoreElements()) {
-            String param = paramNames.nextElement();
+        
+        Map<String,List<String>> queryParams = parseQueryParams(httpRequest.getQueryString());
+        for(Entry<String,List<String>> entry : queryParams.entrySet()){
+            String param = entry.getKey();
             if(param != null && param.startsWith(HEARDER_PREFIX) && param.length() > HEARDER_PREFIX.length()+1){
                 String header = param.substring(HEARDER_PREFIX.length());
-                String[] values = request.getParameterValues(param);
-                if(values != null && values.length > 0){
+                List<String> values = entry.getValue();
+                if(values != null && !values.isEmpty()){
                     if(wrapped == null ){ //lazzy initialisation 
                         wrapped = new OverwriteableHeaderHttpServletRequest(httpRequest);
                     }
-                    wrapped.setHeader(header, values);
+                    wrapped.setHeader(header, values.toArray(new String[values.size()]));
                 }
             }
         }
@@ -81,5 +90,35 @@ public class QueryHeadersFilter implements Filter {
         // Get properties parsed to the Filter
         //filterConfig
     }
-
+    private static Map<String, List<String>> parseQueryParams(String query){
+        if(query == null){
+            return Collections.emptyMap();
+        }
+        String[] params;
+        try {
+            params = URLDecoder.decode(query, "UTF-8").split("&");
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException(e.getMessage(),e);
+        }
+        Map<String, List<String>> map = new HashMap<String, List<String>>();
+        for (String param : params) {
+            int idx = param.indexOf('=');
+            String name;
+            String value;
+            if(idx < 0 ){
+                name = param;
+                value = null;
+            } else {
+                name = param.substring(0, idx);
+                value = param.substring(idx+1);
+            }
+            List<String> values = map.get(name);
+            if(values == null){
+                values = new ArrayList<String>(4);
+                map.put(name, values);
+            }
+            values.add(value);
+        }
+        return map;
+    }
 }
