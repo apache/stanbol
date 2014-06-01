@@ -1,0 +1,69 @@
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db6 <http://discobits.org/ontology#holds> <bundle:///security-content-el/3-content> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db6 <http://discobits.org/ontology#pos> "1" .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db6 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#Entry> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db5 <http://discobits.org/ontology#holds> <bundle:///security-content> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db5 <http://discobits.org/ontology#pos> "1" .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db5 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#Entry> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db4 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#Entry> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db4 <http://discobits.org/ontology#pos> "3" .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db4 <http://discobits.org/ontology#holds> <bundle:///security-content-el/1> .
+<bundle:///security-content-el/3-title> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#XHTMLInfoDiscoBit> .
+<bundle:///security-content-el/3-title> <http://discobits.org/ontology#infoBit> "Permission Management"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db3 <http://discobits.org/ontology#holds> <bundle:///security-content-el/1-content> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db3 <http://discobits.org/ontology#pos> "1" .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db3 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#Entry> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#Entry> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db2 <http://discobits.org/ontology#pos> "0" .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db2 <http://discobits.org/ontology#holds> <bundle:///security-content-el/2-title> .
+<bundle:///security-content> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#OrderedContent> .
+<bundle:///security-content> <http://discobits.org/ontology#contains> _:A6993a12aX3aX123939e7c92X3aXX2dX7db1 .
+<bundle:///security-content> <http://discobits.org/ontology#contains> _:A6993a12aX3aX123939e7c92X3aXX2dX7db0 .
+<bundle:///security-content> <http://discobits.org/ontology#contains> _:A6993a12aX3aX123939e7c92X3aXX2dX7daf .
+<bundle:///security-content> <http://discobits.org/ontology#contains> _:A6993a12aX3aX123939e7c92X3aXX2dX7db4 .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7dae <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#Entry> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7dae <http://discobits.org/ontology#pos> "1" .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7dae <http://discobits.org/ontology#holds> <bundle:///security-content-el/2-content> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7dad <http://discobits.org/ontology#holds> <bundle:///security-content-el/3-title> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7dad <http://discobits.org/ontology#pos> "0" .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7dad <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#Entry> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7dac <http://discobits.org/ontology#holds> <bundle:///security-content-el/1-title> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7dac <http://discobits.org/ontology#pos> "0" .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7dac <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#Entry> .
+<bundle:///security-content-el/2-title> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#XHTMLInfoDiscoBit> .
+<bundle:///security-content-el/2-title> <http://discobits.org/ontology#infoBit> "User Authentication"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral> .
+<bundle:///security-content-el/3-content> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#XHTMLInfoDiscoBit> .
+<bundle:///security-content-el/3-content> <http://discobits.org/ontology#infoBit> "Permissions can be assigned to any user as well as to any role.\nA permission is defined by three attributes:\n<ul xmlns=\"http://www.w3.org/1999/xhtml\">\n<li>tpye: the qualified class name, e.g., java.io.FilePermission</li>\n<li>name: the name of the permission, e.g., the path in case of java.io.FilePermission</li>\n<li>actions: the actions that the permission allows, e.g., read, write</li>\n</ul>\n"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7dab <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#Entry> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7dab <http://discobits.org/ontology#holds> <bundle:///security-title> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7dab <http://discobits.org/ontology#pos> "0" .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db0 <http://discobits.org/ontology#holds> <bundle:///security-content-el/2> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db0 <http://discobits.org/ontology#pos> "1" .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db0 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#Entry> .
+<bundle:///security-content-el/2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#TitledContent> .
+<bundle:///security-content-el/2> <http://discobits.org/ontology#contains> _:A6993a12aX3aX123939e7c92X3aXX2dX7db2 .
+<bundle:///security-content-el/2> <http://discobits.org/ontology#contains> _:A6993a12aX3aX123939e7c92X3aXX2dX7dae .
+<bundle:///security-content-el/1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#TitledContent> .
+<bundle:///security-content-el/1> <http://discobits.org/ontology#contains> _:A6993a12aX3aX123939e7c92X3aXX2dX7dac .
+<bundle:///security-content-el/1> <http://discobits.org/ontology#contains> _:A6993a12aX3aX123939e7c92X3aXX2dX7db3 .
+<bundle:///security-content-el/3> <http://discobits.org/ontology#contains> _:A6993a12aX3aX123939e7c92X3aXX2dX7db6 .
+<bundle:///security-content-el/3> <http://discobits.org/ontology#contains> _:A6993a12aX3aX123939e7c92X3aXX2dX7dad .
+<bundle:///security-content-el/3> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#TitledContent> .
+<bundle:///security-title> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#XHTMLInfoDiscoBit> .
+<bundle:///security-title> <http://discobits.org/ontology#infoBit> "Security"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral> .
+<bundle:///security-content-el/0> <http://discobits.org/ontology#infoBit> "The following functionalities are provided by the platform with respect to security\n<ul xmlns=\"http://www.w3.org/1999/xhtml\">\n<li>User Authentication</li>\n<li>Permission Management</li>\n<li>Permission Check Service</li>\n<li>User Authorization</li>\n</ul>\n"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral> .
+<bundle:///security-content-el/0> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#XHTMLInfoDiscoBit> .
+<bundle:///security-content-el/1-title> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#XHTMLInfoDiscoBit> .
+<bundle:///security-content-el/1-title> <http://discobits.org/ontology#infoBit> "Permission Check Service"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral> .
+<bundle:///security-content-el/1-content> <http://discobits.org/ontology#infoBit> "<p xmlns=\"http://www.w3.org/1999/xhtml\">The platform provides a web service to check whether the current user owns a certain permission. This service is invoked with a GET-request specifying the resource path /security/check and the query parameter permission. The parameter has the format: \n</p>\n<p xmlns=\"http://www.w3.org/1999/xhtml\">\n'(' &lt;permission class name&gt; &lt;double-quoted name&gt; &lt;double-quoted actions&gt; ')'.\n</p>\n<p xmlns=\"http://www.w3.org/1999/xhtml\">\nAn example of a valid URL would be: http://localhost:8282/security/check?permission=(java.io.FilePermission \"/tmp/*\" \"read\")\n</p>\n<p xmlns=\"http://www.w3.org/1999/xhtml\">As a result of this check the platform returns a response with the code 204, if the user has this permission.\n</p>"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral> .
+<bundle:///security-content-el/1-content> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#XHTMLInfoDiscoBit> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db1 <http://discobits.org/ontology#holds> <bundle:///security-content-el/0> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db1 <http://discobits.org/ontology#pos> "0" .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7db1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#Entry> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7daf <http://discobits.org/ontology#pos> "2" .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7daf <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#Entry> .
+_:A6993a12aX3aX123939e7c92X3aXX2dX7daf <http://discobits.org/ontology#holds> <bundle:///security-content-el/3> .
+<bundle:///security> <http://discobits.org/ontology#contains> _:A6993a12aX3aX123939e7c92X3aXX2dX7db5 .
+<bundle:///security> <http://discobits.org/ontology#contains> _:A6993a12aX3aX123939e7c92X3aXX2dX7dab .
+<bundle:///security> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#TitledContent> .
+<bundle:///security-content-el/2-content> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://discobits.org/ontology#XHTMLInfoDiscoBit> .
+<bundle:///security-content-el/2-content> <http://discobits.org/ontology#infoBit> "The platform supports two types of authentication:\n<ul xmlns=\"http://www.w3.org/1999/xhtml\">\n<li>HTTP Basic Authentication</li>\n<li>Cookie-based Authentication</li>\n</ul>\n"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral> .

@@ -1,0 +1,12 @@
+<file:///home/foo/foobar/testbundle-1.0-SNAPSHOT.jar> <http://clerezza.org/2008/11/osgi#owner> _:genid10 .
+<file:///home/testbundle-1.0-SNAPSHOT.jar> <http://clerezza.org/2008/11/osgi#owner> _:genid10 .
+<file:///home/foo/testbundle-1.0-SNAPSHOT.jar> <http://clerezza.org/2008/11/osgi#owner> _:genid10 .
+_:genid10 <http://rdfs.org/sioc/ns#has_function> _:genid20 .
+_:genid20 <http://rdfs.org/sioc/ns#has_function> _:genid22 .
+_:genid22 <http://rdfs.org/sioc/ns#has_function> _:genid23 .
+_:genid23 <http://rdfs.org/sioc/ns#has_function> _:genid24 .
+_:genid24 <http://rdfs.org/sioc/ns#has_function> _:genid21 .
+_:genid21 <http://clerezza.org/2008/10/permission#hasPermission> _:genid30 .
+_:genid30 <http://clerezza.org/2008/10/permission#javaPermissionEntry> "(java.io.FilePermission \"file:///home/foo/-\" \"read,write,delete\")" .
+_:genid30 <http://clerezza.org/2008/10/permission#javaPermissionEntry> "(java.io.FilePermission \"file:///home/foo/*\" \"read,write\")" .
+_:genid30 <http://clerezza.org/2008/10/permission#javaPermissionEntry> "(java.io.FilePermission \"file:///home/*\" \"read,write\")" .
