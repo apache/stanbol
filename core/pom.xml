@@ -30,7 +30,7 @@
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.security.core</artifactId>
-    <version>0.99</version>
+    <version>0.100-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Security Core</name>
@@ -52,12 +52,12 @@
 
   <scm>
     <connection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/org.apache.stanbol.commons.security-0.99/core
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/security-0.99/core
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/org.apache.stanbol.commons.security-0.99/core
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/security-0.99//core
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/org.apache.stanbol.commons.security-0.99/stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>
