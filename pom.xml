@@ -38,18 +38,18 @@
 
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.commons.security</artifactId>
-    <version>0.99</version>
+    <version>0.100-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Apache Stanbol Commons Security Reactor</name>
 
     <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/org.apache.stanbol.commons.security-0.99
+            scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/security-0.99
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/org.apache.stanbol.commons.security-0.99
+            scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/security-0.99
         </developerConnection>
-        <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/org.apache.stanbol.commons.security-0.99</url>
+        <url>http://stanbol.apache.org/</url>
     </scm>
     
     <modules>
