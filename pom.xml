@@ -32,24 +32,24 @@
     <parent>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>stanbol-parent</artifactId>
-      <version>5-SNAPSHOT</version>
+      <version>5</version>
       <relativePath>parent</relativePath>
   </parent>
 
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.commons.security.reactor</artifactId>
-    <version>20140602-SNAPSHOT</version>
+    <version>20140602</version>
     <packaging>pom</packaging>
     <name>Apache Stanbol Reactor or security bunles and parent</name>
 
     <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/security-1.0.0
+            scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/org.apache.stanbol.commons.security.reactor-20140602
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/security-1.0.0
+            scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/org.apache.stanbol.commons.security.reactor-20140602
         </developerConnection>
-        <url>http://stanbol.apache.org/</url>
+        <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/org.apache.stanbol.commons.security.reactor-20140602</url>
     </scm>
     
     <modules>
