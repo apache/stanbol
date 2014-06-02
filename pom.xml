@@ -30,15 +30,15 @@
     <modelVersion>4.0.0</modelVersion>
     
     <parent>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>stanbol-parent</artifactId>
-        <version>4</version>
-        <relativePath />
-    </parent>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>stanbol-parent</artifactId>
+      <version>5-SNAPSHOT</version>
+      <relativePath>parent</relativePath>
+  </parent>
 
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.commons.security</artifactId>
-    <version>0.100-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Apache Stanbol Commons Security Reactor</name>
 
@@ -55,6 +55,7 @@
     <modules>
         <module>authentication.basic</module>
         <module>core</module>
+        <module>parent</module>
     </modules>
 
 </project>
