@@ -29,7 +29,7 @@
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-parent</artifactId>
   <packaging>pom</packaging>
-  <version>5</version>
+  <version>6-SNAPSHOT</version>
 
   <name>Apache Stanbol Parent</name>
   <description>Parent POM for the Apache Stanbol project</description>
@@ -46,12 +46,12 @@
 
   <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/org.apache.stanbol.commons.security.reactor-20140602/parent
+            scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/security-1.0.0/parent
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/org.apache.stanbol.commons.security.reactor-20140602/parent
+            scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/security-1.0.0/parent
         </developerConnection>
-        <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/org.apache.stanbol.commons.security.reactor-20140602/stanbol.apache.org</url>
+        <url>http://stanbol.apache.org/</url>
     </scm>
 
   <issueManagement>
