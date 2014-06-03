@@ -57,6 +57,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.solr.common.SolrException;
 import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.SolrConstants;
 import org.apache.stanbol.commons.solr.SolrServerAdapter;
@@ -275,19 +276,10 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
         }
         try {
             server = new SolrServerAdapter(context.getBundleContext(), serverProperties);
-        } catch (ParserConfigurationException e) {
-            throw new IllegalStateException("Unable to initialise the XML parser " +
-                    "for parsing the SolrServer Configuration for Server '"+
-                    serverProperties.getServerName()+"' (dir="+
-                    serverProperties.getServerDir()+")!",e);
-        } catch (IOException e) {
+        } catch (SolrException e) {
             throw new ConfigurationException(PROPERTY_SERVER_DIR, "Unable to initialise " +
                     "a SolrServer based on the Directory '"+serverProperties.getServerDir() +
                     "'!",e);
-        } catch (SAXException e) {
-            throw new ConfigurationException(PROPERTY_SERVER_DIR, "Unable to initialise " +
-                "a SolrServer based on the Directory '"+serverProperties.getServerDir() +
-                "'!",e);
         }
 //        dfpServiceRegistration = context.getBundleContext().registerService(
 //            DataFileProvider.class.getName(), 
@@ -843,17 +835,10 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
         }
         try {
             server.registerCore(coreConfig);
-        } catch (ParserConfigurationException e) {
-            throw new IllegalStateException("Unable to configure XML parser",e);
-        } catch (IOException e) {
+        } catch (SolrException e) {
             throw new IOException(String.format(
-                "Unable to access the SolrCore configuration for index " +
+                "Unable to activate the SolrCore configuration for index " +
                 "'%s' of managed SolrServer '%s'",
-                metadata.getIndexName(), serverName), e);
-        } catch (SAXException e) {
-            throw  new SAXException(String.format(
-                "Unable to parse SolrCore configuration for  index '%s' of " +
-                "managed SolrServer '%s'",
                 metadata.getIndexName(), serverName), e);
         } finally {
             synchronized (serverInUser) {

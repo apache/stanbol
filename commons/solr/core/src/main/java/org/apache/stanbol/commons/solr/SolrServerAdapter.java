@@ -36,7 +36,6 @@ import static org.apache.stanbol.commons.solr.SolrConstants.SOLR_XML_NAME;
 import static org.osgi.framework.Constants.SERVICE_ID;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,8 +49,6 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.solr.common.SolrException;
@@ -72,7 +69,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 
 /**
  * This Class 'wraps' a Solr {@link CoreContainer} with all its registered 
@@ -203,16 +199,14 @@ public class SolrServerAdapter {
      * {@link SolrCore}s as OSGI services by using the provided {@link BundleContext}.
      * @throws SAXException On any error while parsing the solr.xml file used to 
      * initialise the {@link CoreContainer}
-     * @throws IOException On any error while accessing the solr.xml used to 
-     * initialise the {@link CoreContainer} or the home directory for the 
-     * {@link CoreContainer}
-     * @throws ParserConfigurationException Configuration error of the XML parser
+     * @throws SolrException if the Solr {@link CoreContainer} could not be 
+     * created.
      * @throws IllegalArgumentException if any of the parsed parameters is
      * <code>null</code> or the {@link SolrServerProperties} do not contain a
      * valid value for the {@link SolrConstants#PROPERTY_SERVER_DIR} 
      * property.
      */
-    public SolrServerAdapter(final BundleContext context,SolrServerProperties parsedServerProperties) throws ParserConfigurationException, IOException, SAXException{
+    public SolrServerAdapter(final BundleContext context,SolrServerProperties parsedServerProperties) {
         if(parsedServerProperties == null){
             throw new IllegalArgumentException("The prsed Server Properties MUST NOT be NULL!");
         }
@@ -321,11 +315,9 @@ public class SolrServerAdapter {
      * Reloads a SolrCore e.g. to apply a change in its configuration
      * @param name the name of the Core to reload
      * @return The ServiceReference to the SolrCore.
-     * @throws ParserConfigurationException if the XML parser could not be configured
-     * @throws IOException indicated an error related to accessing the configured resource
-     * @throws SAXException indicated an formatting error in the xml configuration files.
+     * @throws SolrException if the Core could not be reloaded
      */
-    public void reloadCore(String name) throws ParserConfigurationException, IOException, SAXException {
+    public void reloadCore(String name) {
         //try to reload
         log.info("Reload Core {} on CoreContainer {}",name,serverProperties.getServerName());
         ClassLoader classLoader = updateContextClassLoader();
@@ -397,11 +389,9 @@ public class SolrServerAdapter {
      * it will be replace by this one.
      * @param parsedCoreConfig The configuration.
      * @return The ServiceReference to the SolrCore.
-     * @throws ParserConfigurationException if the XML parser could not be configured
-     * @throws IOException indicated an error related to accessing the configured resource
-     * @throws SAXException indicated an formatting error in the xml configuration files.
+     * @throws SolrException If the core could not be registered
      */
-    public ServiceReference registerCore(SolrCoreProperties parsedCoreConfig) throws ParserConfigurationException, IOException, SAXException{
+    public ServiceReference registerCore(SolrCoreProperties parsedCoreConfig) {
         SolrCoreProperties coreConfig = parsedCoreConfig.clone();
         String coreName = coreConfig.getCoreName();
         log.info("Register Core {} to SolrServerAdapter (coreContainer: {})",coreName,serverProperties.getServerName());
@@ -412,7 +402,7 @@ public class SolrServerAdapter {
         if(coreDir == null){
             coreDir = new File(serverProperties.getServerDir(),coreName);
         }
-        SolrCore old = null;
+        //SolrCore old = null;
         ClassLoader classLoader = updateContextClassLoader();
         SolrCore core;
         try {
@@ -425,7 +415,8 @@ public class SolrServerAdapter {
             //of the wrapped CoreContainer!
             //core.addCloseHook(closeHook);
             // parse ture as third argument to avoid closing the current core for now
-            old = server.register(coreName, core, true);
+            //old = 
+            server.register(coreName, core, true);
         } finally {
             Thread.currentThread().setContextClassLoader(classLoader);
         }
