@@ -33,6 +33,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.solr.common.SolrException;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.SolrCore;
 import org.apache.stanbol.commons.solr.SolrServerAdapter;
@@ -126,19 +127,10 @@ public class ReferencedSolrServer {
         log.info(" > publisRest = {}",properties.isPublishREST());
         try {
             server = new SolrServerAdapter(context.getBundleContext(), properties);
-        } catch (ParserConfigurationException e) {
-            throw new IllegalStateException("Unable to initialise the XML parser " +
-            		"for parsing the SolrServer Configuration for Server '"+
-            		properties.getServerName()+"' (dir="+
-            		properties.getServerDir()+")!",e);
-        } catch (IOException e) {
+        } catch (SolrException e) {
             throw new ConfigurationException(PROPERTY_SERVER_DIR, "Unable to initialise " +
             		"a SolrServer based on the Directory '"+properties.getServerDir() +
             		"'!",e);
-        } catch (SAXException e) {
-            throw new ConfigurationException(PROPERTY_SERVER_DIR, "Unable to initialise " +
-                "a SolrServer based on the Directory '"+properties.getServerDir() +
-                "'!",e);
         }
         log.info(" ... SolrServer successfully initialised!");
     }
