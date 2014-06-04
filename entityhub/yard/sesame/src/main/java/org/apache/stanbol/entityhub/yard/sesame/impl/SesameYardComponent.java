@@ -240,7 +240,9 @@ public class SesameYardComponent implements ServiceTrackerCustomizer {
         	log.info(" - currently used Repository was removed (ref: {})", serviceReference);
             unregisterSesameYard();
         }
-        List<ServiceReference> others = Arrays.asList(repositoryTracker.getServiceReferences());
+        ServiceReference[] serviceRefs = repositoryTracker.getServiceReferences();
+        List<ServiceReference> others = serviceRefs == null ? Collections.<ServiceReference>emptyList() :
+            Arrays.asList(serviceRefs);
         if(others.size() > 1){
         	Collections.sort(others); //sort by priority
         }
