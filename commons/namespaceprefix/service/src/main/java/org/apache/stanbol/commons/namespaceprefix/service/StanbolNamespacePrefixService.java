@@ -309,12 +309,12 @@ public class StanbolNamespacePrefixService implements NamespacePrefixService, Na
     
     @Deactivate
     protected void deactivate(ComponentContext ctx) {
-        bundleContext = null;
         if(providersTracker != null) {
             providersTracker.close();
             providersTracker = null;
         }
         mappingsFile = null;
+        bundleContext = null;
     }
 
     @Override
