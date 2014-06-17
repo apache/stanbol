@@ -84,7 +84,7 @@
     <module>launchers/mini</module>
     <module>launchers/full</module>
     <module>launchers/stable</module>
-   <!-- <module>launchers/full-war</module> -->
+    <module>launchers/full-war</module>
     
     <module>development/archetypes/statefull-webmodule</module>
     <module>development/archetypes/stateless-webmodule</module>
