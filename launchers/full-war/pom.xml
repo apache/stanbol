@@ -43,7 +43,14 @@
     <url>http://stanbol.apache.org/</url>
   </scm>
 
+  <properties>
+    <stanbol.context>/stanbol</stanbol.context>
+    <stanbol.port>8080</stanbol.port>
+    <stanbol.home>${project.build.directory}${file.separator}stanbol</stanbol.home>
+  </properties>
+
   <build>
+    <finalName>stanbol</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.sling</groupId>
@@ -113,8 +120,13 @@
         <artifactId>tomcat7-maven-plugin</artifactId>
         <version>2.2</version>
         <configuration>
-          <path>/stanbol</path>
-          <port>8081</port>
+          <path>${stanbol.context}</path>
+          <port>${stanbol.port}</port>
+          <systemProperties>
+            <sling.home>${stanbol.home}</sling.home> <!-- TODO: later overwritten by a servlet  -->
+          </systemProperties>
+          <addWarDependenciesInClassloader>true</addWarDependenciesInClassloader>
+          <warSourceDirectory>${project.build.directory}/${project.build.finalName}/</warSourceDirectory>
         </configuration>
       </plugin>
     </plugins>
