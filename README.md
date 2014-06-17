@@ -40,10 +40,13 @@ If you want to skip the tests, use :
     $ mvn install -Dmaven.test.skip=true
     
 
-### Launching the Apache Stanbol Server
+## Launching the Apache Stanbol Server
 
-The recommended lanchers are packaged under the `launchers/` folder. For
-instance:
+The recommended lanchers are packaged under the `launchers/` folder. 
+
+### Launching the Apache Stanbol runnable jar
+
+For running the full launcher you need to execute:
 
     $ java -Xmx1g -jar launchers/full/target/org.apache.stanbol.launchers.full-0.10.0-incubating-SNAPSHOT.jar
 
@@ -56,7 +59,25 @@ configuration and logs.
 
 If Stanbol is launched with a FactStore a folder named `factstore` is created
 in the current folder. This folder holds the FactStore database (Apache Derby).
-  
+
+### Launching the Apache Stanbol runnable war
+
+For running the full war launcher you need to go to the launcher directory:
+
+    $ cd launchers/full-war
+
+and then execute:
+
+    $ mvn clean package tomcat7:run
+
+Your instance is then available on <http://localhost:8080/stanbol>. You can change the
+default port number by passing `-Pstanbol.port=9090` property to maven.
+
+### Running Apache Stanbol on a application container
+
+For running the full war launcher on a external application container, just deploy
+there in your usual way the file `launchers/full-war/target/stanbol.war`.
+
 
 ## Importing the source code as Eclipse projects
 
