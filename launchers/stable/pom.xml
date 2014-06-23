@@ -77,11 +77,23 @@
               <includeDefaultBundles>false</includeDefaultBundles>
               <!-- Standalone jar requires an OSGi http service implementation -->
               <jarWebSupport>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.http.jetty</artifactId>
-                <!-- depends on OSGI frameowrk (startLevel=2) and is required
-                     by felix.http.whiteboard (startLevel=4) -->
-                <startLevel>3</startLevel>
+                <bundles>
+                  <bundle>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>org.apache.felix.http.jetty</artifactId>
+                    <startLevel>3</startLevel>
+                  </bundle>
+                  <bundle>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>org.apache.felix.http.api</artifactId>
+                    <startLevel>3</startLevel>
+                  </bundle>
+                  <bundle>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>org.apache.felix.http.servlet-api</artifactId>
+                    <startLevel>3</startLevel>
+                  </bundle>
+                </bundles>
               </jarWebSupport>
             </configuration>
           </execution>

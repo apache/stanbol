@@ -54,14 +54,11 @@
             </goals>
             <configuration>
               <includeDefaultBundles>false</includeDefaultBundles>
-              <!-- Standalone jar requires an OSGi http service implementation -->
-              <jarWebSupport>
+              <!-- jarWebSupport> - not needed for a WAR launcher -
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.http.jetty</artifactId>
-                <!-- depends on OSGI frameowrk (startLevel=2) and is required
-                     by felix.http.whiteboard (startLevel=4) -->
                 <startLevel>3</startLevel>
-              </jarWebSupport>
+              </jarWebSupport -->
             </configuration>
           </execution>
         </executions>
@@ -72,10 +69,11 @@
         <configuration>
           <archive>
             <manifest>
-              <!-- make the generated jar runnable -->
+              <!-- not needed for a WAR launcher
               <addClasspath>true</addClasspath>
               <mainClass>org.apache.sling.launchpad.app.Main</mainClass>
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+               -->
             </manifest>
           </archive>
         </configuration>
