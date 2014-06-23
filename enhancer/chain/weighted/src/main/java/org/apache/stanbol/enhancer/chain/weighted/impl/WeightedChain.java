@@ -200,10 +200,6 @@ public class WeightedChain extends AbstractChain implements Chain, ServiceTracke
      * configured {@link #chain} is not active.
      */
     private Graph createExecutionPlan() throws ChainException {
-        Map<String,Map<String,Object>> chainScopedEnhancementProperties = new HashMap<String,Map<String,Object>>();
-        if(getChainProperties() != null){
-            chainScopedEnhancementProperties.put(null, getChainProperties());
-        }
         List<EnhancementEngine> availableEngines = new ArrayList<EnhancementEngine>(chain.size());
         Set<String> optionalEngines = new HashSet<String>();
         Set<String> missingEngines = new HashSet<String>();
@@ -219,12 +215,8 @@ public class WeightedChain extends AbstractChain implements Chain, ServiceTracke
                 optionalEngines.add(entry.getKey());
             }
         }
-//        if(!missingEngines.isEmpty()){
-//            throw new ChainException("This Chain is missing the following " +
-//            		"required Engines "+missingEngines);
-//        }
         return calculateExecutionPlan(getName(),availableEngines,optionalEngines, 
-            missingEngines,chainScopedEnhancementProperties);
+            missingEngines,chainScopedEnhProps);
     }
 
     @Override
