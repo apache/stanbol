@@ -23,7 +23,7 @@
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
     <relativePath>../../parent</relativePath>
-    <version>5-SNAPSHOT</version>
+    <version>6-SNAPSHOT</version>
   </parent>
 
   <artifactId>org.apache.stanbol.commons.tikabundle</artifactId>
