@@ -29,7 +29,7 @@
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-parent</artifactId>
   <packaging>pom</packaging>
-  <version>5-SNAPSHOT</version>
+  <version>6-SNAPSHOT</version>
 
   <name>Apache Stanbol Parent</name>
   <description>Parent POM for the Apache Stanbol project</description>
