@@ -16,7 +16,7 @@
                 <goal>install</goal>
             </goals>
             <properties>
-                <Env.MAVEN_OPTS>-Xmx1g -XX:MaxPermSize=256M</Env.MAVEN_OPTS>
+                <Env.MAVEN_OPTS>-Xmx2g -XX:MaxPermSize=512M</Env.MAVEN_OPTS>
             </properties>
         </action>
         <action>
@@ -26,7 +26,7 @@
                 <goal>install</goal>
             </goals>
             <properties>
-                <Env.MAVEN_OPTS>-Xmx1024M -XX:MaxPermSize=256M</Env.MAVEN_OPTS>
+                <Env.MAVEN_OPTS>-Xmx2g -XX:MaxPermSize=512M</Env.MAVEN_OPTS>
             </properties>
         </action>
         <action>
