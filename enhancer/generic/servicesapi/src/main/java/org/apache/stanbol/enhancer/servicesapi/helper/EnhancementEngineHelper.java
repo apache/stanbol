@@ -31,6 +31,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,7 @@ import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
+import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.TripleCollection;
@@ -845,34 +847,8 @@ public final class EnhancementEngineHelper {
             throw new IllegalArgumentException("The parsed ContentItem MUST NOT be NULL");
         }
         //(1) retrieve Chain scope Enhancement Properties
-        Map<String,Object> chainExProps = new HashMap<String,Object>();
-        Map<String,Object> engineExProps = new HashMap<String,Object>();
-        ci.getLock().readLock().lock();
-        try{
-            MGraph em = ExecutionMetadataHelper.getExecutionMetadata(ci);
-            //(1.a) retrieve EnhancementProperties from the ep:ExecutionPlan
-            log.debug("> extract EnhancementProperties form the ExecutionPlan");
-            NonLiteral executionPlanNode = ExecutionMetadataHelper.getExecutionPlanNode(em, 
-                ExecutionMetadataHelper.getChainExecution(em, ci.getUri()));
-            extractEnhancementProperties(chainExProps, em, executionPlanNode, "Chain Execution");
-            //(1.b) retrieve Enhancement Properties from the ep:ExectutionNode
-            //      for the parsed EnhancementEngine
-            log.debug("> extract EnhancementProperties form the ExecutionNode of Engine {}",
-                engine.getName());
-            Iterator<Triple> engineExecutions = em.filter(null, ExecutionPlan.ENGINE, new PlainLiteralImpl(engine.getName()));
-            //NOTE: we expect only a single execution node for an engine, but if
-            //      there are multiple we will merge the properties of those
-            while(engineExecutions.hasNext()){
-                NonLiteral engineExecution = engineExecutions.next().getSubject();
-                if(em.contains(new TripleImpl(executionPlanNode, ExecutionPlan.HAS_EXECUTION_NODE, engineExecution))){
-                    extractEnhancementProperties(engineExProps,em, engineExecution, "Engine Execution");
-                } //else engine execution of a different execution plan
-            }
-        } catch(NoSuchPartException e){ //no execution metadata are present
-            log.debug("  - no ExecutionMetadata are present ...");
-        } finally {
-            ci.getLock().readLock().unlock();
-        }
+        Map<String,Object> chainExProps = getChainExecutionProperties(engine, ci);
+        
         //(2) retrieve Request specific EnhancementProperties
         //TODO: in future Stanbol version request specific EnhancementProperties
         //      will get stored in the ExecutionMetadata. Chain level properties
@@ -906,10 +882,58 @@ public final class EnhancementEngineHelper {
         //defined by STANBOL-488
         // engineProp > engineEx > chainProp > chainExProp
         Map<String,Object> properties = new HashMap<String,Object>(chainExProps);
-        properties.putAll(engineExProps);
         properties.putAll(chainProperties);
         properties.putAll(engineProperties);
         return properties;
+    }
+
+    /**
+     * Getter for the {@link Chain} scoped (chain and chain-engine scoped) properties 
+     * for the parsed enhancement engine and content item.
+     * @param engine the enhancement engine
+     * @param ci the content item
+     * @return the chain scoped enhancement properties. This will not include any
+     * request scoped properties.
+     * @since 0.12.1 (<a href="https://issues.apache.org/jira/browse/STANBOL-1361">STANBOL-1361</a>)
+     */
+    public static Map<String,Object> getChainExecutionProperties(EnhancementEngine engine, ContentItem ci) {
+        if(engine == null){
+            throw new IllegalArgumentException("The parsed EnhancementEngine MUST NOT be NULL");
+        }
+        if(ci == null){
+            throw new IllegalArgumentException("The parsed ContentItem MUST NOT be NULL");
+        }
+        Map<String,Object> chainExProps = new HashMap<String,Object>();
+        Map<String,Object> engineExProps = new HashMap<String,Object>();
+        ci.getLock().readLock().lock();
+        try{
+            MGraph em = ExecutionMetadataHelper.getExecutionMetadata(ci);
+            //(1.a) retrieve EnhancementProperties from the ep:ExecutionPlan
+            log.debug("> extract EnhancementProperties form the ExecutionPlan");
+            NonLiteral executionPlanNode = ExecutionMetadataHelper.getExecutionPlanNode(em, 
+                ExecutionMetadataHelper.getChainExecution(em, ci.getUri()));
+            extractEnhancementProperties(chainExProps, em, executionPlanNode, "Chain Execution");
+            //(1.b) retrieve Enhancement Properties from the ep:ExectutionNode
+            //      for the parsed EnhancementEngine
+            log.debug("> extract EnhancementProperties form the ExecutionNode of Engine {}",
+                engine.getName());
+            Iterator<Triple> engineExecutions = em.filter(null, ExecutionPlan.ENGINE, new PlainLiteralImpl(engine.getName()));
+            //NOTE: we expect only a single execution node for an engine, but if
+            //      there are multiple we will merge the properties of those
+            while(engineExecutions.hasNext()){
+                NonLiteral engineExecution = engineExecutions.next().getSubject();
+                if(em.contains(new TripleImpl(executionPlanNode, ExecutionPlan.HAS_EXECUTION_NODE, engineExecution))){
+                    extractEnhancementProperties(engineExProps,em, engineExecution, "Engine Execution");
+                } //else engine execution of a different execution plan
+            }
+        } catch(NoSuchPartException e){ //no execution metadata are present
+            log.debug("  - no ExecutionMetadata are present ...");
+        } finally {
+            ci.getLock().readLock().unlock();
+        }
+        //finally merge the chain-engine scoped properties into the chain scoped properties
+        chainExProps.putAll(engineExProps);
+        return chainExProps;
     }
 
     /**
