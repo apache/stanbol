@@ -43,9 +43,9 @@ import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.ChainManager;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
-import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
+import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
 import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.execution.Execution;
@@ -140,7 +140,7 @@ public class EventJobManagerImpl implements EnhancementJobManager {
     }
     
     @Override
-    public void enhanceContent(ContentItem ci) throws EngineException, ChainException {
+    public void enhanceContent(ContentItem ci) throws EnhancementException {
         Chain defaultChain = chainManager.getDefault();
         if(defaultChain == null){
             throw new ChainException("Unable to enhance ContentItem '"+ci.getUri()+
@@ -151,7 +151,7 @@ public class EventJobManagerImpl implements EnhancementJobManager {
     }
 
     @Override
-    public void enhanceContent(ContentItem ci, Chain chain) throws EngineException, ChainException {
+    public void enhanceContent(ContentItem ci, Chain chain) throws EnhancementException {
         if(ci == null) {
             throw new IllegalArgumentException("The parsed contentItem MUST NOT be NULL!");
         }
@@ -200,6 +200,8 @@ public class EventJobManagerImpl implements EnhancementJobManager {
                     log.warn(it.next().toString()));
         	if (e instanceof SecurityException) {
         		throw (SecurityException)e;
+        	} else if(e instanceof EnhancementException){
+        	    throw (EnhancementException)e;
         	} else {
         		throw new ChainException(job.getErrorMessage(), e);
         	}
