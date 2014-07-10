@@ -388,7 +388,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
         //     linkable Token
         // (2) the LONGEST_DOMINANT_RIGHT reducer (TODO: make configurable)
         TagClusterReducer reducer = new ChainedTagClusterReducer(
-            TagClusterReducer.LONGEST_DOMINANT_RIGHT, linkableTokenFilter);
+            linkableTokenFilter,TagClusterReducer.ALL);
         final long[] time = new long[]{0};
         new Tagger(corpus.getFst(), linkableTokenFilter, reducer,session.isSkipAltTokens()) {
             
