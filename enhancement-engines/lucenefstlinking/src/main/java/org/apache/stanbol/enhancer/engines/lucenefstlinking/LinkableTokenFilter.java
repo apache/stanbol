@@ -21,11 +21,15 @@ import static org.apache.stanbol.enhancer.engines.entitylinking.config.TextProce
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.lucene.analysis.TokenFilter;
@@ -372,7 +376,19 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
     }
     @Override
     public void reduce(TagLL[] head) {
-        LinkableTokenContext linkableTokenContext;
+        //this implements a two phase reduce
+        //(1) reduce Tags with no linkable tokens and not matching enough of the
+        //    current chunk.
+        //(2) reduce remaining Tags in the cluster similar to TagClusterReducer
+        //    but only considering the "matchable span" of the Tags. Meaning the
+        //    span over matchable Tokens and not the full Text.
+        
+        //this map holds the matchable spans for Tags. Filled during phase (1) and
+        //used for phase(2)
+        Map<TagLL,int[]> matchableTagSpan = new HashMap<TagLL,int[]>();
+        
+        //(1) reduce Tags based on link-/matchable tokens as well as chunks. 
+    	LinkableTokenContext linkableTokenContext;
         for(TagLL tag = head[0]; tag != null; tag = tag.getNextTag()) {
             int start = tag.getStartOffset();
             int end = tag.getEndOffset();
@@ -391,9 +407,42 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
             } else { //if the tag overlaps a linkable token 
                 TokenData linkableToken = linkableTokenContext.linkableToken;
                 List<TokenData> tokens = linkableTokenContext.context;
-                ChunkData cd = linkableToken.inChunk; //check if it maches > 50% of the chunk
-                 if(!lpc.isIgnoreChunks() && cd != null &&
-                        cd.isProcessable){
+                //calculate the matchable start/end span of the current TagLL
+                int[] mSpan = new int[]{
+                        Math.max(start,linkableToken.token.getStart()),
+                        Math.min(end,linkableToken.token.getEnd())};
+                if(mSpan[0] > start){
+                    for(int i = linkableToken.index-1; i >= 0; i--){
+                        TokenData token = tokens.get(i);
+                        int tStart = token.token.getStart();
+                        if(tStart < start){
+                            break;
+                        } else if(token.isMatchable){
+                            mSpan[0] = tStart;
+                        }
+                    }
+                }
+                if(mSpan[1] < end){
+                    for(int i= linkableToken.index+1; i < tokens.size();i++){
+                        TokenData token = tokens.get(i);
+                        int tEnd = token.token.getEnd();
+                        if(tEnd > end){
+                            break;
+                        } else if(token.isMatchable){
+                            mSpan[1] = tEnd;
+                        }
+                    }
+                }
+                if(log.isTraceEnabled()){
+                    CharSequence text = at.getText();
+                    log.trace(" - matchable Span {}{} for Tag {}[{},{}]", 
+                        new Object[]{ text.subSequence(mSpan[0],mSpan[1]),
+                            Arrays.toString(mSpan), text.subSequence(start, end),
+                            start, end});
+                }
+                matchableTagSpan.put(tag, mSpan);
+                ChunkData cd = linkableToken.inChunk; //check if it matches > 50% of the chunk
+                if(!lpc.isIgnoreChunks() && cd != null && cd.isProcessable){
                     int cstart = cd.getMatchableStartChar() >= 0 ? cd.getMatchableStartChar() :
                         start;
                     int cend = cd.getMatchableEndChar();
@@ -415,6 +464,7 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
                         if(((float)match/(float)num) < minChunkMatchScore &&
                                 match < minFoundTokens){
                             tag.removeLL(); //ignore
+                            matchableTagSpan.remove(tag);
                             if(log.isTraceEnabled()){
                                 CharSequence text = at.getText();
                                 log.trace(" - reduce tag {}[{},{}] - does only match "
@@ -429,11 +479,13 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
                                 new Object[]{text.subSequence(start, end), start, end, match,
                                         num, text.subSequence(cstart, cend), cstart, cend});
                         }
-                    } else if(log.isTraceEnabled()){
-                        CharSequence text = at.getText();
-                        log.trace(" + keep tag {}[{},{}] - matches whole Chunk {}[{},{}]", 
-                            new Object[]{text.subSequence(start, end), start, end, 
-                                 text.subSequence(cstart, cend), cstart, cend});
+                    } else {
+                        if(log.isTraceEnabled()){
+                            CharSequence text = at.getText();
+                            log.trace(" + keep tag {}[{},{}] - matches whole Chunk {}[{},{}]", 
+                                new Object[]{text.subSequence(start, end), start, end, 
+                                     text.subSequence(cstart, cend), cstart, cend});
+                        }
                     }
                 } else if(log.isTraceEnabled()){
                     CharSequence tagSequence = at.getText().subSequence(start, end);
@@ -441,7 +493,47 @@ public final class LinkableTokenFilter extends TokenFilter implements TagCluster
                 }
             }
         }
-        
+        //(2) reduce Tags base on longest dominant right based on the matchable
+        //    spans
+        //NOTE: This is the same code as TagClusterReducer#LONGEST_DOMINANT_RIGHT
+        //      but adapted to use the matchable spans instead of the full Tag
+        //      spans
+        if (head.length == 0 || head[0] == null || head[0].getNextTag() == null) {
+            return; //no tag left from phase one or single token optimization
+        }
+        Set<TagLL> marked = new HashSet<TagLL>(); //can not use TagLL#mark
+        while (true) {
+            // --Find longest not already marked
+            TagLL longest = null;
+            int longestMCharLen = -1;
+            int[] longestMSpan = null;
+            for (TagLL t = head[0]; t != null; t = t.getNextTag()) {
+                int[] mSpan = matchableTagSpan.get(t);
+                int mCharLen = mSpan[1] - mSpan[0];
+                if (!marked.contains(t) && (longest == null || mCharLen >= longestMCharLen)) {
+                    longest = t;
+                    longestMSpan = mSpan;
+                    longestMCharLen = mCharLen;
+                }
+            }
+            if (longest == null) break;
+            // --Mark longest (so we return it eventually)
+            marked.add(longest);
+            // --Remove tags overlapping this longest
+            for (TagLL t = head[0]; t != null; t = t.getNextTag()) {
+                if (marked.contains(t)) {
+                    continue;
+                }
+                int[] mSpan = matchableTagSpan.get(t);
+                boolean overlaps =
+                        mSpan[0] < longestMSpan[0] ? mSpan[1] > longestMSpan[1] : mSpan[0] < longestMSpan[1];
+                if (overlaps) {
+                    t.removeLL();
+                } else if (mSpan[0] >= longestMSpan[1]) {
+                    break;// no subsequent can possibly overlap
+                }
+            }
+        }// loop
     }
     /**
      * Holds the context for a linkable {@link Token}s. This ensures that the
