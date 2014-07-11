@@ -18,6 +18,7 @@ package org.apache.stanbol.enhancer.engines.textannotationnewmodel.impl;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -199,6 +200,26 @@ public class MockComponentContext implements ComponentContext {
         @Override
         public Filter createFilter(String filter) throws InvalidSyntaxException {
             throw new UnsupportedOperationException("Mock implementation");
+        }
+
+        @Override
+        public <S> ServiceRegistration<S> registerService(Class<S> clazz, S service, Dictionary<String, ?> properties) {
+            return null;
+        }
+
+        @Override
+        public <S> ServiceReference<S> getServiceReference(Class<S> clazz) {
+            return null;
+        }
+
+        @Override
+        public <S> Collection<ServiceReference<S>> getServiceReferences(Class<S> clazz, String filter) throws InvalidSyntaxException {
+            return null;
+        }
+
+        @Override
+        public Bundle getBundle(String location) {
+            return null;
         }
         
     }

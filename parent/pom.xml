@@ -547,12 +547,13 @@
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.core</artifactId>
-        <version>4.1.0</version>
+        <version>4.3.1</version>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.compendium</artifactId>
-        <version>4.1.0</version>
+        <!-- with older versions the scr plugin complains -->
+        <version>4.3.1</version>
       </dependency>
 
       <!-- Apache Felix -->
@@ -612,87 +613,87 @@
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>utils</artifactId>
-        <version>0.1-incubating</version>
+        <version>0.2</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.core</artifactId>
-        <version>0.13</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.clerezza</groupId>
-        <artifactId>rdf.utils</artifactId>
-        <version>0.13-incubating</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.clerezza</groupId>
-        <artifactId>jaxrs.utils</artifactId>
-        <version>0.8</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.clerezza</groupId>
-        <artifactId>rdf.metadata</artifactId>
-        <version>0.1-incubating</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.clerezza</groupId>
-        <artifactId>rdf.ontologies</artifactId>
-        <version>0.11-incubating</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.clerezza</groupId>
-        <artifactId>rdf.jena.serializer</artifactId>
-        <version>0.10</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.clerezza</groupId>
-        <artifactId>rdf.jena.parser</artifactId>
-        <version>0.11</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.clerezza</groupId>
-        <artifactId>rdf.jena.sparql</artifactId>
-        <version>0.6</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.clerezza</groupId>
-        <artifactId>rdf.rdfjson</artifactId>
-        <version>0.3-incubating</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.clerezza</groupId>
-        <artifactId>platform.content</artifactId>
-        <version>0.13-incubating</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.clerezza</groupId>
-        <artifactId>platform.graphprovider.content</artifactId>
-        <version>0.6-incubating</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.clerezza</groupId>
-        <artifactId>platform.typerendering.scalaserverpages</artifactId>
-        <version>0.3-incubating</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.clerezza</groupId>
-        <artifactId>jaxrs.rdf.providers</artifactId>
         <version>0.14</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.utils</artifactId>
+        <version>0.14</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>jaxrs.utils</artifactId>
+        <version>0.9</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.metadata</artifactId>
+        <version>0.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.ontologies</artifactId>
+        <version>0.12</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.jena.serializer</artifactId>
+        <version>0.11</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.jena.parser</artifactId>
+        <version>0.12</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.jena.sparql</artifactId>
+        <version>0.7</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.rdfjson</artifactId>
+        <version>0.4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>platform.content</artifactId>
+        <version>0.14</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>platform.graphprovider.content</artifactId>
+        <version>0.7</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>platform.typerendering.scalaserverpages</artifactId>
+        <version>0.4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>jaxrs.rdf.providers</artifactId>
+        <version>0.15</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.simple.storage</artifactId>
-        <version>0.7-incubating</version>
+        <version>0.8</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.facade</artifactId>
-        <version>0.13</version>
+        <version>0.14</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.core.test</artifactId>
-        <version>0.13-incubating</version>
+        <version>0.15</version>
         <scope>test</scope>
       </dependency>
 

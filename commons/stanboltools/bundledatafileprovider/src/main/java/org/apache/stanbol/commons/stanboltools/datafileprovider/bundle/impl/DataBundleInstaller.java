@@ -116,7 +116,7 @@ public class DataBundleInstaller implements BundleListener {
             activated.put(bundle, null);
         }
         log.debug("Register Bundle {} with DataBundleInstaller",bundle.getSymbolicName());
-        Dictionary<String, Object> headers = (Dictionary<String, Object>) bundle.getHeaders();
+        Dictionary<String, String> headers = (Dictionary<String, String>) bundle.getHeaders();
         //        log.info("With Headers:");
         //        for(Enumeration<String> keys = headers.keys();keys.hasMoreElements();){
         //            String key = keys.nextElement();

@@ -18,6 +18,7 @@ package org.apache.stanbol.commons.testing.http;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
@@ -83,6 +84,11 @@ public class BundleContextMock implements BundleContext {
     }
 
     public Bundle getBundle(long id) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    public Bundle getBundle(String id) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -153,10 +159,23 @@ public class BundleContextMock implements BundleContext {
         return this.serviceReferenceMap.get(clazz);
     }
     
+    @Override
+    public  <S>  ServiceReference<S> getServiceReference(Class<S> clazz) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
     public ServiceReference[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
         // TODO Auto-generated method stub
         return null;
     }
+    
+    @Override
+    public  <S>  Collection<ServiceReference<S>> getServiceReferences(Class<S> clazz, String filter) throws InvalidSyntaxException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 
     public Bundle installBundle(String location) throws BundleException {
         // TODO Auto-generated method stub
@@ -196,6 +215,11 @@ public class BundleContextMock implements BundleContext {
     public boolean ungetService(ServiceReference reference) {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    @Override
+    public <S> ServiceRegistration<S> registerService(Class<S> clazz, S service, Dictionary<String, ?> properties) {
+        return null;
     }
 
 }

@@ -21,22 +21,22 @@
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.file.storage</artifactId>
-      <version>0.4-SNAPSHOT</version>
+      <version>0.4</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>platform.config</artifactId>
-      <version>0.4-SNAPSHOT</version>
+      <version>0.4</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>permissiondescriptions</artifactId>
-      <version>0.1-incubating</version>
+      <version>0.2</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>platform</artifactId>
-      <version>0.1-incubating</version>
+      <version>0.2</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
@@ -71,7 +71,7 @@
                 <bundle>
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>platform.graphprovider.content</artifactId>
-			<version>0.6-incubating</version>
+			<version>0.7</version>
 		</bundle>
   </startLevel>
 </bundles>

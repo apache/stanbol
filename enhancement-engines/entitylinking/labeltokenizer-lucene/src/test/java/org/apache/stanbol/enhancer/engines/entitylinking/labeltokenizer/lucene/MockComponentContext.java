@@ -18,6 +18,7 @@ package org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.lucene;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -164,6 +165,26 @@ public class MockComponentContext implements ComponentContext {
 
             @Override
             public void addBundleListener(BundleListener listener) {
+            }
+
+            @Override
+            public <S> ServiceRegistration<S> registerService(Class<S> clazz, S service, Dictionary<String, ?> properties) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public <S> ServiceReference<S> getServiceReference(Class<S> clazz) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public <S> Collection<ServiceReference<S>> getServiceReferences(Class<S> clazz, String filter) throws InvalidSyntaxException {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public Bundle getBundle(String location) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         };
     }
