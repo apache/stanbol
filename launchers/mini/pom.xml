@@ -212,14 +212,6 @@
       <scope>provided</scope>
     </dependency>
     
-    <dependency>
-      <groupId>org.apache.clerezza.provisioning</groupId>
-      <artifactId>rdf</artifactId>
-      <version>0.1</version>
-      <type>partialbundlelist</type>
-      <scope>provided</scope>
-    </dependency>
-    
   </dependencies>
 
 </project>
