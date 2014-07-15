@@ -57,6 +57,7 @@
         <configuration>
           <instructions>
             <Import-Package>
+              org.osgi.service.http; version="[1.2.0,2)",
               org.apache.stanbol.commons.solr.web.dispatch,
               *
             </Import-Package>
