@@ -27,7 +27,7 @@
  <p>Each reasoning service can be accessed to perform one of three tasks: classification, consistency check, get all inferences</p>          
   <ul>
   <#list it.servicesDescription as service>
-    <@serviceDescription.li name="${service.name}" fullpath="${it.currentPath}/${service.path}" path="${service.path}" description="${service.description}"/>
+    <@serviceDescription.li name="${service.name}" fullpath="${it.publicBaseUri}${it.currentPath}/${service.path}" path="${service.path}" description="${service.description}"/>
     <ul>
     <#-- TODO: generate the task list dinamically -->
       <li><a href="${it.publicBaseUri}${it.currentPath}/${service.path}/classify" title="${service.name} Task: classify">classify</a></li>
