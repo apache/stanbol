@@ -52,6 +52,7 @@
         <configuration>
           <instructions>
             <Import-Package>
+              org.osgi.service.http; version="[1.2.0,2)",
               javax.servlet.*; version="[2.5.0,4.0.0)",
               org.apache.stanbol.enhancer.benchmark; provide:=true,
               *
