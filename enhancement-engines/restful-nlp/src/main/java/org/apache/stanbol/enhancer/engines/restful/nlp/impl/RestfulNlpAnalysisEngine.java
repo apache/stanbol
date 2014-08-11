@@ -289,12 +289,12 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
             Exception e = pae.getException();
             if(e instanceof ClientProtocolException) {
                 //force re-initialisation upon error
-                serviceInitialised = false;
+                setRESTfulNlpAnalysisServiceUnavailable();
                 throw new EngineException(this, ci, "Exception while executing Request "
                     + "on RESTful NLP Analysis Service at "+analysisServiceUrl, e);
             } else if(e instanceof IOException) {
                 //force re-initialisation upon error
-                serviceInitialised = false;
+                setRESTfulNlpAnalysisServiceUnavailable();
                 throw new EngineException(this, ci, "Exception while executing Request "
                         + "on RESTful NLP Analysis Service at "+analysisServiceUrl, e);
             } else {
@@ -313,7 +313,7 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
                     Span span = spans.next();
                     switch (span.getType()) {
                         case Sentence:
-                            context = context;
+                            context = (Sentence)span;
                             break;
                         default:
                             Value<NerTag> nerAnno = span.getAnnotation(NER_ANNOTATION);
@@ -443,11 +443,12 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
         connectionManager.setMaxTotal(20);
         connectionManager.setDefaultMaxPerRoute(20);
 
-        //initially set the language config to validate the config
-        //but reset to the default as this is done in the 
-        //    #initRESTfulNlpAnalysisService(..) method
+        //NOTE: The list of supported languages is the combination of the
+        //      languages enabled by the configuration (#languageConfig) and the
+        //      languages supported by the RESTful NLP Analysis Service 
+        //      (#supportedLanguages)
+        //init the language configuration with the engine configuration
         languageConfig.setConfiguration(config);
-        languageConfig.setDefault(); //reset to the default
         
         httpClient = new DefaultHttpClient(connectionManager,httpParams);
         if(usr != null){
@@ -477,7 +478,15 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
                 + "currently not available (url: '"+analysisServiceUrl+"')");
         }
     }
-
+    /**
+     * to be called after handling an exception while calling the remote service
+     * that indicates that the service is no longer available.
+     */
+    private void setRESTfulNlpAnalysisServiceUnavailable(){
+        serviceInitialised = false;
+        supportedLanguages.clear();
+    }
+    
     /**
      * initialises the RESRfulNlpAnalysis if not yet done.
      */
@@ -496,18 +505,15 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
         try {
             supported = AccessController.doPrivileged(new PrivilegedExceptionAction<String>() {
                 public String run() throws IOException {
-                    return httpClient.execute(new HttpGet(analysisServiceUrl), 
-                        new BasicResponseHandler());
+                    HttpGet request = new HttpGet(analysisServiceUrl);
+                    request.setHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.toString());
+                    return httpClient.execute(request,new BasicResponseHandler());
                 }
             });
             serviceInitialised = true;
         } catch (PrivilegedActionException pae) {
             Exception e = pae.getException();
-            if(serviceInitialised){
-                //reset the language config if the service get unavailable
-                languageConfig.setDefault();
-                serviceInitialised = false;
-            }
+            setRESTfulNlpAnalysisServiceUnavailable();
             if(e instanceof IOException){
                 log.warn("Unable to initialise RESTful NLP Analysis Service!", e);
                 return false;
@@ -515,19 +521,11 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
                 throw RuntimeException.class.cast(e);
             }
         }
-        //for the correct language configuration we need to combine the parsed
-        //language configuration with the languages supported by the
-        //RESTful NLP Analysis Service
-        
-        //set the parsed config
-        try {
-            languageConfig.setConfiguration(config);
-        } catch (ConfigurationException e) {
-            //the config was already checked in the activate method ... so this
-            //should never happen
-            throw new IllegalStateException(e.getMessage(),e);
-        }
-        //parse the supported languages
+        //NOTE: The list of supported languages is the combination of the
+        //      languages enabled by the configuration (#languageConfig) and the
+        //      languages supported by the RESTful NLP Analysis Service 
+        //      (#supportedLanguages)
+        //parse the supported languages from the initialization response
         StringTokenizer st = new StringTokenizer(supported, "{[\",]}");
         while(st.hasMoreElements()){
             supportedLanguages.add(st.nextToken());
