@@ -458,7 +458,10 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
             // And add request interceptor to have preemptive authentication
             httpClient.addRequestInterceptor(new PreemptiveAuthInterceptor(), 0);
         }
-        initRESTfulNlpAnalysisService();
+        //STANBOL-1389: deactivated initialization during activation as this can create
+        //issues in cases where Stanbol and the NLP service do run in the same
+        //servlet container.
+        //initRESTfulNlpAnalysisService();
         
         value = config.get(WRITE_TEXT_ANNOTATIONS_STATE);
         if(value instanceof Boolean){
