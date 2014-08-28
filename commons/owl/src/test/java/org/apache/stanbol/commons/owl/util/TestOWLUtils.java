@@ -52,12 +52,12 @@ public class TestOWLUtils {
      * I need a new Parser because if I use getInsance() I keep getting an annoying exception on a
      * RdfJsonParsing Provider that I don't need.
      */
-    private static Parser parser = new Parser();
+    private static Parser parser = Parser.getInstance();
 
     @BeforeClass
     public static void setupTests() throws Exception {
         TcManager.getInstance().addWeightedTcProvider(new SimpleTcProvider());
-        parser.bindParsingProvider(new JenaParserProvider());
+        //parser.bindParsingProvider(new JenaParserProvider());
     }
 
     private Logger log = LoggerFactory.getLogger(getClass());
