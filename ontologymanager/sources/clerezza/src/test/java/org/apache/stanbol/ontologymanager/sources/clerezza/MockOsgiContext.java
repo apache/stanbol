@@ -38,34 +38,13 @@ import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
  */
 public class MockOsgiContext {
 
-    private static Dictionary<String,Object> config;
+    private static Dictionary<String,Object> config = new Hashtable<String,Object>();
 
-    public static Parser parser;
+    public static Parser parser = Parser.getInstance();
 
-    public static Serializer serializer;
+    public static Serializer serializer = Serializer.getInstance();
 
-    public static TcManager tcManager;
+    public static TcManager tcManager = TcManager.getInstance();
 
-    static {
-        config = new Hashtable<String,Object>();
-        reset();
-    }
-
-    /**
-     * Sets up a new mock OSGi context and cleans all resources and components.
-     */
-    public static void reset() {
-        // reset Clerezza objects
-        tcManager = new TcManager();
-        tcManager.addWeightedTcProvider(new SimpleTcProvider());
-        parser = new Parser(); // add Jena-supported formats + RDF/JSON
-        parser.bindParsingProvider(new JenaParserProvider());
-        parser.bindParsingProvider(new RdfJsonParsingProvider());
-        serializer = new Serializer(); // add Jena-supported formats + RDF/JSON
-        serializer.bindSerializingProvider(new JenaSerializerProvider());
-        serializer.bindSerializingProvider(new RdfJsonSerializingProvider());
-
-        // reset Stanbol objects
-    }
 
 }

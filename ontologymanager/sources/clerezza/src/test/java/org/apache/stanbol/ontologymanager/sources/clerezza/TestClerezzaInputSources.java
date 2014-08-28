@@ -17,7 +17,6 @@
 package org.apache.stanbol.ontologymanager.sources.clerezza;
 
 import static org.apache.stanbol.ontologymanager.sources.clerezza.MockOsgiContext.parser;
-import static org.apache.stanbol.ontologymanager.sources.clerezza.MockOsgiContext.reset;
 import static org.apache.stanbol.ontologymanager.sources.clerezza.MockOsgiContext.tcManager;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -49,7 +48,7 @@ public class TestClerezzaInputSources {
 
     @BeforeClass
     public static void loadGraphs() throws Exception {
-        reset();
+    	//nothing to do
     }
 
     private String dummy_RdfXml = "/ontologies/dummy-01.rdfxml.rdf";
@@ -77,7 +76,7 @@ public class TestClerezzaInputSources {
 
     @After
     public void cleanup() {
-        reset();
+    	//nothing to do
     }
 
     /*
