@@ -58,13 +58,13 @@ public class MockOsgiContext {
 
     public static ClerezzaCollectorFactory collectorfactory;
 
-    public static Parser parser;
+    public static Parser parser = Parser.getInstance();
 
-    public static Serializer serializer;
+    public static Serializer serializer = Serializer.getInstance();
 
     public static SessionManager sessionManager;
 
-    public static TcManager tcManager;
+    public static TcManager tcManager = TcManager.getInstance();
 
     static {
         config = new Hashtable<String,Object>();
@@ -81,12 +81,6 @@ public class MockOsgiContext {
         // reset Clerezza objects
         tcManager = new TcManager();
         tcManager.addWeightedTcProvider(new SimpleTcProvider());
-        parser = new Parser(); // add Jena-supported formats + RDF/JSON
-        parser.bindParsingProvider(new JenaParserProvider());
-        parser.bindParsingProvider(new RdfJsonParsingProvider());
-        serializer = new Serializer(); // add Jena-supported formats + RDF/JSON
-        serializer.bindSerializingProvider(new JenaSerializerProvider());
-        serializer.bindSerializingProvider(new RdfJsonSerializingProvider());
 
         // reset Stanbol objects
         ontologyProvider = new ClerezzaOntologyProvider(tcManager, offline, parser);
