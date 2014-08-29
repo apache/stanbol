@@ -68,11 +68,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MultipartRequestTest extends EnhancerTestBase {
     private static final Charset UTF8 = Charset.forName("UTF-8");
-    private static Serializer serializer = new Serializer();
-    static {
-        serializer.bindSerializingProvider(new JenaSerializerProvider());
-    }
-
+    private static Serializer serializer = Serializer.getInstance();
     
     private static final Logger log = LoggerFactory.getLogger(MultipartRequestTest.class);
 

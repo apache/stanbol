@@ -162,9 +162,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
     @BeforeClass
     public static void init() throws IOException {
         //init the RDF parser
-        rdfParser = new Parser();
-        rdfParser.bindParsingProvider(new JenaParserProvider());
-        rdfParser.bindParsingProvider(new RdfJsonParsingProvider());
+        rdfParser = Parser.getInstance();
         //init theTestData
     }
 
