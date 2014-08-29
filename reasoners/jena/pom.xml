@@ -84,6 +84,11 @@
       <artifactId>org.apache.stanbol.reasoners.servicesapi</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
+    <!-- Jena dependency -->
+    <dependency>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-core</artifactId>
+    </dependency>
 
     <!-- Diagnostic dependencies -->
     <dependency>
@@ -123,18 +128,6 @@
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>jena</artifactId>
-      <type>jar</type>
-      <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>slf4j-log4j12</artifactId>
-          <groupId>org.slf4j</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
     
   </dependencies>

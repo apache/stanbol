@@ -112,14 +112,14 @@
     </dependency>
 
     <!-- OWL deps -->
-    <dependency>
+    <!-- dependency>
       <groupId>com.hp.hpl.jena</groupId>
       <artifactId>jena</artifactId>
     </dependency>
     <dependency>
       <groupId>com.hp.hpl.jena</groupId>
       <artifactId>arq</artifactId>
-    </dependency>
+    </dependency -->
 
     <!-- Persistence deps -->
     <dependency>

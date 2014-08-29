@@ -125,8 +125,8 @@
     </dependency>
 
     <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>jena</artifactId>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-core</artifactId>
     </dependency>
 
     <dependency>
