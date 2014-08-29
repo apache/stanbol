@@ -120,17 +120,13 @@ public class ContentItemReaderWriterTest {
         NonLiteral ep = createExecutionPlan(em, "testChain",null);
         writeExecutionNode(em, ep, "testEngine", true, null,null);
         initExecutionMetadata(em, em, contentItem.getUri(), "testChain", false);
-        final Serializer serializer = new Serializer();
-        serializer.bindSerializingProvider(new JenaSerializerProvider());
-        serializer.bindSerializingProvider(new JsonLdSerializerProvider());
-        ciWriter = new ContentItemWriter(serializer);
 
-        final Parser parser = new Parser();
-        parser.bindParsingProvider(new JenaParserProvider());
+        ciWriter = new ContentItemWriter(Serializer.getInstance());
+
         ciReader = new ContentItemReader(){
             @Override
             protected Parser getParser() {
-                return parser;
+                return Parser.getInstance();
             }
             @Override
             protected ContentItemFactory getContentItemFactory() {
