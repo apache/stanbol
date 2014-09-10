@@ -33,6 +33,8 @@ import static org.osgi.framework.Constants.SERVICE_RANKING;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -44,6 +46,10 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.rdf.core.Resource;
+import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -188,6 +194,16 @@ public class FstLinkingEngineComponent {
     public static final String SOLR_CORE = "enhancer.engines.linking.lucenefst.solrcore";
     
     /**
+     * The origin information for all Entities provided by the configured SolrCore and
+     * FST. Origin information are added to all <code>fise:EntityAnnotation</code>
+     * by using the <code>fise:origin</code> property. Configured values can be both
+     * {@link UriRef URI}s or {@link Literal}s. Configured Strings are checked if
+     * they are valid {@link URI}s and  {@link URI#isAbsolute() absolute}. If not
+     * a {@link Literal} is parsed.
+     */
+    public static final String ORIGIN = "enhancer.engines.linking.lucenefst.origin";
+    
+    /**
      * The size of the thread pool used to create FST models (default=1). Creating
      * such models does need a lot of memory. Expect values up to 10times of the
      * build model. So while this task can easily performed concurrently users need
@@ -229,6 +245,11 @@ public class FstLinkingEngineComponent {
      * the name for the EnhancementEngine registered by this component
      */
     private String engineName;
+    
+    /**
+     * The origin information of Entities.
+     */
+    private Resource origin;
     
     /**
      * used to resolve '{prefix}:{local-name}' used within the engines configuration
@@ -391,7 +412,29 @@ public class FstLinkingEngineComponent {
             skipAltTokensConfig = Boolean.valueOf(value.toString());
         } // else no config -> will use the default
         
-        //(4) init the FST configuration
+        //(4) parse Origin information
+        value = properties.get(ORIGIN);
+        if(value instanceof Resource){
+            origin = (Resource)origin;
+        } else if (value instanceof String){
+            try {
+                URI originUri = new URI((String)value);
+                if(originUri.isAbsolute()){
+                    origin = new UriRef((String)value);
+                } else {
+                    origin = new PlainLiteralImpl((String)value);
+                }
+            } catch(URISyntaxException e){
+                origin = new PlainLiteralImpl((String)value);
+            }
+            log.info(" - origin: {}", origin);
+        } else if(value != null){
+            log.warn("Values of the {} property MUST BE of type Resource or String "
+                    + "(parsed: {} (type:{}))", new Object[]{ORIGIN,value,value.getClass()});
+        } //else no ORIGIN information provided
+        
+        
+        //(5) init the FST configuration
         //We can create the default configuration only here, as it depends on the
         //name of the solrIndex
         String defaultConfig = "*;" 
@@ -417,7 +460,7 @@ public class FstLinkingEngineComponent {
                 + "(found: "+value.getClass().getName()+")!");
         }
         
-        //(5) Create the ThreadPool used for the runtime creation of FST models
+        //(6) Create the ThreadPool used for the runtime creation of FST models
         value = properties.get(FST_THREAD_POOL_SIZE);
         int tpSize;
         if(value instanceof Number){
@@ -457,7 +500,7 @@ public class FstLinkingEngineComponent {
         }
         fstCreatorService = Executors.newFixedThreadPool(tpSize,tfBuilder.build());
         
-        //(6) Parse the EntityCache config
+        //(7) Parse the EntityCache config
         int entityCacheSize;
         value = properties.get(ENTITY_CACHE_SIZE);
         if(value instanceof Number){
@@ -482,14 +525,14 @@ public class FstLinkingEngineComponent {
         	log.info(" ... EntityCache enabled (size: {})",this.entityCacheSize);
         }
         
-        //(7) parse the Entity type field
+        //(8) parse the Entity type field
         value = properties.get(IndexConfiguration.SOLR_TYPE_FIELD);
         if(value == null || StringUtils.isBlank(value.toString())){
             solrTypeField = null;
         } else {
             solrTypeField = value.toString().trim();
         }
-        //(8) parse the Entity Ranking field
+        //(9) parse the Entity Ranking field
         value = properties.get(IndexConfiguration.SOLR_RANKING_FIELD);
         if(value == null){
             solrRankingField = null;
@@ -497,7 +540,7 @@ public class FstLinkingEngineComponent {
             solrRankingField = value.toString().trim();
         }
         
-        //(9) start tracking the SolrCore
+        //(10) start tracking the SolrCore
         try {
             solrServerTracker = new RegisteredSolrServerTracker(
                 bundleContext, indexReference, null){
@@ -588,6 +631,7 @@ public class FstLinkingEngineComponent {
                 //set fields parsed in the activate method
                 indexConfig.setExecutorService(fstCreatorService);
                 indexConfig.setRedirectField(null);//TODO add support
+                indexConfig.setOrigin(origin);
                 //NOTE: the FST cofnig is processed even if the SolrCore has not changed
                 //      because their might be config changes and/or new FST files in the
                 //      FST directory of the SolrCore.

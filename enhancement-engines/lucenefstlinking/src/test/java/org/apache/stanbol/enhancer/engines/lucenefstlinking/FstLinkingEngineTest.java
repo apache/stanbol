@@ -18,6 +18,7 @@ package org.apache.stanbol.enhancer.engines.lucenefstlinking;
 
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig.PROCESSED_LANGUAGES;
 import static org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig.PROCESS_ONLY_PROPER_NOUNS_STATE;
+import static org.apache.stanbol.enhancer.engines.lucenefstlinking.FstLinkingEngine.FISE_ORIGIN;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_CREATOR;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_EXTRACTED_FROM;
@@ -122,6 +123,7 @@ public class FstLinkingEngineTest {
      */
     public static final String TEST_YARD_ID = "dbpedia";
     public static final String TEST_SOLR_CORE_NAME = "dbpedia";
+    public static final String TEST_ORIGIN = "texst.origin";
     public static final String TEST_SOLR_CORE_CONFIGURATION = "dbpedia_26k.solrindex.bz2";
     protected static final String TEST_INDEX_REL_PATH = File.separatorChar + "target" + File.separatorChar
                                                         + ManagedSolrServer.DEFAULT_SOLR_DATA_DIR;
@@ -199,6 +201,7 @@ public class FstLinkingEngineTest {
         fstConfig.setTypeField("rdf:type");
         fstConfig.setRankingField("entityhub:entityRank");
         //fstConfig.setEntityCacheManager(new FastLRUCacheManager(2048));
+        fstConfig.setOrigin(new PlainLiteralImpl(TEST_ORIGIN));
         //activate the FST config
         fstConfig.activate(); //activate this configuration
         
@@ -384,6 +387,10 @@ public class FstLinkingEngineTest {
             if(suggestedEntities.remove(entityUri.getUnicodeString())){
                 log.info(" ... found");
             }
+            //assert origin
+            assertEquals(TEST_ORIGIN, EnhancementEngineHelper.getString(
+                ci.getMetadata(),entityAnnotation, FISE_ORIGIN));
+            
 //            Assert.assertTrue("fise:referenced-entity " + entityUri +
 //                " not expected (expected: "+expectedEntities+")",
 //                suggestedEntities.remove(entityUri.getUnicodeString()) || 
