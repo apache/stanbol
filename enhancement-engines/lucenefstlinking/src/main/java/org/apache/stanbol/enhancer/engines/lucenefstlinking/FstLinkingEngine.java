@@ -87,6 +87,8 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
 
     private static final UriRef ENHANCER_ENTITY_RANKING = new UriRef(NamespaceEnum.fise + "entity-ranking");
 
+    public static final UriRef FISE_ORIGIN = new UriRef(NamespaceEnum.fise + "origin");
+
     private final LiteralFactory literalFactory = LiteralFactory.getInstance();
     
     protected final String name;
@@ -579,6 +581,10 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                     Properties.ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(match.getScore())));
                 //add the relation to the fise:TextAnnotation (the tag)
                 metadata.add(new TripleImpl(entityAnnotation, Properties.DC_RELATION, textAnnotation));
+                //write origin information
+                if(indexConfig.getOrigin() != null){
+                    metadata.add(new TripleImpl(entityAnnotation, FISE_ORIGIN, indexConfig.getOrigin()));
+                }
                 //TODO: add origin information of the EntiySearcher
 //                for(Entry<UriRef,Collection<Resource>> originInfo : entitySearcher.getOriginInformation().entrySet()){
 //                    for(Resource value : originInfo.getValue()){

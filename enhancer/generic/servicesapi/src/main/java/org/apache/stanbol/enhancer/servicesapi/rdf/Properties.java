@@ -222,6 +222,16 @@ public final class Properties {
             NamespaceEnum.fise + "confidence-level");
 
     /**
+     * The origin can be used to reference the vocabulary (dataset, thesaurus, 
+     * ontology, ...) the Entity {@link #ENHANCER_ENTITY_REFERENCE referenced}
+     * by a <code>{@link TechnicalClasses#ENHANCER_ENTITYANNOTATION fise:EntiyAnnotation}</code>
+     * originates from.
+     * @since 0.12.1 (STANBOL-????)
+     */
+    public static final UriRef ENHANCER_ORIGIN = new UriRef(
+            NamespaceEnum.fise + "origin");
+    
+    /**
      * Internet Media Type of a content item.
      * 
      * @deprecated dc:FileFormat does not exist
