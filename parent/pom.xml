@@ -293,7 +293,7 @@
         <plugin>
           <groupId>org.apache.sling</groupId>
           <artifactId>maven-launchpad-plugin</artifactId>
-          <version>2.3.0</version>
+          <version>2.3.2</version>
           <extensions>true</extensions>
         </plugin>
         <!-- generates version number of dependencies suitable for introspection
