@@ -57,7 +57,7 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.apache.marmotta.ldpath.api.backend; provide:=true,
+              org.apache.marmotta.ldpath.api.backend; provide:=true; version="[3.2.0,3.4.0)",
               *
             </Import-Package>
             <Export-Package>
