@@ -55,8 +55,8 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.apache.marmotta.ldpath.api.backend; provide:=true,
-              org.apache.marmotta.ldpath.api.functions; provide:=true,
+              org.apache.marmotta.ldpath.api.backend; provide:=true; version="[3.2.0,3.4.0)",
+              org.apache.marmotta.ldpath.api.functions; provide:=true; version="[3.2.0,3.4.0)",
               org.apache.stanbol.enhancer.ldpath,
               org.apache.stanbol.enhancer.ldpath.backend,
               org.apache.stanbol.enhancer.ldpath.function,

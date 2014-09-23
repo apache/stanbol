@@ -55,9 +55,9 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.apache.marmotta.ldpath; provide:=true,
-              org.apache.marmotta.ldpath.api.backend; provide:=true,
-              org.apache.marmotta.ldpath.api.transformers; provide:=true,
+              org.apache.marmotta.ldpath; provide:=true; version="[3.2.0,3.4.0)",
+              org.apache.marmotta.ldpath.api.backend; provide:=true; version="[3.2.0,3.4.0)",
+              org.apache.marmotta.ldpath.api.transformers; provide:=true; version="[3.2.0,3.4.0)",
               org.apache.stanbol.entityhub.servicesapi.query; provide:=true; version="[0.11,0.13)",
               org.apache.stanbol.entityhub.ldpath,
               org.apache.stanbol.entityhub.ldpath.backend,
