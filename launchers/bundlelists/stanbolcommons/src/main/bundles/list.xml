@@ -174,6 +174,24 @@
       <artifactId>joda-time</artifactId>
       <version>2.3</version>
     </bundle>
+    <!-- Stax support -->
+    <!-- as the JVM only gives Stax 1.0 but we want Stax 2.0 (see STANBOL-1395)-->
+    <bundle>
+      <groupId>org.apache.servicemix.specs</groupId>
+      <artifactId>org.apache.servicemix.specs.stax-api-1.2</artifactId>
+      <version>2.4.0</version>
+    </bundle>
+    <bundle> <!-- XML stax lib used by jackson -->
+      <groupId>org.codehaus.woodstox</groupId>
+      <artifactId>woodstox-core-asl</artifactId>
+      <version>4.1.4</version>
+    </bundle>
+    <bundle>
+      <groupId>org.codehaus.woodstox</groupId>
+      <artifactId>stax2-api</artifactId>
+      <version>3.1.4</version>
+    </bundle>
+
     <!-- JSON libs -->
     <bundle> <!-- used for simple JSON parsing/writing in Stanbol -->
       <groupId>org.codehaus.jettison</groupId>
