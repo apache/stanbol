@@ -45,12 +45,12 @@
     <bundle>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.installer.core</artifactId>
-      <version>3.5.0</version>
+      <version>3.5.4</version>
     </bundle>
     <bundle>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.installer.factory.configuration</artifactId>
-      <version>1.0.12</version>
+      <version>1.0.14</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
@@ -60,7 +60,7 @@
     <bundle>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.installer.provider.file</artifactId>
-      <version>1.0.2</version>
+      <version>1.0.4</version>
     </bundle>
   </startLevel>
 
