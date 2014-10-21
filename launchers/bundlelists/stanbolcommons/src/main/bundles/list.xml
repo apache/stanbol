@@ -37,11 +37,11 @@
 
   <!-- Sling installer and Stanbol extensions -->
   <startLevel level="8">
-    <bundle>
+    <!-- bundle>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.installer.api</artifactId>
       <version>1.0.0</version>
-    </bundle>
+    </bundle -->
     <bundle>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.installer.core</artifactId>
