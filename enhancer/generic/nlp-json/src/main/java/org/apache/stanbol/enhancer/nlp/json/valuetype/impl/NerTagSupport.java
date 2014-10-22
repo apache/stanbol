@@ -25,7 +25,6 @@ import org.apache.stanbol.enhancer.nlp.json.valuetype.ValueTypeParser;
 import org.apache.stanbol.enhancer.nlp.json.valuetype.ValueTypeSerializer;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.ner.NerTag;
-import org.apache.stanbol.enhancer.nlp.pos.PosTag;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
