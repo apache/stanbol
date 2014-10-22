@@ -16,6 +16,7 @@
 */
 package org.apache.stanbol.enhancer.nlp.model.impl;
 
+import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NavigableMap;
@@ -75,6 +76,28 @@ public abstract class SectionImpl extends SpanImpl implements Section {
                 }
             });
     }
+    
+    @Override
+    @SuppressWarnings("unchecked")
+    public Iterator<Span> getEnclosed(final Set<SpanTypeEnum> types, int startOffset, int endOffset) {
+        if(startOffset >= (span[1] - span[0])){ //start is outside the span
+            return Collections.<Span>emptySet().iterator();
+        }
+        int startIdx = startOffset < 0 ? span[0] : (span[0]+ startOffset);
+        int endIdx = span[0] + endOffset;
+        if(endIdx <= startIdx) {
+            return Collections.<Span>emptySet().iterator();
+        } else if(endIdx > span[1]){
+            endIdx = span[1];
+        }
+        return IteratorUtils.filteredIterator(getIterator(new SubSetHelperSpan(startIdx, endIdx)), 
+            new Predicate() {
+                @Override
+                public boolean evaluate(Object span) {
+                    return types.contains(((Span)span).getType());
+                }
+            });
+    }
     /**
      * Iterator that does not throw {@link ConcurrentModificationException} but
      * considers modifications to the underlying set by using the
@@ -86,13 +109,32 @@ public abstract class SectionImpl extends SpanImpl implements Section {
      * @return the iterator
      */
     protected Iterator<Span> getIterator(){
-        //the end of this section
-        final Span end = new SubSetHelperSpan(getEnd());
+        return getIterator(null);
+    }
+    /**
+     * Iterator that does not throw {@link ConcurrentModificationException} but
+     * considers modifications to the underlying set by using the
+     * {@link NavigableMap#higherKey(Object)} method for iterating over the
+     * Elements!<p>
+     * This allows to add new {@link Span}s to the {@link Section} while
+     * iterating (e.g. add {@link Token}s and/or {@link Chunk}s while iterating
+     * over the {@link Sentence}s of an {@link AnalysedText})
+     * @param section the (sub-)section of the current section to iterate or
+     * <code>null</code> to iterate the whole section.
+     * @return the iterator
+     */
+    protected Iterator<Span> getIterator(final SubSetHelperSpan section){
+        //create a virtual Span with the end of the section to iterate over
+        final Span end = new SubSetHelperSpan(
+            section == null ? getEnd() : //if no section is defined use the parent
+                section.getEnd()); //use the end of the desired section
         return new Iterator<Span>() {
             
             boolean init = false;
             boolean removed = true;
-            private Span span = SectionImpl.this;
+            //init with the first span of the iterator
+            private Span span = section == null ? 
+                    SectionImpl.this : section; 
             
             @Override
             public boolean hasNext() {

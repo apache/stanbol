@@ -19,20 +19,25 @@ package org.apache.stanbol.enhancer.nlp.model;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Annotation;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
+import org.apache.stanbol.enhancer.nlp.utils.NIFHelper;
+import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
@@ -380,6 +385,65 @@ public class AnalysedTextTest {
       Assert.assertEquals(sentences.size()+" Sentences expected in AnalysedText", sentences.size(),s);
       Assert.assertEquals((sentences.size()*chunksInSentence)+" Chunks expected in AnalysedText", 
           (sentences.size()*chunksInSentence),c);
+    }
+    
+    /**
+     * Tests the {@link Section#getEnclosed(Set, int, int)} method introduced
+     * with <code>0.12.1</code>
+     */
+    @Test
+    public void testSubSectionIteration(){
+        log.info("testSubSectionIteration ...");
+        List<Span> expectedSpans = new ArrayList<Span>();
+        List<Sentence> sentences = new ArrayList<Sentence>();
+        Set<SpanTypeEnum> enabledTypes = EnumSet.of(SpanTypeEnum.Sentence, SpanTypeEnum.Token);
+        Iterator<Span> allIt = analysedTextWithData.getEnclosed(enabledTypes);
+        while(allIt.hasNext()){
+            Span s = allIt.next();
+            expectedSpans.add(s);
+            if(s.getType() == SpanTypeEnum.Sentence) {
+                sentences.add((Sentence)s);
+            }
+        }
+        //first test an section that exceeds the end of the text
+        int[] testSpan = new int[]{4,90};
+        Assert.assertEquals(5, assertSectionIterator(analysedTextWithData, 
+            expectedSpans, testSpan, enabledTypes));
+        //second test a section relative to an sentence
+        Sentence lastSent = sentences.get(sentences.size()-1);
+        int [] offsetSpan = new int[]{5,25};
+        Assert.assertEquals(1, assertSectionIterator(lastSent, expectedSpans, 
+            offsetSpan, enabledTypes));
+        
+    }
+
+
+    /**
+     * @param span
+     * @param testSpan
+     */
+    private int assertSectionIterator(Section section, List<Span> span, int[] testSpan, Set<SpanTypeEnum> types) {
+        log.info("> assert span {} over {}", Arrays.toString(testSpan), section);
+        Iterator<Span> sectionIt = section.getEnclosed(
+            types, testSpan[0], testSpan[1]);
+        int startIdx = section.getStart() + testSpan[0];
+        int endIdx = section.getStart() + testSpan[1];
+        int count = 0;
+        for(Span s : span){
+            if(s.getStart() < startIdx){
+                log.info(" - asserted {} before section", s);
+            } else if(s.getEnd() < endIdx){
+                Assert.assertTrue(sectionIt.hasNext());
+                Assert.assertEquals(s, sectionIt.next());
+                count++;
+                log.info(" - asserted section token {}", s);
+            } else {
+                log.info(" - asserted correct section end", s);
+                Assert.assertFalse(sectionIt.hasNext());
+                break;
+            }
+        }
+        return count;
     }
     
     @Test
