@@ -27,11 +27,13 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
@@ -201,55 +203,6 @@ public final class Nif20Helper {
         }
     }
 
-    /**
-     * Writes basic information of the parsed span by using NIF 1.0 including the
-     * {@link SsoOntology} Sentence/Phrase/Word type based on 
-     * the {@link Span#getType()}<p>
-     * As {@link AnalysedText} is based on the plain text version of the ContentItem
-     * this uses the {@link StringOntology#OffsetBasedString} notation.<p>
-     * <i>NOTE:</i> This DOES NOT write string relations, lemma, pos ... information
-     * that might be stored as {@link Annotation} with the parsed {@link Span}.
-     * @param graph the graph to add the triples
-     * @param base the base URI
-     * @param text the {@link AnalysedText}
-     * @param language the {@link Language} or <code>null</code> if not known
-     * @param span the {@link Span} to write.
-     * @return the {@link UriRef} representing the parsed {@link Span} in the
-     * graph
-     */
-    public static UriRef writeSpan(MGraph graph, UriRef base, AnalysedText text, Language language, Span span){
-        UriRef segment = getNifRFC5147URI(base, span.getStart(), 
-        		span.getType() == SpanTypeEnum.Text ? -1 : span.getEnd());
-        graph.add(new TripleImpl(segment, RDF_TYPE, Nif20.RFC5147String.getUri()));
-        if(span.getEnd() - span.getStart() < 100){
-	        graph.add(new TripleImpl(segment, Nif20.anchorOf.getUri(), 
-	            new PlainLiteralImpl(span.getSpan(),language)));
-        } else {
-        	graph.add(new TripleImpl(segment, Nif20.head.getUri(), 
-	            new PlainLiteralImpl(span.getSpan().substring(0,10),language)));
-        }
-        graph.add(new TripleImpl(segment, Nif20.beginIndex.getUri(), 
-            lf.createTypedLiteral(span.getStart())));
-        graph.add(new TripleImpl(segment, Nif20.endIndex.getUri(), 
-            lf.createTypedLiteral(span.getEnd())));
-        switch (span.getType()) {
-            case Token:
-                graph.add(new TripleImpl(segment, RDF_TYPE, Nif20.Word.getUri()));
-                break;
-            case Chunk:
-                graph.add(new TripleImpl(segment, RDF_TYPE, Nif20.Phrase.getUri()));
-                break;
-            case Sentence:
-                graph.add(new TripleImpl(segment, RDF_TYPE, Nif20.Sentence.getUri()));
-                break;
-            case Text:
-                graph.add(new TripleImpl(segment, RDF_TYPE, Nif20.Context.getUri()));
-                break;
-            default:
-            	// no default:
-        }
-        return segment;
-    }
     
     /**
      * Writes the {@link NlpAnnotations#POS_ANNOTATION} as NIF 1.0 to the parsed
@@ -274,8 +227,30 @@ public final class Nif20Helper {
             }
             graph.add(new TripleImpl(segmentUri, Nif20.posTag.getUri(), 
                 lf.createTypedLiteral(posTag.value().getTag())));
-            graph.add(new TripleImpl(segmentUri, ENHANCER_CONFIDENCE, 
-                lf.createTypedLiteral(posTag.probability())));
+            //set the oliaConf
+            //remove existing conf values (e.g. for a single word phrase)
+            setOliaConf(graph, segmentUri, posTag);
+        }
+    }
+    /**
+     * Sets the {@link Nif20#oliaConf} value. Note this also deletes existing
+     * values. This mans that in the case of multiple Olia annotation (e.g. 
+     * single word phrases together with word level annotation) the last
+     * confidence will win (still better as having two confidence values)
+     * @param graph
+     * @param segmentUri
+     * @param value
+     */
+    private static void setOliaConf(MGraph graph, UriRef segmentUri,
+            Value<?> value) {
+        Iterator<Triple> existingConfValues = graph.filter(segmentUri, Nif20.oliaConf.getUri(), null);
+        while(existingConfValues.hasNext()){
+            existingConfValues.next();
+            existingConfValues.remove();
+        }
+        if(value.probability() != Value.UNKNOWN_PROBABILITY){
+            graph.add(new TripleImpl(segmentUri, Nif20.oliaConf.getUri(), 
+                lf.createTypedLiteral(value.probability())));
         }
     }    
     
@@ -293,8 +268,7 @@ public final class Nif20Helper {
             UriRef phraseTypeUri = LEXICAL_TYPE_TO_PHRASE_TYPE.get(phraseTag.value().getCategory());
             if(phraseTypeUri != null){ //add the oliaLink for the Phrase
                 graph.add(new TripleImpl(segmentUri, Nif20.oliaCategory.getUri(), phraseTypeUri));
-                graph.add(new TripleImpl(segmentUri, ENHANCER_CONFIDENCE, 
-                    lf.createTypedLiteral(phraseTag.probability())));
+                setOliaConf(graph, segmentUri, phraseTag);
             }
         }
     }
