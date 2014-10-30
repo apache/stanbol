@@ -466,6 +466,12 @@ public class ValueConverterFactory {
             super(DataTypeEnum.Time);
         }
     }
+    /**
+     * Converts String values to {@link Text} (without an language tag. Does
+     * NOT convert any other values such as {@link Number}s or {@link Reference}s
+     * @author Rupert Westenthaler
+     *
+     */
     public static class TextConverter implements ValueConverter<Text> {
         @Override
         public Text convert(Object value, ValueFactory valueFactory) {
@@ -474,13 +480,21 @@ public class ValueConverterFactory {
             }
             if(value instanceof Text){
                 return (Text)value;
-            } else {
+            } else if(value instanceof String){
                 return valueFactory.createText(value);
+            } else { //do not convert other values
+                return null;
             }
         }
         @Override
         public String getDataType() { return DataTypeEnum.Text.getUri(); }
     }
+    /**
+     * Converts any value to {@link String} by using the {@link #toString()}
+     * method of the parsed value
+     * @author Rupert Westenthaler
+     *
+     */
     public static class StringConverter implements ValueConverter<String> {
         @Override
         public String convert(Object value, ValueFactory valueFactory) { return value.toString(); }

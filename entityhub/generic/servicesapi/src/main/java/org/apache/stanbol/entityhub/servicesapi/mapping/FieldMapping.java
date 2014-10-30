@@ -146,8 +146,11 @@ public class FieldMapping {
         this.filter = filter;
         if(this.global){
             mappedTo = new String[]{}; //set to empty -> if global than map nothing
-        } else if(this.usesWildcard){
-            mappedTo = new String[]{null}; //wildcard always maps the selected field 1:1
+        //NOTE: FieldMappings do now allow to map a Wildcard to an other field
+        //      This is e.g. usefull for collecting all Literal values in a field
+        //      holding the disambiguation context.
+//        } else if(this.usesWildcard){
+//            mappedTo = new String[]{null}; //wildcard always maps the selected field 1:1
         } else if(mappedTo == null || mappedTo.length<1){
                 mappedTo = new String[]{null}; //if no mapping parse map the field 1:1
         } //else used the parsed one
