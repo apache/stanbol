@@ -71,6 +71,7 @@
     <module>freemarker</module>
     <module>ldpathtemplate</module>
     <module>httpqueryheaders</module> <!-- allows CORS with MS Internet Explorer -->
+	<module>cors</module>
 	
     <!-- DataFile Provider -->
     <module>stanboltools/datafileprovider</module>
