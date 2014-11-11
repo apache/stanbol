@@ -61,10 +61,14 @@ import org.apache.stanbol.enhancer.engines.entitylinking.impl.LinkedEntity;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.Suggestion;
 import org.apache.stanbol.enhancer.engines.lucenefstlinking.TaggingSession.Corpus;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
+import org.apache.stanbol.enhancer.nlp.model.AnalysedTextUtils;
+import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
+import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
@@ -93,13 +97,15 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
     
     protected final String name;
 
+    protected final LinkingModeEnum linkingMode;
+
     protected final TextProcessingConfig tpConfig;
     protected final EntityLinkerConfig elConfig;
 
     private IndexConfiguration indexConfig;
 
-
-    public FstLinkingEngine(String name, IndexConfiguration indexConfig,
+    public FstLinkingEngine(String name, LinkingModeEnum linkingMode, 
+            IndexConfiguration indexConfig,
             TextProcessingConfig tpConfig, EntityLinkerConfig elConfig) {
         if (StringUtils.isBlank(name)) {
             throw new IllegalArgumentException("The parsed name MUST NOT be NULL nor blank!");
@@ -108,6 +114,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
         if (indexConfig == null) {
             throw new IllegalArgumentException("The parsed IndexConfiguration MUST NOT be NULL!");
         }
+        this.linkingMode = linkingMode == null ? LinkingModeEnum.values()[0] : linkingMode;
         this.indexConfig = indexConfig;
         if (tpConfig == null) {
             throw new IllegalArgumentException("The parsed Text Processing configuration MUST NOT be NULL");
@@ -149,18 +156,53 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
         // we need a detected language, the AnalyzedText contentPart with
         // Tokens.
         AnalysedText at = getAnalysedText(this, ci, false);
-        return at != null && at.getTokens().hasNext() ? ENHANCE_ASYNC : CANNOT_ENHANCE;
+        if(at == null && linkingMode == LinkingModeEnum.PLAIN){
+            return NlpEngineHelper.getPlainText(this, ci, false) != null ? ENHANCE_ASYNC : CANNOT_ENHANCE;
+        } else {
+            if(linkingMode == LinkingModeEnum.PLAIN){
+                return ENHANCE_ASYNC;
+            } else if(at.getTokens().hasNext()){
+                return ENHANCE_ASYNC;
+            } else {
+                log.warn("Unable to process {} with engine name={} and mode={} "
+                    + "as the AnalyzedText does not contain any Tokens!", 
+                    new Object[]{ci,name,linkingMode});
+                return at.getTokens().hasNext() ? ENHANCE_ASYNC : CANNOT_ENHANCE;
+            }
+        }
     }
 
     @Override
     public void computeEnhancements(ContentItem ci) throws EngineException {
-        AnalysedText at = getAnalysedText(this, ci, true);
+        AnalysedText at;
+        if(linkingMode != LinkingModeEnum.PLAIN){
+            //require AnalysedText contentPart
+            at = getAnalysedText(this, ci, true);
+        } else { //AnalysedText is optional in LinkingModeEnum.BASIC
+            try {
+                at = AnalysedTextUtils.getAnalysedText(ci);
+            } catch (ClassCastException e) {
+                //unexpected contentPart found under the URI expecting the AnalysedText
+                at = null;
+            }
+        }
+        final String content;
+        if(at != null){ //we can get the content from the Analyzed text
+            content = at.getSpan();
+        } else { //no analyzed text ... read is from the text/plain blob
+            try {
+                content = ContentItemHelper.getText(
+                    NlpEngineHelper.getPlainText(this, ci, true).getValue());
+            } catch (IOException e) {
+                throw new EngineException(this, ci, "Unable to access plain/text content!", e);
+            }
+        }
         log.debug("  > AnalysedText {}", at);
         String language = getLanguage(this, ci, true);
         log.debug("  > Language {}", language);
         if (log.isDebugEnabled()) {
             log.debug("computeEnhancements for ContentItem {} language {} text={}", new Object[] {
-                    ci.getUri().getUnicodeString(), language, StringUtils.abbreviate(at.getSpan(), 100)});
+                    ci.getUri().getUnicodeString(), language, StringUtils.abbreviate(content, 100)});
         }
         // TODO: we need to do the same for the the default matching language
         TaggingSession session;
@@ -177,7 +219,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
             if(session.getLanguageCorpus() != null){
                 corpus = session.getLanguageCorpus();
                 long t = System.currentTimeMillis();
-                int d = tag(at, session,corpus,tags);
+                int d = tag(content, at, session,corpus,tags);
                 log.info(" - {}: fst: {}ms (callback: {}ms)", new Object[]{
                         corpus.getIndexedField(), System.currentTimeMillis()-t, d
                 });
@@ -187,7 +229,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                     corpus = session.getDefaultCorpus();
                 }
                 long t = System.currentTimeMillis();
-                int d = tag(at, session, session.getDefaultCorpus(),tags);
+                int d = tag(content, at, session, session.getDefaultCorpus(),tags);
                 log.info(" - {}: fst: {}ms (callback: {}ms)",new Object[]{
                         session.getDefaultCorpus().getIndexedField(), 
                         System.currentTimeMillis()-t, d});
@@ -201,7 +243,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                     log.info(" - sum fst: {} ms", taggingEnd - taggingStart);
                 }
             }
-            int matches = match(at,tags.values());
+            int matches = match(content,tags.values());
             log.debug(" - loaded {} ({} loaded, {} cached, {} appended) Matches in {} ms", 
                     new Object[]{matches, session.getSessionDocLoaded(),
                         session.getSessionDocCached(), session.getSessionDocAppended(),
@@ -223,7 +265,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
         }
         ci.getLock().writeLock().lock();
         try {
-            writeEnhancements(ci,at.getSpan(),tags.values(),language, 
+            writeEnhancements(ci,content,tags.values(),language, 
                 elConfig.isWriteEntityRankings());
         } finally {
             ci.getLock().writeLock().unlock();
@@ -231,10 +273,9 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
         tags.clear(); //help the GC
     }
 
-    private int match(AnalysedText at, Collection<Tag> tags) {
+    private int match(String text, Collection<Tag> tags) {
         log.trace("  ... process matches for {} extracted Tags:",tags.size());
         int matchCount = 0;
-        String text = at.getSpan();
         Iterator<Tag> tagIt = tags.iterator();
         while(tagIt.hasNext()){
             Tag tag = tagIt.next();
@@ -370,35 +411,54 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
     /**
      * Uses the {@link Corpus} to tag the the {@link AnalysedText} and adds 
      * tagging results to the parsed tag map.
-     * @param at the AnalyzedText
+     * @param content the content to link
+     * @param at the AnalyzedText. not required if {@link LinkingModeEnum#PLAIN}
      * @param session the tagging session of the text
      * @param corpus the corpus o the session to tag the content with
      * @param tags the Tags map used to store the tagging results
      * @return the time in milliseconds spent in the tag callback.
      * @throws IOException on any error while accessing the {@link SolrCore}
      */
-    private int tag(final AnalysedText at, final TaggingSession session, 
-            final Corpus corpus, final Map<int[],Tag> tags) throws IOException {
+    private int tag(final String content, final AnalysedText at, final TaggingSession session, 
+            final Corpus corpus, final Map<int[],Tag> tags) throws IOException{
         final OpenBitSet matchDocIdsBS = new OpenBitSet(session.getSearcher().maxDoc());
         TokenStream baseTokenStream = corpus.getTaggingAnalyzer().tokenStream("", 
-            new CharSequenceReader(at.getText()));
-        LinkableTokenFilter linkableTokenFilter = new LinkableTokenFilter(baseTokenStream, 
-            at, session.getLanguage(), tpConfig.getConfiguration(session.getLanguage()),
-            elConfig.getMinChunkMatchScore(), elConfig.getMinFoundTokens());
+            new CharSequenceReader(content));
+        final TokenStream tokenStream;
+        final TagClusterReducer reducer;
+        log.debug(" ... set up TokenStream and TagClusterReducer for linking mode {}", linkingMode);
+        switch (linkingMode) {
+            case PLAIN: //will link all tokens and search longest dominant right
+                tokenStream = baseTokenStream;
+                reducer = TagClusterReducer.LONGEST_DOMINANT_RIGHT;
+                break;
+//            case NER:
+            case LINKABLE_TOKEN:
+                LinkableTokenFilter linkableTokenFilter = new LinkableTokenFilter(baseTokenStream, 
+                    at, session.getLanguage(), tpConfig.getConfiguration(session.getLanguage()),
+                    elConfig.getMinChunkMatchScore(), elConfig.getMinFoundTokens());
+                reducer = new ChainedTagClusterReducer(
+                    linkableTokenFilter,TagClusterReducer.ALL);
+                tokenStream = linkableTokenFilter;
+                break;
+            default:
+                throw new IllegalStateException("Unrecognized LinkingMode '"
+                    + linkingMode + "! Please adapt implementation to changed Enumeration!");
+        }
+        log.debug(" - tokenStream: {}", tokenStream);
+        log.debug(" - reducer: {}", reducer);
         //we use two TagClusterReducer implementations.
         // (1) the linkableTokenFilter filters all tags that do not overlap any
         //     linkable Token
         // (2) the LONGEST_DOMINANT_RIGHT reducer (TODO: make configurable)
-        TagClusterReducer reducer = new ChainedTagClusterReducer(
-            linkableTokenFilter,TagClusterReducer.ALL);
         final long[] time = new long[]{0};
-        new Tagger(corpus.getFst(), linkableTokenFilter, reducer,session.isSkipAltTokens()) {
+        new Tagger(corpus.getFst(), tokenStream, reducer,session.isSkipAltTokens()) {
             
             @Override
             protected void tagCallback(int startOffset, int endOffset, long docIdsKey) {
                 long start = System.nanoTime();
                 if(log.isTraceEnabled()){
-                    log.trace(" > tagCallback for {}", at.getText().subSequence(startOffset, endOffset));
+                    log.trace(" > tagCallback for {}", content.subSequence(startOffset, endOffset));
                 }
                 int[] span = new int[]{startOffset,endOffset};
                 Tag tag = tags.get(span);

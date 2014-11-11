@@ -301,7 +301,7 @@ public class FstLinkingEngineTest {
         elc.setMinFoundTokens(2);//this is assumed by this test
         elc.setRedirectProcessingMode(RedirectProcessingMode.FOLLOW);
         FstLinkingEngine engine = new FstLinkingEngine("proper-noun-linking", 
-            fstConfig, tpc, elc);
+            LinkingModeEnum.LINKABLE_TOKEN, fstConfig, tpc, elc);
         processConentItem(engine);
         validateEnhancements(
             Arrays.asList(
@@ -322,7 +322,7 @@ public class FstLinkingEngineTest {
         elc.setMinFoundTokens(2);//this is assumed by this test
         elc.setRedirectProcessingMode(RedirectProcessingMode.FOLLOW);
         FstLinkingEngine engine = new FstLinkingEngine("proper-noun-linking", 
-            fstConfig, tpc, elc);
+            LinkingModeEnum.LINKABLE_TOKEN, fstConfig, tpc, elc);
         processConentItem(engine);
         validateEnhancements(
             Arrays.asList(
