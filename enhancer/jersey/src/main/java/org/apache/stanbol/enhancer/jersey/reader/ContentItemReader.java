@@ -299,6 +299,7 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
         //MultivaluedMap<String,String> params = uriInfo.getPathParameters();
         //final String ciUri = params.getFirst("uri");
         String ciUri = null; //parse the uri parameter manually from the request URI
+        String source = null;
         if(query != null){
             int index = query.indexOf("uri=");
             if(index >= 0){
@@ -309,12 +310,17 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
                }
                if(index < endIndex){
                    try {
-                    ciUri = URLDecoder.decode(query.substring(index, endIndex), "UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    throw new IllegalStateException(e); //should never happen
-                }
+                       ciUri = URLDecoder.decode(query.substring(index, endIndex), "UTF-8");
+                       source = "'uri' parameter";
+                   } catch (UnsupportedEncodingException e) {
+                       throw new IllegalStateException(e); //should never happen
+                   }
                }
             }
+        }
+        if(ciUri == null){ //try to get the URI from the Content-Location header
+            ciUri = headers.getRequestHeaders().getFirst(HttpHeaders.CONTENT_LOCATION);
+            source = "'Content-Location' header";
         }
         if(ciUri != null){
             try { //validate the parsed URI
@@ -322,7 +328,7 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
             } catch (URISyntaxException e) {
                throw new WebApplicationException("The parsed ContentItem URI '"
                        + ciUri +"' is not a valid URI. Please check the value "
-                       + "of the 'uri' parameter",Response.Status.BAD_REQUEST);
+                       + "of the " + source, Response.Status.BAD_REQUEST);
             }
         }
         return ciUri == null ? null : new UriRef(ciUri);
