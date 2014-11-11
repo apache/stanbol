@@ -37,11 +37,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,7 +49,6 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrLookup;
 import org.apache.commons.lang.text.StrSubstitutor;
@@ -64,17 +60,9 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.index.AtomicReader;
-import org.apache.lucene.index.FieldInfo;
-import org.apache.lucene.index.FieldInfos;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.SolrCore;
-import org.apache.solr.schema.FieldType;
-import org.apache.solr.schema.IndexSchema;
-import org.apache.solr.search.SolrIndexSearcher;
-import org.apache.solr.util.RefCounted;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
@@ -109,8 +97,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
     policy = ConfigurationPolicy.REQUIRE, // the baseUri is required!
     specVersion = "1.1", 
     metatype = true, 
-    immediate = true,
-    inherit = true)
+    immediate = true)
 @org.apache.felix.scr.annotations.Properties(value={
     @Property(name=PROPERTY_NAME), //the name of the engine
     @Property(name=FstLinkingEngineComponent.SOLR_CORE),
@@ -163,6 +150,17 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
         intValue=FstLinkingEngineComponent.DEFAULT_ENTITY_CACHE_SIZE),
     @Property(name=SUGGESTIONS, intValue=DEFAULT_SUGGESTIONS),
     @Property(name=INCLUDE_SIMILAR_SCORE, boolValue=DEFAULT_INCLUDE_SIMILAR_SCORE),
+    @Property(name=FstLinkingEngineComponent.LINKING_MODE,  options={
+            @PropertyOption(
+                value='%'+FstLinkingEngineComponent.LINKING_MODE+".option.plain",
+                name="PLAIN"),
+            @PropertyOption(
+                value='%'+FstLinkingEngineComponent.LINKING_MODE+".option.linkableToken",
+                name="LINKABLE_TOKEN") //,
+            //@PropertyOption(
+            //    value='%'+FstLinkingEngineComponent.LINKING_MODE+".option.ner",
+            //    name="NER")
+        },value="LINKABLE_TOKEN"),
     @Property(name=CASE_SENSITIVE,boolValue=DEFAULT_CASE_SENSITIVE_MATCHING_STATE),
     @Property(name=PROCESS_ONLY_PROPER_NOUNS_STATE, boolValue=DEFAULT_PROCESS_ONLY_PROPER_NOUNS_STATE),
     @Property(name=PROCESSED_LANGUAGES, cardinality=Integer.MAX_VALUE,
@@ -202,6 +200,10 @@ public class FstLinkingEngineComponent {
      * a {@link Literal} is parsed.
      */
     public static final String ORIGIN = "enhancer.engines.linking.lucenefst.origin";
+    /**
+     * Property used to configure the {@link LinkingModeEnum}.
+     */
+    public static final String LINKING_MODE = "enhancer.engines.linking.lucenefst.mode";
     
     /**
      * The size of the thread pool used to create FST models (default=1). Creating
@@ -267,6 +269,10 @@ public class FstLinkingEngineComponent {
      * the SolrCore.
      */
     private String fstFolder;
+    /**
+     * The {@link LinkingModeEnum linking mode}
+     */
+    private LinkingModeEnum linkingMode;
     /**
      * Holds the {@link TextProcessingConfig} parsed from the configuration of
      * this engine. <p>
@@ -370,11 +376,27 @@ public class FstLinkingEngineComponent {
         } else {
             this.engineName = value.toString();
         }
+        log.info(" - engine name: {}", engineName);
         engineMetadata = new Hashtable<String,Object>();
         engineMetadata.put(PROPERTY_NAME, this.engineName);
         value = properties.get(Constants.SERVICE_RANKING);
         engineMetadata.put(Constants.SERVICE_RANKING, value == null ? Integer.valueOf(0) : value);
-
+        //(0) parse the linking mode
+        value = properties.get(LINKING_MODE);
+        if(value == null || StringUtils.isBlank(value.toString())){
+            this.linkingMode = LinkingModeEnum.LINKABLE_TOKEN;
+        } else {
+            try {
+                this.linkingMode = LinkingModeEnum.valueOf(value.toString());
+            } catch(IllegalArgumentException e){
+                throw new ConfigurationException(LINKING_MODE, "The parsed value '"
+                    +value+"' (type: "+value.getClass().getName()+") is not a member "
+                    + "of the enum (members: "+ Arrays.toString(LinkingModeEnum.values())
+                    + ")!",e);
+            }
+        }
+        log.info(" - linking mode: {}",linkingMode);
+        
         //(1) parse the TextProcessing configuration
         //TODO: decide if we should use the TextProcessingConfig for this engine
         textProcessingConfig = TextProcessingConfig.createInstance(properties);
@@ -692,7 +714,8 @@ public class FstLinkingEngineComponent {
             }
             //set the index configuration to the field;
             this.indexConfig = indexConfig;
-            FstLinkingEngine engine = new FstLinkingEngine(engineName, indexConfig,
+            FstLinkingEngine engine = new FstLinkingEngine(engineName, 
+                linkingMode, indexConfig,
                 textProcessingConfig, entityLinkerConfig);
             String[] services = new String [] {
                     EnhancementEngine.class.getName(),

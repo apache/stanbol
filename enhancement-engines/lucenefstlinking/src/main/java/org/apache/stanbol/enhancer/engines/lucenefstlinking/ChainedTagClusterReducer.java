@@ -16,6 +16,8 @@
 */
 package org.apache.stanbol.enhancer.engines.lucenefstlinking;
 
+import java.util.Arrays;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.opensextant.solrtexttagger.TagClusterReducer;
 import org.opensextant.solrtexttagger.TagLL;
@@ -50,4 +52,8 @@ public class ChainedTagClusterReducer implements TagClusterReducer {
 
     }
 
+    @Override
+    public String toString() {
+        return new StringBuilder(getClass().getSimpleName()).append(Arrays.toString(reducers)).toString();
+    }
 }
