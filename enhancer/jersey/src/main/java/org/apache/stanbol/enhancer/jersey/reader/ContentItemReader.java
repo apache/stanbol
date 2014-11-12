@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -293,7 +295,25 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
      */
     private UriRef getContentItemId() {
         //NOTE: check for request NULL is needed because of unit tests
-        String ciUri = request == null ? null : request.getParameter("uri");
+        if(request == null){
+            return null;
+        }
+        String ciUri = request.getParameter("uri");
+        String source = "'uri' parameter";
+        if(ciUri == null){ //try to get the URI from the Content-Location header
+            ciUri = request.getHeader(HttpHeaders.CONTENT_LOCATION);
+            source = "'Content-Location' header";
+        }
+        if(ciUri != null){
+            try { //validate the parsed URI
+                new URI(ciUri);
+            } catch (URISyntaxException e) {
+               throw new WebApplicationException(new IllegalArgumentException(
+                   "The parsed ContentItem URI '" + ciUri + 
+                   "' is not a valid URI. Please check the value of the " + 
+                           source, e), Response.Status.BAD_REQUEST);
+            }
+        } 
         return ciUri == null ? null : new UriRef(ciUri);
     }
     /**
