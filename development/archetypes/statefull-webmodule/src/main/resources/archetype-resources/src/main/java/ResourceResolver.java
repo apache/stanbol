@@ -84,7 +84,7 @@ public class ResourceResolver {
             tcManager.createMGraph(REQUEST_LOG_GRAPH_NAME);
             //now make sure everybody can read from the graph
             //or more precisly, anybody who can read the content-graph
-            TcAccessController tca = new TcAccessController(tcManager);
+            TcAccessController tca = tcManager.getTcAccessController();
             tca.setRequiredReadPermissions(REQUEST_LOG_GRAPH_NAME, 
                     Collections.singleton((Permission)new TcPermission(
                     "urn:x-localinstance:/content.graph", "read")));
