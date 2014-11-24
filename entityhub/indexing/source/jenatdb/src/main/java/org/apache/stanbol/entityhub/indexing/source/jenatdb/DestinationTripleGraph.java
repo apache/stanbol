@@ -19,7 +19,6 @@ package org.apache.stanbol.entityhub.indexing.source.jenatdb;
 import java.util.Map;
 
 import org.apache.jena.atlas.lib.Tuple;
-import org.apache.jena.atlas.logging.Log;
 import org.slf4j.Logger;
 
 import com.hp.hpl.jena.graph.Node;
@@ -129,7 +128,7 @@ class DestinationTripleGraph implements BulkStreamRDF {
         if ( ! dsg.getLocation().isMem() && startedEmpty )
         {
             String filename = dsg.getLocation().getPath(Names.optStats) ;
-            Stats.write(filename, stats) ;
+            Stats.write(filename, stats.results()) ;
         }
         forceSync(dsg) ;
     }
