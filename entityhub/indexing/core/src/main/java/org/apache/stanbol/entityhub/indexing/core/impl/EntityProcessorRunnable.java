@@ -47,6 +47,12 @@ public class EntityProcessorRunnable extends IndexingDaemon<Representation,Repre
         super(name,IndexerConstants.SEQUENCE_NUMBER_PROCESSOR_DAEMON,
             consume,produce,error);
         this.processors = processors;
+        if(log.isDebugEnabled()){
+            log.debug("Entity Processors:");
+            for(EntityProcessor ep : processors){
+                log.debug("  - {} (type: {})",ep, ep.getClass().getSimpleName());
+            }
+        }
         if(keys == null){
             this.keys = Collections.emptySet();
         } else {
@@ -62,14 +68,17 @@ public class EntityProcessorRunnable extends IndexingDaemon<Representation,Repre
                 item.setProperty(PROCESS_STARTED, start);
                 Iterator<EntityProcessor> it = processors.iterator();
                 Representation processed = item.getItem();
+                log.trace("> process {}", processed);
                 EntityProcessor processor = null;
                 while(processed != null && it.hasNext()){
                     processor = it.next();
+                    log.trace("   - with {}", processor);
                     processed = processor.process(processed);
                 }
                 if(processed == null){
                     log.debug("Item {} filtered by processor {}",item.getItem().getId(),processor);
                 } else {
+                    log.trace("   - done");
                     for(String key : keys){
                         //consume the property and add it to the
                         //transformed representation

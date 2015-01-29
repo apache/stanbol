@@ -48,6 +48,8 @@ public class EntityFieldScoreProvider implements EntityScoreProvider {
     public EntityFieldScoreProvider(String fieldName){
         if(fieldName == null){
             this.fieldName = DEFAULT_FIELD_NAME;
+        } else {
+            this.fieldName = fieldName;
         }
     }
     

@@ -60,7 +60,10 @@ public class FiledMapperProcessor implements EntityProcessor{
         this(nps,vf);
         if(mapper == null){
             throw new IllegalArgumentException("The parsed FieldMapper MUST NOT be NULL!");
+        } else if(mapper.getMappings().isEmpty()){
+            throw new IllegalStateException("The parsed field mappings MUST contain at least a single valid mapping!");
         }
+        this.mapper = mapper;
     }
     public FiledMapperProcessor(Iterator<String> mappings, NamespacePrefixService nps, ValueFactory vf){
         this(nps, vf);
