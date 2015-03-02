@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * This Service provides an {@link TemplateLoader} that provides templates
  * relative to the {@link #TEMPLATES_PATH_IN_BUNDLES}.
  */
-@Component
+@Component(immediate=true)
 @Service(TemplateLoader.class)
 public class BundleTemplateLoader implements TemplateLoader{
 	
@@ -114,7 +114,21 @@ public class BundleTemplateLoader implements TemplateLoader{
 	}
 	
 	private boolean containsTemplates(Bundle bundle) {
-		return bundle.getResource(TEMPLATES_PATH_IN_BUNDLES) != null;
+	    try {
+	        return bundle.getResource(TEMPLATES_PATH_IN_BUNDLES) != null;
+	    } catch(NullPointerException e){
+	        //sometimes this call caused a
+	        //java.lang.NullPointerException
+	        //    at org.apache.felix.framework.BundleRevisionImpl.getResourceLocal(BundleRevisionImpl.java:495)
+	        //    at org.apache.felix.framework.BundleWiringImpl.findClassOrResourceByDelegation(BundleWiringImpl.java:1472)
+	        //    at org.apache.felix.framework.BundleWiringImpl.getResourceByDelegation(BundleWiringImpl.java:1400)
+	        //    at org.apache.felix.framework.Felix.getBundleResource(Felix.java:1600)
+	        //    at org.apache.felix.framework.BundleImpl.getResource(BundleImpl.java:639)
+	        //    at org.apache.stanbol.commons.freemarker.impl.BundleTemplateLoader.containsTemplates(BundleTemplateLoader.java:117)
+	        log.warn(" ... unable to check for Path "+TEMPLATES_PATH_IN_BUNDLES
+	            +" in Bundle "+ bundle, e);
+	        return false;
+	    }
 	}
 	
 }

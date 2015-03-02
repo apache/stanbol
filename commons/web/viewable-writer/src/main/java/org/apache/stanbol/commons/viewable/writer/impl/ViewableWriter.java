@@ -40,7 +40,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 
-@Component
+@Component(immediate=true)
 @Service(Object.class)
 @Property(name="javax.ws.rs", boolValue=true)
 @Produces(MediaType.TEXT_HTML)
