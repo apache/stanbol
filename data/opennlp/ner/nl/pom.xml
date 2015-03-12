@@ -46,19 +46,16 @@
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
-
+  
   <properties>
     <downloadWarning>
-*                  
+*
 * WARNING - this build downloads some OpenNLP files that are *not*
 * licensed under the Apache License, and have more restrictive usage
 * terms than the Apache Stanbol code. See STANBOL-545 for more
 * information: https://issues.apache.org/jira/browse/STANBOL-545
 *
     </downloadWarning>
-    <!-- define the path to/home of the OpenNLP modles-->
-    <opennlp.model.path>org/apache/stanbol/data/opennlp</opennlp.model.path>
-    <opennlp.model.home>http://dev.iks-project.eu/downloads/opennlp/models-1.5</opennlp.model.home>
   </properties>
 
   <build>

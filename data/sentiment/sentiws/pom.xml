@@ -53,15 +53,12 @@
   <properties>
     <downloadWarning>
 *
-* WARNING - this build downloads the SentimentWortschatz files that are *not*
+* WARNING - this build downloads some OpenNLP files that are *not*
 * licensed under the Apache License, and have more restrictive usage
-* terms than the Apache Stanbol code. See STANBOL-836 for more
-* information: https://issues.apache.org/jira/browse/STANBOL-836
+* terms than the Apache Stanbol code. See STANBOL-545 for more
+* information: https://issues.apache.org/jira/browse/STANBOL-545
 *
     </downloadWarning>
-    <!-- define the path to/home of the OpenNLP modles-->
-    <sentiment.model.path>org/apache/stanbol/data/sentiment/sentiws</sentiment.model.path>
-    <sentiment.model.home>http://dev.iks-project.eu/downloads/sentiment-data/</sentiment.model.home>
   </properties>
 
   <build>

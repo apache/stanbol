@@ -35,7 +35,18 @@
     Bundle containing SentiWordNet for English. SentiWordNet assigns to each
     synset of WordNet three sentiment scores: positivity, negativity, objectivity.
   </description>
-  
+
+  <properties>
+    <downloadWarning>
+*
+* WARNING - this build downloads some OpenNLP files that are *not*
+* licensed under the Apache License, and have more restrictive usage
+* terms than the Apache Stanbol code. See STANBOL-545 for more
+* information: https://issues.apache.org/jira/browse/STANBOL-545
+*
+    </downloadWarning>
+  </properties>
+
   <inceptionYear>2012</inceptionYear>
 
   <scm>
@@ -47,19 +58,6 @@
     </developerConnection>
     <url>http://incubator.apache.org/stanbol/</url>
   </scm>
-  <properties>
-    <downloadWarning>
-*
-* WARNING - this build downloads the SentiWordNet files that are *not*
-* licensed under the Apache License. , and have more restrictive usage
-* terms than the Apache Stanbol code. See STANBOL-837 for more
-* information: https://issues.apache.org/jira/browse/STANBOL-837
-*
-    </downloadWarning>
-    <!-- define the path to/home of the sentiment data -->
-    <sentiment.model.path>org/apache/stanbol/data/sentiment/sentiwordnet</sentiment.model.path>
-    <sentiment.model.home>http://dev.iks-project.eu/downloads/sentiment-data/</sentiment.model.home>
-  </properties>
 
   <build>
     <plugins>

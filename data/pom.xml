@@ -54,7 +54,7 @@
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
-  
+
   <modules>
     <module>parent</module>
     <module>defaultconfig</module>

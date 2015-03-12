@@ -56,21 +56,17 @@
   </scm>
 
   <properties>
+    <downloadWarning>
+*
+* WARNING - this build downloads some OpenNLP files that are *not*
+* licensed under the Apache License, and have more restrictive usage
+* terms than the Apache Stanbol code. See STANBOL-545 for more
+* information: https://issues.apache.org/jira/browse/STANBOL-545
+*
+    </downloadWarning>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <dbpedia.default.index.url>http://dev.iks-project.eu/downloads/stanbol-indices/dbpedia_26k.solrindex.bz2</dbpedia.default.index.url>
-    <!-- this is the name of the old index. Used to ensure deletion  -->
-    <dbpedia.default.index.old>dbpedia_43k.solrindex.zip</dbpedia.default.index.old>
-    <dbpedia.default.path>org/apache/stanbol/data/site/dbpedia/default</dbpedia.default.path>
     <dbpedia.default.index.path>${dbpedia.default.path}/index</dbpedia.default.index.path>
     <dbpedia.default.config.path>${dbpedia.default.path}/config</dbpedia.default.config.path>
-    <downloadWarning>
-*                  
-* WARNING - this build downloads a DPBedia index for 26k entities
-* that is *not* licensed under the Apache License, but under the
-* Creative Commons Attribution-ShareAlike 3.0 Unported License.
-* See https://issues.apache.org/jira/browse/STANBOL-873.
-*
-    </downloadWarning>    
   </properties>
 
   <build>
@@ -104,8 +100,7 @@
       </plugin>
       <plugin>
         <!-- 
-          Ant is used to download the models from the
-          http://opennlp.sourceforge.net site.
+          Ant is used to download the dbpedia default data index
         -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
