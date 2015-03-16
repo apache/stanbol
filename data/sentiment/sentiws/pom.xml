@@ -59,9 +59,6 @@
 * information: https://issues.apache.org/jira/browse/STANBOL-836
 *
     </downloadWarning>
-    <!-- define the path to/home of the OpenNLP modles-->
-    <sentiment.model.path>org/apache/stanbol/data/sentiment/sentiws</sentiment.model.path>
-    <sentiment.model.home>http://dev.iks-project.eu/downloads/sentiment-data/</sentiment.model.home>
   </properties>
 
   <build>

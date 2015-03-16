@@ -56,9 +56,6 @@
 * information: https://issues.apache.org/jira/browse/STANBOL-545
 *
     </downloadWarning>
-    <!-- define the path to/home of the OpenNLP modles-->
-    <opennlp.model.path>org/apache/stanbol/data/opennlp</opennlp.model.path>
-    <opennlp.model.home>http://dev.iks-project.eu/downloads/opennlp/models-1.5</opennlp.model.home>
   </properties>
 
   <build>

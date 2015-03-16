@@ -56,9 +56,6 @@
 * information: https://issues.apache.org/jira/browse/STANBOL-837
 *
     </downloadWarning>
-    <!-- define the path to/home of the sentiment data -->
-    <sentiment.model.path>org/apache/stanbol/data/sentiment/sentiwordnet</sentiment.model.path>
-    <sentiment.model.home>http://dev.iks-project.eu/downloads/sentiment-data/</sentiment.model.home>
   </properties>
 
   <build>
