@@ -20,7 +20,16 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.REQUEST_PROPERTIES_URI;
 import static org.apache.stanbol.enhancer.jersey.utils.RequestPropertiesHelper.PARSED_CONTENT_URIS;
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.randomUUID;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_CREATED;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_CREATOR;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_LANGUAGE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_EXTRACTED_FROM;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.DCTERMS_LINGUISTIC_SYSTEM;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_ENHANCEMENT;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -34,10 +43,12 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -52,9 +63,11 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 
+import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
@@ -105,7 +118,11 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
      */
     @Context
     HttpHeaders headers;
-    
+    /**
+     * Clerezza LiteralFactory
+     */
+    private LiteralFactory lf = LiteralFactory.getInstance();
+
     public static final MediaType MULTIPART = MediaType.valueOf(MediaType.MULTIPART_FORM_DATA_TYPE.getType()+"/*");
 
     
@@ -279,10 +296,39 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
         //STANBOL-660: set the language of the content if explicitly parsed in the request
         String contentLanguage = getContentLanguage();
         if(!StringUtils.isBlank(contentLanguage)){
-            EnhancementEngineHelper.set(contentItem.getMetadata(), contentItem.getUri(), 
-                DC_LANGUAGE, new PlainLiteralImpl(contentLanguage));
+            //language codes are case insensitive ... so we convert to lower case
+            contentLanguage = contentLanguage.toLowerCase(Locale.ROOT);
+            createParsedLanguageAnnotation(contentItem,contentLanguage);
+// previously only the dc:language property was set to the contentItem. However this
+// information is only used as fallback if no Language annotation is present. However
+// if a user explicitly parses the language he expects this language to be used
+// so this was change with STANBOL-1417
+//            EnhancementEngineHelper.set(contentItem.getMetadata(), contentItem.getUri(), 
+//                DC_LANGUAGE, new PlainLiteralImpl(contentLanguage));
         }
         return contentItem;
+    }
+    /**
+     * Creates a fise:TextAnnotation for the explicitly parsed Content-Language
+     * header. The confidence of this annotation is set <code>1.0</code> (see 
+     * <a href="https://issues.apache.org/jira/browse/STANBOL-1417">STANBOL-1417</a>).
+     * @param ci the {@link ContentItem} to the the language annotation
+     * @param lang the parsed language
+     */
+    private void createParsedLanguageAnnotation(ContentItem ci, String lang){
+        MGraph m = ci.getMetadata();
+        UriRef la = new UriRef("urn:enhancement-"+ EnhancementEngineHelper.randomUUID());
+        //add the fise:Enhancement information
+        m.add(new TripleImpl(la, RDF_TYPE, ENHANCER_ENHANCEMENT));
+        m.add(new TripleImpl(la, RDF_TYPE, ENHANCER_TEXTANNOTATION));
+        m.add(new TripleImpl(la, ENHANCER_EXTRACTED_FROM, ci.getUri()));
+        m.add(new TripleImpl(la, DC_CREATED, lf.createTypedLiteral(new Date())));
+        m.add(new TripleImpl(la, DC_CREATOR, lf.createTypedLiteral("Content-Language Header of the request")));
+        //add fise:TextAnnotation information as expected by a Language annotation.
+        m.add(new TripleImpl(la, DC_TYPE, DCTERMS_LINGUISTIC_SYSTEM));
+        m.add(new TripleImpl(la, DC_LANGUAGE, new PlainLiteralImpl(lang)));
+        //we set the confidence to 1.0
+        m.add(new TripleImpl(la, ENHANCER_CONFIDENCE, lf.createTypedLiteral(Float.valueOf(1.0f))));
     }
     /**
      * tries to retrieve the ContentItem from the 'uri' query parameter of the
