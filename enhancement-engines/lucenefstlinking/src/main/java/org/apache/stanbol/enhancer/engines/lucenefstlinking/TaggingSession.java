@@ -24,11 +24,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.commons.lang.StringUtils;
@@ -40,23 +41,16 @@ import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexableField;
-import org.apache.lucene.queries.function.valuesource.IfFunction;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.util.RefCounted;
 import org.apache.stanbol.enhancer.engines.lucenefstlinking.Match.FieldLoader;
 import org.apache.stanbol.enhancer.engines.lucenefstlinking.Match.FieldType;
 import org.apache.stanbol.enhancer.engines.lucenefstlinking.cache.EntityCache;
-import org.apache.stanbol.enhancer.engines.lucenefstlinking.impl.ValueSourceAccessor;
-import org.apache.stanbol.enhancer.servicesapi.ContentItem;
-import org.apache.stanbol.enhancer.servicesapi.EngineException;
-import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
+import org.apache.stanbol.enhancer.nlp.ner.NerTag;
 import org.opensextant.solrtexttagger.TaggerFstCorpus;
-import org.opensextant.solrtexttagger.UnsupportedTokenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.eventbus.AllowConcurrentEvents;
 
 /**
  * Profile created based on the {@link IndexConfiguration} for processing a
@@ -101,6 +95,18 @@ public class TaggingSession implements Closeable {
     protected final String typeField;
     protected final String redirectField;
     protected final String rankingField;
+    
+    /**
+     * Used in the {@link LinkingModeEnum#NER} to store the {@link NerTag#getTag()}
+     * and {@link NerTag#getType()} values for the span of the Named Entity.<p>
+     * This information is collected by the {@link NamedEntityTokenFilter} while
+     * iterating over the parsed text and is used in the processing of
+     * {@link Tag}s to filter Entities based on their types. <p>
+     * Not used in any linking mode other than <code>NER</code>
+     */
+    protected final NavigableMap<int[],Set<String>> entityMentionTypes = 
+            new TreeMap<int[],Set<String>>(Tag.SPAN_COMPARATOR);
+    
     private final RefCounted<SolrIndexSearcher> searcherRef;
     /**
      * Document Cache and session statistics for the cache
