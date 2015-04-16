@@ -36,9 +36,13 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -63,6 +67,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.SolrCore;
+import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.solr.IndexReference;
 import org.apache.stanbol.commons.solr.RegisteredSolrServerTracker;
@@ -70,6 +75,7 @@ import org.apache.stanbol.enhancer.engines.entitylinking.config.EntityLinkerConf
 import org.apache.stanbol.enhancer.engines.entitylinking.config.TextProcessingConfig;
 import org.apache.stanbol.enhancer.engines.lucenefstlinking.cache.EntityCacheManager;
 import org.apache.stanbol.enhancer.engines.lucenefstlinking.cache.FastLRUCacheManager;
+import org.apache.stanbol.enhancer.nlp.ner.NerTag;
 import org.apache.stanbol.enhancer.nlp.utils.LanguageConfiguration;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
@@ -132,35 +138,12 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
     value=IndexConfiguration.DEFAULT_FST_FOLDER),
     @Property(name=IndexConfiguration.SOLR_TYPE_FIELD, value="rdf:type"),
     @Property(name=IndexConfiguration.SOLR_RANKING_FIELD, value="entityhub:entityRank"),
-//  @Property(name=REDIRECT_FIELD,value="rdfs:seeAlso"),
-//  @Property(name=REDIRECT_MODE,options={
-//      @PropertyOption(
-//          value='%'+REDIRECT_MODE+".option.ignore",
-//          name="IGNORE"),
-//      @PropertyOption(
-//          value='%'+REDIRECT_MODE+".option.addValues",
-//          name="ADD_VALUES"),
-//      @PropertyOption(
-//              value='%'+REDIRECT_MODE+".option.follow",
-//              name="FOLLOW")
-//      },value="IGNORE"),
     @Property(name=FstLinkingEngineComponent.FST_THREAD_POOL_SIZE,
         intValue=FstLinkingEngineComponent.DEFAULT_FST_THREAD_POOL_SIZE),
     @Property(name=FstLinkingEngineComponent.ENTITY_CACHE_SIZE, 
         intValue=FstLinkingEngineComponent.DEFAULT_ENTITY_CACHE_SIZE),
     @Property(name=SUGGESTIONS, intValue=DEFAULT_SUGGESTIONS),
     @Property(name=INCLUDE_SIMILAR_SCORE, boolValue=DEFAULT_INCLUDE_SIMILAR_SCORE),
-    @Property(name=FstLinkingEngineComponent.LINKING_MODE,  options={
-            @PropertyOption(
-                value='%'+FstLinkingEngineComponent.LINKING_MODE+".option.plain",
-                name="PLAIN"),
-            @PropertyOption(
-                value='%'+FstLinkingEngineComponent.LINKING_MODE+".option.linkableToken",
-                name="LINKABLE_TOKEN") //,
-            //@PropertyOption(
-            //    value='%'+FstLinkingEngineComponent.LINKING_MODE+".option.ner",
-            //    name="NER")
-        },value="LINKABLE_TOKEN"),
     @Property(name=CASE_SENSITIVE,boolValue=DEFAULT_CASE_SENSITIVE_MATCHING_STATE),
     @Property(name=PROCESS_ONLY_PROPER_NOUNS_STATE, boolValue=DEFAULT_PROCESS_ONLY_PROPER_NOUNS_STATE),
     @Property(name=PROCESSED_LANGUAGES, cardinality=Integer.MAX_VALUE,
@@ -178,9 +161,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
         "dbp-ont:Event; schema:Event > dbp-ont:Event",
         "schema:Product > schema:Product",
         "skos:Concept > skos:Concept"}),
-//    @Property(name=DEREFERENCE_ENTITIES, boolValue=DEFAULT_DEREFERENCE_ENTITIES_STATE),
-//    @Property(name=DEREFERENCE_ENTITIES_FIELDS,cardinality=Integer.MAX_VALUE,
-//        value={"rdfs:comment","geo:lat","geo:long","foaf:depiction","dbp-ont:thumbnail"}),
     @Property(name=SERVICE_RANKING,intValue=0)
 })
 public class FstLinkingEngineComponent {
@@ -205,6 +185,13 @@ public class FstLinkingEngineComponent {
      */
     public static final String LINKING_MODE = "enhancer.engines.linking.lucenefst.mode";
     
+    /**
+     * Allows to configure mappings of NamedEntity Types to types of Entities in the
+     * vocabulary. Configured keys are matched against the {@link NerTag#getTag()} AND
+     * {@link NerTag#getType()} values of NamedEntities. Configured Values are mapped
+     * against the values of the configured {@link IndexConfiguration#SOLR_TYPE_FIELD}.
+     */
+    public static final String NAMED_ENTITY_TYPE_MAPPINGS = "enhancer.engines.linking.lucenefst.neTypeMapping";
     /**
      * The size of the thread pool used to create FST models (default=1). Creating
      * such models does need a lot of memory. Expect values up to 10times of the
@@ -242,7 +229,7 @@ public class FstLinkingEngineComponent {
      */
     private static final Integer FST_DEFAULT_MIN_FOUND_TOKENS = 2;
     
-    private final Logger log = LoggerFactory.getLogger(FstLinkingEngineComponent.class);
+    protected final Logger log = LoggerFactory.getLogger(FstLinkingEngineComponent.class);
     /**
      * the name for the EnhancementEngine registered by this component
      */
@@ -257,7 +244,7 @@ public class FstLinkingEngineComponent {
      * used to resolve '{prefix}:{local-name}' used within the engines configuration
      */
     @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
-    protected NamespacePrefixService prefixService;    
+    private NamespacePrefixService prefixService;    
 
     /**
      * Holds the FST configuration parsed to the engine
@@ -322,7 +309,7 @@ public class FstLinkingEngineComponent {
      * The bundle context for this component. Also used to track dependencies
      * and register the {@link #engineRegistration}
      */
-    private BundleContext bundleContext;
+    protected BundleContext bundleContext;
     
     /**
      * Thread pool used for the runtime creation of FST modles.
@@ -355,6 +342,8 @@ public class FstLinkingEngineComponent {
      * The size of the EntityCache ( <code>0</code> ... means deactivated)
      */
     private int entityCacheSize;
+
+    private Map<String,Set<String>> nerTypeMappings;
     
     /**
      * Default constructor as used by OSGI. This expects that 
@@ -366,9 +355,63 @@ public class FstLinkingEngineComponent {
     @Activate
     @SuppressWarnings("unchecked")
     protected void activate(ComponentContext ctx) throws ConfigurationException {
-        log.info("activate {}",getClass().getSimpleName());
+        log.info("activate {}", getClass().getSimpleName());
+        log.debug("  - instance: {}", this);
+        log.debug("  - config: {}", ctx.getProperties());
         this.bundleContext = ctx.getBundleContext();
-        Dictionary<String,Object> properties = ctx.getProperties();
+        //(0) parse the linking mode
+        applyConfig(parseLinkingMode(ctx), ctx.getProperties(), prefixService);
+    }
+
+    /**
+     * Parses the LinkingMode from the {@link #LINKING_MODE} property. This
+     * allows to use this component to configure FST linking engines for any
+     * supported LinkingMode. If the {@link #LINKING_MODE} is not present the
+     * default {@link LinkingModeEnum#LINKABLE_TOKEN} is returned. <p>
+     * <b>NOTE:</b>Typically
+     * users will want to use the <ul>
+     * <li>{@link PlainFstLinkingComponnet} to configure FST engines for the 
+     * {@link LinkingModeEnum#PLAIN}
+     * <li> {@link NamedEntityFstLinkingComponnet} to configure FST engines for
+     * the {@link LinkingModeEnum#NER}
+     * </ul>
+     * but is is also fine to explicitly specify a {@link #LINKING_MODE} linking
+     * mode when using this component to configure the FST linking engine.
+     * @param ctx the parsed component context
+     * @return the parsed {@link LinkingModeEnum}
+     * @throws ConfigurationException
+     */
+    private LinkingModeEnum parseLinkingMode(ComponentContext ctx) throws ConfigurationException {
+        Object value = ctx.getProperties().get(LINKING_MODE);
+        LinkingModeEnum linkingMode;
+        if(value == null || StringUtils.isBlank(value.toString())){
+            linkingMode = LinkingModeEnum.LINKABLE_TOKEN;
+        } else {
+            try {
+                linkingMode = LinkingModeEnum.valueOf(value.toString());
+            } catch(IllegalArgumentException e){
+                throw new ConfigurationException(LINKING_MODE, "The parsed value '"
+                    +value+"' (type: "+value.getClass().getName()+") is not a member "
+                    + "of the enum (members: "+ Arrays.toString(LinkingModeEnum.values())
+                    + ")!",e);
+            }
+        }
+        return linkingMode;
+    }
+    /**
+     * Called by {@link #activate(ComponentContext)}, 
+     * {@link PlainFstLinkingComponnet#activate(ComponentContext)} and 
+     * {@link NamedEntityFstLinkingComponnet#activate(ComponentContext)} to
+     * apply the parsed {@link ComponentContext#getProperties()}. The
+     * {@link LinkingModeEnum linking mode} is parsed separately as OSGI does not
+     * allow to modify the parsed config and sup-classes do need to override
+     * the linking mode.
+     * @param linkingMode the linking mode
+     * @param properties
+     * @throws ConfigurationException
+     */
+    protected void applyConfig(LinkingModeEnum linkingMode, Dictionary<String,Object> properties, NamespacePrefixService prefixService)
+            throws ConfigurationException {
         //(0) The name for the Enhancement Engine and the basic metadata
         Object value = properties.get(PROPERTY_NAME);
         if(value == null || value.toString().isEmpty()){
@@ -381,21 +424,10 @@ public class FstLinkingEngineComponent {
         engineMetadata.put(PROPERTY_NAME, this.engineName);
         value = properties.get(Constants.SERVICE_RANKING);
         engineMetadata.put(Constants.SERVICE_RANKING, value == null ? Integer.valueOf(0) : value);
-        //(0) parse the linking mode
-        value = properties.get(LINKING_MODE);
-        if(value == null || StringUtils.isBlank(value.toString())){
-            this.linkingMode = LinkingModeEnum.LINKABLE_TOKEN;
-        } else {
-            try {
-                this.linkingMode = LinkingModeEnum.valueOf(value.toString());
-            } catch(IllegalArgumentException e){
-                throw new ConfigurationException(LINKING_MODE, "The parsed value '"
-                    +value+"' (type: "+value.getClass().getName()+") is not a member "
-                    + "of the enum (members: "+ Arrays.toString(LinkingModeEnum.values())
-                    + ")!",e);
-            }
-        }
-        log.info(" - linking mode: {}",linkingMode);
+        
+        //(0) set the linking mode
+        this.linkingMode = linkingMode;
+        log.info(" - linking mode: {}", linkingMode);
         
         //(1) parse the TextProcessing configuration
         //TODO: decide if we should use the TextProcessingConfig for this engine
@@ -561,8 +593,70 @@ public class FstLinkingEngineComponent {
         } else {
             solrRankingField = value.toString().trim();
         }
+        //(10) parse the NamedEntity type mappings (if linkingMode = NER)
+        if(linkingMode == LinkingModeEnum.NER){
+            nerTypeMappings = new HashMap<String,Set<String>>();
+            value = properties.get(NAMED_ENTITY_TYPE_MAPPINGS);
+            if(value instanceof String[]){ //support array
+                value = Arrays.asList((String[])value);
+            } else if(value instanceof String) { //single value
+                value = Collections.singleton(value);
+            }
+            if(value instanceof Collection<?>){ //and collection
+                log.info(" - process Named Entity Type Mappings (used by LinkingMode: {})",linkingMode);
+                configs : for(Object o : (Iterable<?>)value){
+                    if(o != null){
+                        StringBuilder usage = new StringBuilder("useage: ");
+                        usage.append("'{namedEntity-tag-or-uri} > {entityType-1}[,{entityType-n}]'");
+                        String[] config = o.toString().split(">");
+                        String namedEntityType = config[0].trim();
+                        if(namedEntityType.isEmpty()){
+                            log.warn("Invalid Type Mapping Config '{}': Missing namedEntityType ({}) -> ignore this config",
+                                o,usage);
+                            continue configs;
+                        }
+                        if(NamespaceMappingUtils.getPrefix(namedEntityType) != null){
+                            namedEntityType = NamespaceMappingUtils.getConfiguredUri(
+                                prefixService, NAMED_ENTITY_TYPE_MAPPINGS,namedEntityType);
+                        }
+                        if(config.length < 2 || config[1].isEmpty()){
+                            log.warn("Invalid Type Mapping Config '{}': Missing dc:type URI '{}' ({}) -> ignore this config",
+                                o,usage);
+                            continue configs;
+                        }
+                        String entityTypes = config[1].trim();
+                        if(config.length > 2){
+                            log.warn("Configuration after 2nd '>' gets ignored. Will use mapping '{} > {}' from config {}",
+                                new Object[]{namedEntityType,entityTypes,o});
+                        }
+                        Set<String> types = nerTypeMappings.get(namedEntityType);
+                        if(types == null){ //add new element to the mapping
+                            types = new HashSet<String>();
+                            nerTypeMappings.put(namedEntityType, types);
+                        }
+                        for(String entityType : entityTypes.split(";")){
+                            entityType = entityType.trim();
+                            if(!entityType.isEmpty()){
+                                String typeUri;
+                                if("*".equals(entityType)){
+                                    typeUri = null; //null is used as wildcard
+                                } else {
+                                    typeUri = NamespaceMappingUtils.getConfiguredUri(
+                                        prefixService, NAMED_ENTITY_TYPE_MAPPINGS, entityType);
+                                }
+                                log.info("   - add {} > {}", namedEntityType, typeUri);
+                                types.add(typeUri);
+                            } //else ignore empty mapping
+                        }
+                    }
+                }
+            } else { //no mappings defined ... set wildcard mapping
+                log.info(" - No Named Entity type mappings configured. Will use wildcard mappings");
+                nerTypeMappings = Collections.singletonMap(null, Collections.<String>singleton(null));
+            }
+        }
         
-        //(10) start tracking the SolrCore
+        //(11) start tracking the SolrCore
         try {
             solrServerTracker = new RegisteredSolrServerTracker(
                 bundleContext, indexReference, null){
@@ -599,7 +693,18 @@ public class FstLinkingEngineComponent {
             throw new ConfigurationException(SOLR_CORE, "parsed SolrCore name '"
                 + value.toString()+"' is invalid (expected: '[{server-name}:]{indexname}'");
         }
-        solrServerTracker.open();
+        try {
+            solrServerTracker.open();
+        } catch(RuntimeException e){
+            //FIX for STANBOL-1416 (see https://issues.apache.org/jira/browse/STANBOL-1416)
+            //If an available SolrCore can not be correctly initialized we will
+            //get the exception here. In this case we want this component to be
+            //activated and waiting for further service events. Because of that
+            //we catch here the exception.
+            log.debug("Error while processing existing SolrCore Service during "
+                    + "opening SolrServiceTracker ... waiting for further service"
+                    + "Events", e);
+        }
     }
     
     /**
@@ -712,18 +817,28 @@ public class FstLinkingEngineComponent {
             } else {
             	log.info("  ... no corpus for default language {} available", defaultCoprous);
             }
-            //set the index configuration to the field;
+            
+            //check if the old configuration is still present
+            if(this.engineRegistration != null){
+                unregisterEngine();
+            }
+            
+            //create the new configuration
+            
+            //set the newly configured instances to the fields
             this.indexConfig = indexConfig;
+            this.solrServerReference = reference;
+            this.solrCore = core;
+            //create the new FST linking engine instance
             FstLinkingEngine engine = new FstLinkingEngine(engineName, 
                 linkingMode, indexConfig,
-                textProcessingConfig, entityLinkerConfig);
+                textProcessingConfig, entityLinkerConfig, nerTypeMappings);
+            //register it as a service
             String[] services = new String [] {
                     EnhancementEngine.class.getName(),
                     ServiceProperties.class.getName()};
             log.info(" ... register {}: {}", engine.getClass().getSimpleName(),engineName);
             this.engineRegistration = bundleContext.registerService(services,engine, engineMetadata);
-            this.solrServerReference = reference;
-            this.solrCore = core;
         }
 
         
@@ -765,12 +880,21 @@ public class FstLinkingEngineComponent {
      * rests the fields. If no engine is registered this does nothing!
      */
     private void unregisterEngine() {
+        log.debug("> in unregisterEngine() ...");
         //use local copies for method calls to avoid concurrency issues
         ServiceRegistration engineRegistration = this.engineRegistration;
         if(engineRegistration != null){
             log.info(" ... unregister Lucene FSTLinkingEngine {}",engineName);
-            engineRegistration.unregister();
+            try {
+                engineRegistration.unregister();
+            } catch(IllegalStateException e) {
+                //this is unexpected but can be ignored
+                log.info("Unexpected State: Service for FSTLinkingEngine "
+                        + engineName+" was already deactivated.", e);
+            }
             this.engineRegistration = null; //reset the field
+        } else {
+            log.debug(" ... no engine registration present");
         }
         solrServerReference = null;
         SolrCore solrServer = this.solrCore;
@@ -778,6 +902,8 @@ public class FstLinkingEngineComponent {
             log.debug(" ... unregister SolrCore {}", solrServer.getName());
             solrServer.close(); //decrease the reference count!!
             this.solrCore = null; //rest the field
+        } else {
+            log.debug(" ... no SolrCore present");
         }
         //deactivate the index configuration if present
         if(indexConfig != null){
@@ -790,6 +916,8 @@ public class FstLinkingEngineComponent {
                 cacheManager.close();
             }
             indexConfig = null;
+        } else {
+            log.debug(" ... no index config present");
         }
     }
 
@@ -834,7 +962,11 @@ public class FstLinkingEngineComponent {
      */
     @Deactivate
     protected void deactivate(ComponentContext ctx) {
-        log.info(" ... deactivate {}: {}",getClass().getSimpleName(), engineName);
+        log.info(" ... deactivate {}: {} (CompInst: {})",new Object[] {
+                getClass().getSimpleName(), 
+                engineName, ctx.getComponentInstance()});
+        log.debug("  - instance: {}", this);
+        log.debug("  - config: {}", ctx.getProperties());
         if(solrServerTracker != null){
             //closing the tracker will also cause registered engines to be
             //unregistered as service (see #updateEngineRegistration())

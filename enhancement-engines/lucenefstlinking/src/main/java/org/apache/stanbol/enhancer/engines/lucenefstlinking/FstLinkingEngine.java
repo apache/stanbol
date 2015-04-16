@@ -28,6 +28,7 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHAN
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -62,8 +63,8 @@ import org.apache.stanbol.enhancer.engines.entitylinking.impl.Suggestion;
 import org.apache.stanbol.enhancer.engines.lucenefstlinking.TaggingSession.Corpus;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedTextUtils;
+import org.apache.stanbol.enhancer.nlp.ner.NerTag;
 import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
-import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
@@ -101,12 +102,23 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
 
     protected final TextProcessingConfig tpConfig;
     protected final EntityLinkerConfig elConfig;
+    
+    /**
+     * Used in the {@link LinkingModeEnum#NER} to filter entities. For that configured
+     * mappings for the {@link NerTag#getType()} and {@link NerTag#getTag()} values 
+     * (the key) are mapped with the actual {@link Match#getTypes()} (the value set). 
+     * The <code>null</code> value is interpreted as wildCard (any type matches). An
+     * empty mapping is interpreted as an blacklist (do not lookup Named Entities
+     * with that {@link NerTag#getType() type}/{@link NerTag#getTag() tag}
+     */
+    protected final Map<String,Set<String>> neTypeMappings;
 
     private IndexConfiguration indexConfig;
 
     public FstLinkingEngine(String name, LinkingModeEnum linkingMode, 
             IndexConfiguration indexConfig,
-            TextProcessingConfig tpConfig, EntityLinkerConfig elConfig) {
+            TextProcessingConfig tpConfig, EntityLinkerConfig elConfig,
+            Map<String,Set<String>> neTypeMappings) {
         if (StringUtils.isBlank(name)) {
             throw new IllegalArgumentException("The parsed name MUST NOT be NULL nor blank!");
         }
@@ -124,6 +136,11 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
             throw new IllegalArgumentException("The parsed Entity Linking configuration MUST NOT be NULL");
         }
         this.elConfig = elConfig;
+        if(linkingMode == LinkingModeEnum.NER && neTypeMappings == null){
+            throw new IllegalArgumentException("The NamedEntity type mappings MUST NOT be NULL "
+                    + "if the LinkingMode is NER!");
+        }
+        this.neTypeMappings = neTypeMappings;
     }
 
     @Override
@@ -155,9 +172,17 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
         }
         // we need a detected language, the AnalyzedText contentPart with
         // Tokens.
-        AnalysedText at = getAnalysedText(this, ci, false);
-        if(at == null && linkingMode == LinkingModeEnum.PLAIN){
-            return NlpEngineHelper.getPlainText(this, ci, false) != null ? ENHANCE_ASYNC : CANNOT_ENHANCE;
+        AnalysedText at = AnalysedTextUtils.getAnalysedText(ci);
+        if(at == null){
+            if( linkingMode == LinkingModeEnum.PLAIN){
+                return NlpEngineHelper.getPlainText(this, ci, false) != null ? ENHANCE_ASYNC : CANNOT_ENHANCE;
+            } else {
+                log.warn("Unable to process {} with engine name={} and mode={} "
+                        + ": Missing AnalyzedText content part. Please ensure that "
+                        + "NLP processing results are available before FST linking!", 
+                        new Object[]{ci,name,linkingMode});
+                return CANNOT_ENHANCE;
+            }
         } else {
             if(linkingMode == LinkingModeEnum.PLAIN){
                 return ENHANCE_ASYNC;
@@ -167,7 +192,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                 log.warn("Unable to process {} with engine name={} and mode={} "
                     + "as the AnalyzedText does not contain any Tokens!", 
                     new Object[]{ci,name,linkingMode});
-                return at.getTokens().hasNext() ? ENHANCE_ASYNC : CANNOT_ENHANCE;
+                return CANNOT_ENHANCE;
             }
         }
     }
@@ -243,7 +268,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                     log.debug(" - sum fst: {} ms", taggingEnd - taggingStart);
                 }
             }
-            int matches = match(content,tags.values());
+            int matches = match(content, tags.values(), session.entityMentionTypes);
             log.debug(" - loaded {} ({} loaded, {} cached, {} appended) Matches in {} ms", 
                     new Object[]{matches, session.getSessionDocLoaded(),
                         session.getSessionDocCached(), session.getSessionDocAppended(),
@@ -273,7 +298,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
         tags.clear(); //help the GC
     }
 
-    private int match(String text, Collection<Tag> tags) {
+    private int match(String text, Collection<Tag> tags, Map<int[],Set<String>> emTypes) {
         log.trace("  ... process matches for {} extracted Tags:",tags.size());
         int matchCount = 0;
         Iterator<Tag> tagIt = tags.iterator();
@@ -294,7 +319,20 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                     log.trace(" {}. {}", i++,  match.getUri());
                 }
                 matchCount++;
-                if(!filterEntityByType(match.getTypes().iterator())){
+                final boolean filterType;
+                if(linkingMode == LinkingModeEnum.NER){
+                    Set<String> types = emTypes.get(new int[]{tag.getStart(), tag.getEnd()});
+                    if(types == null){
+                        log.warn(" - missing NE types for Named Entity [{},{}] {}!",
+                            new Object[]{tag.getStart(), tag.getEnd(),tag.getAnchor()});
+                        filterType = true;
+                    } else {
+                        filterType = filterByNamedEntityType(match.getTypes().iterator(), types);
+                    }
+                } else {
+                    filterType = filterEntityByType(match.getTypes().iterator());
+                }
+                if(!filterType){
                     int distance = Integer.MAX_VALUE;
                     Literal matchLabel = null;
                     for(Iterator<Literal> it = match.getLabels().iterator(); it.hasNext() && distance > 0;){
@@ -370,6 +408,44 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
         return matchCount;
     }
     /**
+     * Filter Entities based on matching the entity types with the named entity types.
+     * The {@link #neTypeMappings} are used to convert named entity types to 
+     * entity types. 
+     * @param eTypes the types of the entity
+     * @param neTypes the types of the named entity
+     * @return
+     */
+    private boolean filterByNamedEntityType(Iterator<UriRef> eTypes, Set<String> neTypes) {
+        //first collect the allowed entity types
+        Set<String> entityTypes = new HashSet<String>();
+        for(String neType : neTypes){
+            if(neType != null){
+                Set<String> mappings = neTypeMappings.get(neType);
+                if(mappings != null){
+                    if(mappings.contains(null)){
+                        //found an wildcard
+                        return false; //do not filter
+                    } else {
+                        entityTypes.addAll(mappings);
+                    }
+                } //else no mapping for neType (tag or uri) present
+            }
+        }
+        if(entityTypes.isEmpty()){
+            return true; //no match possible .. filter
+        }
+        //second check the actual entity types against the allowed
+        while(eTypes.hasNext()){
+            UriRef typeUri = eTypes.next();
+            if(typeUri != null && entityTypes.contains(typeUri.getUnicodeString())){
+                return false; //we found an match .. do not filter
+            }
+        }
+        //no match found ... filter
+        return true;
+    }
+
+    /**
      * Applies the configured entity type based filters
      * @param entityTypes
      * @return
@@ -432,11 +508,23 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                 tokenStream = baseTokenStream;
                 reducer = TagClusterReducer.LONGEST_DOMINANT_RIGHT;
                 break;
-//            case NER:
+            case NER:
+                //this uses the NamedEntityTokenFilter as tokenStream and a
+                //combination with the longest dominant right as reducer 
+                NamedEntityTokenFilter neTokenFilter = new NamedEntityTokenFilter(
+                    baseTokenStream, at, session.getLanguage(), neTypeMappings.keySet(),
+                    session.entityMentionTypes);
+                tokenStream = neTokenFilter;
+                reducer = new ChainedTagClusterReducer(neTokenFilter,
+                    TagClusterReducer.LONGEST_DOMINANT_RIGHT);
+                break;
             case LINKABLE_TOKEN:
+                //this uses the LinkableTokenFilter as tokenStream
                 LinkableTokenFilter linkableTokenFilter = new LinkableTokenFilter(baseTokenStream, 
                     at, session.getLanguage(), tpConfig.getConfiguration(session.getLanguage()),
                     elConfig.getMinChunkMatchScore(), elConfig.getMinFoundTokens());
+                //NOTE that the  LinkableTokenFilter implements longest dominant right
+                // based on the matchable span of tags (instead of the whole span).
                 reducer = new ChainedTagClusterReducer(
                     linkableTokenFilter,TagClusterReducer.ALL);
                 tokenStream = linkableTokenFilter;
@@ -446,11 +534,9 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                     + linkingMode + "! Please adapt implementation to changed Enumeration!");
         }
         log.debug(" - tokenStream: {}", tokenStream);
-        log.debug(" - reducer: {}", reducer);
-        //we use two TagClusterReducer implementations.
-        // (1) the linkableTokenFilter filters all tags that do not overlap any
-        //     linkable Token
-        // (2) the LONGEST_DOMINANT_RIGHT reducer (TODO: make configurable)
+        log.debug(" - reducer: {} (class: {})", reducer, reducer.getClass().getName());
+        
+        //Now process the document
         final long[] time = new long[]{0};
         new Tagger(corpus.getFst(), tokenStream, reducer,session.isSkipAltTokens()) {
             

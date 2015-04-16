@@ -57,12 +57,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class the ensures that only {@link TokenData#isLinkable linkable} Tokens
+ * Class that ensures that only {@link TokenData#isLinkable linkable} Tokens
  * are processed.<p>
  * This is ensured on two places:<ol>
  * <li> Classifies Tokens in the Solr {@link TokenStream} with the {@link TaggingAttribute}
  * based on NLP processing results present in the {@link AnalysedText}. This
- * implementation Classifies Token similar to the {@link EntityLinkingEngine}.
+ * implementation classifies Token similar to the {@link EntityLinkingEngine}.
  * It uses the {@link TextProcessingConfig} for its configuration.<p>
  * <li> Implements {@link TagClusterReducer} to ensure that all {@link TagLL tags}
  * that do not overlap with any {@link TokenData#isLinkable linkable} are
