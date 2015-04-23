@@ -331,8 +331,8 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
         //add fise:TextAnnotation information as expected by a Language annotation.
         m.add(new TripleImpl(la, DC_TYPE, DCTERMS_LINGUISTIC_SYSTEM));
         m.add(new TripleImpl(la, DC_LANGUAGE, new PlainLiteralImpl(lang)));
-        //we set the confidence to 1.0
-        m.add(new TripleImpl(la, ENHANCER_CONFIDENCE, lf.createTypedLiteral(Float.valueOf(1.0f))));
+        //we set the confidence to 1.0^^xsd:double
+        m.add(new TripleImpl(la, ENHANCER_CONFIDENCE, lf.createTypedLiteral(Double.valueOf(1.0f))));
     }
     /**
      * tries to retrieve the ContentItem from the 'uri' query parameter of the
