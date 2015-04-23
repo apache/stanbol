@@ -40,6 +40,7 @@ import java.util.Random;
 import java.util.UUID;
 
 import org.apache.clerezza.rdf.core.BNode;
+import org.apache.clerezza.rdf.core.InvalidLiteralTypeException;
 import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
@@ -728,7 +729,20 @@ public final class EnhancementEngineHelper {
             NonLiteral textAnnotation = textAnnoataions.next().getSubject();
             String language = getString(graph, textAnnotation, DC_LANGUAGE);
             if(language != null){
-                Double confidence = get(graph, textAnnotation, ENHANCER_CONFIDENCE, Double.class, lf);
+                Double confidence = null;
+                try {
+                    confidence = get(graph, textAnnotation, ENHANCER_CONFIDENCE, Double.class, lf);
+                } catch (InvalidLiteralTypeException e){ // STANBOL-1417: not a double value
+                    try { //try with float
+                        Float fconf = get(graph,textAnnotation,ENHANCER_CONFIDENCE,Float.class,lf);
+                        if(fconf != null){
+                            confidence = Double.valueOf(fconf.doubleValue());
+                        }
+                    } catch (InvalidLiteralTypeException e1){
+                        log.warn("Unable to parse confidence for language annotation "
+                            + textAnnotation, e);
+                    }
+                }
                 confidences.put(textAnnotation,confidence);
                 langAnnotations.add(textAnnotation);
             }
