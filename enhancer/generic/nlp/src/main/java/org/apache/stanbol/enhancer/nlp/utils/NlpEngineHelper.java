@@ -203,7 +203,7 @@ public final class NlpEngineHelper {
     }
     
     /**
-     * Getter for the language of the content
+     * Getter for the "<code>plain/text</code>" content part
      * @param ci the ContentItem
      * @param exception <code>false</code> id used in {@link #canEnhance(ContentItem)}
      * and <code>true</code> when called from {@link #computeEnhancements(ContentItem)}
