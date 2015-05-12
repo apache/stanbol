@@ -16,11 +16,6 @@
  */
 package org.apache.stanbol.ontologymanager.web.resources;
 
-//import static javax.ws.rs.HttpMethod.DELETE;
-//import static javax.ws.rs.HttpMethod.GET;
-//import static javax.ws.rs.HttpMethod.OPTIONS;
-//import static javax.ws.rs.HttpMethod.POST;
-//import static javax.ws.rs.HttpMethod.PUT;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
@@ -90,7 +85,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.commons.owl.util.URIUtils;
 import org.apache.stanbol.commons.web.viewable.Viewable;
-import org.apache.stanbol.ontologymanager.ontonet.api.scope.OntologyScope;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
 import org.apache.stanbol.ontologymanager.registry.io.LibrarySource;
@@ -119,9 +113,6 @@ import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
-//import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
-//import org.apache.stanbol.commons.web.base.ContextHelper;
 
 /**
  * The REST resource of an OntoNet {@link OntologyScope} whose identifier is known.

@@ -58,8 +58,6 @@ import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
-import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
-import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.web.base.writers.JsonLdSerializerProvider;
@@ -77,8 +75,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-//import com.sun.jersey.core.util.StringKeyIgnoreCaseMultivaluedMap;
 
 public class ContentItemReaderWriterTest {
     
@@ -140,7 +136,7 @@ public class ContentItemReaderWriterTest {
      * @throws IOException
      */
     private MediaType serializeContentItem(ByteArrayOutputStream out) throws IOException {
-        MultivaluedMap<String,Object> headers = new MultivaluedHashMap<String, Object>();//StringKeyIgnoreCaseMultivaluedMap<Object>();
+        MultivaluedMap<String,Object> headers = new MultivaluedHashMap<String, Object>();
         ciWriter.writeTo(contentItem, ContentItem.class, null, null, MediaType.MULTIPART_FORM_DATA_TYPE, 
             headers , out);
         //check the returned content type
@@ -169,7 +165,7 @@ public class ContentItemReaderWriterTest {
             "<rdf:type rdf:resource=\"urn:types:Document\"/>",
             "--"+ContentItemWriter.CONTENT_ITEM_BOUNDARY,
             "Content-Disposition: form-data; name=\"content\"",
-            "Content-Type: multipart/alternate; boundary=contentParts",
+            "Content-Type: multipart/alternate; boundary="+ContentItemWriter.CONTENT_PARTS_BOUNDERY,
             "--"+ContentItemWriter.CONTENT_PARTS_BOUNDERY,
             "Content-Disposition: form-data; name=\"urn:test_main\"",
             "Content-Type: text/html; charset=UTF-8",
@@ -188,9 +184,11 @@ public class ContentItemReaderWriterTest {
             "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/executionplan#ExecutionNode\"/>",
             "--"+ContentItemWriter.CONTENT_ITEM_BOUNDARY+"--"
         };
+        log.debug("> Validate Multipart Mime:");
         for(String test : tests){
             int index = multipartMime.indexOf(test);
-            assertTrue("content does not contain '" + test + "'!",index >=0);
+            assertTrue("Unable to find: '"+test+"' in multipart mime!",index >=0);
+            log.debug(" - found '{}'",test);
             multipartMime = multipartMime.substring(index);
         }
     }
@@ -210,8 +208,8 @@ public class ContentItemReaderWriterTest {
         assertTrue(copy.isEmpty());
         //assert Blob
         assertEquals(contentItem.getBlob().getMimeType(), ci.getBlob().getMimeType());
-        String content = IOUtils.toString(contentItem.getBlob().getStream(),"UTF-8");
-        String readContent = IOUtils.toString(ci.getBlob().getStream(), "UTF-8");
+        String content = IOUtils.toString(contentItem.getStream(),"UTF-8");
+        String readContent = IOUtils.toString(ci.getStream(), "UTF-8");
         assertEquals(content, readContent);
         Iterator<Entry<UriRef,Blob>> contentItemBlobsIt = ContentItemHelper.getContentParts(contentItem, Blob.class).entrySet().iterator();
         Iterator<Entry<UriRef,Blob>> ciBlobsIt = ContentItemHelper.getContentParts(ci, Blob.class).entrySet().iterator();

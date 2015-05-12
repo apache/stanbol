@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.stanbol.commons.web.sparql;
+package org.apache.stanbol.enhancer.web.topic.fragment;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -22,17 +22,17 @@ import org.apache.stanbol.commons.web.base.NavigationLink;
 /**
  *
  */
-@Component
+@Component(immediate=true)
 @Service(NavigationLink.class)
-public class SparqlMenuItem extends NavigationLink {
+public class TopicMenuItem extends NavigationLink {
     
-   private static final String htmlDescription = "This is the <strong>SPARQL endpoint</strong> for the Stanbol store."+
-            "<a href=\"http://en.wikipedia.org/wiki/Sparql\">SPARQL</a> is the"+
-            "standard query language the most commonly used to provide interactive"+
-            "access to semantic knowledge bases.";
+   private static final String htmlDescription = "<strong>Topic Classification" +
+           "endpoint</strong> for Apache Stanbol. This allows to manage and train " +
+           "topic classification models for the Topic classification engine of the " +
+           "Stanbol Enhancer.";
         
-    public SparqlMenuItem() {
-        super("sparql", "/sparql", htmlDescription , 50);
+    public TopicMenuItem() {
+        super("topic", "/topic", htmlDescription , 15);
     }
     
 }

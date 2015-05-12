@@ -41,7 +41,7 @@ import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider
  * @author Rupert Westenthaler
  *
  */
-@Component(immediate=true,policy=ConfigurationPolicy.OPTIONAL,metatype=true)
+@Component(immediate=true,policy=ConfigurationPolicy.OPTIONAL)
 @Service(value={ResourceLoader.class, DataFileResourceLoader.class})
 public class DataFileResourceLoader implements ResourceLoader {
 

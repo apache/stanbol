@@ -28,7 +28,7 @@ import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(immediate=true, metatype=true)
+@Component(immediate=true)
 @Service
 @Property(name=Constants.SERVICE_RANKING,value="1000000")
 public class DefaultNamespaceMappingsProvider extends NamespacePrefixProviderImpl implements NamespacePrefixProvider {
@@ -36,7 +36,7 @@ public class DefaultNamespaceMappingsProvider extends NamespacePrefixProviderImp
     private static final Logger log = LoggerFactory.getLogger(DefaultNamespaceMappingsProvider.class);
 
     public DefaultNamespaceMappingsProvider(){
-        super(Collections.EMPTY_MAP);
+        super(Collections.<String,String>emptyMap());
         for(DefaultNamespaceMappingsEnum m : DefaultNamespaceMappingsEnum.values()){
             String current = addMapping(m.getPrefix(), m.getNamespace(), true);
             if(current != null){

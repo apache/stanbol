@@ -29,6 +29,9 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +44,9 @@ import com.hp.hpl.jena.rdf.model.RDFWriter;
  * @author enridaga
  *
  */
+@Component
+@Service(Object.class)
+@Property(name="javax.ws.rs", boolValue=true)
 @Provider
 @Produces({"application/rdf+xml", "text/turtle", "text/n3", "text/plain", "application/turtle"})
 public class JenaModelWriter implements MessageBodyWriter<Model> {

@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 
-@Component(immediate = true, metatype = true)
+@Component(immediate = true)
 @Service(RuleAdapter.class)
 public class SPARQLAdapter extends AbstractRuleAdapter {
 

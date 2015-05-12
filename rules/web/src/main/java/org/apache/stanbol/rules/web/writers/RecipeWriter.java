@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
+
 //import javax.servlet.ServletContext;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
@@ -35,7 +36,10 @@ import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.rdfjson.serializer.RdfJsonSerializingProvider;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.owl.transformation.OWLAPIToClerezzaConverter;
 import org.apache.stanbol.commons.web.base.format.KRFormat;
 import org.apache.stanbol.rules.base.api.Recipe;
@@ -67,7 +71,9 @@ import org.slf4j.LoggerFactory;
  * @author anuzzolese
  * 
  */
-
+@Component(immediate=true)
+@Service(Object.class)
+@Property(name = "javax.ws.rs", boolValue = true)
 @Provider
 @Produces({KRFormat.RDF_XML, KRFormat.OWL_XML, KRFormat.MANCHESTER_OWL, KRFormat.FUNCTIONAL_OWL,
            KRFormat.TURTLE, KRFormat.RDF_JSON, MediaType.TEXT_PLAIN})

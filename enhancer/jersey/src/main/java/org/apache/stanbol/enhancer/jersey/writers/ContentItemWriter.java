@@ -77,6 +77,7 @@ import org.apache.http.entity.mime.content.AbstractContentBody;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.ContentDescriptor;
 import org.apache.http.entity.mime.content.InputStreamBody;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
@@ -452,23 +453,22 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
         private String boundary;
 
         public MultipartContentBody(Map<String,ContentBody> parts, String boundary, ContentType contentType){
-            super(contentType);
+            super(ContentType.create(contentType.getMimeType(), new BasicNameValuePair("boundary",boundary)));
             this.parts = parts;
             this.boundary = boundary;
         }
-        @Override
-        public String getCharset() {
-            return null; //no charset for multipart parts
-        }
-        @Override
-        public String getMimeType() {
-            return new StringBuilder(super.getMimeType()).append("; boundary=")
-                    .append(boundary).toString();
-        }
-        @Override
-        public ContentType getContentType() {
-            return super.getContentType();
-        }
+//        @Override
+//        public String getCharset() {
+//            return null; //no charset for multipart parts
+//        }
+//        @Override
+//        public String getMimeType() {
+//            String mime = new StringBuilder(super.getMimeType()).append("; boundary=")
+//                    .append(boundary).toString();
+//            log.info("!!! {}",mime);
+//            return mime;
+//            
+//        }
         @Override
         public String getTransferEncoding() {
             return MIME.ENC_8BIT;

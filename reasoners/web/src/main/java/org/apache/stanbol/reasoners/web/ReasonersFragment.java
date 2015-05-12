@@ -18,26 +18,15 @@ package org.apache.stanbol.reasoners.web;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.felix.scr.annotations.Activate;
+
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
-import org.apache.stanbol.ontologymanager.ontonet.api.ONManager;
-import org.apache.stanbol.ontologymanager.ontonet.api.session.SessionManager;
-import org.apache.stanbol.reasoners.web.resources.JobsResource;
-import org.apache.stanbol.reasoners.web.resources.ReasoningServiceTaskResource;
-import org.apache.stanbol.reasoners.web.resources.ReasoningServicesResource;
-import org.apache.stanbol.reasoners.web.writers.JenaModelWriter;
-import org.apache.stanbol.rules.base.api.RuleStore;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 
 
 /**
@@ -53,34 +42,24 @@ public class ReasonersFragment implements WebFragment {
 
     private static final String NAME = "reasoners";
 
-	private static final String htmlDescription = 
-			"The entry point to multiple <strong>reasoning services</strong> that are used for"+
-			"obtaining unexpressed additional knowledge from the explicit axioms in an ontology."+
-			"Multiple reasoning profiles are available, each with its expressive power and computational cost.";
-
-    @Reference
-    ONManager onm;
-
-    @Reference
-    SessionManager sessionManager;
-
-    @Reference
-    RuleStore kresRuleStore;
-
-    private BundleContext bundleContext;
+    private static final String htmlDescription = 
+            "The entry point to multiple <strong>reasoning services</strong> that are used for"+
+            "obtaining unexpressed additional knowledge from the explicit axioms in an ontology."+
+            "Multiple reasoning profiles are available, each with its expressive power and computational cost.";
 
     @Override
     public Set<Class<?>> getJaxrsResourceClasses() {
-        Set<Class<?>> classes = new HashSet<Class<?>>();
+        //Set<Class<?>> classes = new HashSet<Class<?>>();
         // Reasoner
         // classes.add(ReasonersResource.class);
-        classes.add(ReasoningServicesResource.class);
-        classes.add(ReasoningServiceTaskResource.class);
-        classes.add(JobsResource.class);
+        //classes.add(ReasoningServicesResource.class);
+        //classes.add(ReasoningServiceTaskResource.class);
+        //classes.add(JobsResource.class);
 
         // Writer
-        classes.add(JenaModelWriter.class);
-        return classes;
+        //classes.add(JenaModelWriter.class);
+        //return classes;
+        return Collections.emptySet();
     }
 
     @Override
@@ -102,19 +81,12 @@ public class ReasonersFragment implements WebFragment {
 
     @Override
     public List<NavigationLink> getNavigationLinks() {
-        List<NavigationLink> links = new ArrayList<NavigationLink>();
-        links.add(new NavigationLink("reasoners", "/reasoners", htmlDescription, 50));
-        return links;
+        return Collections.emptyList();
     }
 
     @Override
     public List<ScriptResource> getScriptResources() {
         return Collections.emptyList();
-    }
-
-    @Activate
-    protected void activate(ComponentContext ctx) {
-        this.bundleContext = ctx.getBundleContext();
     }
 
 }

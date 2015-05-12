@@ -16,11 +16,6 @@
  */
 package org.apache.stanbol.ontologymanager.web.resources;
 
-//import static javax.ws.rs.HttpMethod.DELETE;
-//import static javax.ws.rs.HttpMethod.GET;
-//import static javax.ws.rs.HttpMethod.OPTIONS;
-//import static javax.ws.rs.HttpMethod.POST;
-//import static javax.ws.rs.HttpMethod.PUT;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
@@ -44,8 +39,6 @@ import static org.apache.stanbol.commons.web.base.format.KRFormat.X_TURTLE;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -56,7 +49,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -75,7 +67,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.jaxrs.utils.form.FormFile;
 import org.apache.clerezza.jaxrs.utils.form.MultiPartBody;
@@ -117,13 +108,6 @@ import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//
-//import com.sun.jersey.multipart.BodyPart;
-//import com.sun.jersey.multipart.FormDataBodyPart;
-//import com.sun.jersey.multipart.FormDataMultiPart;
-//import static org.apache.stanbol.commons.web.base.CorsHelper.addCORSOrigin;
-//import static org.apache.stanbol.commons.web.base.CorsHelper.enableCORS;
-//import org.apache.stanbol.commons.web.base.ContextHelper;
 
 /**
  * The REST resource of an OntoNet {@link Session} whose identifier is known.

@@ -22,6 +22,11 @@ import org.junit.Test;
 /** Verify that the example config of STANBOL-110 is present */ 
 public class DefaultConfigTest extends StanbolTestBase {
     
+    @Override
+    protected String getCredentials() {
+        return "admin:admin";
+    }
+
     @Test
     public void testDefaultConfig() throws Exception {
         // AFAIK there's no way to get the config in machine
@@ -30,7 +35,6 @@ public class DefaultConfigTest extends StanbolTestBase {
         final String path = "/system/console/config/configuration-status-20110304-1743+0100.txt";
         executor.execute(
                 builder.buildGetRequest(path)
-                .withCredentials("admin", "admin")
         )
         .assertStatus(200)
         .assertContentRegexp(

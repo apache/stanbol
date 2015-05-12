@@ -16,6 +16,8 @@
  */
 package org.apache.stanbol.commons.testing.jarexec;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.Properties;
@@ -28,7 +30,7 @@ import org.apache.commons.exec.ExecuteResultHandler;
 import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.exec.ShutdownHookProcessDestroyer;
-import org.apache.commons.exec.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,16 +90,16 @@ public final class JarExecutor {
         final boolean isWindows = System.getProperty("os.name").toLowerCase().contains("windows");
 
         String portStr = config.getProperty(PROP_SERVER_PORT);
-        serverPort = portStr == null ? DEFAULT_PORT : Integer.valueOf(portStr);
+        serverPort = isBlank(portStr) ? DEFAULT_PORT : Integer.valueOf(portStr);
 
         javaExecutable = isWindows ? "java.exe" : "java";
 
         String jarFolderPath = config.getProperty(PROP_JAR_FOLDER);
-        jarFolderPath = jarFolderPath == null ? DEFAULT_JAR_FOLDER : jarFolderPath;
+        jarFolderPath = isBlank(jarFolderPath) ? DEFAULT_JAR_FOLDER : jarFolderPath;
         final File jarFolder = new File(jarFolderPath);
 
         String jarNameRegexp = config.getProperty(PROP_JAR_NAME_REGEXP);
-        jarNameRegexp = jarNameRegexp == null ? DEFAULT_JAR_NAME_REGEXP : jarNameRegexp;
+        jarNameRegexp = isBlank(jarNameRegexp) ? DEFAULT_JAR_NAME_REGEXP : jarNameRegexp;
         final Pattern jarPattern = Pattern.compile(jarNameRegexp);
 
         // Find executable jar

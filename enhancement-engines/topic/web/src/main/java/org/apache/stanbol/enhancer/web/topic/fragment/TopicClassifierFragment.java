@@ -16,9 +16,7 @@
  */
 package org.apache.stanbol.enhancer.web.topic.fragment;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -29,14 +27,11 @@ import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
-import org.apache.stanbol.commons.web.base.readers.GraphReader;
-import org.apache.stanbol.enhancer.web.topic.resource.TopicClassifierRootResource;
-import org.apache.stanbol.enhancer.web.topic.resource.TopicModelResource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
 
-@Component(immediate = true, metatype = true)
+@Component(immediate = true)
 @Service
 public class TopicClassifierFragment implements WebFragment {
 
@@ -51,9 +46,7 @@ public class TopicClassifierFragment implements WebFragment {
 
     @Override
     public Set<Class<?>> getJaxrsResourceClasses() {
-        Set<Class<?>> classes = new HashSet<Class<?>>();
-        classes.add(GraphReader.class);
-        return classes;
+        return Collections.emptySet();
     }
 
     @Override
@@ -73,9 +66,7 @@ public class TopicClassifierFragment implements WebFragment {
 
     @Override
     public List<NavigationLink> getNavigationLinks() {
-        List<NavigationLink> navList = new ArrayList<NavigationLink>();
-        navList.add(new NavigationLink("topic", "/topic", null, 15));
-        return navList;
+        return Collections.emptyList();
     }
 
     @Activate

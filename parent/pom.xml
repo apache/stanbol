@@ -57,14 +57,37 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    
+    <!-- Library versions defined in the parent pom as constant -->
+    <!-- commons lib versions -->
+    <httpcomponents-version>4.4.1</httpcomponents-version>
+    <jackson-version>1.9.13</jackson-version>
+    <jackson2-version>2.5.3</jackson2-version>
     <owlapi-version>3.3</owlapi-version>
-    <solr-version>4.4.0</solr-version>
-    <pax-exam-version>2.3.0.M1</pax-exam-version>
-    <sesame-version>2.7.7</sesame-version>
-    <marmotta-version>3.2.0</marmotta-version>
+    
+    <!-- sesame and marmotta versions -->
+    <sesame-version>2.7.13</sesame-version>
+    <marmotta-version>3.3.0</marmotta-version>
     <ldpath-version>${marmotta-version}</ldpath-version>
+    <hazelcast.version>3.3.1</hazelcast.version>
+    
     <tika-version>1.5</tika-version>
-    <sourceReleaseAssemblyDescriptor>stanbol-source-release-zip-tar</sourceReleaseAssemblyDescriptor>    
+    <solr-version>4.4.0</solr-version>
+    
+    <!-- jersey and hk2 version -->
+    <jersey-version>2.17</jersey-version>
+    <hk2-version>2.3.0</hk2-version>
+    
+    <!-- OSGi http service versions for jar launchers (see also STANBOL-1402) -->
+    <felix-http-api-version>2.3.2</felix-http-api-version>
+    <felix-jetty-version>3.0.2</felix-jetty-version>
+    <felix-sevlet-api-version>1.1.0</felix-sevlet-api-version>
+
+    <!-- logging and test dep. versions -->
+    <slf4j-version>1.7.12</slf4j-version>
+    <pax-exam-version>2.3.0.M1</pax-exam-version>
+
+    <sourceReleaseAssemblyDescriptor>stanbol-source-release-zip-tar</sourceReleaseAssemblyDescriptor>
   </properties>
 
   <prerequisites>
@@ -140,32 +163,32 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.3.1</version>
+          <version>3.3</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>2.3</version>
+          <version>2.10</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-war-plugin</artifactId>
-          <version>2.1.1</version>
+          <version>2.6</version>
         </plugin>
         <plugin>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>maven-jetty-plugin</artifactId>
-          <version>6.1.20</version>
+          <version>6.1.26</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
-          <version>1.5</version>
+          <version>1.9.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
-          <version>2.3.7</version>
+          <version>2.5.4</version>
           <inherited>true</inherited>
           <configuration>
             <instructions>
@@ -185,14 +208,14 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
-        <version>1.16.0</version>
+        <version>1.21.0</version>
         <!-- slf4j impl is needed when QDox inspects/loads classes that use a
              static field for the logger, so that those classes can be loaded. -->
           <dependencies>
             <dependency>
               <groupId>org.slf4j</groupId>
               <artifactId>slf4j-simple</artifactId>
-              <version>1.6.1</version>
+              <version>${slf4j-version}</version>
             </dependency>
           </dependencies>
           <executions>
@@ -212,7 +235,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
-          <version>2.3.2</version>
+          <version>2.5.2</version>
           <configuration>
             <tagBase>
               https://svn.apache.org/repos/asf/stanbol/tags/
@@ -222,47 +245,47 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>1.0.1</version>
+          <version>1.4</version>
         </plugin>
         <plugin>
           <groupId>org.apache.sling</groupId>
           <artifactId>maven-sling-plugin</artifactId>
-          <version>2.0.6</version>
+          <version>2.1.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-clean-plugin</artifactId>
-          <version>2.4.1</version>
+          <version>2.6.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.7</version>
+          <version>2.8.2</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-install-plugin</artifactId>
-          <version>2.3.1</version>
+          <version>2.5.2</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.0</version>
+          <version>3.4</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <version>2.1.2</version>
+          <version>2.4</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
-          <version>2.5</version>
+          <version>2.7</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.16</version>
+          <version>2.18.1</version>
           <configuration>
             <argLine>-Xmx1G</argLine>
           </configuration>
@@ -270,12 +293,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>2.3.2</version>
+          <version>2.6</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-shade-plugin</artifactId>
-          <version>2.1</version>
+          <version>2.3</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -292,7 +315,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
-          <version>2.2.1</version>
+          <version>2.5.4</version>
         </plugin>
         <plugin>
           <groupId>org.apache.sling</groupId>
@@ -305,7 +328,7 @@
         <plugin>
           <groupId>org.apache.servicemix.tooling</groupId>
           <artifactId>depends-maven-plugin</artifactId>
-          <version>1.0</version>
+          <version>1.2</version>
           <executions>
             <execution>
               <id>generate-depends-file</id>
@@ -429,7 +452,7 @@
         <plugin>
           <groupId>org.apache.rat</groupId>
           <artifactId>apache-rat-plugin</artifactId>
-          <version>0.8</version>
+          <version>0.11</version>
           <executions>
             <execution>
               <configuration>
@@ -441,7 +464,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>license-maven-plugin</artifactId>
-          <version>1.0</version>
+          <version>1.8</version>
           <executions>
             <execution>
               <configuration>
@@ -509,7 +532,7 @@
     <dependencies>
 
       <!-- CMIS -->
-      <dependency>
+      <!-- dependency>
         <groupId>org.apache.chemistry.opencmis</groupId>
         <artifactId>chemistry-opencmis-client-api</artifactId>
         <version>0.4.0</version>
@@ -518,10 +541,10 @@
         <groupId>org.apache.chemistry.opencmis</groupId>
         <artifactId>chemistry-opencmis-client-impl</artifactId>
         <version>0.4.0</version>
-      </dependency>
+      </dependency -->
 
       <!-- JCR -->
-      <dependency>
+      <!-- dependency>
         <groupId>javax.jcr</groupId>
         <artifactId>jcr</artifactId>
         <version>2.0</version>
@@ -541,7 +564,7 @@
         <groupId>org.apache.jackrabbit</groupId>
         <artifactId>jackrabbit-jcr-commons</artifactId>
         <version>2.2.5</version>
-      </dependency>
+      </dependency -->
 
       <!-- OSGi -->
       <dependency>
@@ -552,7 +575,7 @@
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.compendium</artifactId>
-        <!-- with older versions the scr plugin complains -->
+        <!-- with older versions the scr plugin complains (see FELIX-4450) -->
         <version>4.3.1</version>
       </dependency>
 
@@ -560,17 +583,17 @@
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.scr</artifactId>
-        <version>1.6.2</version>
+        <version>1.8.2</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.scr.annotations</artifactId>
-        <version>1.9.8</version>
+        <version>1.9.12</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.configadmin</artifactId>
-        <version>1.2.8</version>
+        <version>1.8.4</version>
       </dependency>      
       <dependency>
         <groupId>org.apache.felix</groupId>
@@ -580,22 +603,27 @@
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.http.jetty</artifactId>
-        <version>2.3.0</version>
+        <version>${felix-jetty-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.http.api</artifactId>
-        <version>2.3.0</version>
+        <version>${felix-http-api-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.http.servlet-api</artifactId>
-        <version>1.0.0</version>
+        <version>${felix-sevlet-api-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.http.whiteboard</artifactId>
-        <version>2.3.0</version>
+        <version>2.3.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.webconsole</artifactId>
+        <version>4.2.8</version>
       </dependency>
 
 
@@ -689,6 +717,11 @@
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.facade</artifactId>
         <version>0.14</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>platform.config</artifactId>
+        <version>0.4</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
@@ -811,6 +844,12 @@
         <artifactId>kiwi-caching-hazelcast</artifactId>
         <version>${marmotta-version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.marmotta</groupId>
+        <artifactId>marmotta-model-vocabs</artifactId>
+        <version>${marmotta-version}</version>
+      </dependency>
+
 
       <!-- Commons -->
       <dependency>
@@ -848,7 +887,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-compress</artifactId>
-        <version>1.8</version>
+        <version>1.9</version>
       </dependency>
       <dependency> <!-- dependency of commons-compress 1.4+ -->
         <groupId>org.tukaani</groupId>
@@ -863,27 +902,37 @@
       <dependency>
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
-        <version>1.8</version>
+        <version>1.10</version>
       </dependency>
       <dependency>
         <groupId>commons-fileupload</groupId>
         <artifactId>commons-fileupload</artifactId>
-        <version>1.3</version>
+        <version>1.3.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>${httpcomponents-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpclient-osgi</artifactId>
-        <version>4.3.1</version>
+        <version>${httpcomponents-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpcore</artifactId>
+        <version>${httpcomponents-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpcore-osgi</artifactId>
-        <version>4.3</version>
+        <version>${httpcomponents-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpmime</artifactId>
-        <version>4.3.1</version>
+        <version>${httpcomponents-version}</version>
       </dependency>
       <dependency> <!-- instead of commons-csv -->
         <groupId>org.apache.servicemix.bundles</groupId>
@@ -895,14 +944,14 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>14.0.1</version>
+        <version>18.0</version>
       </dependency>
 
       <!-- Joda Time -->
       <dependency>
         <groupId>joda-time</groupId>
         <artifactId>joda-time</artifactId>
-        <version>2.0</version>
+        <version>2.7</version>
       </dependency>
 
       <!-- Javax Mail -->
@@ -916,7 +965,7 @@
       <dependency>
         <groupId>org.jsoup</groupId>
         <artifactId>jsoup</artifactId>
-        <version>1.7.2</version>
+        <version>1.8.2</version>
       </dependency>
 
       <!-- Velocity -->
@@ -935,33 +984,33 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>1.6.1</version>
+        <version>${slf4j-version}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>jcl-over-slf4j</artifactId>
-        <version>1.6.1</version>
+        <version>${slf4j-version}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>log4j-over-slf4j</artifactId>
-        <version>1.6.1</version>
+        <version>${slf4j-version}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-jdk14</artifactId>
-        <version>1.6.1</version>
+        <version>${slf4j-version}</version>
       </dependency>
-      <dependency>  <!-- when using log4j for the logging -->
+      <dependency>  <!-- used for log4j logging (for unit tests and tools) -->
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-log4j12</artifactId>
-        <version>1.6.1</version>
+        <version>${slf4j-version}</version>
       </dependency>
-      <dependency>
+      <!-- dependency> - use slf4j-log4j12 instead !!
         <groupId>log4j</groupId>
         <artifactId>log4j</artifactId>
         <version>1.2.16</version>
-      </dependency>
+      </dependency> -->
 
       <!-- Servlet API -->
       <dependency>
@@ -975,7 +1024,7 @@
       <dependency>
           <groupId>javax.ws.rs</groupId>
           <artifactId>javax.ws.rs-api</artifactId>
-          <version>2.0</version>
+          <version>2.0.1</version>
       </dependency>
 
       <!-- Freemarker -->
@@ -990,18 +1039,18 @@
       <dependency>
         <groupId>org.codehaus.jettison</groupId>
         <artifactId>jettison</artifactId>
-        <version>1.3</version>
+        <version>1.3.7</version>
       </dependency>
       <!-- Jackson  -->
       <dependency>
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-core-asl</artifactId>
-        <version>1.9.11</version>
+        <version>${jackson-version}</version>
       </dependency>
       <dependency>
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-mapper-asl</artifactId>
-        <version>1.9.11</version>
+        <version>${jackson-version}</version>
       </dependency>
 
       <!-- Jena (and Clerezza Jena Modules)-->
@@ -1055,58 +1104,10 @@
         <version>1.0.1_1</version>
       </dependency>
       
-      <!-- old Jena Dependencies -->
-      <!-- dependency>
-        <groupId>com.hp.hpl.jena</groupId>
-        <artifactId>jena</artifactId>
-        <version>2.6.3</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>com.hp.hpl.jena</groupId>
-        <artifactId>arq</artifactId>
-        <version>2.8.5</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>com.sun.jmx</groupId>
-            <artifactId>jmxri</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>javax.jms</groupId>
-            <artifactId>jms</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>com.sun.jdmk</groupId>
-            <artifactId>jmxtools</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>com.hp.hpl.jena</groupId>
-        <artifactId>tdb</artifactId>
-        <version>0.8.7</version>
-        <type>jar</type>
-        <exclusions>
-          <exclusion>
-            <artifactId>slf4j-log4j12</artifactId>
-            <groupId>org.slf4j</groupId>
-          </exclusion>
-        </exclusions>
-      </dependency> -->
-
       <dependency>
         <groupId>org.hsqldb</groupId>
         <artifactId>hsqldb-j5</artifactId>
-        <version>2.0.0</version>
+        <version>2.2.4</version>
         <type>jar</type>
       </dependency>
 
@@ -1330,7 +1331,7 @@
     <dependency>
       <groupId>org.jdom</groupId>
       <artifactId>jdom</artifactId>
-      <version>1.1.2</version>
+      <version>1.1.3</version>
       <exclusions>
         <exclusion>
             <groupId>jaxen</groupId>
@@ -1344,9 +1345,7 @@
     <dependency>
       <groupId>net.sourceforge.htmlcleaner</groupId>
       <artifactId>htmlcleaner</artifactId>
-      <version>2.2</version>
-      <type>jar</type>
-      <scope>compile</scope>
+      <version>2.10</version>
       <exclusions>
         <exclusion>
             <groupId>jaxen</groupId>
@@ -1358,18 +1357,6 @@
         </exclusion>
       </exclusions>
     </dependency>  
-
-    <!-- OpenNLP -->
-    <dependency>
-      <groupId>org.clojars.zaxtax</groupId>
-      <artifactId>opennlp-tools</artifactId>
-      <version>1.5.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojars.zaxtax</groupId>
-      <artifactId>maxent</artifactId>
-      <version>3.0.0</version>
-    </dependency>
 
     <!-- see also lucene-xercesImpl -->
     <dependency>
@@ -1535,31 +1522,25 @@
         </exclusion>
       </exclusions>
     </dependency>
-
-    <dependency>
-      <groupId>net.sourceforge</groupId>
-      <artifactId>htmlcleaner</artifactId>
-      <version>2_1p</version>
-    </dependency>
-
+    
     <!-- Sling -->
     <dependency>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.launchpad.base</artifactId>
-      <version>2.5.0</version>
+      <version>4.6.1-2.5.8</version>
       <classifier>app</classifier>
     </dependency>
     <dependency>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.launchpad.base</artifactId>
-      <version>2.5.0</version>
+      <version>4.6.1-2.5.8</version>
       <classifier>webapp</classifier>
       <type>war</type>
     </dependency>
     <dependency>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.launchpad.installer</artifactId>
-      <version>1.2.0</version>
+      <version>1.2.2</version>
     </dependency>
     <dependency>
       <groupId>org.apache.sling</groupId>
@@ -1574,71 +1555,78 @@
     <dependency>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.installer.core</artifactId>
-      <version>3.4.4</version>
+      <version>3.6.2</version>
     </dependency>
-
-    <!-- Apache James -->
-    <!-- do we need this?
-    <dependency>
-      <groupId>org.apache.james</groupId>
-      <artifactId>apache-mime4j</artifactId>
-      <version>0.6</version>
-    </dependency> -->
 
     <!-- Testing Deps -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.6.1</version>
+      <version>${slf4j-version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-nop</artifactId>
-      <version>1.6.1</version>
+      <version>${slf4j-version}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>4.12</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jmock</groupId>
       <artifactId>jmock-junit4</artifactId>
-      <version>2.5.1</version>
+      <version>2.8.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
-      <version>1.6</version>
+      <version>1.10.19</version>
       <scope>test</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
+      <scope>test</scope>
+      <version>3.3.1</version>
+    </dependency>
+
 
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
-      <version>6.1.22</version>
+      <version>6.1.26</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
         <groupId>org.glassfish.jersey.core</groupId>
         <artifactId>jersey-client</artifactId>
-        <version>2.2</version>
+        <version>${jersey-version}</version>
         <scope>test</scope>
     </dependency>
-    
+
+    <dependency>
+        <groupId>org.glassfish.jersey.core</groupId>
+        <artifactId>jersey-common</artifactId>
+        <version>${jersey-version}</version>
+    </dependency>
+
+
     <dependency>
         <groupId>org.glassfish.hk2</groupId>
         <artifactId>hk2-locator</artifactId>
-        <version>2.2.0-b15</version>
+        <version>${hk2-version}</version>
     </dependency>
     <dependency>
         <groupId>org.glassfish.hk2</groupId>
         <artifactId>hk2-utils</artifactId>
-        <version>2.2.0-b15</version>
+        <version>${hk2-version}</version>
     </dependency>
         <dependency>
         <groupId>org.glassfish.hk2</groupId>
@@ -1705,7 +1693,7 @@
     <dependency>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.junit.core</artifactId>
-      <version>1.0.6</version>
+      <version>1.0.10</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -1810,7 +1798,7 @@
               <dependency>
                 <groupId>org.apache.stanbol</groupId>
                 <artifactId>source-assembly</artifactId>
-                <version>1.0.0</version>
+                <version>1.0.1</version>
               </dependency>
             </dependencies>
           </plugin>

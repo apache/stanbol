@@ -39,7 +39,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.jobs.api.JobManager;
 import org.apache.stanbol.commons.web.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
-import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource.ResultData;
 import org.apache.stanbol.reasoners.web.utils.ReasoningServiceResult;
 import org.apache.stanbol.reasoners.web.utils.ResponseTaskBuilder;
 import org.slf4j.Logger;

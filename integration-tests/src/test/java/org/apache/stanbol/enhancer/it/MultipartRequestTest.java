@@ -39,18 +39,16 @@ import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
-import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.http.HttpEntity;
-import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MIME;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.AbstractContentBody;
-import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.ContentDescriptor;
 import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
@@ -542,19 +540,11 @@ public class MultipartRequestTest extends EnhancerTestBase {
         private String boundary;
 
         public MultipartContentBody(Map<String,ContentBody> parts, String boundary, ContentType contentType){
-            super(contentType);
+            super(ContentType.create(contentType.getMimeType(), new BasicNameValuePair("boundary",boundary)));
             this.parts = parts;
             this.boundary = boundary;
         }
-        @Override
-        public String getCharset() {
-            return UTF8.toString(); //no charset for multipart parts
-        }
-        @Override
-        public String getMimeType() {
-            return new StringBuilder(super.getMimeType()).append("; boundary=")
-                    .append(boundary).toString();
-        }
+
         @Override
         public String getTransferEncoding() {
             return MIME.ENC_8BIT;
@@ -584,4 +574,5 @@ public class MultipartRequestTest extends EnhancerTestBase {
         }
         
     }
+
 }

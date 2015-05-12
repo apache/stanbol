@@ -84,7 +84,8 @@
 
     <!-- Specific features -->
     <module>security</module>
-    <module>zzshell</module>
+    <!-- replaced by Clerezza Provisioning shell -->
+    <!-- module>zzshell</module -->
     
     <!-- language specific extensions -->
     <module>language-extras/smartcn</module>

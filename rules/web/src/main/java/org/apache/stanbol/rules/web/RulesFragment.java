@@ -18,24 +18,15 @@ package org.apache.stanbol.rules.web;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.web.base.LinkResource;
 import org.apache.stanbol.commons.web.base.NavigationLink;
 import org.apache.stanbol.commons.web.base.ScriptResource;
 import org.apache.stanbol.commons.web.base.WebFragment;
-import org.apache.stanbol.rules.base.api.RuleStore;
-import org.apache.stanbol.rules.refactor.api.Refactorer;
-
-import org.apache.stanbol.rules.web.resources.RefactorResource;
-import org.apache.stanbol.rules.web.resources.RulesResource;
-import org.apache.stanbol.rules.web.writers.RecipeListWriter;
-import org.apache.stanbol.rules.web.writers.RecipeWriter;
-import org.apache.stanbol.rules.web.writers.RuleListWriter;
 
 
 /**
@@ -51,16 +42,9 @@ public class RulesFragment implements WebFragment {
 
     private static final String NAME = "rules";
 
-	private static final String htmlDescription = 
-			"This is the implementation of Stanbol Rules which can be used both "+
-			"for <strong>reasoning</strong> and <strong>refactoring</strong>";
-
-
-    @Reference
-    Refactorer refactorer;
-
-    @Reference
-    RuleStore ruleStore;
+    private static final String htmlDescription = 
+            "This is the implementation of Stanbol Rules which can be used both "+
+            "for <strong>reasoning</strong> and <strong>refactoring</strong>";
 
     @Override
     public String getName() {
@@ -69,16 +53,17 @@ public class RulesFragment implements WebFragment {
 
     @Override
     public Set<Class<?>> getJaxrsResourceClasses() {
-        Set<Class<?>> classes = new HashSet<Class<?>>();
+        //Set<Class<?>> classes = new HashSet<Class<?>>();
         // resources
-        classes.add(RefactorResource.class);
-        classes.add(RulesResource.class);
+        //classes.add(RefactorResource.class);
+        //classes.add(RulesResource.class);
 
         // writers
-        classes.add(RecipeWriter.class);
-        classes.add(RecipeListWriter.class);
-        classes.add(RuleListWriter.class);
-        return classes;
+        //classes.add(RecipeWriter.class);
+        //classes.add(RecipeListWriter.class);
+        //classes.add(RuleListWriter.class);
+        //return classes;
+        return Collections.emptySet();
     }
 
     @Override
@@ -103,9 +88,7 @@ public class RulesFragment implements WebFragment {
 
     @Override
     public List<NavigationLink> getNavigationLinks() {
-        List<NavigationLink> links = new ArrayList<NavigationLink>();
-        links.add(new NavigationLink("rules", "/rules", htmlDescription, 50));
-        return links;
+        return Collections.emptyList();
     }
 
 }

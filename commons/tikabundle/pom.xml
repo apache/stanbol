@@ -89,7 +89,6 @@
               org.apache.tika.parser.*; version=${tika-version}
             </Export-Package>
             <Import-Package>
-              *,
               com.adobe.xmp;resolution:=optional,
               com.adobe.xmp.properties;resolution:=optional,
               com.google.protobuf;resolution:=optional,
@@ -159,7 +158,8 @@
               visad.data;resolution:=optional,
               visad.data.vis5d;resolution:=optional,
               visad.jmet;resolution:=optional,
-              visad.util;resolution:=optional
+              visad.util;resolution:=optional,
+              *
             </Import-Package>
           </instructions>
         </configuration>

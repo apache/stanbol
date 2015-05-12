@@ -77,7 +77,7 @@ import com.hp.hpl.jena.util.FileManager;
  * 
  */
 
-@Component(immediate = true, metatype = true)
+@Component(immediate = true)
 @Service(RuleAdapter.class)
 public class ClerezzaAdapter extends AbstractRuleAdapter {
 

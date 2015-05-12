@@ -21,7 +21,7 @@ import java.net.URLEncoder;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 
 /**
@@ -30,27 +30,22 @@ import org.apache.http.entity.StringEntity;
  */
 public class Request {
 
-    private final HttpUriRequest request;
-    private String username;
-    private String password;
+    private final HttpRequestBase request;
+//configure on unit test level
+//    private String username;
+//    private String password;
     private boolean redirects = true;
 
-    Request(HttpUriRequest r) {
+    Request(HttpRequestBase r) {
         request = r;
     }
 
-    public HttpUriRequest getRequest() {
+    public HttpRequestBase getRequest() {
         return request;
     }
 
     public Request withHeader(String name, String value) {
         request.addHeader(name, value);
-        return this;
-    }
-
-    public Request withCredentials(String username, String password) {
-        this.username = username;
-        this.password = password;
         return this;
     }
 
@@ -111,13 +106,13 @@ public class Request {
         return this;
     }
 
-    public String getUsername() {
-        return username;
-    }
+//    public String getUsername() {
+//        return username;
+//    }
 
-    public String getPassword() {
-        return password;
-    }
+//    public String getPassword() {
+//        return password;
+//    }
 
     public boolean getRedirects() {
         return redirects;

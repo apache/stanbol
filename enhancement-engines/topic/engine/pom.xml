@@ -234,11 +234,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.apache.clerezza.ext</groupId>
       <artifactId>com.ibm.icu</artifactId>
       <scope>test</scope>
