@@ -116,7 +116,8 @@
     <module>opencalais</module> <!-- http://opencalais.com/ -->
     <module>zemanta</module> <!-- htt://zemanta.com -->
 	
-	<module>entitycoreference</module>
+    <!-- The entity co-refernece engine is not yet in trunk -->
+	  <!-- module>entitycoreference</module -->
   </modules>
 
   <build>
