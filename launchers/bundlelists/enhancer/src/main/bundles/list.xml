@@ -158,11 +158,11 @@
       <artifactId>org.apache.stanbol.enhancer.engines.tika</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </bundle>
-	  <bundle><!-- XMP Extractor engine -->
-		  <groupId>org.apache.stanbol</groupId>
-		  <artifactId>org.apache.stanbol.enhancer.engines.xmpextractor</artifactId>
-		  <version>1.0.0-SNAPSHOT</version>
-	  </bundle>
+      <bundle><!-- XMP Extractor engine -->
+          <groupId>org.apache.stanbol</groupId>
+          <artifactId>org.apache.stanbol.enhancer.engines.xmpextractor</artifactId>
+          <version>1.0.0-SNAPSHOT</version>
+      </bundle>
 
     <!-- language identification -->
 
@@ -171,7 +171,7 @@
       <artifactId>org.apache.stanbol.enhancer.engines.langdetect</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </bundle>
-	  <bundle>
+      <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.langid</artifactId>
       <version>1.0.0-SNAPSHOT</version>
@@ -289,7 +289,7 @@
       <version>1.0.0-SNAPSHOT</version>
     </bundle>
 
-	  <!-- Post-Processing engine -->
+      <!-- Post-Processing engine -->
     
     <bundle> <!-- Disambigutation using Solr MLT queries -->
       <groupId>org.apache.stanbol</groupId>
@@ -314,14 +314,15 @@
     </bundle>
     
     <!-- Refactor Enhancement Engine -->
+    <!-- TODO:  reactivate when ontologymanager is part of ng
     <bundle> 
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.refactor</artifactId>
       <version>1.0.0-SNAPSHOT</version>
-    </bundle>
+    </bundle> -->
 
-	<!-- bundle> - finds co-mentions of Entities earlier mentioned on the Text (STANBOL-1070)-
-	TODO: Not yet in trunk
+    <!-- bundle> - finds co-mentions of Entities (STANBOL-1070) -
+    TODO: Not yet in trunk
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.engines.entitycoreference</artifactId>
       <version>1.0.0-SNAPSHOT</version>
