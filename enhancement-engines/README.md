@@ -25,5 +25,3 @@ lifting of unstructured content.
 For documentation see 
   
   http://stanbol.apache.org/docs/trunk/components/enhancer/engines/list.html
-  
-  test
