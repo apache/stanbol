@@ -111,37 +111,16 @@
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
        <artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
        <version>1.0.0-SNAPSHOT</version>
     </dependency>
 
-    <!-- KReS dependencies -->
-    <!--
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.ontologymanager.ontonet</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>org.apache.felix.scr.annotations</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.hp.hpl.jena</groupId>
-          <artifactId>arq</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.hp.hpl.jena</groupId>
-          <artifactId>jena</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    -->
-    <dependency>
+     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.owl</artifactId>
       <version>1.0.0-SNAPSHOT</version>
@@ -196,45 +175,16 @@
       <scope>provided</scope>
     </dependency>
 
-
     <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>jena</artifactId>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-core</artifactId>
       <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.hp.hpl.jena</groupId>
-      <artifactId>arq</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.sun.jmx</groupId>
-          <artifactId>jmxri</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>javax.jms</groupId>
-          <artifactId>jms</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.sun.jdmk</groupId>
-          <artifactId>jmxtools</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-arq</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
-    </dependency>
+
   </dependencies>
 
 </project>

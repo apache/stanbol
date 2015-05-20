@@ -83,23 +83,16 @@
                 <bundles>
                   <bundle>
                     <groupId>org.apache.felix</groupId>
+                    <artifactId>org.apache.felix.http.servlet-api</artifactId>
+                    <!-- explicit version is required (STANBOL-1402) -->
+                    <version>${felix-servlet-api-version}</version>
+                    <startLevel>1</startLevel>
+                  </bundle>
+                  <bundle>
+                    <groupId>org.apache.felix</groupId>
                     <artifactId>org.apache.felix.http.jetty</artifactId>
                     <!-- explicit version is required (STANBOL-1402) -->
                     <version>${felix-jetty-version}</version>
-                    <startLevel>3</startLevel>
-                  </bundle>
-                  <bundle>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>org.apache.felix.http.api</artifactId>
-                    <!-- explicit version is required (STANBOL-1402) -->
-                    <version>${felix-http-api-version}</version>
-                    <startLevel>3</startLevel>
-                  </bundle>
-                  <bundle>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>org.apache.felix.http.servlet-api</artifactId>
-                    <!-- explicit version is required (STANBOL-1402) -->
-                    <version>${felix-sevlet-api-version}</version>
                     <startLevel>3</startLevel>
                   </bundle>
                 </bundles>

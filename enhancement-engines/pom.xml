@@ -53,8 +53,7 @@
     <module>xmpextractor</module>
     <!-- TODO: reactivate as soon as mvn repo is back online -->
     <!-- module>metaxa</module -->
-    <!-- TODO:  reactivate when ontologymanager is part of ng -->
-    <!-- <module>refactor</module> -->
+    <module>refactor</module>
 
     <!-- NLP processing engines -->
 	  <module>langdetect</module>

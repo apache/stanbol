@@ -82,8 +82,10 @@
 
     <module>launchers/bundlelists</module>
     <module>launchers/mini</module>
-    <module>launchers/full</module>
+    <module>launchers/mini-war</module>
     <module>launchers/stable</module>
+    <module>launchers/stable-war</module>
+    <module>launchers/full</module>
     <module>launchers/full-war</module>
     
     <module>development/archetypes/statefull-webmodule</module>
