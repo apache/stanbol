@@ -79,9 +79,9 @@
     <hk2-version>2.3.0</hk2-version>
     
     <!-- OSGi http service versions for jar launchers (see also STANBOL-1402) -->
-    <felix-http-api-version>2.3.2</felix-http-api-version>
+    <felix-http-version>2.3.2</felix-http-version>
     <felix-jetty-version>3.0.2</felix-jetty-version>
-    <felix-sevlet-api-version>1.1.0</felix-sevlet-api-version>
+    <felix-servlet-api-version>1.1.0</felix-servlet-api-version>
 
     <!-- logging and test dep. versions -->
     <slf4j-version>1.7.12</slf4j-version>
@@ -608,7 +608,7 @@
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.http.api</artifactId>
-        <version>${felix-http-api-version}</version>
+        <version>${felix-http-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
@@ -618,7 +618,7 @@
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.http.whiteboard</artifactId>
-        <version>2.3.2</version>
+        <version>${felix-http-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
@@ -1527,13 +1527,13 @@
     <dependency>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.launchpad.base</artifactId>
-      <version>4.6.1-2.5.8</version>
+      <version>5.0.0-2.6.0</version>
       <classifier>app</classifier>
     </dependency>
     <dependency>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.launchpad.base</artifactId>
-      <version>4.6.1-2.5.8</version>
+      <version>5.0.0-2.6.0</version>
       <classifier>webapp</classifier>
       <type>war</type>
     </dependency>
@@ -1555,7 +1555,7 @@
     <dependency>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.installer.core</artifactId>
-      <version>3.6.2</version>
+      <version>3.6.4</version>
     </dependency>
 
     <!-- Testing Deps -->

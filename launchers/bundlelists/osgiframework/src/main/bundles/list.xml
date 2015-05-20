@@ -114,14 +114,20 @@
   
   <!-- HTTP service and Http related Utilities -->
   <!-- 
-    NOTE: in case of a JAR launcher the <jarWebSupport> bundle (by default the
-      felix.http.jetty bundle) is expected to use a startLevel of 3 
+    NOTE: This only include packages needed for WAR and JAR launchers. The
+          <jarWebsupport> if the JAR launcher will add additional bundles and the
+          Launchpad Maven plugin will include the http.bridge bundle.
    -->
-  <startLevel level="4">
+  <startLevel level="1">
+    <bundle>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.http.api</artifactId>
+      <version>${felix-http-version}</version>
+    </bundle>
     <bundle>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.http.whiteboard</artifactId>
-      <version>2.3.2</version>
+      <version>${felix-http-version}</version>
     </bundle>
   </startLevel>
 
