@@ -63,11 +63,6 @@
             </goals>
             <configuration>
               <includeDefaultBundles>false</includeDefaultBundles>
-              <!-- jarWebSupport> - not needed for a WAR launcher -
-               <groupId>org.apache.felix</groupId>
-               <artifactId>org.apache.felix.http.jetty</artifactId>
-               <startLevel>3</startLevel>
-               </jarWebSupport -->
             </configuration>
           </execution>
         </executions>
@@ -75,17 +70,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifest>
-              <!-- not needed for a WAR launcher
-               <addClasspath>true</addClasspath>
-               <mainClass>org.apache.sling.launchpad.app.Main</mainClass>
-               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-               -->
-            </manifest>
-          </archive>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -123,7 +107,7 @@
           <path>${stanbol.context}</path>
           <port>${stanbol.port}</port>
           <systemProperties>
-            <sling.home>${stanbol.home}</sling.home> <!-- TODO: later overwritten by a servlet  -->
+            <sling.home>${stanbol.home}</sling.home> <!-- TODO later overwritten by a servlet  -->
           </systemProperties>
           <addWarDependenciesInClassloader>true</addWarDependenciesInClassloader>
           <warSourceDirectory>${project.build.directory}/${project.build.finalName}/</warSourceDirectory>
@@ -140,15 +124,16 @@
       <type>war</type>
       <scope>runtime</scope>
     </dependency>
-
+    
     <!-- OSGi Framemework Bundle List -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.osgiframework</artifactId>
       <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
+      <scope>provided</scope>
     </dependency>
-
+    
     <!-- Clerezza RDF bundles -->
     <dependency>
       <groupId>org.apache.clerezza.provisioning</groupId>
@@ -157,15 +142,26 @@
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
-
+    
+    <!-- Clerezza Jena TDB storage (used by Ontonet) -->
+    <dependency>
+      <groupId>org.apache.clerezza.provisioning</groupId>
+      <artifactId>rdf.tdb</artifactId>
+      <version>0.1</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+    
     <!-- Stanbol Commons Bundle List -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.stanbolcommons</artifactId>
       <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
+      <scope>provided</scope>
     </dependency>
-    <!-- Security Support-->
+    
+    <!-- Security Support -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.security</artifactId>
@@ -173,47 +169,51 @@
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
-
-    <!-- Stanbol CMS Adapter Bundle List
+    
+    <!-- Clerezza zz> Shell Bundle List  -->
     <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.launchers.bundlelists.cmsadapter</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <groupId>org.apache.clerezza.provisioning</groupId>
+      <artifactId>shell</artifactId>
+      <version>0.1</version>
       <type>partialbundlelist</type>
-    </dependency> -->
-
-    <!-- Stanbol Contenthub Bundle List
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.launchers.bundlelists.contenthub</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
-      <type>partialbundlelist</type>
-    </dependency> -->
-
+      <scope>provided</scope>
+    </dependency>
+    
     <!-- Stanbol Data Bundle List -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.defaultdata</artifactId>
       <version>1.1.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
+      <scope>provided</scope>
     </dependency>
-    <dependency> <!-- include all OpenNLP models in the full launcher -->
+    <!-- include all OpenNLP models in the full launcher  -->
+    <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.opennlp</artifactId>
       <version>1.1.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
-
+    
     <!-- Stanbol Enhancer Bundle List -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.enhancer</artifactId>
       <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
+      <scope>provided</scope>
     </dependency>
-
-    <!-- Stanbol Entityhub Bundle List -->
+    
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.enhancer-engines-restricted</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+    
+    <!-- Stanbol Entityhub Bundle List(s) -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.entityhub.core</artifactId>
@@ -235,6 +235,14 @@
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
+    <!-- Marmotta integration with the Entityhub -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.marmotta.kiwi</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
     
     <!-- Stanbol Ontology Manager Bundle List -->
     <dependency>
@@ -242,20 +250,40 @@
       <artifactId>org.apache.stanbol.launchers.bundlelists.ontologymanager</artifactId>
       <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
+      <scope>provided</scope>
     </dependency>
-
-    <!-- Stanbol Rules Bundle List -->
+    
+    <!-- Stanbol Rules Bundle List  -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.rules</artifactId>
       <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
+      <scope>provided</scope>
     </dependency>
     
     <!-- Stanbol Reasoners Bundle List -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.reasoners</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+    
+    <!-- Language Extras -->
+    <!-- Basic Cinese language support (STANBOL-855) -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.languageextras.smartcn</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+    <!-- Japanese Language Support  -->
+    <dependency>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.launchers.bundlelists.languageextras.kuromoji</artifactId>
       <version>1.0.0-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
