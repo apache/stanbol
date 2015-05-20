@@ -80,7 +80,7 @@ import org.slf4j.LoggerFactory;
  * @author suat
  * 
  */
-@Component(metatype = true)
+@Component
 @Service(value = ContenthubFeeder.class)
 public class JCRContenthubFeeder implements ContenthubFeeder {
     private static final String JCR_NT_FILE = "nt:file";

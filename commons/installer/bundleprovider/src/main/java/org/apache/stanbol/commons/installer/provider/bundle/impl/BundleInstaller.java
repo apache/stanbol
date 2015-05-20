@@ -201,13 +201,13 @@ public class BundleInstaller implements BundleListener {
             }
         }
         log.debug("  ... registering");
-        Dictionary<String, Object> headers = (Dictionary<String, Object>) bundle.getHeaders();
+        Dictionary<String, String> headers = (Dictionary<String, String>) bundle.getHeaders();
         //        log.info("With Headers:");
         //        for(Enumeration<String> keys = headers.keys();keys.hasMoreElements();){
         //            String key = keys.nextElement();
         //            log.info(" > "+key+"="+headers.get(key));
         //        }
-        String path = (String) headers.get(BUNDLE_INSTALLER_HEADER);
+        String path = headers.get(BUNDLE_INSTALLER_HEADER);
         activated.put(bundle, path);
         if (path != null) {
             log.info(" ... process configuration within path {} for bundle {}",path,bundle.getSymbolicName());

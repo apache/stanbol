@@ -69,7 +69,7 @@ public class ObjectTypesResource extends BaseStanbolResource {
     public ObjectTypesResource(@Context ServletContext context) {
         try {
             BundleContext bundleContext = (BundleContext) context.getAttribute(BundleContext.class.getName());
-            ServiceReference serviceReference = bundleContext.getServiceReferences(null,
+            ServiceReference serviceReference = bundleContext.getServiceReferences((String)null,
                 "(component.factory=org.apache.stanbol.cmsadapter.servicesapi.mapping.MappingEngineFactory)")[0];
             ComponentFactory componentFactory = (ComponentFactory) bundleContext.getService(serviceReference);
             ComponentInstance componentInstance = componentFactory

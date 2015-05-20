@@ -51,19 +51,16 @@ import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
-import org.apache.clerezza.rdf.rdfjson.parser.RdfJsonParsingProvider;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.CoreConnectionPNames;
-import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.config.SocketConfig;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
@@ -135,9 +132,8 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
     public static final String DEFAULT_TEST_DATA_PROPERTY = "http://dbpedia.org/ontology/abstract";
     private static final String[] ENABLE_EXECUTION_METADATA = new String[]{"executionmetadata","true"};
     protected static Parser rdfParser;
-    protected DefaultHttpClient pooledHttpClient;
-    private BasicHttpParams httpParams;
-    private PoolingClientConnectionManager connectionManager;
+    protected CloseableHttpClient pooledHttpClient;
+    private PoolingHttpClientConnectionManager connectionManager;
     
     private NamespacePrefixService nsPrefixService;
     
@@ -160,9 +156,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
     @BeforeClass
     public static void init() throws IOException {
         //init the RDF parser
-        rdfParser = new Parser();
-        rdfParser.bindParsingProvider(new JenaParserProvider());
-        rdfParser.bindParsingProvider(new RdfJsonParsingProvider());
+        rdfParser = Parser.getInstance();
         //init theTestData
     }
 
@@ -346,17 +340,22 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
     @Before
     public void initialiseHttpClient() {
         if(this.pooledHttpClient == null){ //init for the first test
-            httpParams = new BasicHttpParams();
-            httpParams.setParameter(CoreProtocolPNames.USER_AGENT, "Stanbol Integration Test");
-            httpParams.setBooleanParameter(ClientPNames.HANDLE_REDIRECTS,true);
-            httpParams.setIntParameter(ClientPNames.MAX_REDIRECTS,3);
-            httpParams.setBooleanParameter(CoreConnectionPNames.SO_KEEPALIVE,true);
-    
-            connectionManager = new PoolingClientConnectionManager();
+            RequestConfig requestConfig = RequestConfig.custom()
+                    .setRedirectsEnabled(true)
+                    .setMaxRedirects(3).build();
+            SocketConfig socketConfig = SocketConfig.custom()
+                    .setSoKeepAlive(true).build();
+            
+            connectionManager = new PoolingHttpClientConnectionManager();
+            connectionManager.setDefaultSocketConfig(socketConfig);
             connectionManager.setMaxTotal(20);
             connectionManager.setDefaultMaxPerRoute(20);
     
-            pooledHttpClient = new DefaultHttpClient(connectionManager,httpParams);
+            pooledHttpClient = HttpClientBuilder.create()
+                    .setUserAgent("Stanbol Integration Test")
+                    .setConnectionManager(connectionManager)
+                    .setDefaultRequestConfig(requestConfig)
+                    .build();
         }
     }
 
@@ -414,10 +413,15 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
     @After
     public final void close() {
         setEndpoint(null,ENABLE_EXECUTION_METADATA); //reset the endpoint to the default
-        httpParams = null;
+        try {
+            pooledHttpClient.close();
+        } catch (IOException e) {
+            log.info("Unable to close HttpClient",e);
+        }
         pooledHttpClient = null;
         connectionManager.shutdown();
         connectionManager = null;
+        
     }
 
     public static class TestSettings {

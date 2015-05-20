@@ -17,11 +17,13 @@
 package org.apache.stanbol.rules.manager.arqextention;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.ExecutionContext;
 import com.hp.hpl.jena.sparql.engine.QueryIterator;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.Binding1;
+import com.hp.hpl.jena.sparql.engine.binding.BindingFactory;
 import com.hp.hpl.jena.sparql.pfunction.PropFuncArg;
 import com.hp.hpl.jena.sparql.pfunction.PropFuncArgType;
 import com.hp.hpl.jena.sparql.pfunction.PropertyFunctionEval;
@@ -45,8 +47,9 @@ public class CreateURI extends PropertyFunctionEval {
             Node ref = argumentSubject.getArg();
             if (ref.isVariable()) {
                 String argumentString = argumentObject.getArg().toString().replace("\"", "");
-
-                b = new Binding1(binding, Var.alloc(ref), Node.createURI(argumentString));
+                //STANBOL-621: Binding1 has no longer a public constructor
+                //b = new Binding1(binding, Var.alloc(ref), NodeFactory.createURI(argumentString));
+                b = BindingFactory.binding(binding, Var.alloc(ref), NodeFactory.createURI(argumentString));
             }
         }
 

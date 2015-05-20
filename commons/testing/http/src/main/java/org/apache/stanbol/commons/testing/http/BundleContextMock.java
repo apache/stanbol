@@ -18,6 +18,7 @@ package org.apache.stanbol.commons.testing.http;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,62 +49,62 @@ public class BundleContextMock implements BundleContext {
     private Map<ServiceReference, Object> serviceMap = new HashMap<ServiceReference,Object>();
 
     public void addBundleListener(BundleListener listener) {
-    // TODO Auto-generated method stub
+    
 
     }
 
     public void addFrameworkListener(FrameworkListener listener) {
-    // TODO Auto-generated method stub
+    
 
     }
 
     public void addServiceListener(ServiceListener listener) {
-    // TODO Auto-generated method stub
+    
 
     }
 
     public void addServiceListener(ServiceListener listener, String filter) throws InvalidSyntaxException {
-    // TODO Auto-generated method stub
+    
 
     }
 
     public Filter createFilter(String filter) throws InvalidSyntaxException {
-        // TODO Auto-generated method stub
+        
         return null;
     }
 
     public ServiceReference[] getAllServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
-        // TODO Auto-generated method stub
+        
         return null;
     }
 
     public Bundle getBundle() {
-        // TODO Auto-generated method stub
+        
         return null;
     }
 
     public Bundle getBundle(long id) {
-        // TODO Auto-generated method stub
+        
         return null;
     }
 
     public Bundle[] getBundles() {
-        // TODO Auto-generated method stub
+        
         return null;
     }
 
     public File getDataFile(String filename) {
-        // TODO Auto-generated method stub
+        
         return null;
     }
 
     public String getProperty(String key) {
-        // TODO Auto-generated method stub
+        
         return null;
     }
 
-    public Object getService(ServiceReference reference) {
-        return this.serviceMap.get(reference);
+    public <S> S getService(ServiceReference<S> reference) {
+        return (S)this.serviceMap.get(reference);
     }
     
     /**
@@ -116,32 +117,26 @@ public class BundleContextMock implements BundleContext {
         ServiceReference dummy = new ServiceReference() {
             
             public boolean isAssignableTo(Bundle bundle, String className) {
-                // TODO Auto-generated method stub
                 return false;
             }
             
             public Bundle[] getUsingBundles() {
-                // TODO Auto-generated method stub
                 return null;
             }
             
             public String[] getPropertyKeys() {
-                // TODO Auto-generated method stub
                 return null;
             }
             
             public Object getProperty(String key) {
-                // TODO Auto-generated method stub
                 return null;
             }
             
             public Bundle getBundle() {
-                // TODO Auto-generated method stub
                 return null;
             }
             
             public int compareTo(Object reference) {
-                // TODO Auto-generated method stub
                 return 0;
             }
         };
@@ -149,53 +144,68 @@ public class BundleContextMock implements BundleContext {
         this.serviceMap.put(dummy, instance);
     }
 
-    public ServiceReference getServiceReference(String clazz) {
-        return this.serviceReferenceMap.get(clazz);
-    }
-    
     public ServiceReference[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     public Bundle installBundle(String location) throws BundleException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     public Bundle installBundle(String location, InputStream input) throws BundleException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public ServiceRegistration registerService(String[] clazzes, Object service, Dictionary properties) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public ServiceRegistration registerService(String clazz, Object service, Dictionary properties) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     public void removeBundleListener(BundleListener listener) {
-    // TODO Auto-generated method stub
-
     }
 
     public void removeFrameworkListener(FrameworkListener listener) {
-    // TODO Auto-generated method stub
-
     }
 
     public void removeServiceListener(ServiceListener listener) {
-    // TODO Auto-generated method stub
-
     }
 
-    public boolean ungetService(ServiceReference reference) {
-        // TODO Auto-generated method stub
+    @Override
+    public ServiceRegistration<?> registerService(String[] clazzes, Object service,
+            Dictionary<String,?> properties) {
+        return null;
+    }
+
+    @Override
+    public ServiceRegistration<?> registerService(String clazz, Object service,
+            Dictionary<String,?> properties) {
+        return null;
+    }
+
+    @Override
+    public <S> ServiceRegistration<S> registerService(Class<S> clazz, S service,
+            Dictionary<String,?> properties) {
+        return null;
+    }
+
+    @Override
+    public <S> ServiceReference<S> getServiceReference(Class<S> clazz) {
+        return (ServiceReference<S>) getServiceReference(clazz.getName());
+    }
+    @Override
+    public ServiceReference<?> getServiceReference(String clazz) {
+        return this.serviceReferenceMap.get(clazz);
+    }
+
+    @Override
+    public <S> Collection<ServiceReference<S>> getServiceReferences(Class<S> clazz, String filter)
+            throws InvalidSyntaxException {
+        return null;
+    }
+
+    public boolean ungetService(ServiceReference<?> reference) {
         return false;
     }
+
+    @Override
+    public Bundle getBundle(String location) {
+        return null;
+    }
+
 
 }

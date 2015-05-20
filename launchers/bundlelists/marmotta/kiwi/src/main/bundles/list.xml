@@ -71,6 +71,11 @@
       <artifactId>jackson-core</artifactId>
       <version>2.3.1</version>
     </bundle>
+    <bundle> <!-- hazelcast dependency -->
+      <groupId>com.eclipsesource.minimal-json</groupId>
+      <artifactId>minimal-json</artifactId>
+      <version>0.9.2</version>
+    </bundle>
   </startLevel>
   
   <startLevel level="5">
@@ -87,12 +92,12 @@
     <bundle>
       <groupId>org.openrdf.sesame</groupId>
       <artifactId>sesame-runtime-osgi</artifactId>
-      <version>2.7.11</version>
+      <version>${sesame-version}</version>
     </bundle>
     <bundle>
       <groupId>org.apache.marmotta</groupId>
       <artifactId>marmotta-commons</artifactId>
-      <version>3.2.0</version>
+      <version>${marmotta-version}</version>
     </bundle>
   </startLevel>
   
@@ -110,7 +115,7 @@
     <bundle>
       <groupId>com.hazelcast</groupId>
       <artifactId>hazelcast</artifactId>
-      <version>3.1.6</version>
+      <version>3.3.1</version>
     </bundle>
     
     <!-- EHCache Caching

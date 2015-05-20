@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author anuzzolese
  * 
  */
-@Component(immediate = true, metatype = true)
+@Component(immediate = true)
 @Service(RuleAdaptersFactory.class)
 public class RuleAdaptersFactoryImpl implements RuleAdaptersFactory, ServiceListener {
 

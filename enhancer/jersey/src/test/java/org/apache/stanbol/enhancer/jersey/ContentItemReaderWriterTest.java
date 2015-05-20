@@ -56,8 +56,6 @@ import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
-import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
-import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.web.base.writers.JsonLdSerializerProvider;
@@ -116,17 +114,14 @@ public class ContentItemReaderWriterTest {
         NonLiteral ep = createExecutionPlan(em, "testChain",null);
         writeExecutionNode(em, ep, "testEngine", true, null,null);
         initExecutionMetadata(em, em, contentItem.getUri(), "testChain", false);
-        final Serializer serializer = new Serializer();
-        serializer.bindSerializingProvider(new JenaSerializerProvider());
-        serializer.bindSerializingProvider(new JsonLdSerializerProvider());
+        final Serializer serializer = Serializer.getInstance();
         ciWriter = new ContentItemWriter(null) {
             protected org.apache.clerezza.rdf.core.serializedform.Serializer getSerializer() {
                 return serializer;
             };
         };
 
-        final Parser parser = new Parser();
-        parser.bindParsingProvider(new JenaParserProvider());
+        final Parser parser = Parser.getInstance();
         ciReader = new ContentItemReader(null){
             @Override
             protected Parser getParser() {
@@ -160,41 +155,43 @@ public class ContentItemReaderWriterTest {
         MediaType contentType = serializeContentItem(out);
         assertTrue(MediaType.MULTIPART_FORM_DATA_TYPE.isCompatible(contentType));
         assertNotNull(contentType.getParameters().get("boundary"));
-        assertEquals(contentType.getParameters().get("boundary"),"contentItem");
+        assertEquals(contentType.getParameters().get("boundary"),ContentItemWriter.CONTENT_ITEM_BOUNDARY);
         assertNotNull(contentType.getParameters().get("charset"));
         assertEquals(contentType.getParameters().get("charset"),"UTF-8");
         //check the serialised multipart MIME
         String multipartMime = new String(out.toByteArray(),Charset.forName(contentType.getParameters().get("charset")));
         log.info("Multipart MIME content:\n{}\n",multipartMime);
         String[] tests = new String[]{
-            "--"+contentType.getParameters().get("boundary"),
+            "--"+ContentItemWriter.CONTENT_ITEM_BOUNDARY,
             "Content-Disposition: form-data; name=\"metadata\"; filename=\"urn:test\"",
             "Content-Type: application/rdf+xml; charset=UTF-8",
             "<rdf:type rdf:resource=\"urn:types:Document\"/>",
-            "--"+contentType.getParameters().get("boundary"),
+            "--"+ContentItemWriter.CONTENT_ITEM_BOUNDARY,
             "Content-Disposition: form-data; name=\"content\"",
-            "Content-Type: multipart/alternate; boundary=contentParts; charset=UTF-8",
-            "--contentParts",
+            "Content-Type: multipart/alternate; boundary="+ContentItemWriter.CONTENT_PARTS_BOUNDERY,
+            "--"+ContentItemWriter.CONTENT_PARTS_BOUNDERY,
             "Content-Disposition: form-data; name=\"urn:test_main\"",
             "Content-Type: text/html; charset=UTF-8",
             "This is a <b>ContentItem</b> to <i>Mime Multipart</i> test!",
-            "--contentParts",
+            "--"+ContentItemWriter.CONTENT_PARTS_BOUNDERY,
             "Content-Disposition: form-data; name=\"run:text:text\"",
             "Content-Type: text/plain; charset=UTF-8",
             "This is a ContentItem to Mime Multipart test!",
-            "--contentParts--",
-            "--"+contentType.getParameters().get("boundary"),
+            "--"+ContentItemWriter.CONTENT_PARTS_BOUNDERY+"--",
+            "--"+ContentItemWriter.CONTENT_ITEM_BOUNDARY,
             "Content-Disposition: form-data; name=\""+REQUEST_PROPERTIES_URI.getUnicodeString()+"\"",
             "Content-Type: application/json; charset=UTF-8",
-            "--"+contentType.getParameters().get("boundary"),
+            "--"+ContentItemWriter.CONTENT_ITEM_BOUNDARY,
             "Content-Disposition: form-data; name=\""+CHAIN_EXECUTION.getUnicodeString()+"\"",
             "Content-Type: application/rdf+xml; charset=UTF-8",
             "<rdf:type rdf:resource=\"http://stanbol.apache.org/ontology/enhancer/executionplan#ExecutionNode\"/>",
-            "--"+contentType.getParameters().get("boundary")+"--"
+            "--"+ContentItemWriter.CONTENT_ITEM_BOUNDARY+"--"
         };
+        log.debug("> Validate Multipart Mime:");
         for(String test : tests){
             int index = multipartMime.indexOf(test);
-            assertTrue(index >=0);
+            assertTrue("Unable to find: '"+test+"' in multipart mime!",index >=0);
+            log.debug(" - found '{}'",test);
             multipartMime = multipartMime.substring(index);
         }
     }

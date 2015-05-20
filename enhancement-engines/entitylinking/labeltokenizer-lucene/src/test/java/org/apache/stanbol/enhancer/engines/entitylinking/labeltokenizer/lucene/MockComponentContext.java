@@ -18,6 +18,7 @@ package org.apache.stanbol.enhancer.engines.entitylinking.labeltokenizer.lucene;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -56,11 +57,6 @@ public class MockComponentContext implements ComponentContext {
         return new BundleContext() {
 
             @Override
-            public boolean ungetService(ServiceReference reference) {
-                return false;
-            }
-
-            @Override
             public void removeServiceListener(ServiceListener listener) {
             }
 
@@ -72,17 +68,6 @@ public class MockComponentContext implements ComponentContext {
             public void removeBundleListener(BundleListener listener) {
             }
 
-            @Override
-            public ServiceRegistration registerService(String clazz,
-                    Object service, Dictionary properties) {
-                return null;
-            }
-
-            @Override
-            public ServiceRegistration registerService(String[] clazzes,
-                    Object service, Dictionary properties) {
-                return null;
-            }
 
             @Override
             public Bundle installBundle(String location, InputStream input)
@@ -103,11 +88,6 @@ public class MockComponentContext implements ComponentContext {
 
             @Override
             public ServiceReference getServiceReference(String clazz) {
-                return null;
-            }
-
-            @Override
-            public Object getService(ServiceReference reference) {
                 return null;
             }
 
@@ -164,6 +144,50 @@ public class MockComponentContext implements ComponentContext {
 
             @Override
             public void addBundleListener(BundleListener listener) {
+            }
+
+            @Override
+            public ServiceRegistration<?> registerService(String[] clazzes, Object service,
+                    Dictionary<String,?> properties) {
+                return null;
+            }
+
+            @Override
+            public ServiceRegistration<?> registerService(String clazz, Object service,
+                    Dictionary<String,?> properties) {
+                return null;
+            }
+
+            @Override
+            public <S> ServiceRegistration<S> registerService(Class<S> clazz, S service,
+                    Dictionary<String,?> properties) {
+                return null;
+            }
+
+            @Override
+            public <S> ServiceReference<S> getServiceReference(Class<S> clazz) {
+                return null;
+            }
+
+            @Override
+            public <S> Collection<ServiceReference<S>> getServiceReferences(Class<S> clazz, String filter)
+                    throws InvalidSyntaxException {
+                return null;
+            }
+
+            @Override
+            public <S> S getService(ServiceReference<S> reference) {
+                return null;
+            }
+
+            @Override
+            public boolean ungetService(ServiceReference<?> reference) {
+                return false;
+            }
+
+            @Override
+            public Bundle getBundle(String location) {
+                return null;
             }
         };
     }

@@ -91,7 +91,7 @@ import com.ibm.icu.util.Output;
  * 
  */
 
-@Component(immediate = true, metatype = true)
+@Component(immediate = true)
 @Service(RuleAdapter.class)
 public class JenaAdapter extends AbstractRuleAdapter {
 

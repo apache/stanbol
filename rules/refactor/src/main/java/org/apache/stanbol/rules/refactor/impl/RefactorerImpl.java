@@ -62,7 +62,7 @@ import com.hp.hpl.jena.sparql.pfunction.PropertyFunctionRegistry;
  * 
  */
 
-@Component(immediate = true, metatype = true)
+@Component(immediate = true)
 @Service(Refactorer.class)
 public class RefactorerImpl implements Refactorer {
 

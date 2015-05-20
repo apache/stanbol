@@ -19,19 +19,15 @@ package org.apache.stanbol.ontologymanager.registry;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
-import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
-import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
-import org.apache.clerezza.rdf.rdfjson.parser.RdfJsonParsingProvider;
-import org.apache.clerezza.rdf.rdfjson.serializer.RdfJsonSerializingProvider;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 
 public class MockOsgiContext {
 
-    public static Parser parser;
+    public static Parser parser = Parser.getInstance();
 
     public static TcManager tcManager;
-    
-    public static Serializer serializer;
+
+    public static Serializer serializer = Serializer.getInstance();
 
     static {
         reset();
@@ -40,14 +36,6 @@ public class MockOsgiContext {
     public static void reset() {
         tcManager = new TcManager();
         tcManager.addWeightedTcProvider(new SimpleTcProvider());
-        
-        serializer = new Serializer();
-        serializer.bindSerializingProvider(new JenaSerializerProvider());
-        serializer.bindSerializingProvider(new RdfJsonSerializingProvider());
-        
-        parser = new Parser();
-        parser.bindParsingProvider(new JenaParserProvider());
-        parser.bindParsingProvider(new RdfJsonParsingProvider());
     }
 
 }

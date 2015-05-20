@@ -18,6 +18,7 @@ package org.apache.stanbol.enhancer.engines.kuromoji.impl;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -157,16 +158,6 @@ public class MockComponentContext implements ComponentContext {
         }
 
         @Override
-        public ServiceRegistration registerService(String[] clazzes, Object service, Dictionary properties) {
-            throw new UnsupportedOperationException("Mock implementation");
-        }
-
-        @Override
-        public ServiceRegistration registerService(String clazz, Object service, Dictionary properties) {
-            throw new UnsupportedOperationException("Mock implementation");
-        }
-
-        @Override
         public ServiceReference[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
             throw new UnsupportedOperationException("Mock implementation");
         }
@@ -182,22 +173,56 @@ public class MockComponentContext implements ComponentContext {
         }
 
         @Override
-        public Object getService(ServiceReference reference) {
-            throw new UnsupportedOperationException("Mock implementation");
-        }
-
-        @Override
-        public boolean ungetService(ServiceReference reference) {
-            throw new UnsupportedOperationException("Mock implementation");
-        }
-
-        @Override
         public File getDataFile(String filename) {
             throw new UnsupportedOperationException("Mock implementation");
         }
 
         @Override
         public Filter createFilter(String filter) throws InvalidSyntaxException {
+            throw new UnsupportedOperationException("Mock implementation");
+        }
+
+        @Override
+        public ServiceRegistration<?> registerService(String[] clazzes, Object service,
+                Dictionary<String,?> properties) {
+            throw new UnsupportedOperationException("Mock implementation");
+        }
+
+        @Override
+        public ServiceRegistration<?> registerService(String clazz, Object service,
+                Dictionary<String,?> properties) {
+            throw new UnsupportedOperationException("Mock implementation");
+        }
+
+        @Override
+        public <S> ServiceRegistration<S> registerService(Class<S> clazz, S service,
+                Dictionary<String,?> properties) {
+            throw new UnsupportedOperationException("Mock implementation");
+        }
+
+        @Override
+        public <S> ServiceReference<S> getServiceReference(Class<S> clazz) {
+            throw new UnsupportedOperationException("Mock implementation");
+        }
+
+        @Override
+        public <S> Collection<ServiceReference<S>> getServiceReferences(Class<S> clazz, String filter)
+                throws InvalidSyntaxException {
+            throw new UnsupportedOperationException("Mock implementation");
+        }
+
+        @Override
+        public <S> S getService(ServiceReference<S> reference) {
+            throw new UnsupportedOperationException("Mock implementation");
+        }
+
+        @Override
+        public boolean ungetService(ServiceReference<?> reference) {
+            throw new UnsupportedOperationException("Mock implementation");
+        }
+
+        @Override
+        public Bundle getBundle(String location) {
             throw new UnsupportedOperationException("Mock implementation");
         }
         

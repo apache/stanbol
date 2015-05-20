@@ -61,7 +61,7 @@ public class BridgeDefinitionsResource extends BaseStanbolResource {
     public BridgeDefinitionsResource(@Context ServletContext context) {
         try {
             BundleContext bundleContext = (BundleContext) context.getAttribute(BundleContext.class.getName());
-            ServiceReference serviceReference = bundleContext.getServiceReferences(null,
+            ServiceReference serviceReference = bundleContext.getServiceReferences((String)null,
                 MAPPING_ENGINE_COMPONENT_FACTORY_FILTER)[0];
             ComponentFactory componentFactory = (ComponentFactory) bundleContext.getService(serviceReference);
             @SuppressWarnings("rawtypes")

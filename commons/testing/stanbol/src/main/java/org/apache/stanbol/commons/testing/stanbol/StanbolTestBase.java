@@ -21,14 +21,21 @@ import java.util.List;
 import java.util.TreeSet;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.HttpHostConnectException;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.stanbol.commons.testing.http.RequestBuilder;
 import org.apache.stanbol.commons.testing.http.RequestExecutor;
 import org.apache.stanbol.commons.testing.jarexec.JarExecutor;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
@@ -52,9 +59,18 @@ public class StanbolTestBase {
 
     protected boolean serverReady = false;
     protected RequestBuilder builder;
-    protected DefaultHttpClient httpClient = new DefaultHttpClient();
-    protected RequestExecutor executor = new RequestExecutor(httpClient);
-
+    protected CloseableHttpClient httpClient = null;
+    protected RequestExecutor executor;
+    
+    /**
+     * Overwrite to enable authentication for requests
+     * @return the <code>username:password</code> or <code>null</code> to deactivate
+     * authentication (default)
+     */
+    protected String getCredentials(){
+        return null;
+    }
+    
     @BeforeClass
     public static synchronized void startRunnableJar() throws Exception {
         if (serverBaseUrl != null) {
@@ -87,7 +103,19 @@ public class StanbolTestBase {
     public void waitForServerReady() throws Exception {
         // initialize instance request builder and HTTP client
         builder = new RequestBuilder(serverBaseUrl);
-        httpClient = new DefaultHttpClient();
+        //TODO:user name and pwd
+        String credentials = getCredentials();
+        if(credentials != null && !credentials.isEmpty()){
+            CredentialsProvider credsProvider = new BasicCredentialsProvider();
+            credsProvider.setCredentials(
+                    new AuthScope(HttpHost.create(serverBaseUrl)),
+                    new UsernamePasswordCredentials(credentials));
+            httpClient = HttpClients.custom()
+                    .setDefaultCredentialsProvider(credsProvider)
+                    .build();
+        } else {
+            httpClient = HttpClients.createDefault();
+        }
         executor = new RequestExecutor(httpClient);
 
         if (serverReady) {
@@ -137,9 +165,10 @@ public class StanbolTestBase {
                         get.setHeader(s[i], s[i+1]);
                     }
                 }
+                CloseableHttpResponse response = null;
                 HttpEntity entity = null;
                 try {
-                    HttpResponse response = httpClient.execute(get);
+                    response = httpClient.execute(get);
                     entity = response.getEntity();
                     final int status = response.getStatusLine().getStatusCode();
                     if (status != 200) {
@@ -163,8 +192,9 @@ public class StanbolTestBase {
                     log.info("Got HttpHostConnectException at " + url + " - will retry");
                     continue readyLoop;
                 } finally {
-                    if (entity != null) {
-                        entity.consumeContent();
+                    EntityUtils.consumeQuietly(entity);
+                    if(response != null){
+                        response.close();
                     }
                 }
             }
@@ -175,6 +205,11 @@ public class StanbolTestBase {
         if (!serverReady) {
             throw new Exception("Server not ready after " + timeoutSec + " seconds");
         }
+    }
+    
+    @After
+    public void closeExecutor(){
+        executor.close();
     }
 
 }

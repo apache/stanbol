@@ -60,6 +60,7 @@
                             marmotta-util-tripletable,
                             kiwi-caching-infinispan, kiwi-caching-hazelcast,
                             kiwi-caching-ehcache,
+                            marmotta-model-vocabs,
                             tomcat-jdbc, tomcat-juli, postgresql
                         </Embed-Dependency>
                         <!-- DynamicImport-Package is needed for
@@ -125,7 +126,10 @@
             <groupId>org.apache.marmotta</groupId>
             <artifactId>kiwi-caching-hazelcast</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.marmotta</groupId>
+            <artifactId>marmotta-model-vocabs</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.openrdf.sesame</groupId>

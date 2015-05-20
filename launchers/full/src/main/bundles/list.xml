@@ -38,7 +38,7 @@
     <bundle>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-client</artifactId>
-      <version>1.15</version>
+      <version>${jersey-version}</version>
     </bundle>
   </startLevel>
 
@@ -48,7 +48,7 @@
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.sparql</artifactId>
-      <version>0.12.0</version>
+      <version>0.12.1-SNAPSHOT</version>
     </bundle>
   </startLevel>
 

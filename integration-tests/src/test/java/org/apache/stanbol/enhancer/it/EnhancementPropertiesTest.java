@@ -69,11 +69,11 @@ public class EnhancementPropertiesTest extends EnhancerTestBase {
                 "http://fise.iks-project.eu/ontology/entity-reference.*http://dbpedia.org/resource/Paris",
                 "http://fise.iks-project.eu/ontology/entity-reference.*http://dbpedia.org/resource/Bob_Marley",
                 //the Arabic and Russian label of paris
-                "http://www.w3.org/2000/01/rdf-schema#label.*\"\\\\u0628\\\\u0627\\\\u0631\\\\u064A\\\\u0633\"@ar",
-                "http://www.w3.org/2000/01/rdf-schema#label.*\"\\\\u041F\\\\u0430\\\\u0440\\\\u0438\\\\u0436\"@ru",
+                "http://www.w3.org/2000/01/rdf-schema#label.*\"باريس\"@ar",
+                "http://www.w3.org/2000/01/rdf-schema#label.*\"Париж\"@ru",
                 //the Arabic and Russian label of Bob Marley
-                "http://www.w3.org/2000/01/rdf-schema#label.*\"\\\\u0628\\\\u0648\\\\u0628 \\\\u0645\\\\u0627\\\\u0631\\\\u0644\\\\u064A\"@ar",
-                "http://www.w3.org/2000/01/rdf-schema#label.*\"\\\\u041C\\\\u0430\\\\u0440\\\\u043B\\\\u0438, \\\\u0411\\\\u043E\\\\u0431\"@ru",
+                "http://www.w3.org/2000/01/rdf-schema#label.*\"بوب مارلي\"@ar",
+                "http://www.w3.org/2000/01/rdf-schema#label.*\"Марли, Боб\"@ru",
                  //foaf:depiction triples for Paris and Bob_Marley
                 "http://dbpedia.org/resource/Paris.*http://xmlns.com/foaf/0.1/depiction.*http://upload.wikimedia.org/wikipedia/.*",
                 "http://dbpedia.org/resource/Bob_Marley.*http://xmlns.com/foaf/0.1/depiction.*http://upload.wikimedia.org/wikipedia/.*"

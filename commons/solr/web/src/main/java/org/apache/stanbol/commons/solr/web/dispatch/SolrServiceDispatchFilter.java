@@ -123,7 +123,7 @@ public class SolrServiceDispatchFilter extends DelegatingSolrDispatchFilter {
         try {
             references = filter == null ? 
                     context.getServiceReferences(CoreContainer.class.getName(), null) :
-                        context.getServiceReferences(null, filter.toString());
+                        context.getServiceReferences((String)null, filter.toString());
         } catch (InvalidSyntaxException e) {
             references = null;
             //can not be happen, because we created the filter already in the

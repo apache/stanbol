@@ -257,12 +257,14 @@ public class RepresentationReader implements MessageBodyReader<Map<String,Repres
                     Response.status(Status.INTERNAL_SERVER_ERROR).
                     entity(message).
                     header(HttpHeaders.ACCEPT, acceptedMediaType).build());
-            } catch (Exception e){
-                String message = "Unable to create the Parser for the supported format "
-                    +content.getMediaType()+" ("+e+")";
+            } catch (RuntimeException e){
+                //NOTE: Clerezza seams not to provide specific exceptions on
+                //      parsing errors. Hence the catch for all RuntimeException
+                String message = "Unable to parse the provided RDF data (format: "
+                    +content.getMediaType()+", message: "+e.getMessage()+")";
                 log.error(message,e);
                 throw new WebApplicationException(
-                    Response.status(Status.INTERNAL_SERVER_ERROR).
+                    Response.status(Status.BAD_REQUEST).
                     entity(message).
                     header(HttpHeaders.ACCEPT, acceptedMediaType).build());
                 

@@ -248,16 +248,23 @@ public final class EntityhubTest extends QueryTestBase {
         }
         Assert.assertNotNull(f.isFile());
         ZipFile archive = new ZipFile(f);
-        for(Enumeration<? extends ZipEntry> e = archive.entries();e.hasMoreElements();){
-            ZipEntry entry = e.nextElement();
-            RequestExecutor re = executor.execute(
-                buildImportRdfData(archive.getInputStream(entry) ,RDF_XML, false, null));
-            //assert that the entity was created (or already existed)
-            //some projects seams to have more than a single doap file
-            int status = re.getResponse().getStatusLine().getStatusCode();
-            Assert.assertTrue(status == 200 || status == 304);
+        try {
+            for(Enumeration<? extends ZipEntry> e = archive.entries();e.hasMoreElements();){
+                ZipEntry entry = e.nextElement();
+                if(!entry.isDirectory()) {
+                    log.debug(" - uploading {} to entityhub",entry);
+                    RequestExecutor re = executor.execute(
+                        buildImportRdfData(archive.getInputStream(entry) ,RDF_XML, false, null));
+                    //assert that the entity was created (or already existed)
+                    //some projects seams to have more than a single doap file
+                    int status = re.getResponse().getStatusLine().getStatusCode();
+                    Assert.assertTrue("Unable to add '"+entry.getName()+"'! Status:" 
+                            + re.getResponse().getStatusLine(), status == 200 || status == 304);
+                }
+            }
+        } finally {
+            archive.close();
         }
-        
         testFindNameQuery();
         testFindWildcards();
         testFindLimitAndOffsetQuery();

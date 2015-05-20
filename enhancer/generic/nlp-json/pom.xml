@@ -93,6 +93,10 @@
       <artifactId>org.apache.stanbol.enhancer.nlp</artifactId>
       <version>0.12.0</version>
     </dependency>
+        <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.scr.annotations</artifactId>
+    </dependency>
     <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>

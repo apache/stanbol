@@ -40,7 +40,7 @@ import freemarker.cache.TemplateLoader;
  * Statically define the list of available resources and providers to be contributed to the the Stanbol JAX-RS
  * Endpoint.
  */
-@Component(immediate = true, metatype = true)
+@Component(immediate = true)
 @Service
 public class EnhancerVieWebFragment implements WebFragment {
 

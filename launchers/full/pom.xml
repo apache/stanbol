@@ -79,23 +79,16 @@
                 <bundles>
                   <bundle>
                     <groupId>org.apache.felix</groupId>
-                    <artifactId>org.apache.felix.http.jetty</artifactId>
-                    <!-- explicit version is required (STANBOL-1402) -->
-                    <version>2.3.0</version>
-                    <startLevel>3</startLevel>
-                  </bundle>
-                  <bundle>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>org.apache.felix.http.api</artifactId>
-                    <!-- explicit version is required (STANBOL-1402) -->
-                    <version>2.3.0</version>
-                    <startLevel>3</startLevel>
-                  </bundle>
-                  <bundle>
-                    <groupId>org.apache.felix</groupId>
                     <artifactId>org.apache.felix.http.servlet-api</artifactId>
                     <!-- explicit version is required (STANBOL-1402) -->
-                    <version>1.0.0</version>
+                    <version>${felix-servlet-api-version}</version>
+                    <startLevel>1</startLevel>
+                  </bundle>
+                  <bundle>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>org.apache.felix.http.jetty</artifactId>
+                    <!-- explicit version is required (STANBOL-1402) -->
+                    <version>${felix-jetty-version}</version>
                     <startLevel>3</startLevel>
                   </bundle>
                 </bundles>
@@ -211,6 +204,25 @@
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
+
+    <!-- Clerezza RDF bundles -->
+    <dependency>
+      <groupId>org.apache.clerezza.provisioning</groupId>
+      <artifactId>rdf</artifactId>
+      <version>0.1</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Clerezza Jena TDB storage (used by Ontonet) -->
+    <dependency>
+      <groupId>org.apache.clerezza.provisioning</groupId>
+      <artifactId>rdf.tdb</artifactId>
+      <version>0.1</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
 
     <!-- Security Support -->
     <dependency>

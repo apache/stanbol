@@ -76,6 +76,11 @@
 			<artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
 			<version>0.12.0</version>
 		</dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+        </dependency>
+        
 		<!-- for tests -->
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>

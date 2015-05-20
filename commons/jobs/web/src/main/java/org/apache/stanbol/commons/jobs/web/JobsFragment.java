@@ -34,7 +34,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
 
-@Component(immediate = true, metatype = true)
+@Component(immediate = true)
 @Service(WebFragment.class)
 public class JobsFragment implements WebFragment{
 

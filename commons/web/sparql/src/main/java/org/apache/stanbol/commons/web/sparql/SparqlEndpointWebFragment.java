@@ -39,7 +39,7 @@ import org.osgi.service.component.ComponentContext;
  * Statically define the list of available resources and providers to be contributed to the the Stanbol JAX-RS
  * Endpoint.
  */
-@Component(immediate = true, metatype = true)
+@Component(immediate = true)
 @Service
 @References({})
 public class SparqlEndpointWebFragment implements WebFragment {

@@ -58,14 +58,22 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jersey-version>1.15</jersey-version>
-    <freemarker-version>2.3.19</freemarker-version>
+    <freemarker-version>2.3.22</freemarker-version>
     <owlapi-version>3.3</owlapi-version>
     <solr-version>4.4.0</solr-version>
     <pax-exam-version>2.3.0.M1</pax-exam-version>
-    <sesame-version>2.7.11</sesame-version>
-    <marmotta-version>3.2.0</marmotta-version>
+    <sesame-version>2.7.13</sesame-version>
+    <marmotta-version>3.3.0</marmotta-version>
     <ldpath-version>${marmotta-version}</ldpath-version>
     <tika-version>1.5</tika-version>
+    <httpcomponents-version>4.4.1</httpcomponents-version>
+    <jackson-version>1.9.13</jackson-version>
+    <slf4j-version>1.7.12</slf4j-version>
+    <!-- OSGi http service versions for jar launchers (see also STANBOL-1402) -->
+    <felix-http-version>2.3.2</felix-http-version>
+    <felix-jetty-version>3.0.2</felix-jetty-version>
+    <felix-servlet-api-version>1.1.0</felix-servlet-api-version>
+    
     <sourceReleaseAssemblyDescriptor>stanbol-source-release-zip-tar</sourceReleaseAssemblyDescriptor>    
   </properties>
 
@@ -183,14 +191,14 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
-        <version>1.16.0</version>
+        <version>1.21.0</version>
         <!-- slf4j impl is needed when QDox inspects/loads classes that use a
              static field for the logger, so that those classes can be loaded. -->
           <dependencies>
             <dependency>
               <groupId>org.slf4j</groupId>
               <artifactId>slf4j-simple</artifactId>
-              <version>1.6.1</version>
+              <version>${slf4j-version}</version>
             </dependency>
           </dependencies>
           <executions>
@@ -538,12 +546,13 @@
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.core</artifactId>
-        <version>4.1.0</version>
+        <version>4.3.1</version>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.compendium</artifactId>
-        <version>4.1.0</version>
+        <!-- with older versions the scr plugin complains (see FELIX-4450)-->
+        <version>4.3.1</version>
       </dependency>
 
       <!-- Apache Felix -->
@@ -555,12 +564,12 @@
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.scr.annotations</artifactId>
-        <version>1.9.8</version>
+        <version>1.9.12</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.configadmin</artifactId>
-        <version>1.8.0</version>
+        <version>1.8.4</version>
       </dependency>      
       <dependency>
         <groupId>org.apache.felix</groupId>
@@ -570,22 +579,27 @@
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.http.jetty</artifactId>
-        <version>2.3.0</version>
+        <version>${felix-jetty-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.http.api</artifactId>
-        <version>2.3.0</version>
+        <version>${felix-http-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.http.servlet-api</artifactId>
-        <version>1.0.0</version>
+        <version>${felix-servlet-api-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.http.whiteboard</artifactId>
-        <version>2.3.0</version>
+        <version>${felix-http-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.webconsole</artifactId>
+        <version>4.2.8</version>
       </dependency>
 
 
@@ -598,89 +612,100 @@
       <dependency>
         <groupId>org.wymiwyg</groupId>
         <artifactId>wymiwyg-commons-core</artifactId>
-        <version>0.7.5</version>
+        <version>0.7.6</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>utils</artifactId>
-        <version>0.1-incubating</version>
+        <version>0.2</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.core</artifactId>
-        <version>0.12-incubating</version>
+        <version>0.14</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.utils</artifactId>
-        <version>0.13-incubating</version>
+        <version>0.14</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.metadata</artifactId>
-        <version>0.1-incubating</version>
+        <version>0.2</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.ontologies</artifactId>
-        <version>0.11-incubating</version>
+        <version>0.12</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.serializer</artifactId>
-        <version>0.9-incubating</version>
+        <version>0.11</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.parser</artifactId>
-        <version>0.10-incubating</version>
+        <version>0.12</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.sparql</artifactId>
-        <version>0.5-incubating</version>
+        <version>0.7</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.rdfjson</artifactId>
-        <version>0.3-incubating</version>
+        <version>0.4</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>platform.content</artifactId>
-        <version>0.13-incubating</version>
+        <version>0.14</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>platform.graphprovider.content</artifactId>
-        <version>0.6-incubating</version>
+        <version>0.7</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>platform.typerendering.scalaserverpages</artifactId>
-        <version>0.3-incubating</version>
+        <version>0.4</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>jaxrs.rdf.providers</artifactId>
-        <version>0.13-incubating</version>
+        <version>0.15</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.simple.storage</artifactId>
-        <version>0.7-incubating</version>
+        <version>0.8</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.facade</artifactId>
-        <version>0.12-incubating</version>
+        <version>0.14</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.jena.commons</artifactId>
+        <version>0.7</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza</groupId>
+        <artifactId>rdf.jena.storage</artifactId>
+        <version>0.7</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.core.test</artifactId>
-        <version>0.13-incubating</version>
+        <version>0.15</version>
         <scope>test</scope>
       </dependency>
+      
 
 
       <!-- Sesame (openrdf) -->
@@ -748,12 +773,17 @@
         <artifactId>kiwi-caching-hazelcast</artifactId>
         <version>${marmotta-version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.marmotta</groupId>
+        <artifactId>marmotta-model-vocabs</artifactId>
+        <version>${marmotta-version}</version>
+      </dependency>
 
       <!-- Commons -->
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>1.4</version>
+        <version>2.4</version>
       </dependency>
       <!-- As commons-beanutils:commons-beanutils is not bundle we use the
            org.apache.stanbol.servuemix version instead -->
@@ -773,6 +803,11 @@
         <version>2.6</version>
       </dependency>
       <dependency>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.4</version>
+      </dependency>
+      <dependency>
         <groupId>commons-cli</groupId>
         <artifactId>commons-cli</artifactId>
         <version>1.2</version>
@@ -785,12 +820,12 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-compress</artifactId>
-        <version>1.4.1</version>
+        <version>1.9</version>
       </dependency>
       <dependency> <!-- dependency of commons-compress 1.4+ -->
         <groupId>org.tukaani</groupId>
         <artifactId>xz</artifactId>
-        <version>1.2</version>
+        <version>1.5</version>
       </dependency>
       <dependency>
         <groupId>commons-logging</groupId>
@@ -800,41 +835,51 @@
       <dependency>
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
-        <version>1.7</version>
+        <version>1.10</version>
       </dependency>
       <dependency>
         <groupId>commons-fileupload</groupId>
         <artifactId>commons-fileupload</artifactId>
-        <version>1.2.2</version>
+        <version>1.3.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>${httpcomponents-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpclient-osgi</artifactId>
-        <version>4.2.1</version>
+        <version>${httpcomponents-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpcore</artifactId>
+        <version>${httpcomponents-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpcore-osgi</artifactId>
-        <version>4.2.1</version>
+        <version>${httpcomponents-version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpmime</artifactId>
-        <version>4.2.1</version>
+        <version>${httpcomponents-version}</version>
       </dependency>
       
       <!-- Google Commons -->
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>14.0.1</version>
+        <version>18.0</version>
       </dependency>
 
       <!-- Joda Time -->
       <dependency>
         <groupId>joda-time</groupId>
         <artifactId>joda-time</artifactId>
-        <version>2.0</version>
+        <version>2.7</version>
       </dependency>
 
       <!-- Javax Mail -->
@@ -867,27 +912,27 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>1.6.1</version>
+        <version>${slf4j-version}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>jcl-over-slf4j</artifactId>
-        <version>1.6.1</version>
+        <version>${slf4j-version}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>log4j-over-slf4j</artifactId>
-        <version>1.6.1</version>
+        <version>${slf4j-version}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-jdk14</artifactId>
-        <version>1.6.1</version>
+        <version>${slf4j-version}</version>
       </dependency>
       <dependency>  <!-- when using log4j for the logging -->
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-log4j12</artifactId>
-        <version>1.6.1</version>
+        <version>${slf4j-version}</version>
       </dependency>
       <dependency>
         <groupId>log4j</groupId>
@@ -967,67 +1012,78 @@
       <dependency>
         <groupId>org.codehaus.jettison</groupId>
         <artifactId>jettison</artifactId>
-        <version>1.3</version>
+        <version>1.3.7</version>
       </dependency>
       <!-- Jackson  -->
       <dependency>
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-core-asl</artifactId>
-        <version>1.9.11</version>
+        <version>${jackson-version}</version>
       </dependency>
       <dependency>
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-mapper-asl</artifactId>
-        <version>1.9.11</version>
+        <version>${jackson-version}</version>
       </dependency>
+      
+      <!-- Jena (and Clerezza Jena Modules)-->
+      <dependency>
+        <groupId>org.apache.jena</groupId>
+        <artifactId>jena-core</artifactId>
+        <version>2.11.0</version>
+        <exclusions>
+          <exclusion>
+            <artifactId>slf4j-log4j12</artifactId>
+            <groupId>org.slf4j</groupId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza.ext</groupId>
+        <artifactId>org.apache.jena.jena-core</artifactId>
+        <version>2.11.1_1</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.apache.jena</groupId>
+        <artifactId>jena-tdb</artifactId>
+        <version>1.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza.ext</groupId>
+        <artifactId>org.apache.jena.jena-tdb</artifactId>
+        <version>1.0.1_1</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.apache.jena</groupId>
+        <artifactId>jena-arq</artifactId>
+        <version>2.11.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza.ext</groupId>
+        <artifactId>org.apache.jena.jena-arq</artifactId>
+        <version>2.11.1_1</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.apache.jena</groupId>
+        <artifactId>jena-iri</artifactId>
+        <version>1.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza.ext</groupId>
+        <artifactId>org.apache.jena.jena-iri</artifactId>
+        <version>1.0.1_1</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.apache.jena</groupId>
+        <artifactId>jena-text</artifactId>
+        <version>1.0.1</version>
+      </dependency>
+      
 
-      <!-- Jena -->
-      <dependency>
-        <groupId>com.hp.hpl.jena</groupId>
-        <artifactId>jena</artifactId>
-        <version>2.6.3</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>com.hp.hpl.jena</groupId>
-        <artifactId>arq</artifactId>
-        <version>2.8.5</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>com.sun.jmx</groupId>
-            <artifactId>jmxri</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>javax.jms</groupId>
-            <artifactId>jms</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>com.sun.jdmk</groupId>
-            <artifactId>jmxtools</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>com.hp.hpl.jena</groupId>
-        <artifactId>tdb</artifactId>
-        <version>0.8.7</version>
-        <type>jar</type>
-        <exclusions>
-          <exclusion>
-            <artifactId>slf4j-log4j12</artifactId>
-            <groupId>org.slf4j</groupId>
-          </exclusion>
-        </exclusions>
-      </dependency>
 
       <dependency>
         <groupId>org.hsqldb</groupId>
@@ -1206,7 +1262,7 @@
     <dependency>
       <groupId>com.ibm.icu</groupId>
   	  <artifactId>icu4j</artifactId>
-	    <version>4.8.1.1</version>
+	    <version>49.1</version>
     </dependency>    
     <dependency>
         <groupId>org.apache.lucene</groupId>
@@ -1284,18 +1340,6 @@
         </exclusion>
       </exclusions>
     </dependency>  
-
-    <!-- OpenNLP -->
-    <dependency>
-      <groupId>org.clojars.zaxtax</groupId>
-      <artifactId>opennlp-tools</artifactId>
-      <version>1.5.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojars.zaxtax</groupId>
-      <artifactId>maxent</artifactId>
-      <version>3.0.0</version>
-    </dependency>
 
     <!-- see also lucene-xercesImpl -->
     <dependency>
@@ -1472,20 +1516,20 @@
     <dependency>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.launchpad.base</artifactId>
-      <version>2.5.0</version>
+      <version>5.0.0-2.6.0</version>
       <classifier>app</classifier>
     </dependency>
     <dependency>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.launchpad.base</artifactId>
-      <version>2.5.0</version>
+      <version>5.0.0-2.6.0</version>
       <classifier>webapp</classifier>
       <type>war</type>
     </dependency>
     <dependency>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.launchpad.installer</artifactId>
-      <version>1.2.0</version>
+      <version>1.2.2</version>
     </dependency>
     <dependency>
       <groupId>org.apache.sling</groupId>
@@ -1500,7 +1544,7 @@
     <dependency>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.installer.core</artifactId>
-      <version>3.5.0</version>
+      <version>3.6.4</version>
     </dependency>
 
     <!-- Apache James -->
@@ -1514,13 +1558,13 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.6.1</version>
+      <version>${slf4j-version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-nop</artifactId>
-      <version>1.6.1</version>
+      <version>${slf4j-version}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

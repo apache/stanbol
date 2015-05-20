@@ -49,7 +49,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
 
 /**
- * Verifies the correct setup of ontology registries.
+ * Verifies the correct setup of ontology registries. As these objects are virtually unaware of the OSGi
+ * environment, the context is constructed using plain Java objects.
  */
 public class TestOntologyRegistry {
 
@@ -71,7 +72,7 @@ public class TestOntologyRegistry {
         OfflineConfiguration offline = new OfflineConfigurationImpl(config);
         // The registry manager can be updated via calls to createModel()
         regman = new RegistryManagerImpl(offline, new ClerezzaOntologyProvider(new SimpleTcProvider(),
-                offline, new Parser()), config);
+                offline, Parser.getInstance()), config);
     }
 
     /**

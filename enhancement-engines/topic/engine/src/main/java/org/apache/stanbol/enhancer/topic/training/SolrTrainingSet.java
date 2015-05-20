@@ -266,7 +266,7 @@ public class SolrTrainingSet extends ConfiguredSolrCoreTracker implements Traini
             q += " AND " + exampleIdField + ":[" + offset.toString() + " TO *]";
         }
         query.setQuery(q);
-        query.addSortField(exampleIdField, SolrQuery.ORDER.asc);
+        query.addSort(exampleIdField, SolrQuery.ORDER.asc);
         query.set("rows", batchSize + 1);
         String nextExampleId = null;
         try {

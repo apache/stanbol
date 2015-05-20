@@ -35,13 +35,25 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <!-- NOTE: This needs to come with on old version of Jena to support LARQ -->
             <Import-Package>
               org.apache.stanbol.contenthub.servicesapi.search.related; provide:=true; version="[0.10,0.13)",
               org.apache.stanbol.contenthub.servicesapi.search.featured; provide:=true; version="[0.10,0.13)",
+              !com.hp.hpl.jena.*,
+              !org.apache.xml.resolver.*,!sun.*,
+              !com.sun.msv.*,
+              !com.sun.jdmk.*,
+              !javax.jms.*,
+              !org.relaxng.*,
+              !com.ibm.uvm.tools,
+              !javax.jmdns,
+              !org.apache.lucene,
+              !org.apache.solr,
               *
             </Import-Package>
             <Export-Package>
             </Export-Package>
+            <Embed-Dependency>jena, arq, xercesImpl, lucene-core</Embed-Dependency>
             <Private-Package>
               org.apache.stanbol.contenthub.search.related,
               org.apache.stanbol.contenthub.search.related.ontologyresource,
@@ -96,13 +108,70 @@
     </dependency>
 
     <!-- Jena dependencies -->
+    <!-- NOTE: THis can not use Apache Jena because it requires LARQ -->
     <dependency>
       <groupId>com.hp.hpl.jena</groupId>
       <artifactId>jena</artifactId>
+      <version>2.6.3</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+        <exclusion>
+          <artifactId>xmlParserAPIs</artifactId>
+          <groupId>xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>xercesImpl</artifactId>
+          <groupId>xerces</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.hp.hpl.jena</groupId>
       <artifactId>arq</artifactId>
+      <version>2.8.5</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+        <exclusion>
+          <artifactId>xmlParserAPIs</artifactId>
+          <groupId>xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>xercesImpl</artifactId>
+          <groupId>xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.sun.jmx</groupId>
+          <artifactId>jmxri</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.jms</groupId>
+          <artifactId>jms</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.sun.jdmk</groupId>
+          <artifactId>jmxtools</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+      <dependency>
+        <groupId>xerces</groupId>
+        <artifactId>xercesImpl</artifactId>
+        <version>2.9.1</version>
+    </dependency> 
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>2.9.4</version>
     </dependency>
   </dependencies>
 </project>

@@ -17,7 +17,6 @@
 package org.apache.stanbol.ontologymanager.registry;
 
 import static org.apache.stanbol.ontologymanager.registry.MockOsgiContext.parser;
-import static org.apache.stanbol.ontologymanager.registry.MockOsgiContext.reset;
 import static org.apache.stanbol.ontologymanager.registry.MockOsgiContext.tcManager;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -81,7 +80,7 @@ public class TestRegistryManager {
                                   .toString()});
         offline = new OfflineConfigurationImpl(configuration);
 
-        reset();
+        MockOsgiContext.reset();
 
     }
 
@@ -94,7 +93,7 @@ public class TestRegistryManager {
 
     @After
     public void cleanup() throws Exception {
-        reset();
+        MockOsgiContext.reset();
         provider = new ClerezzaOntologyProvider(tcManager, offline, parser);
     }
 

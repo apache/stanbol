@@ -215,8 +215,9 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
          .assertContentType("text/turtle")
          .assertContentContains(
              "<http://stanbol.apache.org/ontology/entityhub/query#score>",
-             "<http://dbpedia.org/resource/Vienna>",
-             "<name_de> \"Wien\"@de .");
+             "<http://dbpedia.org/resource/Vienna>")
+         .assertContentRegexp(
+             "<name_de>\\s+\"Wien\"@de .");
     }
     @Test
     public void testFindLDPathOnMultipleResults() throws IOException {
@@ -261,7 +262,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
          .assertContentType("text/turtle")
          .assertContentRegexp(
              "<http://stanbol.apache.org/ontology/entityhub/query#score>",
-             "<name>  \"Spider\"@en ;",
+             "<name>\\s+\"Spider\"@en ;",
              "<category>.*<http://dbpedia.org/resource/Category:Arachnids>",
              "<category>.*<http://dbpedia.org/resource/Category:Spiders>",
              "<others>.*<http://dbpedia.org/resource/Opiliones>",
@@ -366,13 +367,13 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
             "<http://dbpedia.org/resource/Koblenz>",
             "<http://dbpedia.org/resource/Cologne>",
             //now some values based on the LDPath
-            "<name>  \"Koblenz\"@en",
-            "<lat>   \"50.359722\"",
-            "<long>  \"7.597778\"",
+            "<name>\\s+\"Koblenz\"@en",
+            "<lat>\\s+\"50.359722\"",
+            "<long>\\s+\"7.597778\"",
             "<type>.*<http://www.w3.org/2002/07/owl#Thing>",
             "<type>.*<http://www.opengis.net/gml/_Feature>",
             "<type>.*<http://dbpedia.org/ontology/Town>",
-            "<population> 314926");
+            "<population>\\s+314926");
     }
     
     

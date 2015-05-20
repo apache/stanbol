@@ -40,7 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-@Component(immediate = true, metatype = true)
+@Component(immediate = true)
 @Service
 public class CMSAdapterWebFragment implements WebFragment {
 

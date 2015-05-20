@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * @author andrea.nuzzolese
  * 
  */
-@Component(immediate = true, metatype = true)
+@Component(immediate = true)
 @Service(Dereferencer.class)
 public class DereferencerImpl implements Dereferencer {
 

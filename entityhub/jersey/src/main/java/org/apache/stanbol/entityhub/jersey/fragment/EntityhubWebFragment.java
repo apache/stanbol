@@ -45,7 +45,7 @@ import org.apache.stanbol.entityhub.jersey.writers.SignWriter;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-@Component(immediate = true, metatype = true)
+@Component(immediate = true)
 @Service
 public class EntityhubWebFragment implements WebFragment {
     

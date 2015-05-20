@@ -18,47 +18,34 @@ package org.apache.stanbol.commons.testing.http;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpException;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.AuthState;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.entity.ContentType;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.ExecutionContext;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
-import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Executes a Request and provides convenience methods
@@ -66,8 +53,10 @@ import org.junit.Assert;
  */
 public class RequestExecutor {
 
-    private final DefaultHttpClient httpClient;
-    private HttpUriRequest request;
+    private final Logger log = LoggerFactory.getLogger(getClass());
+    
+    private final CloseableHttpClient httpClient;
+    private HttpRequestBase request;
     private HttpResponse response;
     private HttpEntity entity;
     private String contentString;
@@ -75,34 +64,37 @@ public class RequestExecutor {
     private ContentType contentType;
     private Charset charset;
 
-    /**
-     * HttpRequestInterceptor for preemptive authentication, based on httpclient
-     * 4.0 example
-     */
-    private static class PreemptiveAuthInterceptor implements HttpRequestInterceptor {
+//    /**
+//     * HttpRequestInterceptor for preemptive authentication, based on httpclient
+//     * 4.0 example
+//     */
+//    private static class PreemptiveAuthInterceptor implements HttpRequestInterceptor {
+//
+//        public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {
+//
+//            AuthState authState = (AuthState) context.getAttribute(HttpClientContext.TARGET_AUTH_STATE);
+//            CredentialsProvider credsProvider = (CredentialsProvider) context.getAttribute(HttpClientContext.CREDS_PROVIDER);
+//            HttpHost targetHost = (HttpHost) context.getAttribute(HttpClientContext.HTTP_TARGET_HOST);
+//
+//            // If not auth scheme has been initialized yet
+//            if (authState.getAuthScheme() == null) {
+//                AuthScope authScope = new AuthScope(targetHost.getHostName(), targetHost.getPort());
+//
+//                // Obtain credentials matching the target host
+//                Credentials creds = credsProvider.getCredentials(authScope);
+//
+//                // If found, generate BasicScheme preemptively
+//                if (creds != null) {
+//                    authState.update(new BasicScheme(), creds);
+//                }
+//            }
+//        }
+//    }
 
-        public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {
-
-            AuthState authState = (AuthState) context.getAttribute(ClientContext.TARGET_AUTH_STATE);
-            CredentialsProvider credsProvider = (CredentialsProvider) context.getAttribute(ClientContext.CREDS_PROVIDER);
-            HttpHost targetHost = (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
-
-            // If not auth scheme has been initialized yet
-            if (authState.getAuthScheme() == null) {
-                AuthScope authScope = new AuthScope(targetHost.getHostName(), targetHost.getPort());
-
-                // Obtain credentials matching the target host
-                Credentials creds = credsProvider.getCredentials(authScope);
-
-                // If found, generate BasicScheme preemptively
-                if (creds != null) {
-                    authState.update(new BasicScheme(), creds);
-                }
-            }
-        }
+    public RequestExecutor(CloseableHttpClient client) {
+        httpClient = client;
     }
-
-    public RequestExecutor(DefaultHttpClient client) {
+    public RequestExecutor(CloseableHttpClient client, String username, String password) {
         httpClient = client;
     }
 
@@ -124,21 +116,12 @@ public class RequestExecutor {
         clear();
         request = r.getRequest();
 
-        // Optionally setup for basic authentication
-        if (r.getUsername() != null) {
-            httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY,
-                    new UsernamePasswordCredentials(r.getUsername(), r.getPassword()));
-
-            // And add request interceptor to have preemptive authentication
-            httpClient.addRequestInterceptor(new PreemptiveAuthInterceptor(), 0);
-        } else {
-            //httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, null);
-            httpClient.removeRequestInterceptorByClass(PreemptiveAuthInterceptor.class);
-        }
-
-        // Setup redirects
-        httpClient.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, r.getRedirects());
-
+        RequestConfig rc = RequestConfig.custom()
+                //.setConnectionRequestTimeout(TODO)
+                //.setConnectTimeout(TODO)
+                .setRedirectsEnabled(r.getRedirects())
+                .setRelativeRedirectsAllowed(true).build();
+        request.setConfig(rc);
         // Execute request
         response = httpClient.execute(request);
         entity = response.getEntity();
@@ -331,5 +314,14 @@ public class RequestExecutor {
      */
     public final Charset getCharset() {
         return charset;
+    }
+    
+    public void close() {
+        clear();
+        try {
+            httpClient.close();
+        } catch (IOException e) {
+            log.error("Error while closing Http Client", e);
+        }
     }
 }

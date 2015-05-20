@@ -22,6 +22,12 @@ import org.junit.Test;
 /** Test access to the OSGi console */
 public class OsgiConsoleTest extends StanbolTestBase {
     
+    
+    @Override
+    protected String getCredentials() {
+        return "admin:admin";
+    }
+    
     @Test
     public void testDefaultConsolePaths() throws Exception {
         final String [] subpaths = {
@@ -45,7 +51,6 @@ public class OsgiConsoleTest extends StanbolTestBase {
             final String path = "/system/console/" + subpath;
             executor.execute(
                     builder.buildGetRequest(path)
-                    .withCredentials("admin", "admin")
             ).assertStatus(200);
         }
     }

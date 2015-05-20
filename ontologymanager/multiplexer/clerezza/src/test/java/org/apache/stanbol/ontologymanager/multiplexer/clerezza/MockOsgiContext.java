@@ -81,12 +81,8 @@ public class MockOsgiContext {
         // reset Clerezza objects
         tcManager = new TcManager();
         tcManager.addWeightedTcProvider(new SimpleTcProvider());
-        parser = new Parser(); // add Jena-supported formats + RDF/JSON
-        parser.bindParsingProvider(new JenaParserProvider());
-        parser.bindParsingProvider(new RdfJsonParsingProvider());
-        serializer = new Serializer(); // add Jena-supported formats + RDF/JSON
-        serializer.bindSerializingProvider(new JenaSerializerProvider());
-        serializer.bindSerializingProvider(new RdfJsonSerializingProvider());
+        parser = Parser.getInstance();
+        serializer = Serializer.getInstance();
 
         // reset Stanbol objects
         ontologyProvider = new ClerezzaOntologyProvider(tcManager, offline, parser);

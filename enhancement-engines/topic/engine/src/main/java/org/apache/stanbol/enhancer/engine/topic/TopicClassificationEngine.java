@@ -501,7 +501,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 "Unable to extract " + " textual content from ContentPart %s of ContentItem %s!",
                 contentPart.getKey(), ci.getUri()), e);
         }
-        if (text.trim().isEmpty()) {
+        if (StringUtils.isBlank(text)) {
             log.warn(
                 "ContentPart {} of ContentItem {} does not contain any " + "text to extract topics from",
                 contentPart.getKey(), ci.getUri());
@@ -709,7 +709,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         query.addFilterQuery(entryTypeField + ":" + METADATA_ENTRY);
         query.addFilterQuery(broaderField + ":" + ClientUtils.escapeQueryChars(broadTopicId));
         query.addField(conceptUriField);
-        query.addSortField(conceptUriField, SolrQuery.ORDER.asc);
+        query.addSort(conceptUriField, SolrQuery.ORDER.asc);
         try {
             for (SolrDocument result : solrServer.query(query).getResults()) {
                 narrowerConcepts.add(result.getFirstValue(conceptUriField).toString());
@@ -759,7 +759,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         // TODO: this can be very big on flat thesauri: should we enable a paging API instead?
         query.setRows(MAX_ROOTS);
         query.setFields(conceptUriField);
-        query.setSortField(conceptUriField, SolrQuery.ORDER.asc);
+        query.setSort(conceptUriField, SolrQuery.ORDER.asc);
         query.addFilterQuery(entryTypeField + ":" + METADATA_ENTRY);
         if (broaderField != null) {
             // find any topic with an empty broaderField
@@ -927,7 +927,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         String offset = null;
         boolean done = false;
         int batchSize = 1000;
-        query.addSortField(conceptUriField, SolrQuery.ORDER.asc);
+        query.addSort(conceptUriField, SolrQuery.ORDER.asc);
         query.setRows(batchSize + 1);
         try {
             while (!done) {

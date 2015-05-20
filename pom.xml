@@ -81,9 +81,8 @@
 
     <module>launchers/bundlelists</module>
     <module>launchers/full</module>
-
-    <module>launchers/stable</module>
     <module>launchers/full-war</module>
+    <module>launchers/stable</module>
     
     <module>development/archetypes/statefull-webmodule</module>
     <module>development/archetypes/stateless-webmodule</module>

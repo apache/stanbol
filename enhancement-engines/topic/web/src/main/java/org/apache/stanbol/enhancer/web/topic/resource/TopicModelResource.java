@@ -26,6 +26,7 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.topic.api.ClassifierException;
 import org.apache.stanbol.enhancer.topic.api.TopicClassifier;
+import org.apache.stanbol.enhancer.topic.api.TopicSuggestion;
 import org.apache.stanbol.enhancer.topic.api.training.TrainingSet;
 import org.apache.stanbol.enhancer.topic.api.training.TrainingSetException;
 import org.osgi.framework.BundleContext;
@@ -36,6 +37,8 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
@@ -201,6 +204,38 @@ public final class TopicModelResource extends BaseStanbolResource {
         }
         addCORSOrigin(servletContext, rb, headers);
         return rb.build();
+    }
+    /**
+     * Suggests a list of concepts for the parsed content. Intended for simple
+     * testing of the classifier (e.g. by bash scripts)
+     * @param max the maximum number of suggested categories (default all)
+     * @param score if the scores should be included
+     */
+    @POST
+    @Path("suggest")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN) // comma separated list of concept URIs
+    public String suggest(@QueryParam(value = "max") int max,
+            @QueryParam(value = "score") Boolean score, 
+            String textContent, @Context HttpHeaders headers) 
+            throws TrainingSetException, ClassifierException {
+        if(max < 1){
+            max = Integer.MAX_VALUE;
+        }
+        StringBuilder concepts = new StringBuilder();
+        List<TopicSuggestion> sugs = classifier.suggestTopics(textContent);
+        for(int i=0;i < max && i <sugs.size(); i++){
+            TopicSuggestion sug = sugs.get(i);
+            if(i > 0){
+                concepts.append('\n');
+            }
+            concepts.append(sug.conceptUri);
+            if(score == null || Boolean.TRUE.equals(score)){
+                concepts.append('\t');
+                concepts.append(sug.score);
+            }
+        }
+        return concepts.toString();
     }
 
     // TODO make the following a DELETE method on the example sub-resources them-selves once we have a GET for
