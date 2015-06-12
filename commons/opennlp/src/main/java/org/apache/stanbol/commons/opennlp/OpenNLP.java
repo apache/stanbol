@@ -25,7 +25,11 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import opennlp.tools.chunker.Chunker;
 import opennlp.tools.chunker.ChunkerME;
@@ -82,7 +86,17 @@ public class OpenNLP {
      * TODO: change to use a WeakReferenceMap
      */
     protected Map<String,Object> models = new HashMap<String,Object>();
-    
+    /**
+     * used to sync access to the {@link #models} and {@link #modelCreationLock}
+     */
+    protected ReadWriteLock modelLock = new ReentrantReadWriteLock();
+    /**
+     * used to avoid loading the same model multiple times in parallel.
+     * The value is a int array with an single element. The int at index zero is
+     * used as reference count. When it reaches zero the mapping can be deleted
+     * from the map. 
+     */
+    protected Map<String,int[]> modelCreationLock = new HashMap<String,int[]>();
     /**
      * Default constructor
      */
@@ -450,88 +464,158 @@ public class OpenNLP {
      * @throws IOException on any error while loading the model data
      * @throws IllegalStateException on any Exception while creating the model
      */
-    @SuppressWarnings("unchecked")
     private <T> T initModel(String name,Class<T> modelType, Map<String,String> modelProperties) throws InvalidFormatException, IOException {
-        Object model = models.get(name);
-        if(model != null) {
-            if(modelType.isAssignableFrom(model.getClass())){
-                return (T) model;
+        T model = getCachedModel(name, modelType);
+        if(model != null){
+            return model;
+        } //else create the model
+        //We need to avoid creating a model twice in parallel
+        modelLock.writeLock().lock();
+        int[] lock;
+        try {
+            lock = modelCreationLock.get(name);
+            if(lock == null){
+                lock = new int[]{0};
+                modelCreationLock.put(name, lock);
+            }
+            lock[0]++;
+        } finally {
+            modelLock.writeLock().unlock();
+        }
+        try {
+            //create only one model with the same name in parallel
+            synchronized (lock) { 
+                //now we have the lock ... 
+                //  first check if it was created while we where waiting for the lock
+                model = getCachedModel(name, modelType);
+                if(model != null){
+                    return model;
+                }
+                //not created in the meantime ... we need to create it!
+                T built = loadModel(name, modelType, modelProperties);
+                //register the model
+                modelLock.writeLock().lock();
+                try {
+                    models.put(name, built);
+                } finally {
+                    modelLock.writeLock().unlock();
+                }
+                return built;
+            }
+        } finally {
+            //we do no longer need the lock
+            lock[0]--;
+            //check if we need to clean up the modelCreationLock map
+            if(lock[0] == 0){
+                modelLock.writeLock().lock();
+                try {
+                    if(lock[0] == 0){
+                        modelCreationLock.remove(name);
+                    }
+                } finally {
+                    modelLock.writeLock().unlock();
+                }
+            }
+        }
+    }
+    private <T> T loadModel(String name, Class<T> modelType,
+            Map<String, String> modelProperties) throws InvalidFormatException,
+            IOException {
+        if(modelProperties != null){ //copy the data to avoid external modifications
+            modelProperties = new HashMap<String,String>(modelProperties);
+        }else {
+            modelProperties = new HashMap<String,String>();
+        }
+        if(!modelProperties.containsKey("Description")){
+            modelProperties.put("Description", "Statistical model for OpenNLP");
+        }
+        if(!modelProperties.containsKey("Model Type")){
+            modelProperties.put("Model Type", modelType.getSimpleName());
+        }
+        if(!modelProperties.containsKey("Download Location")){
+            modelProperties.put("Download Location", DOWNLOAD_ROOT+name);
+        }
+        InputStream modelDataStream;
+        try {
+            modelDataStream = lookupModelStream(name,modelProperties);
+        } catch (IOException e) {
+            log.debug("Unable to load Resource {} via the DataFileProvider",name);
+            return null;
+        }
+        if(modelDataStream == null){
+            log.debug("Unable to load Resource {} via the DataFileProvider",name);
+            return null;
+        }
+        T built;
+        try {
+            Constructor<T> constructor;
+            constructor = modelType.getConstructor(InputStream.class);
+            built = constructor.newInstance(modelDataStream);
+        } catch (SecurityException e) {
+            throw new IllegalStateException(String.format(
+                "Unable to create %s for %s!",modelType.getSimpleName(),
+                name),e);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException(String.format(
+                "Unable to create %s for %s!",modelType.getSimpleName(),
+                name),e);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException(String.format(
+                "Unable to create %s for %s!",modelType.getSimpleName(),
+                name),e);
+        } catch (InstantiationException e) {
+            throw new IllegalStateException(String.format(
+                "Unable to create %s for %s!",modelType.getSimpleName(),
+                name),e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(String.format(
+                "Unable to create %s for %s!",modelType.getSimpleName(),
+                name),e);
+        } catch (InvocationTargetException e) {
+            //this indicates an exception while creating the instance
+            //for InvalidFormatException and IO Exceptions we shall
+            //directly throw the cause. for all others wrap the thrown one
+            //in an IllegalStateException
+            Throwable checked = e.getCause();
+            if (checked instanceof InvalidFormatException){
+                throw (InvalidFormatException)checked;
+            } else if(checked instanceof IOException){
+                throw (IOException)checked;
             } else {
                 throw new IllegalStateException(String.format(
-                    "Incompatible Model Types for name '%s': present=%s | requested=%s",
-                    name,model.getClass(),modelType));
-            }
-        } else { //create new model
-            if(modelProperties != null){ //copy the data to avoid external modifications
-                modelProperties = new HashMap<String,String>(modelProperties);
-            }else {
-                modelProperties = new HashMap<String,String>();
-            }
-            if(!modelProperties.containsKey("Description")){
-                modelProperties.put("Description", "Statistical model for OpenNLP");
-            }
-            if(!modelProperties.containsKey("Model Type")){
-                modelProperties.put("Model Type", modelType.getSimpleName());
-            }
-            if(!modelProperties.containsKey("Download Location")){
-                modelProperties.put("Download Location", DOWNLOAD_ROOT+name);
-            }
-            InputStream modelDataStream;
-            try {
-                modelDataStream = lookupModelStream(name,modelProperties);
-            } catch (IOException e) {
-                log.debug("Unable to load Resource {} via the DataFileProvider",name);
-                return null;
-            }
-            if(modelDataStream == null){
-                log.debug("Unable to load Resource {} via the DataFileProvider",name);
-                return null;
-            }
-            T built;
-            try {
-                Constructor<T> constructor;
-                constructor = modelType.getConstructor(InputStream.class);
-                built = constructor.newInstance(modelDataStream);
-            } catch (SecurityException e) {
-                throw new IllegalStateException(String.format(
                     "Unable to create %s for %s!",modelType.getSimpleName(),
                     name),e);
-            } catch (NoSuchMethodException e) {
-                throw new IllegalStateException(String.format(
-                    "Unable to create %s for %s!",modelType.getSimpleName(),
-                    name),e);
-            } catch (IllegalArgumentException e) {
-                throw new IllegalStateException(String.format(
-                    "Unable to create %s for %s!",modelType.getSimpleName(),
-                    name),e);
-            } catch (InstantiationException e) {
-                throw new IllegalStateException(String.format(
-                    "Unable to create %s for %s!",modelType.getSimpleName(),
-                    name),e);
-            } catch (IllegalAccessException e) {
-                throw new IllegalStateException(String.format(
-                    "Unable to create %s for %s!",modelType.getSimpleName(),
-                    name),e);
-            } catch (InvocationTargetException e) {
-                //this indicates an exception while creating the instance
-                //for InvalidFormatException and IO Exceptions we shall
-                //directly throw the cause. for all others wrap the thrown one
-                //in an IllegalStateException
-                Throwable checked = e.getCause();
-                if (checked instanceof InvalidFormatException){
-                    throw (InvalidFormatException)checked;
-                } else if(checked instanceof IOException){
-                    throw (IOException)checked;
+            }
+        } finally {
+            IOUtils.closeQuietly(modelDataStream);
+        }
+        return built;
+    }
+    /**
+     * Used to retrieve a model of the parsed model type from the internal cache
+     * @param name the name of the model
+     * @param modelType the type of the model
+     * @return the model or <code>null</code> if not cached
+     * @throws IllegalStateException if the cached model does not have the
+     * expected type
+     */
+    private <T> T getCachedModel(String name, Class<T> modelType) {
+        modelLock.readLock().lock();
+        try {
+            Object model = models.get(name);
+            if(model != null) {
+                if(modelType.isAssignableFrom(model.getClass())){
+                    return modelType.cast(model);
                 } else {
                     throw new IllegalStateException(String.format(
-                        "Unable to create %s for %s!",modelType.getSimpleName(),
-                        name),e);
+                        "Incompatible Model Types for name '%s': present=%s | requested=%s",
+                        name,model.getClass(),modelType));
                 }
-            } finally {
-                IOUtils.closeQuietly(modelDataStream);
+            } else {
+                return null;
             }
-            models.put(name, built);
-            return built;
+        } finally {
+            modelLock.readLock().unlock();
         }
     }
     /**
