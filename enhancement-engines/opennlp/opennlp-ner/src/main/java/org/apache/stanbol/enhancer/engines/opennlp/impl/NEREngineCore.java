@@ -267,8 +267,10 @@ public abstract class NEREngineCore
                     if(occurrence.type != null){
                         g.add(new TripleImpl(textAnnotation, DC_TYPE, occurrence.type));
                     }
-                    g.add(new TripleImpl(textAnnotation, ENHANCER_CONFIDENCE, literalFactory
-                            .createTypedLiteral(occurrence.confidence)));
+                    if(occurrence.confidence != null){
+                        g.add(new TripleImpl(textAnnotation, ENHANCER_CONFIDENCE, literalFactory
+                                .createTypedLiteral(occurrence.confidence)));
+                    }
                     if (occurrence.start != null && occurrence.end != null) {
                         g.add(new TripleImpl(textAnnotation, ENHANCER_START, literalFactory
                                 .createTypedLiteral(occurrence.start)));
@@ -556,9 +558,21 @@ public abstract class NEREngineCore
             for (int j = 0; j < nameSpans.length; j++) {
                 String name = sentence.substring(tokenSpans[nameSpans[j].getStart()].getStart(), 
                     tokenSpans[nameSpans[j].getEnd()-1].getEnd());
-                Double confidence = 1.0;
-                for (int k = nameSpans[j].getStart(); k < nameSpans[j].getEnd(); k++) {
-                    confidence *= probs[k];
+                //NOTE: With OpenNLP 1.6 the probability is now stored in the span
+                double prob = nameSpans[j].getProb();
+                //prob == 0.0 := unspecified
+                Double confidence = prob != 0.0 ? Double.valueOf(prob) : null;
+                if(confidence == null){ //fall back to the old if it is not set.
+                    for (int k = nameSpans[j].getStart(); k < nameSpans[j].getEnd(); k++) {
+                        prob *= probs[k];
+                    }
+                    confidence = Double.valueOf(prob);
+                } else if(confidence < 0.5d){
+                    //It looks like as if preceptron based models do return
+                    //invalid probabilities. As it is expected the Named Entities
+                    //with a probability < 50% are not even returned by finder.find(..)
+                    //we will just ignore confidence values < 0.5 here
+                    confidence = null;
                 }
                 int start = tokenSpans[nameSpans[j].getStart()].getStart();
                 int absoluteStart = sentenceSpans[i].getStart() + start;
