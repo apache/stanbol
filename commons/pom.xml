@@ -105,7 +105,10 @@
     
     <module>jobs</module> <!-- Stanbol Background Jobs Framework -->
   
-    <module>opennlp</module> <!-- Allows to load OpenNLP modles via DataFile provider --> 
+    <!-- OpenNLP extensions -->
+    <module>opennlp</module> <!-- Allows to load OpenNLP modles via DataFile provider -->
+    <module>ixa-pipe-nerc</module> <!-- extensions for OpenNLP (STANBOL-1422)-->
+    
     <module>owl</module>
   
     <!-- Apache Clerezza utils and extensions-->

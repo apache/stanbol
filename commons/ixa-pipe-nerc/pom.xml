@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one or more
+ contributor license agreements.  See the NOTICE file distributed with
+ this work for additional information regarding copyright ownership.
+ The ASF licenses this file to You under the Apache License, Version 2.0
+ (the "License"); you may not use this file except in compliance with
+ the License.  You may obtain a copy of the License at
+ 
+ http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>stanbol-parent</artifactId>
+    <version>6-SNAPSHOT</version>
+    <relativePath>../../parent</relativePath>
+  </parent>
+
+  <artifactId>org.apache.stanbol.commons.ixa-pipe-nerc</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>bundle</packaging>
+
+  <name>Apache Stanbol Commons: IXA pipe nerc extensions for OpenNLP</name>
+  <description>
+    Provides extensions to OpenNLP needed to use the OpenNLP models
+    provided by the IXA pipe nerc module.
+  </description>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <ixa-pipe-nerc-version>1.5.2</ixa-pipe-nerc-version>
+  </properties>
+
+  <build>
+    <!-- make it an OSGi bundle -->
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-Activator>org.apache.stanbol.commons.ixa.pipe.nerc.Activator</Bundle-Activator>
+            <!-- we can ignore some imports as those are only used for training -->
+            <Import-Package>
+              !net.sourceforge.argparse4j*,
+              ixa.kaflib;resolution:=optional,
+              com.google.common.*;version="[13,99)",
+              org.jdom2*;version="[2,3)";resolution:=optional,
+              opennlp.tools.cmdline*;resolution:=optional,
+              *
+            </Import-Package>
+            <Export-Package>
+              eus.ixa.ixa.pipe.nerc.*;version=${ixa-pipe-nerc-version}
+            </Export-Package>
+            <Private-Package>
+              org.apache.stanbol.commons.ixa.pipe.nerc.*;version=${project.version}
+            </Private-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.sling</groupId>
+        <artifactId>maven-sling-plugin</artifactId>
+      </plugin>
+
+    </plugins>
+  </build>
+
+  <dependencies>
+    <!-- obviously we need opennlp -->
+    <dependency>
+      <groupId>org.apache.opennlp</groupId>
+      <artifactId>opennlp-maxent</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.opennlp</groupId>
+      <artifactId>opennlp-tools</artifactId>
+    </dependency>
+    <!-- and the ixa nerc -->
+    <dependency>
+      <groupId>eus.ixa</groupId>
+      <artifactId>ixa-pipe-nerc</artifactId>
+      <version>${ixa-pipe-nerc-version}</version>
+      <scope>provided</scope> <!-- class files will be embedded in the bundle -->
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jdom</groupId>
+      <artifactId>jdom2</artifactId>
+      <version>2.0.6</version>
+    </dependency>
+    <!-- OSGI dependencies -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+      <scope>provided</scope> <!-- build only dependency -->
+    </dependency>
+  </dependencies>
+</project>
