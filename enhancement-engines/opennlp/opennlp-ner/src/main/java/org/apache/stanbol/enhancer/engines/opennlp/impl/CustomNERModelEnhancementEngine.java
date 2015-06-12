@@ -218,6 +218,7 @@ public class CustomNERModelEnhancementEngine
             String.format("Statistical NameFinder (NER) model for OpenNLP as configured "
                 +"for the %s (name: %s)",getClass().getSimpleName(),getName()));
         modelProperties.put("Model Type", TokenNameFinderModel.class.getSimpleName());
+        log.info(" - register DataFileTracker for {}", nameFinderModelNames);
         for(String modelName : nameFinderModelNames){
            dataFileTracker.add(modelFileListener, modelName, modelProperties);
         }
@@ -243,10 +244,11 @@ public class CustomNERModelEnhancementEngine
         public boolean available(String resourceName, InputStream is) {
             TokenNameFinderModel model;
             try {
+                log.info(" - NER model {} is now available ...", resourceName);
                 model = openNLP.getModel(TokenNameFinderModel.class, resourceName, null);
                 //register the new model to the configuration
                 String modelLang = model.getLanguage().toLowerCase();
-                log.info("register custom NameFinderModel from resource: {} for language: {} to {} (name:{})",
+                log.info(" - registered custom NameFinderModel from resource: {} for language: {} to {} (name:{})",
                     new Object[]{resourceName,model.getLanguage(),getClass().getSimpleName(),getName()});
                 String currentLang = registeredModels.remove(resourceName);
                 if(currentLang != null && !modelLang.equals(currentLang)){
@@ -256,11 +258,11 @@ public class CustomNERModelEnhancementEngine
                 registeredModels.put(resourceName, modelLang);
             } catch (IOException e) {
                 log.warn("Error while loading custom TokenNameFinderModel model from resource " +
-                		" resourceName. This model will NOT be available for the "+
+                        resourceName + ". This model will NOT be available for the "+
                         getClass().getSimpleName()+" (name:"+getName()+")",e);
             } catch (RuntimeException e){
                 log.warn("Error while loading custom TokenNameFinderModel model from resource " +
-                        " resourceName. This model will NOT be available for the "+
+                        resourceName + ". This model will NOT be available for the "+
                         getClass().getSimpleName()+" (name:"+getName()+")",e);
             }
             return false; //keep tracking
