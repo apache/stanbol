@@ -17,6 +17,7 @@
 package org.apache.stanbol.enhancer.engines.restful.nlp.impl;
 
 import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.NER_ANNOTATION;
+import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.SENTIMENT_ANNOTATION;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getLanguage;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
@@ -98,7 +99,9 @@ import org.apache.stanbol.enhancer.nlp.model.Span;
 import org.apache.stanbol.enhancer.nlp.model.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
 import org.apache.stanbol.enhancer.nlp.ner.NerTag;
+import org.apache.stanbol.enhancer.nlp.sentiment.SentimentTag;
 import org.apache.stanbol.enhancer.nlp.utils.LanguageConfiguration;
+import org.apache.stanbol.enhancer.nlp.utils.NIFHelper;
 import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -107,6 +110,7 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -168,6 +172,30 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
      * The maximum size of the preix/suffix for the selection context
      */
     private static final int DEFAULT_SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE = 50;
+
+
+/*********************************Specific sentiment RDF properties and types******************************************/
+    /**
+     * The property used to write the sum of all positive classified words
+     */
+    public static final UriRef POSITIVE_SENTIMENT_PROPERTY = new UriRef(NamespaceEnum.fise+"positive-sentiment");
+    /**
+     * The property used to write the sum of all negative classified words
+     */
+    public static final UriRef NEGATIVE_SENTIMENT_PROPERTY = new UriRef(NamespaceEnum.fise+"negative-sentiment");
+    /**
+     * The sentiment of the section (sum of positive and negative classifications)
+     */
+    public static final UriRef SENTIMENT_PROPERTY = new UriRef(NamespaceEnum.fise+"sentiment");
+    /**
+     * The dc:type value used for fise:TextAnnotations indicating a Sentiment
+     */
+    public static final UriRef SENTIMENT_TYPE = new UriRef(NamespaceEnum.fise+"Sentiment");
+    /**
+     * The dc:Type value sued for the sentiment annotation of the whole document
+     */
+    public static final UriRef DOCUMENT_SENTIMENT_TYPE = new UriRef(NamespaceEnum.fise+"DocumentSentiment");
+/**********************************************************************************************************************/
 
     private static final Map<String,Object> SERVICE_PROPERTIES;
     static {
@@ -275,9 +303,9 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
         final HttpPost request = new HttpPost(analysisServiceUrl);
         request.addHeader(HttpHeaders.CONTENT_LANGUAGE, language);
         request.setEntity(new InputStreamEntity(
-            blob.getStream(), blob.getContentLength(),
-            ContentType.create(blob.getMimeType(), 
-                blob.getParameter().get("charset"))));
+                blob.getStream(), blob.getContentLength(),
+                ContentType.create(blob.getMimeType(),
+                        blob.getParameter().get("charset"))));
         //execute the request
         try {
             AccessController.doPrivileged(new PrivilegedExceptionAction<AnalysedText>() {
@@ -302,6 +330,13 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
             }
         }
         if(writeTextAnnotations){
+
+            double positiveSent = 0.0;
+            int positiveCount = 0;
+            double negativeSent = 0.0;
+            int negativeCount = 0;
+            int sentimentCount = 0;
+
             Iterator<Span> spans = at.getEnclosed(EnumSet.of(SpanTypeEnum.Sentence,SpanTypeEnum.Chunk));
             Sentence context = null;
             MGraph metadata = ci.getMetadata();
@@ -314,34 +349,99 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
                     switch (span.getType()) {
                         case Sentence:
                             context = (Sentence)span;
-                            break;
-                        default:
+                            //FALLThrough intended!!
+                        default: {
                             Value<NerTag> nerAnno = span.getAnnotation(NER_ANNOTATION);
-                            if(nerAnno != null){
+                            if (nerAnno != null) {
                                 UriRef ta = EnhancementEngineHelper.createTextEnhancement(ci, this);
                                 //add span related data
-                                metadata.add(new TripleImpl(ta, ENHANCER_SELECTED_TEXT, 
-                                    new PlainLiteralImpl(span.getSpan(), lang)));
-                                metadata.add(new TripleImpl(ta, ENHANCER_START, 
-                                    lf.createTypedLiteral(span.getStart())));
-                                metadata.add(new TripleImpl(ta, ENHANCER_END, 
-                                    lf.createTypedLiteral(span.getEnd())));
-                                metadata.add(new TripleImpl(ta, ENHANCER_SELECTION_CONTEXT, 
-                                    new PlainLiteralImpl(context == null ?
-                                            getDefaultSelectionContext(at.getSpan(), span.getSpan(), span.getStart()) :
+                                metadata.add(new TripleImpl(ta, ENHANCER_SELECTED_TEXT,
+                                        new PlainLiteralImpl(span.getSpan(), lang)));
+                                metadata.add(new TripleImpl(ta, ENHANCER_START,
+                                        lf.createTypedLiteral(span.getStart())));
+                                metadata.add(new TripleImpl(ta, ENHANCER_END,
+                                        lf.createTypedLiteral(span.getEnd())));
+                                metadata.add(new TripleImpl(ta, ENHANCER_SELECTION_CONTEXT,
+                                        new PlainLiteralImpl(context == null ?
+                                                getDefaultSelectionContext(at.getSpan(), span.getSpan(), span.getStart()) :
                                                 context.getSpan(), lang)));
                                 //add the NER type
-                                if(nerAnno.value().getType() != null){
-                                    metadata.add(new TripleImpl(ta,DC_TYPE,nerAnno.value().getType()));
+                                if (nerAnno.value().getType() != null) {
+                                    metadata.add(new TripleImpl(ta, DC_TYPE, nerAnno.value().getType()));
                                 }
-                                if(nerAnno.probability() >= 0) {
-                                    metadata.add(new TripleImpl(ta, ENHANCER_CONFIDENCE, 
-                                        lf.createTypedLiteral(nerAnno.probability())));
+                                if (nerAnno.probability() >= 0) {
+                                    metadata.add(new TripleImpl(ta, ENHANCER_CONFIDENCE,
+                                            lf.createTypedLiteral(nerAnno.probability())));
                                 }
+
+                            }
+
+                            Value<Double> sentimentAnnotation = span.getAnnotation(SENTIMENT_ANNOTATION);
+                            if (sentimentAnnotation != null) {
+
+                                Double sentiment = sentimentAnnotation.value();
+
+                                UriRef ta = EnhancementEngineHelper.createTextEnhancement(ci, this);
+                                //add span related data
+                                metadata.add(new TripleImpl(ta, ENHANCER_START,
+                                        lf.createTypedLiteral(span.getStart())));
+                                metadata.add(new TripleImpl(ta, ENHANCER_END,
+                                        lf.createTypedLiteral(span.getEnd())));
+
+                                //add the sentiment metadata
+                                metadata.add(new TripleImpl(ta, SENTIMENT_PROPERTY,
+                                        lf.createTypedLiteral(sentiment)));
+
+                                //add the Sentiment type
+                                metadata.add(new TripleImpl(ta, DC_TYPE, SENTIMENT_TYPE));
+
+                                UriRef ssoType = NIFHelper.SPAN_TYPE_TO_SSO_TYPE.get(span.getType());
+
+                                if(ssoType != null){
+                                    metadata.add(new TripleImpl(ta, DC_TYPE, ssoType));
+                                }
+
+                                //Calculating overall sentiment for the document
+                                 sentimentCount++ ;
+                                if(sentiment >0){
+                                    positiveSent += sentiment;
+                                    positiveCount++;
+                                }else if(sentiment <0){
+                                    negativeSent += sentiment;
+                                    negativeCount++;
+                                }
+
                             }
                             break;
+                        }
                     }
                 }
+
+                UriRef ta = EnhancementEngineHelper.createTextEnhancement(ci, this);
+
+                //add the sentiment metadata for the actual document
+                if ( sentimentCount > 0 ) {
+                    //calculate the average sentiment for a document
+                    //TODO: Think on a better way to calculate a general sentiment value for a document.
+                    metadata.add(new TripleImpl(ta, SENTIMENT_PROPERTY,
+                            lf.createTypedLiteral((positiveSent + negativeSent) / sentimentCount)));
+
+                    if ( positiveCount > 0 ){
+                        //average positive sentiment calculation for the document
+                        metadata.add(new TripleImpl(ta, POSITIVE_SENTIMENT_PROPERTY,
+                                lf.createTypedLiteral( positiveSent / positiveCount )));
+                    }
+                    if ( negativeCount > 0 ){
+                        //average negative sentiment calculation for the document
+                        metadata.add(new TripleImpl(ta, NEGATIVE_SENTIMENT_PROPERTY,
+                                lf.createTypedLiteral( negativeSent / negativeCount )));
+                    }
+                }else metadata.add(new TripleImpl(ta, SENTIMENT_PROPERTY,
+                        lf.createTypedLiteral(0.0)));
+
+                metadata.add(new TripleImpl(ta, DC_TYPE, SENTIMENT_TYPE));
+                metadata.add(new TripleImpl(ta, DC_TYPE, DOCUMENT_SENTIMENT_TYPE));
+
             } finally {
                 ci.getLock().writeLock().unlock();
             }
