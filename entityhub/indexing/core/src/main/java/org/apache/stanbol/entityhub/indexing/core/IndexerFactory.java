@@ -99,6 +99,7 @@ public final class IndexerFactory {
             config= new IndexingConfig(dir);
         }
         //get the mode based on the configured IndexingComponents
+        String name = config.getName();
         EntityDataIterable dataIterable = config.getDataIterable();
         EntityIterator idIterator = config.getEntityIdIterator();
         EntityDataProvider dataProvider = config.getEntityDataProvider();
@@ -137,12 +138,12 @@ public final class IndexerFactory {
         }
         if(dataIterable != null && scoreProvider != null){
             // iterate over data and lookup scores
-            indexer = new IndexerImpl(dataIterable, scoreProvider, 
+            indexer = new IndexerImpl(name, dataIterable, scoreProvider, 
                 config.getNormaliser(),destination, processors,
                 config.getIndexedEntitiesIdsFile(),postProcessors);
         } else if(idIterator != null && dataProvider != null){
             // iterate over id and lookup data
-            indexer = new IndexerImpl(idIterator,dataProvider,
+            indexer = new IndexerImpl(name, idIterator,dataProvider,
                 config.getNormaliser(),destination, processors,
                 config.getIndexedEntitiesIdsFile(),postProcessors);
         } else if(dataIterable != null && idIterator != null){
@@ -152,7 +153,7 @@ public final class IndexerFactory {
                 "required EntityScoreProvider as needed together with the " +
             	"configured EntityDataIterable '{}'",
             	idIterator.getClass(), dataIterable.getClass());
-            indexer = new IndexerImpl(dataIterable,
+            indexer = new IndexerImpl(config.getName(), dataIterable,
                 new EntityIneratorToScoreProviderAdapter(idIterator),
                 config.getNormaliser(),destination, processors,
                 config.getIndexedEntitiesIdsFile(),postProcessors);
@@ -167,45 +168,45 @@ public final class IndexerFactory {
         return indexer;
     }
 
-    public Indexer create(EntityIterator idIterator, EntityDataProvider dataProvider,
+    public Indexer create(String name, EntityIterator idIterator, EntityDataProvider dataProvider,
                           ScoreNormaliser normaliser,
                           List<EntityProcessor> processors, IndexingDestination destination){
-        return new IndexerImpl(idIterator, dataProvider, normaliser,destination, processors,null,null);
+        return new IndexerImpl(name, idIterator, dataProvider, normaliser,destination, processors,null,null);
     }
-    public Indexer create(EntityIterator idIterator, EntityDataProvider dataProvider,
+    public Indexer create(String name, EntityIterator idIterator, EntityDataProvider dataProvider,
                           ScoreNormaliser normaliser,
                           List<EntityProcessor> processors, List<EntityProcessor> postProcessors,
                           IndexingDestination destination){
         File tmp;
         try {
-            tmp = File.createTempFile("ind-ent-ids","zip");
+            tmp = File.createTempFile("ind-ent-ids",".zip");
             tmp.deleteOnExit();
         } catch (IOException e) {
             throw new IllegalStateException("Unable to create temporary file for storing the" +
                     "indexed Entity IDs",e);
         }
-        return new IndexerImpl(idIterator, dataProvider, normaliser,destination, processors,
+        return new IndexerImpl(name, idIterator, dataProvider, normaliser,destination, processors,
             tmp,postProcessors);
     }
     
-    public Indexer create(EntityDataIterable dataIterable,EntityScoreProvider scoreProvider,
+    public Indexer create(String name, EntityDataIterable dataIterable,EntityScoreProvider scoreProvider,
                           ScoreNormaliser normaliser,
                           List<EntityProcessor> processors, IndexingDestination destination){
-        return new IndexerImpl(dataIterable, scoreProvider, normaliser,destination, processors,null,null);
+        return new IndexerImpl(name, dataIterable, scoreProvider, normaliser,destination, processors,null,null);
     }
-    public Indexer create(EntityDataIterable dataIterable,EntityScoreProvider scoreProvider,
+    public Indexer create(String name, EntityDataIterable dataIterable,EntityScoreProvider scoreProvider,
                           ScoreNormaliser normaliser,
                           List<EntityProcessor> processors,  List<EntityProcessor> postProcessors,
                           IndexingDestination destination){
         File tmp;
         try {
-            tmp = File.createTempFile("ind-ent-ids","zip");
+            tmp = File.createTempFile("ind-ent-ids",".zip");
             tmp.deleteOnExit();
         } catch (IOException e) {
             throw new IllegalStateException("Unable to create temporary file for storing the" +
                     "indexed Entity IDs",e);
         }
-        return new IndexerImpl(dataIterable, scoreProvider, normaliser,destination, processors,
+        return new IndexerImpl(name, dataIterable, scoreProvider, normaliser,destination, processors,
             tmp,postProcessors);
     }
 }

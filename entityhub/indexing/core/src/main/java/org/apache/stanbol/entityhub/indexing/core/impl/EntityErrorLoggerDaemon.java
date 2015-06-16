@@ -23,10 +23,9 @@ import org.slf4j.Logger;
 public class EntityErrorLoggerDaemon extends IndexingDaemon<IndexingError,Object> {
 
     private final Logger err;
-    public EntityErrorLoggerDaemon(BlockingQueue<QueueItem<IndexingError>> consume,
-                             Logger err) {
-        super("Indexer: Entity Error Logging Daemon",
-            IndexerConstants.SEQUENCE_NUMBER_ERROR_HANDLING_DAEMON,
+    public EntityErrorLoggerDaemon(String name, 
+            BlockingQueue<QueueItem<IndexingError>> consume, Logger err) {
+        super(name, IndexerConstants.SEQUENCE_NUMBER_ERROR_HANDLING_DAEMON,
             consume, null, null);
         this.err = err;
     }
