@@ -72,11 +72,15 @@ public class CorpusCreationTask implements Runnable{
                 log.warn("Unable to delete existing FST fiel for {}",corpusInfo);
             }
         }
-        try {
-            corpus.save(corpusInfo.fst);
-        } catch (IOException e) {
-            log.warn("Unable to store FST corpus " + corpusInfo + " to "
-                    + corpusInfo.fst.getAbsolutePath() + "!", e);
+        if(corpus.getPhrases() != null){ //the FST is not empty
+            try { //NOTE saving an empty corpus results in a NPE
+                corpus.save(corpusInfo.fst);
+            } catch (IOException e) {
+                log.warn("Unable to store FST corpus " + corpusInfo + " to "
+                        + corpusInfo.fst.getAbsolutePath() + "!", e);
+            }
+        } else {
+           log.info("FST for {} is empty ... no FST will be stored",corpusInfo); 
         }
     }
     
