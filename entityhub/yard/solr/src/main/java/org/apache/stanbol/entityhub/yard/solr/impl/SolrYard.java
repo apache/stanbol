@@ -177,12 +177,12 @@ public class SolrYard extends AbstractYard implements Yard {
         super();
         if(server == null){
             throw new IllegalArgumentException("The parsed SolrServer instance" +
-            		"MUST NOT be NULL!");
+                    "MUST NOT be NULL!");
         }
         this.server = server;
         if(config == null){
             throw new IllegalArgumentException("The parsed SolrYard configuration" +
-            		"MUST NOT be NULL");
+                    "MUST NOT be NULL");
         }
         this.config = config;
         //set the value/query/indexValue factory
@@ -698,11 +698,11 @@ public class SolrYard extends AbstractYard implements Yard {
         try {
             AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
                 public Object run() throws IOException, SolrServerException {
-		            update.process(server);
-		            if (immediateCommit) {
-		                server.commit();
-		            }
-		            return null;
+                    update.process(server);
+                    if (immediateCommit) {
+                        server.commit();
+                    }
+                    return null;
                 }
             });
             long ready = System.currentTimeMillis();
@@ -866,7 +866,7 @@ public class SolrYard extends AbstractYard implements Yard {
 
     @Override
     public final Representation update(Representation representation) 
-    		throws IllegalArgumentException, NullPointerException, YardException {
+            throws IllegalArgumentException, NullPointerException, YardException {
         if (representation == null) {
             throw new IllegalArgumentException("The parsed Representation MUST NOT be NULL!");
         }
@@ -875,13 +875,13 @@ public class SolrYard extends AbstractYard implements Yard {
             return store(representation); // there is no "update" for solr
         } else {
             throw new IllegalArgumentException("Parsed Representation " + representation.getId()
-            		+ " in not managed by this Yard " + getName() + "(id=" + getId() + ")");
+                    + " in not managed by this Yard " + getName() + "(id=" + getId() + ")");
         }
     }
 
     @Override
     public final Iterable<Representation> update(Iterable<Representation> representations)
-    		throws YardException, IllegalArgumentException, NullPointerException {
+            throws YardException, IllegalArgumentException, NullPointerException {
         if (representations == null) {
             throw new IllegalArgumentException("The parsed Iterable over Representations MUST NOT be NULL!");
         }
@@ -901,7 +901,7 @@ public class SolrYard extends AbstractYard implements Yard {
             ids = checkRepresentations(ids); // returns the ids found in the solrIndex
         } catch (SolrServerException e) {
             throw new YardException("Error while searching for alredy present documents "
-            		+ "before executing the actual update for the parsed Representations", e);
+                    + "before executing the actual update for the parsed Representations", e);
         } catch (IOException e) {
             throw new YardException("Unable to access SolrServer", e);
         }
@@ -945,9 +945,9 @@ public class SolrYard extends AbstractYard implements Yard {
         }
         long ready = System.currentTimeMillis();
         log.info(String.format( "Processed updateRequest for %d documents (%d in index "
-        		+ "| %d updated) in %dms (checked %dms|created %dms| stored%dms)",
-        		numDocs, ids.size(), updated.size(), ready - start, checked - start, 
-        		created - checked, ready - created));
+                + "| %d updated) in %dms (checked %dms|created %dms| stored%dms)",
+                numDocs, ids.size(), updated.size(), ready - start, checked - start, 
+                created - checked, ready - created));
         return updated;
     }
 
