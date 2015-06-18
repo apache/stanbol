@@ -105,9 +105,11 @@ public final class OntologyUtils {
         List<String> result = new ArrayList<String>();
         for (String f : preferredFormats)
             if (supported.contains(f)) result.add(f);
+        /*
         // The non-preferred supported formats on the tail in any order
         for (String f : supported)
             if (!result.contains(f)) result.add(f);
+        */
         return result;
     }
 

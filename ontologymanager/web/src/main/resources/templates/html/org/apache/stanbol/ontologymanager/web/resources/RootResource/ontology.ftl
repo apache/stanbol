@@ -26,6 +26,17 @@
         <li><a href=${it.publicBaseUri}ontonet/${alias}>${alias}</a></li>
       </#list>
       </ul>
+
+      Direct dependencies:
+      <ul>
+      <#list it.dependencies?keys as dep>
+        <li><a href=${it.publicBaseUri}ontonet/${dep}>${dep}</a>
+        <#if it.dependencies[dep] == "NO_MATCH">
+          (not loaded)
+        </#if>
+        </li>
+      </#list>
+      </ul>
         
       Handles:
       <ul>
@@ -64,37 +75,5 @@
 </#escape>
 
 <script>
- function setFormat(){
-   var format = $("#selectFormat").val();
-   $("#downloadOntology").attr("href", "${it.requestUri}?header_Accept="+encodeURIComponent(format));
-   switch(format) {
-     case "application/json":
-       $("#downloadOntology").attr("download", "${it.stringForm(it.representedOntologyKey)}.json");
-       break;
-     case "application/owl+xml":
-       $("#downloadOntology").attr("download", "${it.stringForm(it.representedOntologyKey)}.owl");
-       break;
-     case "application/rdf+json":
-       $("#downloadOntology").attr("download", "${it.stringForm(it.representedOntologyKey)}.json");
-       break;
-     case "application/rdf+xml":
-       $("#downloadOntology").attr("download", "${it.stringForm(it.representedOntologyKey)}.rdf");
-       break;
-     case "text/owl-functional":
-       $("#downloadOntology").attr("download", "${it.stringForm(it.representedOntologyKey)}.owl");
-       break;
-     case "text/owl-manchester":
-       $("#downloadOntology").attr("download", "${it.stringForm(it.representedOntologyKey)}.owl");
-       break;
-     case "text/rdf+n3":
-       $("#downloadOntology").attr("download", "${it.stringForm(it.representedOntologyKey)}.n3");
-       break;
-     case "text/rdf+nt":
-       $("#downloadOntology").attr("download", "${it.stringForm(it.representedOntologyKey)}.nt");
-       break;
-     case "text/turtle":
-       $("#downloadOntology").attr("download", "${it.stringForm(it.representedOntologyKey)}.rdf");
-       break;
-}
- }
+function setFormat(){var format=$("#selectFormat").val();$("#downloadOntology").attr("href","${it.requestUri}?header_Accept="+encodeURIComponent(format));var extn;switch(format){case"application/json":case"application/rdf+json":extn=".json";break;case"application/owl+xml":case"text/owl-functional":case"text/owl-manchester":extn=".owl";break;case"application/rdf+xml":case"text/turtle":extn=".rdf";break;case"text/rdf+n3":extn=".n3";break;case"text/rdf+nt":default:extn=".nt"}$("#downloadOntology").attr("download","${it.stringForm(it.representedOntologyKey)}"+extn)}
 </script>

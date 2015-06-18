@@ -94,6 +94,11 @@ public interface OntologyProvider<S> {
      */
     public String RESOLVE_IMPORTS = "org.apache.stanbol.ontologymanager.ontonet.resolveImports";
 
+    /**
+     * The key used to configure the default import failure policy for this provider.
+     */
+    public String MISSING_IMPORTS_FAIL = "org.apache.stanbol.ontologymanager.ontonet.failOnMissingImports";
+
     boolean addAlias(OWLOntologyID primaryKey, OWLOntologyID alias);
 
     OWLOntologyID createBlankOntologyEntry(OWLOntologyID publicKey);

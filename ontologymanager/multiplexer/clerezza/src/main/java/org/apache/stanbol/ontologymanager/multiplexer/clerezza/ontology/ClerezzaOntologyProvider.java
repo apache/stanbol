@@ -53,6 +53,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeSet;
+import java.util.concurrent.locks.Lock;
 
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
@@ -64,6 +65,7 @@ import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.TypedLiteral;
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.clerezza.rdf.core.access.EntityAlreadyExistsException;
+import org.apache.clerezza.rdf.core.access.LockableMGraph;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
@@ -95,6 +97,7 @@ import org.apache.stanbol.ontologymanager.servicesapi.collector.ImportManagement
 import org.apache.stanbol.ontologymanager.servicesapi.io.Origin;
 import org.apache.stanbol.ontologymanager.servicesapi.ontology.Multiplexer;
 import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyHandleException;
+import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyLoadingException;
 import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.servicesapi.ontology.OrphanOntologyKeyException;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.Scope;
@@ -225,9 +228,6 @@ public class ClerezzaOntologyProvider implements
             IRI ontologyIri = publicKey.getOntologyIRI(), versionIri = publicKey.getVersionIRI();
             if (ontologyIri == null) throw new IllegalArgumentException(
                     "Cannot build a UriRef resource on an anonymous public key!");
-
-            log.debug("Searching for a meta graph entry for public key:");
-            log.debug(" -- {}", publicKey);
             UriRef match = null;
             LiteralFactory lf = LiteralFactory.getInstance();
             TypedLiteral oiri = lf.createTypedLiteral(new UriRef(ontologyIri.toString()));
@@ -264,7 +264,6 @@ public class ClerezzaOntologyProvider implements
                     }
                 }
             }
-            log.debug("Matching UriRef in graph : {}", match);
             if (match == null) {
                 return new UriRef(OntologyUtils.encode(publicKey));
             } else {
@@ -298,6 +297,9 @@ public class ClerezzaOntologyProvider implements
 
         OWLOntologyID getReverseMapping(UriRef graphName) {
             // Logical mappings first.
+
+            log.info("GRAPH NAME {}", graphName);
+
             Iterator<Triple> it = graph.filter(null, MAPS_TO_GRAPH_URIREF, graphName);
             while (it.hasNext()) {
                 Resource obj = it.next().getSubject();
@@ -368,9 +370,11 @@ public class ClerezzaOntologyProvider implements
 
         void removeMapping(OWLOntologyID ontologyReference) {
             Iterator<Triple> it = graph.filter(buildResource(ontologyReference), MAPS_TO_GRAPH_URIREF, null);
-            // I expect a concurrent modification exception here, but we can deal with it later.
+            // To avoid concurrent modification exceptions
+            Collection<Triple> removeUs = new HashSet<Triple>();
             while (it.hasNext())
-                graph.remove(it.next());
+                removeUs.add(it.next());
+            graph.removeAll(removeUs);
         }
 
         void setMapping(OWLOntologyID ontologyReference, UriRef graphName) {
@@ -387,6 +391,8 @@ public class ClerezzaOntologyProvider implements
     private static final String _META_GRAPH_ID_DEFAULT = "urn:x-localinstance:/ontologymanager.graph";
 
     private static final boolean _RESOLVE_IMPORTS_DEFAULT = true;
+
+    private static final boolean _MISSING_IMPORTS_FAIL_DEFAULT = true;
 
     protected Multiplexer descriptor = null;
 
@@ -437,6 +443,9 @@ public class ClerezzaOntologyProvider implements
 
     @Property(name = OntologyProvider.RESOLVE_IMPORTS, boolValue = _RESOLVE_IMPORTS_DEFAULT)
     protected boolean resolveImports = _RESOLVE_IMPORTS_DEFAULT;
+
+    @Property(name = OntologyProvider.MISSING_IMPORTS_FAIL, boolValue = _MISSING_IMPORTS_FAIL_DEFAULT)
+    protected boolean failMissingImports = _MISSING_IMPORTS_FAIL_DEFAULT;
 
     /*
      * Do not use SCR reference here: this might be different from the registered WeightedTcProvider services
@@ -507,6 +516,11 @@ public class ClerezzaOntologyProvider implements
             resolveImports = (Boolean) (configuration.get(OntologyProvider.RESOLVE_IMPORTS));
         } catch (Exception ex) {
             resolveImports = _RESOLVE_IMPORTS_DEFAULT; // Should be already assigned though
+        }
+        try {
+            failMissingImports = (Boolean) (configuration.get(OntologyProvider.MISSING_IMPORTS_FAIL));
+        } catch (Exception ex) {
+            failMissingImports = _MISSING_IMPORTS_FAIL_DEFAULT; // Should be already assigned though
         }
 
         Object importPolicy = configuration.get(OntologyProvider.IMPORT_POLICY);
@@ -611,7 +625,7 @@ public class ClerezzaOntologyProvider implements
      */
     private void fillImportsReverse(OWLOntologyID importing,
                                     List<OWLOntologyID> reverseImports,
-                                    List<OWLOntologyID> level1Imports) {
+                                    List<OWLOntologyID> level1Imports) throws OntologyHandleException {
         log.debug("Filling reverse imports for {}", importing);
 
         // Add the importing ontology first
@@ -623,13 +637,28 @@ public class ClerezzaOntologyProvider implements
         = getStoredOntology(/* getPublicKey */(importing), MGraph.class, false);
         Iterator<Triple> it = graph.filter(null, RDF.type, OWL.Ontology);
         if (!it.hasNext()) return;
+        log.debug("Import list follows:");
         Iterator<Triple> it2 = graph.filter(it.next().getSubject(), OWL.imports, null);
         while (it2.hasNext()) {
             // obj is the *original* import target
             Resource obj = it2.next().getObject();
+            log.debug(" * {}", obj);
             if (obj instanceof UriRef) {
                 // Right now getKey() is returning the "private" storage ID
                 String key = getKey(IRI.create(((UriRef) obj).getUnicodeString()));
+                log.debug("   ... with key {}", key);
+                if (key == null) {
+                    if (failMissingImports) throw new OntologyHandleException(
+                            "Failed to retrieve storage key for ontology "
+                                    + obj
+                                    + ". To prevent these exceptions from being thrown, please unset property "
+                                    + "'org.apache.stanbol.ontologymanager.ontonet.failOnMissingImports'");
+                    else {
+                        log.warn("null key for {}!", obj);
+                        log.warn("Will ignore since 'failOnMissingImports' is unset.");
+                        continue;
+                    }
+                }
                 // TODO this will not be needed when getKey() and getPublicKey() return the proper public key.
                 OWLOntologyID oid = keymap.getReverseMapping(new UriRef(key));
                 // Check used for breaking cycles in the import graph.
@@ -638,6 +667,9 @@ public class ClerezzaOntologyProvider implements
                     if (level1Imports != null) level1Imports.add(oid);
                     fillImportsReverse(oid, reverseImports, null);
                 }
+            } else {
+                log.warn("Unexpected type for resource {}.", obj);
+                log.warn(" ... Expected {}, found {}", UriRef.class, obj.getClass());
             }
         }
     }
@@ -1130,6 +1162,8 @@ public class ClerezzaOntologyProvider implements
                 if (sup != null && !formats.contains(sup)) formats.add(sup);
         }
 
+        log.debug("Will try {} supported formats", formats.size());
+
         for (String currentFormat : formats) {
             try {
                 final URLConnection con = location.toURI().toURL().openConnection();
@@ -1149,7 +1183,10 @@ public class ClerezzaOntologyProvider implements
             } catch (UnsupportedFormatException e) {
                 log.debug("FAILURE format {} (unsupported). Trying next one.", currentFormat);
                 continue;
+            } catch (OntologyLoadingException e) {
+                throw new OntologyLoadingException(e);
             } catch (Exception e) {
+                // From here we should only be expecting parser-specific exceptions.
                 log.debug("FAILURE format {} (parse error). Will try next one.", currentFormat);
                 continue;
             }
@@ -1157,7 +1194,9 @@ public class ClerezzaOntologyProvider implements
 
         // No parser worked, return null.
         log.error("All parsers failed, giving up.");
-        return null;
+        log.error("Failing location was <{}>", location);
+        throw new OntologyLoadingException("Failed to parse an ontology from location <" + location + ">");
+        // return null;
     }
 
     @Override
@@ -1309,43 +1348,61 @@ public class ClerezzaOntologyProvider implements
                 mappedIds += " , " + alias;
             }
 
+        // Resolve imports.
         // Do this AFTER registering the ontology, otherwise import cycles will cause infinite loops.
         if (resolveImports) {
             // Scan resources of type owl:Ontology, but only get the first.
-            Iterator<Triple> it = targetGraph.filter(null, RDF.type, OWL.Ontology);
-            if (it.hasNext()) {
-                // Scan import statements for the one owl:Ontology considered.
-                Iterator<Triple> it2 = targetGraph.filter(it.next().getSubject(), OWL.imports, null);
-                while (it2.hasNext()) {
-                    Resource obj = it2.next().getObject();
-                    log.info("Resolving import target {}", obj);
-                    if (obj instanceof UriRef) try {
-                        // TODO try locals first
-                        UriRef target = (UriRef) obj;
-                        OWLOntologyID id = new OWLOntologyID(IRI.create(target.getUnicodeString()));
-                        if (keymap.getMapping(id) == null) { // Check if it's not there already.
-                            if (isOfflineMode()) throw new RuntimeException(
-                                    "Cannot load imported ontology " + obj
-                                            + " while Stanbol is in offline mode.");
-                            // TODO manage origins for imported ontologies too?
-                            OWLOntologyID id2 = loadInStore(IRI.create(((UriRef) obj).getUnicodeString()),
-                                null, false);
-                            if (id2 != null) id = id2;
-                            log.info("Import {} resolved.", obj);
-                            log.debug("");
-                        } else {
-                            log.info("Requested import already stored. Setting dependency only.");
-                        }
-                        descriptor.setDependency(primaryKey, id);
-                    } catch (UnsupportedFormatException e) {
-                        log.warn("Failed to parse format for resource " + obj, e);
-                        // / XXX configure to continue?
-                    } catch (IOException e) {
-                        log.warn("Failed to load ontology from resource " + obj, e);
-                        // / XXX configure to continue?
+            NonLiteral ontologySubject = null;
+            List<UriRef> importTargets = new LinkedList<UriRef>();
+            Lock l = null; // There could be locking iterators...
+            if (targetGraph instanceof LockableMGraph) {
+                l = ((LockableMGraph) targetGraph).getLock().readLock();
+                l.lock();
+            }
+            try {
+                Iterator<Triple> it = targetGraph.filter(null, RDF.type, OWL.Ontology);
+                if (it.hasNext()) ontologySubject = it.next().getSubject();
+                if (ontologySubject != null) {
+                    // Scan import statements for the one owl:Ontology considered.
+                    it = targetGraph.filter(ontologySubject, OWL.imports, null);
+                    while (it.hasNext()) {
+                        Resource obj = it.next().getObject();
+                        if (obj instanceof UriRef) importTargets.add((UriRef) obj);
                     }
                 }
+            } finally {
+                if (l != null) l.unlock();
             }
+            for (UriRef importTgt : importTargets)
+                try {
+                    log.info("Resolving import target {}", importTgt);
+                    OWLOntologyID id = new OWLOntologyID(IRI.create(importTgt.getUnicodeString()));
+                    if (keymap.getMapping(id) == null) { // Check if it's not there already.
+                        if (isOfflineMode()) throw new RuntimeException(
+                                "Cannot load imported ontology " + importTgt
+                                        + " while Stanbol is in offline mode.");
+                        // TODO manage origins for imported ontologies too?
+                        try {
+                            IRI irimp = IRI.create(importTgt.getUnicodeString());
+                            OWLOntologyID id2 = loadInStore(irimp, null, false);
+                            if (id2 != null) id = id2;
+                            log.info("<== SUCCESS");
+                        } catch (OntologyLoadingException e) {
+                            log.warn("<== FAIL");
+                            if (failMissingImports) throw e;
+                            else log.warn("Import from IRI <{}> failed, but will not abort due to permissive failed import handling set for this ontology provider.");
+                        }
+                    } else {
+                        log.info("Requested import already stored. Setting dependency only.");
+                    }
+                    descriptor.setDependency(primaryKey, id);
+                } catch (UnsupportedFormatException e) {
+                    log.warn("Failed to parse format for resource " + importTgt, e);
+                    // / XXX configure to continue?
+                } catch (IOException e) {
+                    log.warn("Failed to load ontology from resource " + importTgt, e);
+                    // / XXX configure to continue?
+                }
         }
 
         log.debug(" Ontology {}", mappedIds);
@@ -1442,7 +1499,11 @@ public class ClerezzaOntologyProvider implements
         List<OWLOntologyID> revImps = new Stack<OWLOntologyID>();
         List<OWLOntologyID> lvl1 = new Stack<OWLOntologyID>();
 
-        fillImportsReverse(keymap.getReverseMapping(graphName), revImps, lvl1);
+        try {
+            fillImportsReverse(keymap.getReverseMapping(graphName), revImps, lvl1);
+        } catch (OntologyHandleException e) {
+            throw new OWLOntologyCreationException(e);
+        }
 
         // If not set to merge (either by policy of by force), adopt the set import policy.
         if (!forceMerge && !ImportManagementPolicy.MERGE.equals(getImportManagementPolicy())) {
