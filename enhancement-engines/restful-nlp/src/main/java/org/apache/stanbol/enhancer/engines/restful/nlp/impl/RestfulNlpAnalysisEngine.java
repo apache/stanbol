@@ -17,6 +17,7 @@
 package org.apache.stanbol.enhancer.engines.restful.nlp.impl;
 
 import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.NER_ANNOTATION;
+import static org.apache.stanbol.enhancer.nlp.NlpAnnotations.SENTIMENT_ANNOTATION;
 import static org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper.getLanguage;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
@@ -90,6 +91,7 @@ import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
+import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
 import org.apache.stanbol.enhancer.nlp.json.AnalyzedTextParser;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedTextFactory;
@@ -99,6 +101,7 @@ import org.apache.stanbol.enhancer.nlp.model.Span.SpanTypeEnum;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Value;
 import org.apache.stanbol.enhancer.nlp.ner.NerTag;
 import org.apache.stanbol.enhancer.nlp.utils.LanguageConfiguration;
+import org.apache.stanbol.enhancer.nlp.utils.NIFHelper;
 import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -107,6 +110,7 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
@@ -168,6 +172,31 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
      * The maximum size of the preix/suffix for the selection context
      */
     private static final int DEFAULT_SELECTION_CONTEXT_PREFIX_SUFFIX_SIZE = 50;
+
+
+	//TODO: move those sentiment specific constants to o.a.s.enhancer.servicesapi as soon as
+	//      Sentiment Annotations are normalized.
+	//      NOTE: they are also define in the Sentiment Summarization engine!
+    /**
+     * The property used to write the sum of all positive classified words
+     */
+    public static final UriRef POSITIVE_SENTIMENT_PROPERTY = new UriRef(NamespaceEnum.fise+"positive-sentiment");
+    /**
+     * The property used to write the sum of all negative classified words
+     */
+    public static final UriRef NEGATIVE_SENTIMENT_PROPERTY = new UriRef(NamespaceEnum.fise+"negative-sentiment");
+    /**
+     * The sentiment of the section (sum of positive and negative classifications)
+     */
+    public static final UriRef SENTIMENT_PROPERTY = new UriRef(NamespaceEnum.fise+"sentiment");
+    /**
+     * The dc:type value used for fise:TextAnnotations indicating a Sentiment
+     */
+    public static final UriRef SENTIMENT_TYPE = new UriRef(NamespaceEnum.fise+"Sentiment");
+    /**
+     * The dc:Type value sued for the sentiment annotation of the whole document
+     */
+    public static final UriRef DOCUMENT_SENTIMENT_TYPE = new UriRef(NamespaceEnum.fise+"DocumentSentiment");
 
     private static final Map<String,Object> SERVICE_PROPERTIES;
     static {
@@ -302,6 +331,14 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
             }
         }
         if(writeTextAnnotations){
+			//if enabled fise:TextAnnotations are created for Named Entities and Sentiments
+			
+            double positiveSent = 0.0;
+            int positiveCount = 0;
+            double negativeSent = 0.0;
+            int negativeCount = 0;
+            int sentimentCount = 0;
+
             Iterator<Span> spans = at.getEnclosed(EnumSet.of(SpanTypeEnum.Sentence,SpanTypeEnum.Chunk));
             Sentence context = null;
             MGraph metadata = ci.getMetadata();
@@ -314,7 +351,7 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
                     switch (span.getType()) {
                         case Sentence:
                             context = context;
-                            break;
+                            //FALLThrough intended!!
                         default:
                             Value<NerTag> nerAnno = span.getAnnotation(NER_ANNOTATION);
                             if(nerAnno != null){
@@ -339,9 +376,67 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
                                         lf.createTypedLiteral(nerAnno.probability())));
                                 }
                             }
+
+                            Value<Double> sentimentAnnotation = span.getAnnotation(SENTIMENT_ANNOTATION);
+                            if (sentimentAnnotation != null) { //this span has a sentiment assigned
+
+                                Double sentiment = sentimentAnnotation.value();
+
+								//Create a fise:TextAnnotation for the sentiment
+                                UriRef ta = EnhancementEngineHelper.createTextEnhancement(ci, this);
+                                metadata.add(new TripleImpl(ta, ENHANCER_START,
+                                        lf.createTypedLiteral(span.getStart())));
+                                metadata.add(new TripleImpl(ta, ENHANCER_END,
+                                        lf.createTypedLiteral(span.getEnd())));
+                                metadata.add(new TripleImpl(ta, SENTIMENT_PROPERTY,
+                                        lf.createTypedLiteral(sentiment)));
+
+                                //add the generic dc:type used for all Sentiment annotation
+                                metadata.add(new TripleImpl(ta, DC_TYPE, SENTIMENT_TYPE));
+								//determine the specific dc:type for the sentiment annotation
+                                UriRef ssoType = NIFHelper.SPAN_TYPE_TO_SSO_TYPE.get(span.getType());
+                                if(ssoType != null){
+                                    metadata.add(new TripleImpl(ta, DC_TYPE, ssoType));
+                                }
+
+                                //keep statistics for the overall sentiment for the Document
+                                sentimentCount++ ;
+                                if(sentiment > 0){
+                                    positiveSent += sentiment;
+                                    positiveCount++;
+                                }else if(sentiment < 0){
+                                    negativeSent += sentiment;
+                                    negativeCount++;
+                                }
+
+                            }
                             break;
                     }
                 }
+
+
+                //Add the annotation for the overall sentiment of the document 
+                if ( sentimentCount > 0 ) {
+                UriRef ta = EnhancementEngineHelper.createTextEnhancement(ci, this);
+                    //calculate the average sentiment for a document
+                    //TODO: Think on a better way to calculate a general sentiment value for a document.
+                    metadata.add(new TripleImpl(ta, SENTIMENT_PROPERTY,
+                            lf.createTypedLiteral((positiveSent + negativeSent) / sentimentCount)));
+
+                    if ( positiveCount > 0 ){
+                        //average positive sentiment calculation for the document
+                        metadata.add(new TripleImpl(ta, POSITIVE_SENTIMENT_PROPERTY,
+                                lf.createTypedLiteral( positiveSent / positiveCount )));
+                    }
+                    if ( negativeCount > 0 ){
+                        //average negative sentiment calculation for the document
+                        metadata.add(new TripleImpl(ta, NEGATIVE_SENTIMENT_PROPERTY,
+                                lf.createTypedLiteral( negativeSent / negativeCount )));
+                    }
+                    metadata.add(new TripleImpl(ta, DC_TYPE, SENTIMENT_TYPE));
+                    metadata.add(new TripleImpl(ta, DC_TYPE, DOCUMENT_SENTIMENT_TYPE));
+                } // no sentiment annotation present ... nothing to do
+
             } finally {
                 ci.getLock().writeLock().unlock();
             }
