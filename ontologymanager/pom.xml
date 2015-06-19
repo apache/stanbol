@@ -19,23 +19,43 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
+  
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
     <version>6-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
+  
   <groupId>org.apache.stanbol</groupId>
-  <artifactId>org.apache.stanbol.ontologymanager.reactor</artifactId>
+  <artifactId>apache-stanbol-ontologymanager</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Apache Stanbol Ontology Manager Reactor</name>
+  <name>Apache Stanbol Ontology Manager</name>
   <description>
     Pseudo project to build the complete Apache Stanbol Ontology Manager.
   </description>
 
   <inceptionYear>2011</inceptionYear>
+  <licenses>
+    <license>
+      <name>Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>
+  
+  <scm>
+    <connection>
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/ontologymanager
+    </connection>
+    <developerConnection>
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/ontologymanager
+    </developerConnection>
+    <url>http://stanbol.apache.org</url>
+  </scm>  
 
   <modules>
     <module>generic/servicesapi</module>
@@ -46,5 +66,22 @@
     <module>registry</module>
     <module>web</module>
   </modules>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <inherited>true</inherited>
+          <configuration>
+            <instructions>
+              <Bundle-Category>Stanbol Ontology Manager</Bundle-Category>
+            </instructions>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 
 </project>

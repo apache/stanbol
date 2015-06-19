@@ -48,7 +48,9 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-ClassPath>.</Bundle-ClassPath>
+            <!--
+            <Bundle-ClassPath>.,OSGI-INF</Bundle-ClassPath>
+            -->
             <Bundle-Activator/>
             <Export-Package>
               org.apache.stanbol.ontologymanager.ontonet.api.*;version=${project.version}, <!-- DEPRECATED -->

@@ -22,14 +22,12 @@
 
   <parent>
     <groupId>org.apache.stanbol</groupId>
-    <artifactId>stanbol-parent</artifactId>
-    <version>6-SNAPSHOT</version>
-    <relativePath>../../../parent</relativePath>
+    <artifactId>apache-stanbol-ontologymanager</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <relativePath>../..</relativePath>
   </parent>
 
-  <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.ontologymanager.multiplexer.clerezza</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Ontology Manager : Network Multiplexer (Clerezza implementation)</name>
@@ -47,11 +45,16 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <!--
             <Bundle-ClassPath>
               .,
               OSGI-INF
             </Bundle-ClassPath>
+             -->
             <Bundle-Activator/>
+            <!-- Note: this format for Export-Package instructions is causing
+                 exceptions in maven-bundle-plugin version 2.5.4+, 
+                 see http://issues.apache.org/jira/browse/FELIX-4874 -->
             <Export-Package>
               org.apache.stanbol.ontologymanager.multiplexer.clerezza.collector;version=${project.version},
               org.apache.stanbol.ontologymanager.multiplexer.clerezza.ontology;version=${project.version},
