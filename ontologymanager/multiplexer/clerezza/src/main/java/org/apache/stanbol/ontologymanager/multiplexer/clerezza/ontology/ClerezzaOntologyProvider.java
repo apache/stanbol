@@ -1187,7 +1187,9 @@ public class ClerezzaOntologyProvider implements
                 throw new OntologyLoadingException(e);
             } catch (Exception e) {
                 // From here we should only be expecting parser-specific exceptions.
-                log.debug("FAILURE format {} (parse error). Will try next one.", currentFormat);
+                log.debug("FAILURE format {} (most likely a parse error). Will try next one.", currentFormat);
+                log.debug("Logged exception was a {} : {}", e.getClass(), e.getLocalizedMessage());
+                log.trace("Stack trace follows:", e);
                 continue;
             }
         }
