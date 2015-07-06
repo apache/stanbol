@@ -479,15 +479,23 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
         try {
             if("*".equals(id)){
                 managedSite.deleteAll();
-                builder = Response.noContent();
-            } else if(managedSite.getEntity(id) != null){
-                managedSite.delete(id);
-                builder = Response.noContent();
+                builder = Response.ok();
             } else {
-                builder = Response.status(Status.NOT_FOUND).entity(
-                    "No Entity with the parsed Id '"+id+"' is present on the ManagedSite '"
-                    + managedSite.getId()+"'!")
-                .header(HttpHeaders.ACCEPT, accepted);
+                Entity entity = managedSite.getEntity(id);
+                if(entity != null){
+                    managedSite.delete(id); //delete the entity
+                    //return the deleted data
+                    final MediaType acceptedMediaType = getAcceptableMediaType(headers,
+                        new HashSet<String>(JerseyUtils.ENTITY_SUPPORTED_MEDIA_TYPES), 
+                        MediaType.APPLICATION_JSON_TYPE);
+                    builder = Response.ok(entity).header(HttpHeaders.CONTENT_TYPE, 
+                        acceptedMediaType+"; charset=utf-8");
+                } else {
+                    builder = Response.status(Status.NOT_FOUND).entity(
+                        "No Entity with the parsed Id '"+id+"' is present on the ManagedSite '"
+                        + managedSite.getId()+"'!")
+                    .header(HttpHeaders.ACCEPT, accepted);
+                }
             }
         } catch (SiteException e) {
             String message = "Exception while deleting '"+id+"' from ManagedSite '"
