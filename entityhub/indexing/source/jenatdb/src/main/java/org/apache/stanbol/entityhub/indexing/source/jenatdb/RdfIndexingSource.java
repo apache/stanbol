@@ -52,6 +52,7 @@ import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.datatypes.xsd.XSDDuration;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.impl.LiteralLabel;
 import com.hp.hpl.jena.query.Query;
@@ -395,9 +396,9 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
         final Node resource;
         //STANBOL-765: check if the parsed id represents an bnode
         if(bnodePrefix != null && id.startsWith(bnodePrefix)){
-            resource = Node.createAnon(AnonId.create(id.substring(bnodePrefix.length())));
+            resource = NodeFactory.createAnon(AnonId.create(id.substring(bnodePrefix.length())));
         } else {
-            resource = Node.createURI(id);
+            resource = NodeFactory.createURI(id);
         }
         Representation source = vf.createRepresentation(id);
         boolean found;
@@ -788,6 +789,9 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
     @Override
     public Collection<Node> listObjects(Node subject, Node property) {
         Collection<Node> nodes = new ArrayList<Node>();
+        if(bnodePrefix != null && subject.isURI() && subject.getURI().startsWith(bnodePrefix)){
+            subject = NodeFactory.createAnon(new AnonId(subject.getURI().substring(bnodePrefix.length())));
+        }
         ExtendedIterator<Triple> it = indexingDataset.getDefaultGraph().find(subject, property, null);
         while(it.hasNext()){
             //STANBOL-765: we need also to transform bnodes to URIs for the
@@ -796,7 +800,7 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
             if(bnodePrefix != null && object.isBlank()){
                 StringBuilder sb = new StringBuilder(bnodePrefix);
                 sb.append(object.getBlankNodeId().getLabelString());
-                object = Node.createURI(sb.toString());
+                object = NodeFactory.createURI(sb.toString());
             }
             nodes.add(object);
         }
@@ -806,6 +810,9 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
     @Override
     public Collection<Node> listSubjects(Node property, Node object) {
         Collection<Node> nodes = new ArrayList<Node>();
+        if(bnodePrefix != null && object.isURI() && object.getURI().startsWith(bnodePrefix)){
+            object = NodeFactory.createAnon(new AnonId(object.getURI().substring(bnodePrefix.length())));
+        }
         ExtendedIterator<Triple> it = indexingDataset.getDefaultGraph().find(null, property, object);
         while(it.hasNext()){
             Node subject = it.next().getSubject();
@@ -814,7 +821,7 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
             if(bnodePrefix != null && subject.isBlank()){
                 StringBuilder sb = new StringBuilder(bnodePrefix);
                 sb.append(subject.getBlankNodeId().getLabelString());
-                subject = Node.createURI(sb.toString());
+                subject = NodeFactory.createURI(sb.toString());
             }
             nodes.add(subject);
         }
@@ -834,7 +841,7 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
     @Override
     public Node createURI(String uri) {
         if(bnodePrefix != null && uri.startsWith(bnodePrefix)){
-            return Node.createAnon(AnonId.create(uri.substring(bnodePrefix.length())));
+            return NodeFactory.createAnon(AnonId.create(uri.substring(bnodePrefix.length())));
         } else {
             return super.createURI(uri);
         }

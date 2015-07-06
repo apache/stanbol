@@ -107,17 +107,18 @@ public class FieldValueFilter implements EntityProcessor{
 
     @Override
     public void setConfiguration(Map<String,Object> config) {
+        log.info("> configure {}",getClass().getSimpleName());
         IndexingConfig indexingConfig = (IndexingConfig)config.get(IndexingConfig.KEY_INDEXING_CONFIG);
         nsPrefixProvider = indexingConfig.getNamespacePrefixService();
         Object value = config.get(PARAM_FIELD);
         if(value == null || value.toString().isEmpty()){
             this.field = getUri(DEFAULT_FIELD);
-            log.info("Using default Field {}",field);
         } else {
             this.field = getUri(value.toString());
-            log.info("configured Field: {}",field);
         }
+        log.info(" - field: {}",field);
         value = config.get(PARAM_VALUES);
+        log.info(" - filters:");
         parseFilterConfig(value);
     }
 
@@ -156,6 +157,7 @@ public class FieldValueFilter implements EntityProcessor{
                     entry = "";
                 }
                 if(!includeAll && entry.equals("*")){
+                    log.info("    - includeAll");
                     includeAll = true;
                     continue;
                 }
@@ -177,7 +179,13 @@ public class FieldValueFilter implements EntityProcessor{
                 }
                 //if exclude add to this.exclude otherwise to this.values
                 (exclude ? this.exclude : this.included).add(uri);
+                log.info("    - {} {}",exclude ? "exclude" : "include", uri.isEmpty() ? "<empty>" : uri);
             }
+        }
+        //if only excludes are configured add the include all
+        if(!includeAll && !exclude.isEmpty() && included.isEmpty()){
+            log.info("    - includeAll (because only exclusions are configured");
+            includeAll = true;
         }
     }
 
