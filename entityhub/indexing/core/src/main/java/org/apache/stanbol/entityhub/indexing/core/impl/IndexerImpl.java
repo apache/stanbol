@@ -129,15 +129,20 @@ public class IndexerImpl implements Indexer {
     private List<EntityProcessor> entityPostProcessors;
 
     private OutputStream indexedEntityIdOutputStream;
+    /**
+     * The name of the index this indexer creates (used for logging)
+     */
+    private String name;
     
-    public IndexerImpl(EntityIterator entityIterator,
+    public IndexerImpl(String name, 
+                       EntityIterator entityIterator,
                        EntityDataProvider dataProvider,
                        ScoreNormaliser normaliser,
                        IndexingDestination indexingDestination, 
                        List<EntityProcessor> entityProcessors,
                        File indexedEntityIdFile,
                        List<EntityProcessor> entityPostProcessors){
-        this(normaliser,indexingDestination,entityProcessors,indexedEntityIdFile,entityPostProcessors);
+        this(name, normaliser,indexingDestination,entityProcessors,indexedEntityIdFile,entityPostProcessors);
         //set entityMode interfaces
         if(entityIterator == null){
             throw new IllegalArgumentException("The EntityIterator MUST NOT be NULL!");
@@ -148,14 +153,15 @@ public class IndexerImpl implements Indexer {
         this.indexingComponents.add(entityIterator);
         this.indexingComponents.add(dataProvider);
     }
-    public IndexerImpl(EntityDataIterable dataIterable, 
+    public IndexerImpl(String name,
+                       EntityDataIterable dataIterable, 
                        EntityScoreProvider scoreProvider, 
                        ScoreNormaliser normaliser,
                        IndexingDestination indexingDestination, 
                        List<EntityProcessor> entityProcessors,
                        File indexedEntityIdFile,
                        List<EntityProcessor> entityPostProcessors){
-        this(normaliser,indexingDestination,entityProcessors,indexedEntityIdFile,entityPostProcessors);
+        this(name, normaliser,indexingDestination,entityProcessors,indexedEntityIdFile,entityPostProcessors);
         //deactivate entityMode interfaces
         this.entityIterator = null;
         if(scoreProvider == null){
@@ -168,11 +174,13 @@ public class IndexerImpl implements Indexer {
         this.indexingComponents.add(dataIterable);
     }
     
-    protected IndexerImpl(ScoreNormaliser normaliser,
+    protected IndexerImpl(String name, 
+                          ScoreNormaliser normaliser,
                           IndexingDestination indexingDestination, 
                           List<EntityProcessor> entityProcessors,
                           File indexedEntityIdFile,
                           List<EntityProcessor> entityPostProcessors){
+        this.name = name;
         if(indexingDestination == null){
             throw new IllegalArgumentException("The Yard MUST NOT be NULL!");
         }
@@ -269,7 +277,7 @@ public class IndexerImpl implements Indexer {
                 return;
             }
             setState(State.INITIALISING);
-            log.info("Initialisation started ...");
+            log.info("{}: initialisation started ...", name);
         }
         //add all IndexingSources that need to be initialised to a set
         final Collection<IndexingComponent> toInitialise = new HashSet<IndexingComponent>();
@@ -331,7 +339,7 @@ public class IndexerImpl implements Indexer {
             }
         }
 
-        log.info("Initialisation completed");
+        log.info("initialisation completed for {}", name);
         setState(State.INITIALISED);
     }
     /* (non-Javadoc)
@@ -349,9 +357,9 @@ public class IndexerImpl implements Indexer {
                 "Calling this Method is not supported while in State %s! Supported States are ",
                 state,supportedStates));
         }
-        log.info("start initialisation ...");
+        log.info("{}: start initialisation ...", name);
         initialiseIndexing();
-        log.info("  ... initialisation completed");
+        log.info("  ... initialisation completed for {}", name);
         //if now the state is an unsupported one it indicates that
         //initialiseIndexingSources() was called by an other thread before this one!
         state = getState(); 
@@ -360,15 +368,15 @@ public class IndexerImpl implements Indexer {
                 "Calling this Method is not supported while in State %s! Supported States are ",
                 state,supportedStates));
         }
-        log.info("start indexing ...");
+        log.info("{}: start indexing ...", name);
         indexEntities();
-        log.info("  ... indexing completed");
-        log.info("start post-processing ...");
+        log.info("  ... indexing completed for {}", name);
+        log.info("{}: start post-processing ...", name);
         postProcessEntities();
-        log.info("  ... post-processing finished ...");
-        log.info("start finalisation....");
+        log.info("  ... post-processing finished for {}",name);
+        log.info("{}: start finalisation....", name);
         finaliseIndexing();
-        log.info("  ...finalisation completed");
+        log.info("  ... finalisation completed for {}", name);
     }
     @Override
     public void skipPostProcessEntities() {
@@ -400,7 +408,7 @@ public class IndexerImpl implements Indexer {
                 return; // ignore this call
             }
             setState(State.POSTPROCESSING);
-            log.info("PostProcessing started ...");
+            log.info("{}: PostProcessing started ...", name);
         }
         if(entityPostProcessors == null || entityPostProcessors.isEmpty()){
             setState(State.POSTPROCESSED);
@@ -450,7 +458,7 @@ public class IndexerImpl implements Indexer {
         //TODO: Here we would need to create multiple instances in case
         //      one would e.g. like to use several threads for processing entities
         //(1) the daemon reading from the IndexingSources
-        String entitySourceReaderName = "Post-processing: Entity Reader Deamon";
+        String entitySourceReaderName = name + ": post-processing: Entity Reader Deamon";
         activeIndexingDeamons.add(
             new EntityIdBasedIndexingDaemon(
                 entitySourceReaderName,
@@ -462,7 +470,7 @@ public class IndexerImpl implements Indexer {
         //(2) The daemon for post-processing the entities
         activeIndexingDeamons.add(
             new EntityProcessorRunnable(
-                "Post-processing: Entity Processor Deamon",
+                name +": post-processing: Entity Processor Deamon",
                 indexedEntityQueue, //it consumes indexed Entities
                 processedEntityQueue,  //it produces processed Entities
                 errorEntityQueue,
@@ -473,7 +481,7 @@ public class IndexerImpl implements Indexer {
         //(3) The daemon for persisting the entities
         activeIndexingDeamons.add(
             new EntityPersisterRunnable(
-                "Indexing: Entity Perstisting Deamon",
+                name + ": Entity Perstisting Deamon",
                 processedEntityQueue, //it consumes processed Entities
                 finishedEntityQueue, //it produces finished Entities
                 errorEntityQueue,
@@ -481,12 +489,14 @@ public class IndexerImpl implements Indexer {
         //(4) The daemon for logging finished entities
         activeIndexingDeamons.add(
             new FinishedEntityDaemon(
+                name + ": Finished Entity Logger Deamon",
                 finishedEntityQueue, -1, log, 
                 null)); //we have already all entity ids!
         //(5) The daemon for logging errors
         activeIndexingDeamons.add(
             new EntityErrorLoggerDaemon(
-            errorEntityQueue, log));
+                name +": Entity Error Logging Daemon",
+                errorEntityQueue, log));
         //start post-processing and wait until it has finished
         startAndWait(activeIndexingDeamons);        
         
@@ -547,7 +557,7 @@ public class IndexerImpl implements Indexer {
                 return; // ignore this call
             }
             setState(State.FINALISING);
-            log.info("finalisation started ...");
+            log.info("{}: finalisation started ...",name);
         }
         indexingDestination.finalise();
         setState(State.FINISHED);
@@ -582,7 +592,7 @@ public class IndexerImpl implements Indexer {
                 return; // ignore this call
             }
             setState(State.INDEXING);
-            log.info("Indexing started ...");
+            log.info("{}: indexing started ...",name);
         }
         //init the queues
         int queueSize = Math.max(MIN_QUEUE_SIZE, chunkSize*2);
@@ -602,7 +612,7 @@ public class IndexerImpl implements Indexer {
         //TODO: Here we would need to create multiple instances in case
         //      one would e.g. like to use several threads for processing entities
         //(1) the daemon reading from the IndexingSources
-        String entitySourceReaderName = "Indexing: Entity Source Reader Deamon";
+        String entitySourceReaderName = name +": Entity Source Reader Deamon";
         if(entityIterator != null){
             activeIndexingDeamons.add(
                 new EntityIdBasedIndexingDaemon(
@@ -625,7 +635,7 @@ public class IndexerImpl implements Indexer {
         //(2) The daemon for processing the entities
         activeIndexingDeamons.add(
             new EntityProcessorRunnable(
-                "Indexing: Entity Processor Deamon",
+                name +": Entity Processor Deamon",
                 indexedEntityQueue, //it consumes indexed Entities
                 processedEntityQueue,  //it produces processed Entities
                 errorEntityQueue,
@@ -634,7 +644,7 @@ public class IndexerImpl implements Indexer {
         //(3) The daemon for persisting the entities
         activeIndexingDeamons.add(
             new EntityPersisterRunnable(
-                "Indexing: Entity Perstisting Deamon",
+                name + ": Entity Perstisting Deamon",
                 processedEntityQueue, //it consumes processed Entities
                 finishedEntityQueue, //it produces finished Entities
                 errorEntityQueue,
@@ -642,11 +652,13 @@ public class IndexerImpl implements Indexer {
         //(4) The daemon for logging finished entities
         activeIndexingDeamons.add(
             new FinishedEntityDaemon(
+                name + ": Finished Entity Logger Deamon",
                 finishedEntityQueue, -1, log, indexedEntityIdOutputStream));
         //(5) The daemon for logging errors
         activeIndexingDeamons.add(
             new EntityErrorLoggerDaemon(
-            errorEntityQueue, log));
+                name +": Entity Error Logging Daemon",
+                errorEntityQueue, log));
         //start indexing and wait until it has finished
         startAndWait(activeIndexingDeamons);
         //close the stream with IDs

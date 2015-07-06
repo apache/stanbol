@@ -72,12 +72,9 @@ public class FinishedEntityDaemon extends IndexingDaemon<Representation,Object> 
     private static final Charset UTF8 = Charset.forName("UTF-8");
     
     
-    public FinishedEntityDaemon(BlockingQueue<QueueItem<Representation>> consume,
-                                  int majorInterval,
-                                  Logger out,
-                                  OutputStream idOut) {
-        super("Indexing: Finished Entity Logger Deamon",
-            IndexerConstants.SEQUENCE_NUMBER_FINISHED_DAEMON,
+    public FinishedEntityDaemon(String name, BlockingQueue<QueueItem<Representation>> consume,
+                                int majorInterval, Logger out, OutputStream idOut) {
+        super(name, IndexerConstants.SEQUENCE_NUMBER_FINISHED_DAEMON,
             consume, null, null);
         this.out = out;
         if(majorInterval > 0){
