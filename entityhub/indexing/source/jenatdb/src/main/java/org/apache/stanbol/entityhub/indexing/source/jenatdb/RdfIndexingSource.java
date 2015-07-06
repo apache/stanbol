@@ -780,6 +780,9 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
     @Override
     public Collection<Node> listObjects(Node subject, Node property) {
         Collection<Node> nodes = new ArrayList<Node>();
+        if(bnodePrefix != null && subject.isURI() && subject.getURI().startsWith(bnodePrefix)){
+            subject = Node.createAnon(new AnonId(subject.getURI().substring(bnodePrefix.length())));
+        }
         ExtendedIterator<Triple> it = indexingDataset.getDefaultGraph().find(subject, property, null);
         while(it.hasNext()){
             //STANBOL-765: we need also to transform bnodes to URIs for the
@@ -798,6 +801,9 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
     @Override
     public Collection<Node> listSubjects(Node property, Node object) {
         Collection<Node> nodes = new ArrayList<Node>();
+        if(bnodePrefix != null && object.isURI() && object.getURI().startsWith(bnodePrefix)){
+            object = Node.createAnon(new AnonId(object.getURI().substring(bnodePrefix.length())));
+        }
         ExtendedIterator<Triple> it = indexingDataset.getDefaultGraph().find(null, property, object);
         while(it.hasNext()){
             Node subject = it.next().getSubject();
