@@ -186,7 +186,13 @@
       <artifactId>stax2-api</artifactId>
       <version>4.0.0</version>
     </bundle>
-    
+    <bundle> <!-- Jdom is e.g. used by some LDPath functions -->
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.jdom</artifactId>
+      <version>2.0.6_1</version>
+    </bundle>
+
+
     <bundle> <!-- jarkata regexp as bundle provided by servicemix.apache.org -->
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.regexp</artifactId>
