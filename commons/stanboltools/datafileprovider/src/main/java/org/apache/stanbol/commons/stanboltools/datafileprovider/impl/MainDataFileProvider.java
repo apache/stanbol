@@ -136,7 +136,7 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
     }
     
     @SuppressWarnings("unchecked")
-    private <ResultType> ResultType requireProperty(Dictionary<?, ?> props, String name, Class<ResultType> clazz) 
+    static <ResultType> ResultType requireProperty(Dictionary<?, ?> props, String name, Class<ResultType> clazz) 
     throws ConfigurationException {
         final Object o = props.get(name);
         if(o == null) {
