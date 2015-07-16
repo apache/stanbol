@@ -390,11 +390,16 @@
     <bundle>
       <groupId>org.apache.opennlp</groupId>
       <artifactId>opennlp-tools</artifactId>
-      <version>1.5.3</version>
+      <version>1.6.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.opennlp</artifactId>
+      <version>0.12.1-SNAPSHOT</version>
+    </bundle>
+    <bundle> <!-- ixa-pipe-nerc extensions for OpenNLP (STANBOL-1422) -->
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.ixa-pipe-nerc</artifactId>
       <version>0.12.1-SNAPSHOT</version>
     </bundle>
   </startLevel>
