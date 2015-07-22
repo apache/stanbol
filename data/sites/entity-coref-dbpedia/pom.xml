@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache.stanbol</groupId>
+    <artifactId>org.apache.stanbol.data.parent</artifactId>
+    <version>1.2.0-SNAPSHOT</version>
+    <relativePath>../../parent</relativePath>
+  </parent>
+
+  <groupId>org.apache.stanbol</groupId>
+  <artifactId>org.apache.stanbol.data.sites.entity-coref-dbpedia</artifactId>
+  <version>1.2.0-SNAPSHOT</version>
+  <packaging>bundle</packaging>
+
+  <name>Apache Stanbol Data: DBpedia.org and Yago.org</name>
+  <description>
+    This bundle allows to use DBpedia and Yago as Referenced Site for the 
+	Entity Co-reference Engine. The build also downloads the dbpedia index.
+  </description>
+
+  <inceptionYear>2015</inceptionYear>
+  <licenses>
+    <license>
+      <name>Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>  
+
+  <scm>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/data/sites/entity-coref-dbpedia</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/data/sites/entity-coref-dbpedia</developerConnection>
+    <url>http://stanbol.apache.org/</url>
+  </scm>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <dbpedia.default.index.url>https://github.com/cpetroaca/stanbol-indices/releases/download/trunk/entity-coref-dbpedia.solrindex.zip</dbpedia.default.index.url>
+    <dbpedia.default.path>org/apache/stanbol/data/site/entity-coref-dbpedia/default</dbpedia.default.path>
+    <dbpedia.default.index.path>${dbpedia.default.path}/index</dbpedia.default.index.path>
+    <dbpedia.default.config.path>${dbpedia.default.path}/config</dbpedia.default.config.path>
+    <downloadWarning>
+*                  
+* WARNING - this build downloads a DPBedia index
+* that is *not* licensed under the Apache License, but under the
+* Creative Commons Attribution-ShareAlike 3.0 Unported License.
+*
+    </downloadWarning>    
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <inherited>true</inherited>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <!-- 
+              Extension used to provide files in that directory to the
+              DataFileProvider
+              -->
+            <Data-Files>${dbpedia.default.index.path}</Data-Files>
+            <!-- 
+              Use a priority lower than 0 to allow providers without a
+              defined ranking to override this default data.
+             -->
+            <Data-Files-Priority>-100</Data-Files-Priority>
+            <!-- 
+              Extension used by the Bundle-Installer to load OSGI 
+              component configuration  
+             -->
+            <Install-Path>${dbpedia.default.config.path}</Install-Path>
+            <_versionpolicy>$${version;===;${@}}</_versionpolicy>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>download</id>
+            <phase>generate-resources</phase>
+            <configuration>
+              <!--
+                TODO: I would like to add an "unless" constraint to the
+                target that prevents execution if Maven operates in offline
+                mode. However I was not able to find out how to obtain this
+                information. ${settings.offline} (as noted by several
+                resources) does not work.
+                Until fixed builds will fail if no internetconnection is
+                available!
+              -->
+              <target>
+                <property name="target.directory" value="${project.basedir}/downloads/resources/${dbpedia.default.index.path}" />
+                <property name="index.url" value="${dbpedia.default.index.url}" />
+                                
+                <echo message="copy Solr Index " />
+                <echo message=" FROM ${index.url} " />
+                <echo message=" TO ${target.directory}" />
+
+                <ant antfile="${basedir}/download_index.xml">
+                  <target name="download" />
+                </ant>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- AL20 licensed. See src/main/resources/README -->
+            <exclude>src/main/resources/org/apache/stanbol/data/site/entity-coref-dbpedia/default/config/entity-coref-dbpedia.solrindex.ref</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/data/site/entity-coref-dbpedia/default/config/org.apache.stanbol.enhancer.engines.entitytagging.impl.NamedEntityTaggingEngine-entity-coref-dbpedia.config</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/data/site/entity-coref-dbpedia/default/config/org.apache.stanbol.entityhub.core.site.CacheImpl-entity-coref-dbpedia.config</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/data/site/entity-coref-dbpedia/default/config/org.apache.stanbol.entityhub.site.referencedSite-entity-coref-dbpedia.config</exclude>
+            <exclude>src/main/resources/org/apache/stanbol/data/site/entity-coref-dbpedia/default/config/org.apache.stanbol.entityhub.yard.solr.impl.SolrYard-entity-coref-dbpedia.config</exclude>
+
+            <!-- Licensed under Creative Commons Attribution-ShareAlike 3.0 Unported License -->
+            <exclude>src/main/resources/org/apache/stanbol/data/site/entity-coref-dbpedia/default/index/entity-coref-dbpedia.solrindex.zip</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <!-- DBPedia dumps can be deployed -->
+          <skip>false</skip>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

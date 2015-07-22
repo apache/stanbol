@@ -61,6 +61,7 @@
 
     <module>sites/dbpedia</module>
     <module>sites/dbpediacached</module>
+	<!--module>sites/entity-coref-dbpedia</module-->
 
     <module>registries/default</module>
 

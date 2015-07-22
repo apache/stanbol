@@ -114,9 +114,8 @@
     <module>geonames</module> <!-- http://geonames.org -->
     <module>opencalais</module> <!-- http://opencalais.com/ -->
     <module>zemanta</module> <!-- htt://zemanta.com -->
-	
-    <!-- The entity co-refernece engine is not yet in trunk -->
-	  <!-- module>entitycoreference</module -->
+
+	<module>entitycoreference</module>
   </modules>
 
   <build>

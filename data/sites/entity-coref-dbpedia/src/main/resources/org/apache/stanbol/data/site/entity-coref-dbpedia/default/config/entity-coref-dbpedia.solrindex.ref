@@ -1,0 +1,5 @@
+#Tue Feb 03 20:20:31 EET 2015
+Name=SolrIndex for entity-coref-dbpedia
+Synchronized=true
+Description=DBpedia.org 
+Index-Archive=entity-coref-dbpedia.solrindex.zip
