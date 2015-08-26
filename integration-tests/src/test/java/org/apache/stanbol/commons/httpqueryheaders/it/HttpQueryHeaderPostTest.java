@@ -69,8 +69,11 @@ public class HttpQueryHeaderPostTest extends EnhancerTestBase {
         .assertStatus(200)
         //check for JSON-LD (the default content type
         .assertContentType("application/ld+json")
-        .assertContentRegexp("entity-reference\": \"http://dbpedia.org/resource/London\"",
-            "creator\": \"org.apache.stanbol.enhancer.engines.langdetect.LanguageDetectionEnhancementEngine\"",
-            "creator\": \"org.apache.stanbol.enhancer.engines.entitytagging.impl.NamedEntityTaggingEngine\"");
+        .assertContentContains(
+            "\"http://fise.iks-project.eu/ontology/entity-reference\" : [ {",
+            "\"@id\" : \"http://dbpedia.org/resource/London\"",
+            "\"http://purl.org/dc/terms/creator\" : [ {",
+            "\"@value\" : \"org.apache.stanbol.enhancer.engines.langdetect.LanguageDetectionEnhancementEngine\"",
+            "\"@value\" : \"org.apache.stanbol.enhancer.engines.entitytagging.impl.NamedEntityTaggingEngine\"");
     }
 }

@@ -56,25 +56,38 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Export-Package></Export-Package>
             <Import-Package>
-              org.apache.stanbol.commons.jsonld.*,
               *
             </Import-Package>
-            <Export-Package>
-              org.apache.stanbol.commons.jsonld.*;version=${project.version}
-            </Export-Package>
+            <Private-Package>
+              org.apache.stanbol.commons.jsonld.clerezza;version=${project.version}
+            </Private-Package>
           </instructions>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+      </plugin>
+      
     </plugins>
   </build>
 
   <dependencies>
     <dependency>
-      <groupId>org.codehaus.jettison</groupId>
-      <artifactId>jettison</artifactId>
+      <groupId>com.github.jsonld-java</groupId>
+      <artifactId>jsonld-java-clerezza</artifactId>
+      <version>0.6.0</version>
     </dependency>
-   
+    <dependency>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+    </dependency>
     <!-- Logging -->
     <dependency>
       <groupId>org.slf4j</groupId>

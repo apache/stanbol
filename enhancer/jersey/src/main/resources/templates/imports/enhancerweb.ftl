@@ -92,7 +92,7 @@ $(".enginelisting p").click(function () {
     <p><textarea rows="15" name="content"></textarea></p>
     <p class="submitButtons">Output format:
       <select name="format">
-        <option value="application/json">JSON-LD</option>
+        <option value="application/ld+json">JSON-LD</option>
         <option value="application/rdf+xml">RDF/XML</option>
         <option value="application/rdf+json">RDF/JSON</option>
         <option value="text/turtle">Turtle</option>

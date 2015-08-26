@@ -113,9 +113,10 @@ public class MultipartRequestTest extends EnhancerTestBase {
         //This is basically testing backward compatibility 
         
         String[] jsonLDMetadataTests = new String[]{
-            "\"@id\": \"http://dbpedia.org/resource/Paris\",",
-            "\"@id\": \"http://dbpedia.org/resource/Bob_Marley\",",
-            "\"dc:creator\": \"org.apache.stanbol.enhancer.engines.entitytagging.impl.NamedEntityTaggingEngine\","
+            "\"@id\" : \"http://dbpedia.org/resource/Paris\",",
+            "\"@id\" : \"http://dbpedia.org/resource/Bob_Marley\",",
+            "\"http://purl.org/dc/terms/creator\" : [ {",
+            "\"@value\" : \"org.apache.stanbol.enhancer.engines.entitytagging.impl.NamedEntityTaggingEngine\""
         };
         String[] params = new String []{
                     "outputContent","text/plain"
@@ -127,7 +128,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
             .withContent(HTML_CONTENT)
         )
         .assertStatus(200) //metadata as JSONLD
-        .assertContentRegexp(jsonLDMetadataTests);
+        .assertContentContains(jsonLDMetadataTests);
         
         params = new String []{
             "outputContent","application/octet-stream"}; //omitMetadata=false
@@ -138,7 +139,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
             .withContent(HTML_CONTENT)
         )
         .assertStatus(200) //metadata as JSONLD
-        .assertContentRegexp(jsonLDMetadataTests);
+        .assertContentContains(jsonLDMetadataTests);
 
         params = new String []{
            "outputContent","application/octet-stream"}; //omitMetadata=false
@@ -149,7 +150,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
             .withContent(HTML_CONTENT)
         )
         .assertStatus(200) //metadata as JSONLD
-        .assertContentRegexp(jsonLDMetadataTests);
+        .assertContentContains(jsonLDMetadataTests);
     }
     
     @Test

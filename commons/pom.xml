@@ -113,7 +113,10 @@
   
     <!-- Apache Clerezza utils and extensions-->
     <module>indexedgraph</module>
-    <module>jsonld</module> <!-- JSON-LD implementation for Stanbol (outdated) -->
+    <!-- JSON-LD serializer/parser provider for Clerezza 
+       (should move to https://github.com/jsonld-java/jsonld-java/tree/master/integration/clerezza)
+     -->
+    <module>jsonld</module>
     <module>ldpath/clerezza</module>
     <module>launchpad</module>
     

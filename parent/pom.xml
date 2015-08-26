@@ -62,7 +62,7 @@
     <!-- commons lib versions -->
     <httpcomponents-version>4.4.1</httpcomponents-version>
     <jackson-version>1.9.13</jackson-version>
-    <jackson2-version>2.5.3</jackson2-version>
+    <jackson2-version>2.6.1</jackson2-version>
     <owlapi-version>3.3</owlapi-version>
     
     <!-- sesame and marmotta versions -->
@@ -1074,7 +1074,7 @@
       <dependency>
         <groupId>org.apache.jena</groupId>
         <artifactId>jena-tdb</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.2</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza.ext</groupId>
@@ -1085,7 +1085,7 @@
       <dependency>
         <groupId>org.apache.jena</groupId>
         <artifactId>jena-arq</artifactId>
-        <version>2.11.1</version>
+        <version>2.11.2</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza.ext</groupId>
@@ -1096,7 +1096,7 @@
       <dependency>
         <groupId>org.apache.jena</groupId>
         <artifactId>jena-iri</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.2</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza.ext</groupId>

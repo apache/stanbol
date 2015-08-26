@@ -133,7 +133,11 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
-
+    <!-- Json lib used for serializers -->
+    <dependency>
+      <groupId>org.codehaus.jettison</groupId>
+      <artifactId>jettison</artifactId>
+    </dependency>
     <!-- jersey-multipart now uses an other lib to read multipart/mime 
          however the MessagebodyReaderUtils still use this lib -->    
     <dependency>

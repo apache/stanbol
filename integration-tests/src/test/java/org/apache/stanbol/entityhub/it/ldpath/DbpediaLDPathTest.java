@@ -145,10 +145,10 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
         )
         .assertStatus(200)
         .assertContentContains(
-            "\"@id\": \"http://dbpedia.org/resource/London\"",
-            "\"@value\": \"London\"",
-            "\"@id\": \"http://dbpedia.org/resource/Paris\"",
-            "\"@value\": \"Paris\"");
+            "\"@id\" : \"http://dbpedia.org/resource/London\"",
+            "\"@value\" : \"London\"",
+            "\"@id\" : \"http://dbpedia.org/resource/Paris\"",
+            "\"@value\" : \"Paris\"");
     }
     @Test
     public void testUnknownContext() throws IOException {
@@ -160,7 +160,7 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
                 "ldpath","name = rdfs:label[@en] :: xsd:string;")
         )
         .assertStatus(200)
-        .assertContentContains("{","}");
+        .assertContentContains("[","]");
     }
     @Test
     public void testLDPath() throws IOException {
@@ -181,16 +181,18 @@ public class DbpediaLDPathTest extends EntityhubTestBase {
         .assertStatus(200)
         .assertContentType("application/json")
         .assertContentContains(
-            "\"@id\": \"http://dbpedia.org/resource/Paris\"",
-            "\"comment\": {",
+            "\"@id\" : \"http://dbpedia.org/resource/Paris\"",
+            "\"comment\" : [ {",
             "Paris is the capital and largest city of France.",
-            "\"homepage\": \"http://www.paris.fr/\"",
-            "\"labels\": [",
-            "\"@value\": \"Parigi\"",
-            "\"@value\": \"巴黎\"",
-            "\"location\": \"[48.8567,2.3508]\"",
-            "\"name\": {",
-            "\"@value\": \"Paris\""
+            "\"homepage\" : [ {",
+            "\"@id\" : \"http://www.paris.fr/\"",
+            "\"labels\" : [ {",
+            "\"@value\" : \"Parigi\"",
+            "\"@value\" : \"巴黎\"",
+            "\"location\" : [ {",
+            "\"@value\" : \"[48.8567,2.3508]\"",
+            "\"name\" : [ {",
+            "\"@value\" : \"Paris\""
             );
     }
     /*

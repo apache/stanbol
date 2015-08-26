@@ -223,6 +223,21 @@
       <artifactId>jackson-jaxrs</artifactId>
       <version>1.9.13</version>
     </bundle>
+        <bundle> <!-- e.g. required by the JSON-LD serializer -->
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson2-version}</version>
+    </bundle>
+    <bundle> <!-- e.g. required by the JSON-LD serializer -->
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson2-version}</version>
+    </bundle>
+    <bundle>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jackson2-version}</version>
+    </bundle>
     <!-- Velocity -->
     <!-- only used by Enhancer Benchmarking (org.apache.stanbol.enhancer.benchmark) -->
     <bundle>
@@ -449,10 +464,21 @@
       <version>1.0.0-SNAPSHOT</version>
     </bundle>
     <!-- support for JSON-LD -->
-    <bundle>
+    <!-- JSON-LD support for Clerezza -->
+    <bundle> <!-- this for now provides the Parser/Serializer provider for Clerezza -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.jsonld</artifactId>
       <version>1.0.0-SNAPSHOT</version>
+    </bundle>
+    <bundle> <!-- this will (in a future version replace the above) -->
+      <groupId>com.github.jsonld-java</groupId>
+      <artifactId>jsonld-java-clerezza</artifactId>
+      <version>0.6.0</version>
+    </bundle>
+    <bundle> <!-- core jsonld library used by jena, sesame and now clerezza -->
+      <groupId>com.github.jsonld-java</groupId>
+      <artifactId>jsonld-java</artifactId>
+      <version>0.6.0</version>
     </bundle>
     <!-- Support for Jobs -->
     <bundle>

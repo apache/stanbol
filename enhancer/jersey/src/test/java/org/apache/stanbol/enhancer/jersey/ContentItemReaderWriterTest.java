@@ -60,7 +60,6 @@ import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.commons.io.IOUtils;
-import org.apache.stanbol.commons.web.base.writers.JsonLdSerializerProvider;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.jersey.reader.ContentItemReader;
 import org.apache.stanbol.enhancer.jersey.writers.ContentItemWriter;
