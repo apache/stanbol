@@ -7,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Map;
@@ -15,20 +14,22 @@ import java.util.Map;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(immediate=true,policy=ConfigurationPolicy.REQUIRE, 
     configurationFactory=true, metatype=true)
 @Service
-@Property(name=Constants.SERVICE_RANKING, intValue=0)
+@Properties(value={
+        @Property(name=Constants.SERVICE_RANKING, intValue=0)
+})
 public class DirectoryDataFileProvider implements DataFileProvider {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
