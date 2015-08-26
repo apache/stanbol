@@ -87,11 +87,6 @@
   </build>
 
   <dependencies>
-    <dependency>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.jsonld</artifactId>
-      <version>0.11.0</version>
-    </dependency>
 
     <!-- Clerezza dependencies -->
     <dependency>

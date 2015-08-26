@@ -36,9 +36,9 @@ public class DefaultChainTest extends EnhancerTestBase {
      * Expected content-type, Expected regexp
      */
     public final static String [] ACCEPT_FORMAT_TEST_DATA  = new String[] {
-        "application/json",
-        "application/json", //now JSON LD uses application/json
-        "\"creator\": \"org.apache.stanbol.enhancer.engines.langdetect.LanguageDetectionEnhancementEngine\",",
+        "application/ld+json",
+        "application/ld+json", //now JSON LD uses application/ld+json
+        "\"@value\" : \"org.apache.stanbol.enhancer.engines.langdetect.LanguageDetectionEnhancementEngine\"",
         
         "application/rdf+xml",
         "application/rdf+xml",
