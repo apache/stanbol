@@ -88,20 +88,20 @@ public class ClerezzaRDFParser implements RDFParser {
         return count;
     }
     
-    private String getResourceValue(NonLiteral nl, Map<BNode,String> bNodeMap) {
+    private String getResourceValue(NonLiteral nl, Map<BNode, String> bNodeMap) {
         if (nl == null) {
             return null;
         } else if (nl instanceof UriRef) {
-            return ((UriRef)nl).getUnicodeString();
+            return ((UriRef) nl).getUnicodeString();
         } else if (nl instanceof BNode) {
             String bNodeId = bNodeMap.get(nl);
-            if(bNodeId == null){
+            if (bNodeId == null) {
                 bNodeId = Integer.toString(bNodeMap.size());
-                bNodeMap.put((BNode)nl, bNodeId);
+                bNodeMap.put((BNode) nl, bNodeId);
             }
-            return new StringBuilder("_:").append(bNodeId).toString();
+            return new StringBuilder("_:b").append(bNodeId).toString();
         } else {
-            throw new IllegalStateException("Unknwon NonLiteral type "+nl.getClass().getName()+"!");
+            throw new IllegalStateException("Unknwon NonLiteral type " + nl.getClass().getName() + "!");
         }
     }
 }
