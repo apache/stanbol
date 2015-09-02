@@ -267,7 +267,6 @@ public class SolrServerAdapter {
             } finally { //decrease the reference count
                 core.close();
             }
-            
         }
     }
     /**
@@ -492,14 +491,16 @@ public class SolrServerAdapter {
             CoreRegistration current;
             synchronized (registrations) {
                 CoreRegistration old = registrations.remove(name);
+                //NOTE: we register the new before unregistering the old to allow
+                //      uninterrupted usage of this core by components.
+                current = new CoreRegistration(name,core);
+                log.info("   ... register {}",current);
+                registrations.put(name,current);
                 if(old != null){
                     sameCore = this.server.getCore(name); //2nd reference to the core
                     log.info("  ... unregister old registration {}", old);
                     old.unregister();
                 }
-                current = new CoreRegistration(name,core);
-                log.info("   ... register {}",current);
-                registrations.put(name,current);
             }
             return current.getServiceReference();
         } finally {
