@@ -212,7 +212,7 @@ public class SolrServerAdapter {
         }
         if(context == null){
             throw new IllegalArgumentException("The parsed BundlContext used to register " +
-            		"the Solr Components as OSGI services MUST NOT be NULL!");
+                    "the Solr Components as OSGI services MUST NOT be NULL!");
         }
         File solrDir = parsedServerProperties.getServerDir();
         if(solrDir == null){
@@ -461,8 +461,8 @@ public class SolrServerAdapter {
         
 //        if(!old.isClosed()){
 //            log.warn("Old SolrCore was not Closed correctly - this indicates that some other" +
-//            		"components calling CoreContainer#getSolrCore() has not colled SolrCore#close()" +
-//            		"after using it.");
+//                  "components calling CoreContainer#getSolrCore() has not colled SolrCore#close()" +
+//                  "after using it.");
 //            log.warn("To avoid memory leaks this will call SolrCore#close() until closed");
 //            int i=0;
 //            for(;!old.isClosed();i++){
@@ -492,14 +492,16 @@ public class SolrServerAdapter {
             CoreRegistration current;
             synchronized (registrations) {
                 CoreRegistration old = registrations.remove(name);
+                //NOTE: we register the new before unregistering the old to allow
+                //      uninterrupted usage of this core by components.
+                current = new CoreRegistration(name,core);
+                log.info("   ... register {}",current);
+                registrations.put(name,current);
                 if(old != null){
                     sameCore = this.server.getCore(name); //2nd reference to the core
                     log.info("  ... unregister old registration {}", old);
                     old.unregister();
                 }
-                current = new CoreRegistration(name,core);
-                log.info("   ... register {}",current);
-                registrations.put(name,current);
             }
             return current.getServiceReference();
         } finally {
