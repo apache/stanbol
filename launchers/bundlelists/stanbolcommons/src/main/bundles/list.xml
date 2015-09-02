@@ -338,20 +338,20 @@
     </bundle>
     
     <!-- JSON-LD support for Clerezza -->
-    <!-- bundle>
+    <bundle> <!-- this for now provides the Parser/Serializer provider for Clerezza -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.jsonld</artifactId>
       <version>0.12.1-SNAPSHOT</version>
-    </bundle> -->
+    </bundle>
     <bundle> <!-- this will (in a future version replace the above) -->
       <groupId>com.github.jsonld-java</groupId>
       <artifactId>jsonld-java-clerezza</artifactId>
-      <version>0.6.1-SNAPSHOT</version>
+      <version>0.6.0</version>
     </bundle>
     <bundle> <!-- core jsonld library used by jena, sesame and now clerezza -->
       <groupId>com.github.jsonld-java</groupId>
       <artifactId>jsonld-java</artifactId>
-      <version>0.6.1-SNAPSHOT</version>
+      <version>0.6.0</version>
     </bundle>
     
   </startLevel>
@@ -400,6 +400,12 @@
       <artifactId>org.apache.stanbol.commons.owl</artifactId>
       <version>0.12.1-SNAPSHOT</version>
     </bundle>
+    <!-- support for JSON-LD 
+    <bundle>
+      <groupId>org.apache.stanbol</groupId>
+      <artifactId>org.apache.stanbol.commons.jsonld</artifactId>
+      <version>0.12.1-SNAPSHOT</version>
+    </bundle> -->
     <!-- Support for Jobs -->
     <bundle>
       <groupId>org.apache.stanbol</groupId>

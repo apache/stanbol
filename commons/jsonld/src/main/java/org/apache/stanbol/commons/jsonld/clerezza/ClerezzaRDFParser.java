@@ -99,7 +99,7 @@ public class ClerezzaRDFParser implements RDFParser {
                 bNodeId = Integer.toString(bNodeMap.size());
                 bNodeMap.put((BNode)nl, bNodeId);
             }
-            return new StringBuilder("_:b").append(bNodeId).toString();
+            return new StringBuilder("_:").append(bNodeId).toString();
         } else {
             throw new IllegalStateException("Unknwon NonLiteral type "+nl.getClass().getName()+"!");
         }
