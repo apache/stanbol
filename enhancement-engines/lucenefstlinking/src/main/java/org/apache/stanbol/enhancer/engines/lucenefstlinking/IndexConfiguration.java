@@ -489,7 +489,6 @@ public class IndexConfiguration {
             Map<String,File> presentFstFiles = new HashMap<String,File>();
             WildcardFileFilter fstFilter = new WildcardFileFilter(
                 fstName+".*.fst");
-            @SuppressWarnings("unchecked")
             Iterator<File> fstFiles = FileUtils.iterateFiles(fstDirectory, fstFilter, null);
             while(fstFiles.hasNext()){
                 File fstFile = fstFiles.next();
