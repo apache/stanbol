@@ -734,12 +734,12 @@ public class FstLinkingEngineComponent {
         BundleContext bundleContext = this.bundleContext;
         //We need to keep the old configuration vars for unregistering the
         //current engine (see #unregisterEngine(..) method)
-        ServiceRegistration<?> oldEngineRegistration = this.engineRegistration;
-        SolrCore oldSolrCore = this.solrCore;
-        IndexConfiguration oldIndexConfig = this.indexConfig;
+        final ServiceRegistration<?> oldEngineRegistration = this.engineRegistration;
+        final SolrCore oldSolrCore = this.solrCore;
+        final IndexConfiguration oldIndexConfig = this.indexConfig;
+        SolrCore core;
+        IndexConfiguration indexConfig; // the indexConfig build by this call
         synchronized (this) { //init one after the other in case of multiple calls
-            SolrCore core;
-            IndexConfiguration indexConfig; // the indexConfig build by this call
             try { //try to init - finally unregisterEngine
                 if(bundleContext == null){ //already deactivated
                     return; //NOTE: unregistering is done in finally block
@@ -885,10 +885,9 @@ public class FstLinkingEngineComponent {
                 engineRegistration.unregister();
             } catch(IllegalStateException e) {
                 //already unregistered ... can be ignored
-                log.debug("Unexpected State: Service for FSTLinkingEngine "
+                log.warn("Unexpected State: Service for FSTLinkingEngine "
                         + engineName+" was already deactivated.", e);
             }
-            this.engineRegistration = null; //reset the field
         } else {
             log.debug(" ... no (old) engine registration present");
         }
