@@ -18,11 +18,13 @@ package org.apache.stanbol.enhancer.engine.disambiguation.mlt;
 
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ORIGIN;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
 
 import java.util.SortedMap;
 import java.util.SortedSet;
 
+import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.TripleCollection;
 import org.apache.clerezza.rdf.core.UriRef;
@@ -92,6 +94,10 @@ public class Suggestion implements Comparable<Suggestion> {
             suggestion.originalConfidnece = 0.0;
         }
         suggestion.site = EnhancementEngineHelper.getString(graph, entityAnnotation, ENTITYHUB_SITE);
+        if(suggestion.site == null){
+            //STANBOL-1411: fall back to fise:orign
+            suggestion.site = getOrigin(graph, entityAnnotation);
+        }
         // NOTE: site might be NULL
         return suggestion;
     }
@@ -172,6 +178,8 @@ public class Suggestion implements Comparable<Suggestion> {
 
     /**
      * The name of the Entityhub {@link Site} the suggested Entity is managed.
+     * Both <code>entityhub:site</code> and <code>fise:orign</code> are 
+     * considered as sites (see STANBOL-1411).
      * 
      * @return the name of the Entityhub {@link Site}
      */
@@ -228,6 +236,25 @@ public class Suggestion implements Comparable<Suggestion> {
         // ensure (x.compareTo(y)==0) == (x.equals(y))
         return result == 0 ? entityUri.getUnicodeString().compareTo(other.entityUri.getUnicodeString())
                 : result;
+    }
+    
+    private static String getOrigin(TripleCollection graph, UriRef entityAnnotation) {
+        UriRef uOrigin = EnhancementEngineHelper.getReference(graph, entityAnnotation, ENHANCER_ORIGIN);
+        if (uOrigin != null) {
+            return uOrigin.getUnicodeString();
+        } else {
+            String sOrigin = EnhancementEngineHelper.getString(graph, entityAnnotation, ENHANCER_ORIGIN);
+            if (sOrigin != null) {
+                return sOrigin;
+            } else {
+                Literal lOrigin = EnhancementEngineHelper.get(graph, entityAnnotation, ENHANCER_ORIGIN, Literal.class, lf);
+                if (lOrigin != null) {
+                    return lOrigin.getLexicalForm();
+                } else {
+                    return null;
+                }
+            }
+        }
     }
 
 }
