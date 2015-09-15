@@ -226,7 +226,7 @@ public final class Properties {
      * ontology, ...) the Entity {@link #ENHANCER_ENTITY_REFERENCE referenced}
      * by a <code>{@link TechnicalClasses#ENHANCER_ENTITYANNOTATION fise:EntiyAnnotation}</code>
      * originates from.
-     * @since 0.12.1 (STANBOL-????)
+     * @since 0.12.1 (STANBOL-1391)
      */
     public static final UriRef ENHANCER_ORIGIN = new UriRef(
             NamespaceEnum.fise + "origin");
