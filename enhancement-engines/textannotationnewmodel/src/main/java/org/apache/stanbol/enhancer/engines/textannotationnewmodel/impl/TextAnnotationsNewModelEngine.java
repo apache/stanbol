@@ -18,22 +18,25 @@ package org.apache.stanbol.enhancer.engines.textannotationnewmodel.impl;
 
 import static org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper.getBlob;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_END;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTION_CONTEXT;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTION_HEAD;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTION_PREFIX;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTION_SUFFIX;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTION_TAIL;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_START;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
@@ -124,7 +127,7 @@ public class TextAnnotationsNewModelEngine extends AbstractEnhancementEngine<Run
         } catch (IOException e) {
             throw new EngineException(this, contentItem, "Unable to read Plain Text Blob", e);
         }
-        Map<NonLiteral,Literal[]> prefixSuffixMap = new HashMap<NonLiteral,Literal[]>();
+        Set<Triple> addedTriples = new HashSet<Triple>();
         MGraph metadata = contentItem.getMetadata();
         //extract all the necessary information within a read lock
         contentItem.getLock().readLock().lock();
@@ -134,7 +137,8 @@ public class TextAnnotationsNewModelEngine extends AbstractEnhancementEngine<Run
                 NonLiteral ta = it.next().getSubject();
                 boolean hasPrefix = metadata.filter(ta, ENHANCER_SELECTION_PREFIX, null).hasNext();
                 boolean hasSuffix = metadata.filter(ta, ENHANCER_SELECTION_SUFFIX, null).hasNext();
-                if(hasPrefix && hasSuffix){
+                boolean hasSelected = metadata.filter(ta, ENHANCER_SELECTED_TEXT, null).hasNext();
+                if(hasPrefix && hasSuffix && hasSelected){
                     continue; //this TextAnnotation already uses the new model
                 }
                 Integer start;
@@ -143,6 +147,10 @@ public class TextAnnotationsNewModelEngine extends AbstractEnhancementEngine<Run
                     if(start == null){
                         log.debug("unable to add fise:selection-prefix to TextAnnotation {} "
                             + "because fise:start is not present",ta);
+                    } else if(start < 0){
+                        log.warn("fise:start {} of TextAnnotation {} < 0! "
+                                + "Will not transform this TextAnnotation", start, ta);
+                        start = 0;
                     }
                 } else {
                     start = null;
@@ -153,36 +161,57 @@ public class TextAnnotationsNewModelEngine extends AbstractEnhancementEngine<Run
                     if(end == null){
                         log.debug("unable to add fise:selection-suffix to TextAnnotation {} "
                             + "because fise:end is not present",ta);
+                    } else if(end > text.length()) {
+                        log.warn("fise:end {} of TextAnnotation {} > as the content length {}! "
+                                + "Will not transform this TextAnnotation",
+                                end, ta, text.length());
+                        end = null;
+                    } else if(start != null && end < start){
+                        log.warn("fise:end {} < fise:start {} of TextAnnotation {}! "
+                                + "Will not transform this TextAnnotation",
+                                end, start, ta);
+                        end = null;
+                        start = null;
                     }
                 } else {
                     end = null;
                 }
-                if(end != null || start != null){
-                    prefixSuffixMap.put(ta, new Literal[]{
-                            start == null ? null : new PlainLiteralImpl(text.substring(
-                                Math.max(0,start-prefixSuffixSize), start), lang),
-                            end == null ? null : new PlainLiteralImpl(text.substring(
-                                end,Math.min(text.length(), end+prefixSuffixSize)),lang)
-                    });
+                if(!hasPrefix && start != null){
+                    addedTriples.add(new TripleImpl(ta, ENHANCER_SELECTION_PREFIX, 
+                            new PlainLiteralImpl(text.substring(Math.max(0,start-prefixSuffixSize), start), lang)));
+                }
+                if(!hasSuffix && end != null){
+                    addedTriples.add(new TripleImpl(ta, ENHANCER_SELECTION_SUFFIX,
+                            new PlainLiteralImpl(text.substring(end,Math.min(text.length(), end+prefixSuffixSize)),lang)));
+                }
+                if(!hasSelected && start != null && end != null){
+                    //This adds missing fise:selected or fise:head/fise:tail if the selected text is to long
+                    int length = end - start;
+                    if(length > 3*prefixSuffixSize){ //add prefix/suffix
+                        addedTriples.add(new TripleImpl(ta, ENHANCER_SELECTION_HEAD, 
+                                new PlainLiteralImpl(text.substring(start, start+prefixSuffixSize), lang)));
+                        addedTriples.add(new TripleImpl(ta, ENHANCER_SELECTION_TAIL,
+                                new PlainLiteralImpl(text.substring(end-prefixSuffixSize,end),lang)));
+                    } else { //add missing fise:selected
+                        String selection = text.substring(start, end);
+                        addedTriples.add(new TripleImpl(ta, ENHANCER_SELECTED_TEXT,
+                                new PlainLiteralImpl(selection,lang)));
+                        //check if we should also add an selection context
+                        if(!metadata.filter(ta, ENHANCER_SELECTION_CONTEXT, null).hasNext()){
+                            addedTriples.add(new TripleImpl(ta, ENHANCER_SELECTION_CONTEXT, 
+                                    new PlainLiteralImpl(EnhancementEngineHelper.getSelectionContext(text, selection, start),lang)));
+                        }
+                    }
                 }
             }
         } finally {
             contentItem.getLock().readLock().unlock();
         }
         //finally write the prefix/suffix triples within a write lock
-        if(!prefixSuffixMap.isEmpty()){
+        if(!addedTriples.isEmpty()){
             contentItem.getLock().writeLock().lock();
             try {
-                for(Entry<NonLiteral,Literal[]> entry : prefixSuffixMap.entrySet()){
-                    if(entry.getValue()[0] != null){
-                        metadata.add(new TripleImpl(entry.getKey(), 
-                            ENHANCER_SELECTION_PREFIX, entry.getValue()[0]));
-                    } //else prefix already present
-                    if(entry.getValue()[1] != null){
-                        metadata.add(new TripleImpl(entry.getKey(), 
-                            ENHANCER_SELECTION_SUFFIX, entry.getValue()[1]));
-                    } //else suffix already present
-                }
+                metadata.addAll(addedTriples);
             } finally {
                 contentItem.getLock().writeLock().unlock();
             }
