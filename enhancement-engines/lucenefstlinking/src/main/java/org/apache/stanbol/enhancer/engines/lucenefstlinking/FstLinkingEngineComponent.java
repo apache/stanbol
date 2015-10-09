@@ -665,7 +665,7 @@ public class FstLinkingEngineComponent {
                 public void removedService(ServiceReference reference, Object service) {
                     log.info(" ... SolrCore for {} was removed!", reference);
                     //try to get an other serviceReference from the tracker
-                    if(reference.equals(FstLinkingEngineComponent.this.indexReference)){
+                    if(reference.equals(FstLinkingEngineComponent.this.solrServerReference)){
                         updateEngineRegistration(solrServerTracker.getServiceReference(), null);
                     } else {
                         log.info("  - removed SolrCore was not used for FST linking");

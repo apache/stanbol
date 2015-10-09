@@ -184,7 +184,7 @@ public class SolrServerAdapter {
             try {
                 updateServerRegistration();
             } catch (IllegalStateException e) {
-                log.debug("Server Registration already unregistered ",e);
+                log.debug("Not updating Server Registration (already unregistered)");
             }
         }
 
