@@ -413,7 +413,7 @@ public class IndexConfiguration {
      */
     public boolean activate() {
         active = true;
-        RefCounted<SolrIndexSearcher> searcherRef = index.getSearcher(true, true, null);
+        RefCounted<SolrIndexSearcher> searcherRef = index.getSearcher();
         try {
             return processFstConfig(searcherRef.get().getAtomicReader());
         }catch (RuntimeException e) { //in case of any excpetion
