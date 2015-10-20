@@ -19,6 +19,8 @@ package org.apache.stanbol.enhancer.engines.lucenefstlinking.cache;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.lucene.document.Document;
 import org.apache.solr.search.CacheRegenerator;
@@ -42,6 +44,8 @@ public class FastLRUCacheManager implements EntityCacheManager {
     RefCounted<EntityCache> current;
     private final CacheRegenerator regenerator;
     private final Map<String,String> config;
+    private ReadWriteLock lock = new ReentrantReadWriteLock();
+    
     
     /**
      * Creates a cache manager instance with the parsed maximum size and no 
@@ -77,36 +81,63 @@ public class FastLRUCacheManager implements EntityCacheManager {
     
     @Override
     public RefCounted<EntityCache> getCache(Object version) {
-        if(current == null || !current.get().getVersion().equals(version)){
-            if(current != null){
-            	log.debug(" > invalidate EntityCache for version {}", current.get().getVersion());
-            	//remove the reference to the old instance. This will allow to
-            	//destroy the old cache as soon as it is no longer used
-            	current.decref(); 
-            	log.debug("  ... {} remaining users for invalidated Cache", current.getRefcount());
-            	current = null;
+        lock.readLock().lock();
+        try {
+            if(current != null && current.get().getVersion().equals(version)){
+                current.incref(); //this increase is for the holder of the returned instance
+                log.debug(" > increase RefCount for EntityCache for version {} to {}", 
+                        version, current.getRefcount());
+                return current;
             }
-            //create a new cache
-            log.debug(" > create EntityCache for version {}", version);
-            SolrCache<Integer,Document> cache = new FastLRUCache<Integer,Document>();
-            cache.init(config, null, regenerator);
-            current = new RefCountedImpl(new SolrEntityCache(version, cache));
-            //add a reference to the new cache by this class. This will be removed
-            //as soon as the instance is outdated
-            current.incref(); 
+        } finally {
+            lock.readLock().unlock();
         }
-        current.incref(); //this increase is for the holder of the returned instance
-        log.debug(" > increase RefCount for EntityCache for version {} to {}", 
-        		version, current.getRefcount());
-        return current;
+        //still here ... looks like we need to build a new one
+        lock.writeLock().lock();
+        try {
+            //check again ... an other thread might have already built the cache
+            //for the requested version
+            if(current == null || !current.get().getVersion().equals(version)){
+                if(current != null){
+                	log.debug(" > invalidate EntityCache for version {}", current.get().getVersion());
+                	//remove the reference to the old instance. This will allow to
+                	//destroy the old cache as soon as it is no longer used
+                	current.decref(); 
+                	log.debug("  ... {} remaining users for invalidated Cache", current.getRefcount());
+                	current = null;
+                }
+                //create a new cache
+                log.debug(" > create EntityCache for version {}", version);
+                SolrCache<Integer,Document> cache = new FastLRUCache<Integer,Document>();
+                cache.init(config, null, regenerator);
+                current = new RefCountedImpl(new SolrEntityCache(version, cache));
+                //add a reference to the new cache by this class. This will be removed
+                //as soon as the instance is outdated
+                current.incref(); 
+            }
+            current.incref(); //this increase is for the holder of the returned instance
+            log.debug(" > increase RefCount for EntityCache for version {} to {}", 
+            		version, current.getRefcount());
+            return current;
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     @Override
     public void close() {
-    	if(current != null){
-    		current.decref();
-    		current = null;
-    	}
+        lock.writeLock().lock();
+        try {
+        	if(current != null){
+            	    Object version = log.isDebugEnabled() ? current.get().getVersion() : null;
+            		current.decref();
+                    log.debug(" > close EntityCache for version {} (remaining refCount: {})", 
+                        version , current.getRefcount());
+            		current = null;
+        	}
+        } finally{ 
+            lock.writeLock().unlock();
+        }
     }
     
     @Override
