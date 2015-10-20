@@ -73,7 +73,9 @@
               <goal>prepare-package</goal>
             </goals>
             <configuration>
+              <!-- not used - needs to be in the plugin configuration
               <includeDefaultBundles>false</includeDefaultBundles>
+               -->
               <!-- Standalone jar requires an OSGi http service implementation -->
               <jarWebSupport>
                 <bundles>
@@ -96,6 +98,10 @@
             </configuration>
           </execution>
         </executions>
+        <configuration>
+          <!-- Stanbol does not need the default Sling bundles -->
+          <includeDefaultBundles>false</includeDefaultBundles>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
