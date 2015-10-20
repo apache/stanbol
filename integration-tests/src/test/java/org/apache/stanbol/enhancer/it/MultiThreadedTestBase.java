@@ -39,8 +39,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
-import javax.ws.rs.core.MediaType;
-
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.Resource;
 import org.apache.clerezza.rdf.core.Triple;
@@ -57,18 +55,12 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.params.ClientPNames;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.CoreConnectionPNames;
-import org.apache.http.params.CoreProtocolPNames;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
@@ -384,14 +376,19 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
         int testNum;
         for(testNum = 0;testDataIterator.hasNext() && testNum < settings.getMaxRequests(); testNum++){
             String test = testDataIterator.next();
-            Request request = builder.buildPostRequest(getEndpoint())
-                    .withHeader("Accept",rdfFormat)
-                    .withContent(test);
-            tracker.register(request,test);
-            if(testNum%100 == 0){
-                log.info("  ... sent {} Requests ({} finished, {} pending, {} failed",
-                    new Object[]{testNum,tracker.getNumCompleted(),
-                                 tracker.getNumPending(),tracker.getFailed().size()});
+            if(StringUtils.isNotBlank(test)){
+                Request request = builder.buildPostRequest(getEndpoint())
+                        .withHeader("Accept",rdfFormat)
+                        .withContent(test);
+                tracker.register(request, test);
+                if(testNum%100 == 0){
+                    log.info("  ... sent {} Requests ({} finished, {} pending, {} failed",
+                        new Object[]{testNum,tracker.getNumCompleted(),
+                                     tracker.getNumPending(),tracker.getFailed().size()});
+                }
+            } else {
+                log.warn(" - TestDataIterator returned empty or NULL content (igonred)");
+                testNum--;
             }
         }
         log.info("> All {} requests sent!",testNum);
@@ -406,7 +403,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
         tracker.printStatistics();
         log.warn("Content(s) of Faild tests:");
         int i=1;
-        for(Entry<RequestExecutor,String> failed :tracker.getFailed().entrySet()) {
+        for(Entry<RequestExecutor,String> failed : tracker.getFailed().entrySet()) {
             log.warn("Failed ({}):",i);
             log.warn("  > Request: {}"+failed.getKey().getRequest());
             log.warn("  > Response: {}"+failed.getKey().getResponse());
@@ -619,12 +616,12 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
         protected ExcutionTracker(ExecutorService executorService){
             this(executorService,100);
         }
-        public ExcutionTracker(ExecutorService executorService,int maxRegistered) {
+        public ExcutionTracker(ExecutorService executorService, int maxRegistered) {
             this.executorService = executorService;
             this.maxRegistered = maxRegistered <= 0 ? Integer.MAX_VALUE : maxRegistered;
         }
         
-        public void register(Request request,String content){
+        public void register(Request request, String content){
             synchronized (registered) {
                 while(registered.size() >= maxRegistered){
                     try {
@@ -634,7 +631,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
                     }
                 }
                 registered.add(request);
-                executorService.execute(new AsyncExecuter(content,request, this));
+                executorService.execute(new AsyncExecuter(content, request, this));
             }
         }
 
@@ -654,7 +651,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
             }
         }
 
-        void failed(Request request, String content,RequestExecutor executor) {
+        void failed(Request request, String content, RequestExecutor executor) {
             synchronized (registered) {
                 failed.put(executor,content);
                 if(registered.remove(request)){
@@ -747,7 +744,6 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
             Long rtt;
             try {
                 executor.execute(request).assertStatus(200);
-                content = null; //do not store content for successfull resutls
                 rtt = System.currentTimeMillis()-start;
             } catch (Throwable e) {
                 log.warn("Error while sending Request ",e);
@@ -758,17 +754,22 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
             IndexedMGraph graph = new IndexedMGraph();
             try {
                 rdfParser.parse(graph,executor.getStream(), executor.getContentType().getMimeType());
+                Iterator<Triple> ciIt = graph.filter(null, Properties.ENHANCER_EXTRACTED_FROM, null);
+                if(!ciIt.hasNext()){
+                    throw new IllegalStateException("Enhancement Results do not caontain a single Enhancement");
+                }
+                Resource contentItemUri = ciIt.next().getObject();
+                if(!(contentItemUri instanceof UriRef)){
+                    throw new IllegalStateException("ContentItem URI is not an UriRef but an instance of "
+                            + contentItemUri.getClass().getSimpleName());
+                }
+                tracker.succeed(request, (UriRef) contentItemUri, graph, rtt, executor.getContent().length());
+                content = null; //do not store content for successful results
             } catch (Exception e) {
                 log.warn("Exception while parsing Enhancement Response",e);
                 tracker.failed(request, content, executor);
                 return;
             }
-            Iterator<Triple> ciIt = graph.filter(null, Properties.ENHANCER_EXTRACTED_FROM, null);
-            Assert.assertTrue("Enhancement Results do not caontain a single Enhancement",ciIt.hasNext());
-            Resource contentItemUri = ciIt.next().getObject();
-            Assert.assertTrue("ContentItem URI is not an UriRef but an instance of "
-                    + contentItemUri.getClass().getSimpleName(), contentItemUri instanceof UriRef);
-            tracker.succeed(request, (UriRef) contentItemUri, graph, rtt, executor.getContent().length());
         }
     }
 
