@@ -154,4 +154,12 @@ public class SimilarityConstraint extends Constraint {
         }
         return refContext.toString();
     }
+    
+    @Override
+    public String toString() {
+        return new StringBuilder(getClass().getSimpleName()).append("[context: ")
+                .append(context.length() > 20 ? (context.substring(0,18)+"..") : context)
+                .append(" | contextType: ").append(contextType).append(" | languages: ")
+                .append(languages).append(']').toString();
+    }
 }
