@@ -94,6 +94,46 @@ public class LdpathSourceProcessor implements EntityProcessor {
     private boolean appendMode;
 
     /**
+     * Default constructor. Expects that {@link #setConfiguration(Map)} is
+     * called to initialise the instance
+     */
+    public LdpathSourceProcessor() {
+    }
+    /**
+     * Initializes the {@link LdpathSourceProcessor} with the parsed parameters and
+     * appendMode enabled
+     * @param backend the {@link RDFBackend} to use for executing the program
+     * @param program the {@link Program} to be executed by this processor for
+     * entities to process
+     */
+    @SuppressWarnings({ "rawtypes"})
+    public LdpathSourceProcessor(RDFBackend backend, Program program) {
+        this(backend,program,true);
+    }
+    /**
+     * Initializes the {@link LdpathSourceProcessor} with the parsed parameters
+     * @param backend the {@link RDFBackend} to use for executing the program
+     * @param program the {@link Program} to be executed by this processor for
+     * entities to process
+     * @param appendMode if <code>true</code> results of the {@link LDPath} execution
+     * will be appended to parsed {@link Representation}. If <code>false</code> the
+     * results of this processor will be added to a new {@link Representation} -
+     * meaning that fields of the input will not be present in the processing
+     * results
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public LdpathSourceProcessor(RDFBackend backend, Program program, boolean appendMode) {
+        assert backend != null;
+        assert program != null;
+        this.backend = backend;
+        this.program = program;
+        this.appendMode = appendMode;
+        this.configuration = new EntityhubConfiguration(vf);
+        this.transformer = configuration.getTransformers();
+        this.ldPath = new LDPath(backend,configuration);
+    }
+    
+    /**
      * The indexing configuration
      */
     protected IndexingConfig indexingConfig;
@@ -195,6 +235,10 @@ public class LdpathSourceProcessor implements EntityProcessor {
     @SuppressWarnings({"unchecked","rawtypes"})
     @Override
     public Representation process(Representation source) {
+        if(log.isTraceEnabled()){
+            log.trace(" - process {} (backend: {}, program: {}, append: {})",
+                    source.getId(), backend, program, appendMode);
+        }
         Object context = backend.createURI(source.getId());
         Representation result  = appendMode ? source : vf.createRepresentation(source.getId());
         /*
