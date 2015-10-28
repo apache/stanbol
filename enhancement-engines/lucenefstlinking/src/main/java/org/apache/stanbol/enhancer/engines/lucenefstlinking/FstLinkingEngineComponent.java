@@ -741,12 +741,17 @@ public class FstLinkingEngineComponent {
         IndexConfiguration indexConfig; // the indexConfig build by this call
         synchronized (this) { //init one after the other in case of multiple calls
             try { //try to init - finally unregisterEngine
+                //reset the old field values
+                this.engineRegistration = null;
+                this.indexConfig = null;
+                this.solrCore = null;
+                //now we can update the engines configuration
                 if(bundleContext == null){ //already deactivated
                     return; //NOTE: unregistering is done in finally block
                 }
                 core = getSolrCore(server);
                 if(core == null){ //no SolrCore
-                    log.info("   - SolrCore {} present", this.solrCore == null ?
+                    log.info("   - SolrCore {} present", oldSolrCore == null ?
                     		"not yet" : "no longer");
                     return; //NOTE: unregistering is done in finally block
                 } else { //- we do have a SolrCore

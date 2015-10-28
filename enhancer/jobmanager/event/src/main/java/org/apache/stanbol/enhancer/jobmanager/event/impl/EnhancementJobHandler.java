@@ -38,6 +38,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.NonLiteral;
+import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
@@ -371,9 +372,9 @@ public class EnhancementJobHandler implements EventHandler {
 		    			job.getExecutionMetadata(),job.getContentItem().getUri());
 		    	ChainExecution ce = em.getChainExecution();
 		    	long cd = ce.getDuration();
-		    	logger.info("Executed Chain {} in {}ms", ce.getChainName(),
-		    				ce.getDuration());
-		    	logger.info(" > ContentItem: {}", job.getContentItem().getUri().getUnicodeString());
+                StringBuilder message = new StringBuilder("> processed ContentItem ")
+                .append(job.getContentItem().getUri()).append(" with Chain '")
+                .append(ce.getChainName()).append("' in ").append(ce.getDuration()).append("ms | ");
 		    	List<Execution> ees = new ArrayList<Execution>(em.getEngineExecutions().values());
 		    	//sort by start date (execution order)
 		    	Collections.sort(ees, new Comparator<Execution>() {
@@ -382,23 +383,30 @@ public class EnhancementJobHandler implements EventHandler {
 		    			return e1.getStarted().compareTo(e2.getStarted());
 		    		}
 				});
+		    	message.append("chain:[");
 		    	long eds = 0;
+		    	boolean first = true;
 		    	for(Execution ee : ees){
+                    if(first){
+                        first = false;
+                    } else {
+                        message.append(", ");
+                    }
 		    		long ed = ee.getDuration();
 		    		eds = eds + ed;
 		    		int edp = Math.round(ed*100/(float)cd);
-		    		logger.info(" - {} in {}ms ({}%)", new Object[]{
-		    				ee.getExecutionNode().getEngineName(), ed, edp});
+		    		message.append(ee.getExecutionNode().getEngineName())
+		    		    .append(": ").append(ed).append("ms (").append(edp).append("%)");
 		    	}
 		    	float cf = eds/cd;
 		    	int cfp = Math.round((cf-1)*100);
-		    	logger.info(" > concurrency: {} ({}%)",cf, cfp);
+                message.append("], concurrency: ").append(cf).append(" (").append(cfp).append("%)");
+                logger.info(message.toString());
     		} catch (RuntimeException e) {
     			log.warn("Exception while logging ExecutionTimes for Chain: '" +
     					job.getChainName() + " and ContentItem "+
     					job.getContentItem().getUri() +" to Logger " +
     					logger.getName(),e);
-    			
     		}
     	}
     }
