@@ -49,7 +49,8 @@ public class SparqlQueryUtilsTest {
             SparqlQueryUtils.createFullTextQueryString(keywords));
 
         keywords = Arrays.asList("'test' \"keyword\"");
-        assertEquals("(\"\\'test\\'\" AND \"\\\"keyword\\\"\")",
+        //NOTE: changed implementation to remove none word chars
+        assertEquals("(\"test\" AND \"keyword\")",
             SparqlQueryUtils.createFullTextQueryString(keywords));
         
         keywords = Arrays.asList("1 Alpha ? Numeric Test .");

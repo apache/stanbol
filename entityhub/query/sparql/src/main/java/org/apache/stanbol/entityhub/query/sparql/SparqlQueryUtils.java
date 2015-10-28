@@ -23,6 +23,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,6 +38,7 @@ import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
 import org.apache.stanbol.entityhub.servicesapi.query.RangeConstraint;
+import org.apache.stanbol.entityhub.servicesapi.query.SimilarityConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
 import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint.PatternType;
 import org.apache.stanbol.entityhub.servicesapi.query.ValueConstraint;
@@ -471,7 +473,7 @@ public final class SparqlQueryUtils {
 
             log.trace("adding a constraint [type :: {}][field :: {}][prefix :: {}][intent :: {}].",
                 new Object[]{constraint.getType(), field, varPrefix, intend});
-
+            boolean added = true;
             switch (constraint.getType()) {
                 case value:
                     addValueConstraint(queryString, field, (ValueConstraint) constraint, selectedFields,
@@ -487,12 +489,15 @@ public final class SparqlQueryUtils {
                     addRangeConstriant(queryString, var, (RangeConstraint) constraint, intend);
                     break;
                 default:
-                    log.warn("Please update this Implementation to support the Constraint Type "
-                             + fieldConstraint.getValue().getType());
+                    log.warn("Constraint Type '{}' not supported in SPARQL! Constriant {} "
+                            + "will be not included in the query!",
+                             fieldConstraint.getValue().getType(), fieldConstraint.getValue());
+                    added = false;
                     break;
             }
-
-            queryString.append(" . \n");
+            if(added){
+                queryString.append(" . \n");
+            }
         }
         // for some endpoints we need to add an additional constraints used for
         // ranking. If sub-queries are used this need to be in the select part
@@ -848,7 +853,7 @@ public final class SparqlQueryUtils {
                     textQuery.append(" OR ");
                 }
                 // TODO: maybe we should use a word tokenizer here
-                String[] words = constraintText.split("\\s");
+                String[] words = constraintText.split("\\W+");
                 if (words.length > 1) {
                     // not perfect because words might contain empty string, but
                     // it will eliminate most unnecessary brackets .
@@ -872,7 +877,9 @@ public final class SparqlQueryUtils {
                         }
 
                         textQuery.append('"');
-                        addGrammarEscapedValue(textQuery, word);
+                        textQuery.append(word);
+                        //escapes are no longer needed with the "\W" regex tokenizer
+                        //addGrammarEscapedValue(textQuery, word);
                         textQuery.append('"');
                     }
                 }
@@ -1200,7 +1207,7 @@ public final class SparqlQueryUtils {
         // "text value","anothertest","some more values"),true));
         // query.setConstraint("urn:field2a", new TextConstraint(":-]"));
         // //tests escaping of REGEX
-         query.setConstraint("urn:field3", new TextConstraint("language text",PatternType.wildcard, true, "en"));
+         query.setConstraint("urn:field3", new TextConstraint("\"quote",PatternType.none, true, "en", null));
         //query.setConstraint("urn:field4", new TextConstraint("multi language text", "en", "de", null));
         // query.setConstraint("urn:field5", new
         // TextConstraint("wildcar*",PatternType.wildcard,false,"en","de"));
@@ -1214,6 +1221,8 @@ public final class SparqlQueryUtils {
         // query.setConstraint("urn:field11", new RangeConstraint(null, (int)10, true));
         // query.setConstraint("urn:field12", new RangeConstraint((int)5, null, true));
         //query.setConstraint("urn:field12", new RangeConstraint(new Date(), null, true));
+         query.setConstraint("urn:similarity", new SimilarityConstraint(Collections.singleton("This is a test"), 
+                 DataTypeEnum.Text));
         // query.addSelectedField("urn:field2a");
         // query.addSelectedField("urn:field3");
         query.setLimit(5);
