@@ -160,7 +160,7 @@ public class EventJobManagerImpl implements EnhancementJobManager {
                 "' because NULL was passed as enhancement chain");
         }
         long start = System.currentTimeMillis();
-        enhancementJobManagerLog.info(">> enhance {} with chain {}", ci.getUri(), chain.getName());
+        enhancementJobManagerLog.debug(">> enhance {} with chain {}", ci.getUri(), chain.getName());
         boolean isDefaultChain = chain.equals(chainManager.getDefault());
         EnhancementJob job = new EnhancementJob(ci, chain.getName(), chain.getExecutionPlan(),isDefaultChain);
         //start the execution
@@ -193,7 +193,7 @@ public class EventJobManagerImpl implements EnhancementJobManager {
         	Exception e = job.getError();
             EnhancementJobHandler.logJobInfo(enhancementJobManagerLog, job, 
             		"-- log information about failed EnhancementJob --", true);
-            logExecutionMetadata(job);
+            logExecutionMetadata(enhancementJobManagerLog, job, true);
             log.warn("ExecutionMetadata: ");
             for(Iterator<Triple> it = job.getExecutionMetadata().iterator();
                     it.hasNext();
@@ -209,28 +209,35 @@ public class EventJobManagerImpl implements EnhancementJobManager {
         if(!job.isFinished()){
             log.warn("Execution finished, but Job is not finished!");
             EnhancementJobHandler.logJobInfo(log, job, null, true);
-            logExecutionMetadata(job);
+            logExecutionMetadata(log, job, true);
             throw new ChainException("EnhancementJobManager was deactivated while" +
             		" enhancing the passed ContentItem "+job.getContentItem()+
             		" (EnhancementJobManager type: "+getClass()+")");
         } else {
         	//log infos about the execution times to the enhancementJobManager
         	EnhancementJobHandler.logExecutionTimes(enhancementJobManagerLog, job);
+        	logExecutionMetadata(enhancementJobManagerLog, job, false);
         }
     }
-	/**
-	 * Logs the ExecutionMetadata 
-	 * @param job
-	 */
-	protected void logExecutionMetadata(EnhancementJob job) {
-		if(log.isDebugEnabled()){
+    /**
+     * Logs the ExecutionMetadata 
+     * @param logger the logger to log the execution metadata to
+     * @param job the enhancement job to log the execution metadata for
+     * @param isWarn if <code>true</code> the data are logged with <code>WARN</code> level.
+     * If <code>false</code> the <code>DEBUG</code> level is used
+     */
+	protected void logExecutionMetadata(Logger logger, EnhancementJob job, boolean isWarn) {
+		if(log.isDebugEnabled() || (isWarn && log.isWarnEnabled())){
+		    StringBuilder message = new StringBuilder(1024);
+		    message.append("ExecutionMetadata for ContentItem ").append(job.getContentItem().getUri())
+		        .append(" and Chain ").append(job.getChainName()).append(": \n");
+		    boolean serialized = false;
 			if(serializer != null){
-				log.debug("ExecutionMetadata: ");
 				ByteArrayOutputStream bout = new ByteArrayOutputStream();
 				try {
 					serializer.serialize(bout, job.getExecutionMetadata(), SupportedFormat.TURTLE);
-					log.debug(bout.toString("utf-8"));
-					return; //serialized
+					message.append(bout.toString("utf-8"));
+					serialized = true;
 				} catch (RuntimeException e){ 
 					log.warn("   ... unable to serialize Execution Metadata | {}: {}",
 							e.getClass(), e.getMessage());
@@ -239,10 +246,18 @@ public class EventJobManagerImpl implements EnhancementJobManager {
 							e.getClass(), e.getMessage());
 				}
 			}
-			//No serializer for TURTLE ... use the toString method of triple
-			for(Triple t : job.getExecutionMetadata()){
-				log.debug(t.toString());
+			if(!serialized){
+    			//TURTLE serialization not possible ... use the toString method of triple
+    			for(Triple t : job.getExecutionMetadata()){
+    			    message.append(t.toString()).append('\n');
+    			}
 			}
+			//finally write the serialized graph to the logger
+            if(isWarn){
+                logger.warn(message.toString());
+            } else {
+                logger.debug(message.toString());
+            }
 		}
 	}
 
