@@ -305,7 +305,7 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
                     (langs == null || langs.isEmpty())){
                 copyAll(uri, rep, graph, writeLock);
             } else { //we need to apply some filters while dereferencing
-                if(fieldMapper != null || !langs.isEmpty()){
+                if(fieldMapper != null || (langs != null && !langs.isEmpty())){
                     //this considers speficied fields and included languages
                     copyMapped(uri, rep, fieldMapper, langs, graph, writeLock);
                 }
