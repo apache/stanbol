@@ -67,9 +67,6 @@ wget -c $DBPEDIA/$DBP_I18N/tr/labels_tr.nt.bz2
 wget -c $DBPEDIA/$DBP_I18N/zh/labels_zh.nt.bz2
 wget -c $DBPEDIA/$DBP_I18N/en/short-abstracts_en.nt.bz2
 wget -c $DBPEDIA/$DBP_I18N/en/long-abstracts_en.nt.bz2
-wget -c $DBPEDIA/$DBP_I18N/en/article-categories_en.nt.bz2
-wget -c $DBPEDIA/$DBP_I18N/en/category-labels_en.nt.bz2 
-wget -c $DBPEDIA/$DBP_I18N/en/skos-categories_en.nt.bz2
 
 
 # special handling of the image file that has 5 corrupted entries
@@ -95,9 +92,9 @@ wget -c $DBPEDIA/$DBP_I18N/en/geo-coordinates_en.nt.bz2
 wget -c $DBPEDIA/$DBP_I18N/en/persondata_en.nt.bz2
 
 # Category information
-wget -c $DBPEDIA/$DBP_I18N/en/category_labels_en.nt.bz2
-wget -c $DBPEDIA/$DBP_I18N/en/skos_categories_en.nt.bz2
-wget -c $DBPEDIA/$DBP_I18N/en/article_categories_en.nt.bz2
+wget -c $DBPEDIA/$DBP_I18N/en/category-labels_en.nt.bz2
+wget -c $DBPEDIA/$DBP_I18N/en/skos-categories_en.nt.bz2
+wget -c $DBPEDIA/$DBP_I18N/en/article-categories_en.nt.bz2
 
 # Redirects
 wget -c $DBPEDIA/$DBP_I18N/en/redirects_en.nt.bz2
