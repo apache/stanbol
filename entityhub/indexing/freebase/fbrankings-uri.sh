@@ -27,8 +27,7 @@ set -x -e -o pipefail
 INCOMING_FILE=${WORKSPACE}/incoming_links.txt
 FB_DUMP=$1
 
-gunzip -c ${FB_DUMP} \
-| grep "^<http://rdf.freebase.com/ns/m\..*<.*>.*<http://rdf.freebase.com/ns/m\." \
+zgrep "^<http://rdf.freebase.com/ns/m\..*<.*>.*<http://rdf.freebase.com/ns/m\." $FB_DUMP\
 | cut -f 3 \
 | sed 's/.*\/ns\/\(.*\)>/\1/g' \
 | sort -S $MAX_SORT_MEM \

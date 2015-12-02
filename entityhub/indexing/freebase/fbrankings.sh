@@ -27,8 +27,7 @@ set -x -e -o pipefail
 INCOMING_FILE=${WORKSPACE}/incoming_links.txt
 FB_DUMP=$1
 
-gunzip -c ${FB_DUMP} \
-| grep "^ns:m\..*\t.*\tns:m\." \
+zgrep "^ns:m\..*\t.*\tns:m\." $FB_DUMP \
 | cut -f 3 | sed 's/.$//' \
 | sort -S $MAX_SORT_MEM \
 | uniq -c  \
