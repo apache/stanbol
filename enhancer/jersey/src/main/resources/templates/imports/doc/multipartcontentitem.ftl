@@ -134,4 +134,4 @@ curl -v -X POST -H "Accept: text/plain" \
     "${it.serviceUrl}?omitMetadata=true"
 </pre> 
 <p>The response will be of type <code>text/plain</code> and return the string
-<code>"John Smith was born in London."</code>.
+<code>"The Stanbol enhancer can detect famous cities such as Paris and people such as Bob Marley."</code>.
