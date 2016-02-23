@@ -71,6 +71,8 @@
             <Embed-Dependency>
               solr-text-tagger
             </Embed-Dependency>
+            <!-- we install a logger configuration to set TaggerFstCorpus loggings to ERROR -->
+            <Install-Path>config</Install-Path>
           </instructions>
         </configuration>
       </plugin>

@@ -28,7 +28,6 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHAN
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -164,12 +163,17 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
             return CANNOT_ENHANCE;
         }
         //(2) check if we have a FST model for the language
-        if(indexConfig.getCorpus(language) == null &&  //for the language
-        		indexConfig.getDefaultCorpus() == null){ //a default model
-            log.debug("Engine {} ignores ContentItem {} becuase no FST modles for language {} "
-            		+ "are available", new Object[] {getName(), ci.getUri(), language});
-                return CANNOT_ENHANCE;
-        }
+        //NOTE: as STANBOL-1448 the index configuration is Solr index version
+        //      dependent. This means that we can not use informations of the
+        //      current IndexConfiguration to check if we have an FST model for
+        //      the language of the requested document. Those information might
+        //      be already out dated.
+//        if(indexConfig.getCorpus(language) == null &&  //for the language
+//        		indexConfig.getDefaultCorpus() == null){ //a default model
+//            log.debug("Engine {} ignores ContentItem {} becuase no FST modles for language {} "
+//            		+ "are available", new Object[] {getName(), ci.getUri(), language});
+//                return CANNOT_ENHANCE;
+//        }
         // we need a detected language, the AnalyzedText contentPart with
         // Tokens.
         AnalysedText at = AnalysedTextUtils.getAnalysedText(ci);

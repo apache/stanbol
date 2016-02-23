@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.Resource;
@@ -79,6 +80,7 @@ import org.apache.stanbol.enhancer.nlp.ner.NerTag;
 import org.apache.stanbol.enhancer.nlp.utils.LanguageConfiguration;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.opensextant.solrtexttagger.TaggerFstCorpus;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -760,7 +762,7 @@ public class FstLinkingEngineComponent {
                 }
                 //File fstDir = new File(dataDir,"fst");
                 //now collect the FST configuration
-                indexConfig = new IndexConfiguration(fstConfig, core, fieldEncoding);
+                indexConfig = new IndexConfiguration(fstConfig, core, fieldEncoding, entityLinkerConfig.getDefaultLanguage());
                 indexConfig.setTypeField(solrTypeField);
                 indexConfig.setRankingField(solrRankingField);
                 //set fields parsed in the activate method
@@ -778,48 +780,40 @@ public class FstLinkingEngineComponent {
                 if(skipAltTokensConfig != null){
                     indexConfig.setSkipAltTokens(skipAltTokensConfig);
                 }
-                //create a new searcher for creating FSTs
-                if(!indexConfig.activate()){
-                    log.warn("Processing of the FST configuration was not successfull "
-                        + "for any language. See WARN level loggings for more details!");
-                    log.warn("  ... FstLinkingEnigne wiht name {} will be registered but"
-                        + "be inactive as there seam to be no data for linking available" 
-                        + "in the SolrCore {} (dir: {})", 
-                        new Object []{engineName, core.getName(), 
-                                core.getCoreDescriptor().getInstanceDir()});
-                } else { //some FST corpora initialised
-                    if(log.isInfoEnabled()){ //log the initialised languages
-                        Set<String> langSet = new HashSet<String>(indexConfig.getCorpusLanguages());
-                        if(langSet.remove(null)){ //replace the null for the default language
-                            langSet.add(""); //with an empty string
-                        }
-                        String[] langArray = langSet.toArray(new String[langSet.size()]);
-                        Arrays.sort(langArray,String.CASE_INSENSITIVE_ORDER);
-                        log.info(" ... initialised FST corpora for languages {}",
-                            Arrays.toString(langArray));
+                //activate the index configuration
+                try {
+                    //this will init the FST directory if necessary so we might run
+                    //into IOExceptions
+                    indexConfig.activate(); 
+                } catch (IOException e) {
+                    throw new RuntimeException("Unable to activate Index for FST Linking Engine '"
+                        + engineName +"' (solrCore: "+ core.getName() + ", instanceDir: "
+                        + core.getCoreDescriptor().getInstanceDir() +")!", e);
+                }
+                if(log.isInfoEnabled()){ //log the initialised languages
+                    Set<String> langSet = new HashSet<String>(indexConfig.getCorpusLanguages());
+                    if(langSet.remove(null)){ //replace the null for the default language
+                        langSet.add(""); //with an empty string
                     }
+                    String[] langArray = langSet.toArray(new String[langSet.size()]);
+                    Arrays.sort(langArray,String.CASE_INSENSITIVE_ORDER);
+                    log.info(" ... initialised FST corpora for languages {}",
+                        Arrays.toString(langArray));
                 }
                 //check if we need to create some FST files
                 for(CorpusInfo fstInfo : indexConfig.getCorpora()){
                     //check if the fst does not exist and the fstInfo allows creation
                     if(!fstInfo.fst.exists() && fstInfo.allowCreation){
                         //create a task on the FST corpus creation service
-                        fstCreatorService.execute(new CorpusCreationTask(indexConfig, fstInfo));
+                        fstInfo.corpusLock.writeLock().lock();
+                        try {
+                            Future<TaggerFstCorpus> enqueued = fstCreatorService.submit(new CorpusCreationTask(indexConfig, fstInfo));
+                            fstInfo.enqueued(enqueued);
+                        } finally {
+                            fstInfo.corpusLock.writeLock().unlock();
+                        }
                     }
                 }
-                //set the default linking corpora
-                String defaultLanguage = entityLinkerConfig.getDefaultLanguage();
-                if(defaultLanguage == null){
-                    defaultLanguage = ""; //FST uses an empty string for the default
-                }
-                CorpusInfo defaultCoprous = indexConfig.getCorpus(defaultLanguage);
-                if(defaultCoprous != null){
-                    log.info(" ... set '{}' as default FST Corpus: {}", defaultCoprous.language, defaultCoprous);
-                    indexConfig.setDefaultCorpus(defaultCoprous);
-                } else {
-                    log.info("  ... no corpus for default language {} available", defaultCoprous);
-                }
-                //create the new configuration
                 
                 //set the newly configured instances to the fields
                 this.indexConfig = indexConfig;
