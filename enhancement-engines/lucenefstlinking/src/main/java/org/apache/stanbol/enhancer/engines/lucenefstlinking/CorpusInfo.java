@@ -26,6 +26,9 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.Future;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ObjectUtils;
@@ -80,9 +83,11 @@ public class CorpusInfo {
     
     public final Analyzer taggingAnalyzer;
     
+    protected final ReadWriteLock corpusLock = new ReentrantReadWriteLock();
+    
     protected Reference<TaggerFstCorpus> taggerCorpusRef;
     
-    protected long enqueued = -1;
+    private Future<TaggerFstCorpus> enqueuedCorpus;
     /**
      * Allows to store an error message encountered while loading/creating the
      * FST corpus.
@@ -96,6 +101,7 @@ public class CorpusInfo {
      * Indicates an Error during the runtime creation
      */
     private boolean creationError = false;
+    
     
     /** 
      * @param language
@@ -118,14 +124,10 @@ public class CorpusInfo {
      * Allows to set an error occurring during the creation of 
      * @param message
      */
-    protected void setError(long enqueued, String message){
+    protected void setError(String message){
         this.errorMessage = message;
-        if(message != null){
-            this.creationError = true;
-        }
-        if(this.enqueued == enqueued){
-            this.enqueued = -1;
-        }
+        this.creationError = true;
+        setCorpus(null);
     }
     public boolean isFstFile(){
         return fst != null && fst.isFile();
@@ -151,67 +153,127 @@ public class CorpusInfo {
      * @param enqueued the version of the corpus
      * @param corpus the corpus
      */
-    protected final void setCorpus(long enqueued, TaggerFstCorpus corpus) {
-        if(taggerCorpusRef != null){
-            taggerCorpusRef.clear();
-            taggerCorpusRef = null;
+    protected final void setCorpus(final TaggerFstCorpus corpus) {
+        corpusLock.writeLock().lock();
+        try {
+            enqueuedCorpus = null; //clear the future ref
+            if(taggerCorpusRef != null){
+                taggerCorpusRef.clear();
+                taggerCorpusRef = null;
+            }
+            if(corpus != null){
+                //reset any error
+                this.errorMessage = null; 
+                this.creationError = false;
+                //we set the corpus as a weak reference. This allows the
+                //GC to free the corpus earlier.
+                //This is done, because here the corpus was just built and not
+                //yet requested. So we want those to be GCed earlier.
+                taggerCorpusRef = new WeakReference<TaggerFstCorpus>(corpus);
+            }
+        } finally {
+            corpusLock.writeLock().unlock();
         }
+        //Store the newly built FST corpus to disc. A read level lock is sufficient
+        //for this.
+        //NOTE: the WeakReference to the corpus can only be GC'ed after we
+        //      have written the corpus to disc, as we still have a reference
+        //      to corpus!
         if(corpus != null){
-            //reset any error
-            this.errorMessage = null; 
-            this.creationError = false;
-            //we set the corpus as a weak reference. This allows the
-            //GC to free the corpus earlier.
-            //This is done, because here the corpus was just built and not
-            //yet requested. So we want those to be GCed earlier.
-            taggerCorpusRef = new WeakReference<TaggerFstCorpus>(corpus);
-        }
-        //check if the set version is the most current one
-        if(enqueued == this.enqueued){ //if so
-            this.enqueued = -1; //mark this one as up-to-date
+            try {
+                corpusLock.readLock().lock();
+                try { //STANBOL-1177: save FST models in AccessController.doPrivileged(..)
+                    AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+                        public Object run() throws IOException {
+                            if(fst.exists()){
+                                if(!FileUtils.deleteQuietly(fst)){
+                                    log.warn("Unable to delete existing FST file for {}", fst);
+                                }
+                            }
+                            corpus.save(fst);
+                            return null; //not used
+                        }
+                    });
+                } finally {
+                    corpusLock.readLock().unlock();
+                }
+            } catch (PrivilegedActionException pae) {
+                Exception e = pae.getException();
+                if(e instanceof IOException){ //IO Exception while loading the file
+                    log.warn("Unable to store FST corpus to "
+                            + fst.getAbsolutePath() + "!", e);
+                    //if we can not save the FST corpus we replace the WeakReference
+                    //with a SoftReference to avoid frequent rebuilding of the corpus
+                    corpusLock.writeLock().lock();
+                    try {
+                        if(taggerCorpusRef instanceof WeakReference<?>){
+                            taggerCorpusRef.clear();
+                            taggerCorpusRef = new SoftReference<TaggerFstCorpus>(corpus);
+                        }
+                    } finally {
+                        corpusLock.writeLock().lock();
+                    }
+                } else { //Runtime exception
+                    throw RuntimeException.class.cast(e);
+                }
+            }
         }
     }
 
     public TaggerFstCorpus getCorpus() {
-        TaggerFstCorpus corpus = taggerCorpusRef == null ? null : taggerCorpusRef.get();
-        if(corpus != null){
-            //on first usage replace a WeakReference with a SoftReference
-            if(taggerCorpusRef instanceof WeakReference<?>){
-                log.debug(" ... convert Weak to Soft Reference for Corpus {}", fst);
-                taggerCorpusRef.clear();
-                taggerCorpusRef = new SoftReference<TaggerFstCorpus>(corpus);
+        TaggerFstCorpus corpus;
+        corpusLock.readLock().lock();
+        try {
+            corpus = taggerCorpusRef == null ? null : taggerCorpusRef.get();
+            if(corpus != null){
+                //on first usage replace a WeakReference with a SoftReference
+                if(taggerCorpusRef instanceof WeakReference<?>){
+                    log.debug(" ... convert Weak to Soft Reference for Corpus {}", fst);
+                    taggerCorpusRef.clear();
+                    taggerCorpusRef = new SoftReference<TaggerFstCorpus>(corpus);
+                }
+            } else if(taggerCorpusRef != null){
+                taggerCorpusRef = null; //reset to null as the reference was taken
             }
-        } else if(taggerCorpusRef != null){
-            taggerCorpusRef = null; //reset to null as the reference was taken
+        } finally {
+            corpusLock.readLock().unlock();
         }
         if(corpus == null) {
             log.info(" ... load FST corpus {}",fst);
+            corpusLock.writeLock().lock();
             try { //STANBOL-1177: load FST models in AccessController.doPrivileged(..)
-                corpus = AccessController.doPrivileged(new PrivilegedExceptionAction<TaggerFstCorpus>() {
-                    public TaggerFstCorpus run() throws IOException {
-                        if(fst.exists() && //if the file exists AND the file was not yet failing to load 
-                                //OR the file is newer as the last version failing to load
-                                (!fstFileError || FileUtils.isFileNewer(fst, fstDate))){
-                            TaggerFstCorpus corpus = TaggerFstCorpus.load(fst);
-                            if(corpus != null){
-                                //I need to set fstDate here, because I can not
-                                //access lastModified() outside doPrivileged
-                                fstDate = new Date(fst.lastModified());
-                                if(log.isInfoEnabled()){
-                                    log.info(" ... loaded FST (date: {})", 
-                                        SimpleDateFormat.getDateTimeInstance().format(fstDate));
+                corpus = taggerCorpusRef == null ? null : taggerCorpusRef.get();
+                if(corpus == null){ //corpus not loaded while waiting for the write lock
+                    corpus = AccessController.doPrivileged(new PrivilegedExceptionAction<TaggerFstCorpus>() {
+                        public TaggerFstCorpus run() throws IOException {
+                            if(fst.exists() && //if the file exists AND the file was not yet failing to load 
+                                    //OR the file is newer as the last version failing to load
+                                    (!fstFileError || FileUtils.isFileNewer(fst, fstDate))){
+                                TaggerFstCorpus corpus = TaggerFstCorpus.load(fst);
+                                if(corpus != null){
+                                    //I need to set fstDate here, because I can not
+                                    //access lastModified() outside doPrivileged
+                                    fstDate = new Date(fst.lastModified());
+                                    if(log.isInfoEnabled()){
+                                        log.info(" ... loaded FST (date: {})", 
+                                            SimpleDateFormat.getDateTimeInstance().format(fstDate));
+                                    }
+                                } else {
+                                    log.warn(" ... no corpus loaded from {}",fst);
                                 }
+                                return corpus;
                             } else {
-                                log.warn(" ... no corpus loaded from {}",fst);
+                                log.warn(" ... unable to load FST from {} (exists: {}, fileError {})",
+                                    new Object[]{fst, fst.exists(),fstFileError});
+                                return null;
                             }
-                            return corpus;
-                        } else {
-                            log.warn(" ... unable to load FST from {} (exists: {}, fileError {})",
-                                new Object[]{fst, fst.exists(),fstFileError});
-                            return null;
                         }
-                    }
-                });
+                    });
+                    if(corpus != null){
+                        fstFileError = false;
+                        taggerCorpusRef = new SoftReference<TaggerFstCorpus>(corpus);
+                    } //else not loaded from file
+                } //else corpus was loaded while waiting for the write lock
             } catch (PrivilegedActionException pae) {
                 Exception e = pae.getException();
                 if(e instanceof IOException){ //IO Exception while loading the file
@@ -223,28 +285,25 @@ public class CorpusInfo {
                 } else { //Runtime exception
                     throw RuntimeException.class.cast(e);
                 }
+            } finally {
+                corpusLock.writeLock().unlock();
             }
-            if(corpus != null){
-                fstFileError = false;
-                taggerCorpusRef = new SoftReference<TaggerFstCorpus>(corpus);
-            } //else not loaded from file
         }
         return corpus;
     }
     /**
-     * Called when a {@link CorpusInfo} object is enqueued for runtime generation.
-     * This is used to prevent multiple FST generation in cases where the
-     * FstInfo is enqueued a 2nd time before the first one was processed.
-     * @return the {@link System#currentTimeMillis() current time} when calling
-     * this method.
+     * Called after the curpus was enqueued for rebuilding
      */
-    protected long enqueue(){
-        enqueued = System.currentTimeMillis();
-        return enqueued;
+    protected void enqueued(Future<TaggerFstCorpus> enqueued){
+        this.enqueuedCorpus = enqueued;
     }
-    
-    protected long getEnqueued(){
-        return enqueued;
+    /**
+     * Allows to get the {@link Future} of a ongoing {@link CorpusCreationTask}.
+     * @return returns a {@link Future} that allows to wait for a corpus that is
+     * currently be built. 
+     */
+    public Future<TaggerFstCorpus> getEnqueued(){
+        return enqueuedCorpus;
     }
     
     /**
@@ -255,7 +314,7 @@ public class CorpusInfo {
      * @return <code>true</code> if the FST corpus is enqueued for (re)generation.
      */
     public boolean isEnqueued(){
-        return enqueued > 0;
+        return taggerCorpusRef != null;
     }
     
     

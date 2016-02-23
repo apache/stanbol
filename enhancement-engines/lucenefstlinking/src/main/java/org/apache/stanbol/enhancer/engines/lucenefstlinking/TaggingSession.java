@@ -27,6 +27,11 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.clerezza.rdf.core.Language;
 import org.apache.clerezza.rdf.core.Literal;
@@ -134,6 +139,12 @@ public class TaggingSession implements Closeable {
         SolrIndexSearcher searcher = searcherRef.get();
         DirectoryReader indexReader = searcher.getIndexReader();
         indexVersion = Long.valueOf(indexReader.getVersion());
+        //check if the IndexConfiguration is up to date with the version of the index
+        long confVersion = config.getVersion();
+        if(confVersion != indexVersion){
+            log.debug("> update IndexConfiguration (from: {} | to: {}",confVersion, indexVersion);
+            config.update(indexVersion, searcher);
+        }
         
         //get the corpusInfo
         CorpusInfo langCorpusInfo = config.getCorpus(language);
@@ -338,56 +349,104 @@ public class TaggingSession implements Closeable {
      */
     private TaggerFstCorpus obtainFstCorpus(Long indexVersion, CorpusInfo fstInfo) throws CorpusException {
         TaggerFstCorpus fstCorpus;
-        synchronized (fstInfo) { // one at a time
-            fstCorpus = fstInfo.getCorpus(); 
-            if (fstCorpus == null) {
-                if (fstInfo.isEnqueued()) {
-                    throw new CorpusException("The FST corpus for language '"
-                            + fstInfo.language + "' is enqueued for creation, but not yet "
-                            + "available. Try at a  later point in time", null);
+        fstCorpus = fstInfo.getCorpus(); 
+        Future<TaggerFstCorpus> enqueuedCorpus = null;
+        if (fstCorpus == null) {
+            if (!fstInfo.allowCreation && fstInfo.isFstCreationError()) {
+                throw new CorpusException(fstInfo.getErrorMessage(), null);
+            }
+            fstInfo.corpusLock.readLock().lock();
+            try {
+                enqueuedCorpus = fstInfo.getEnqueued();
+            } finally {
+                fstInfo.corpusLock.readLock().unlock();
+            }
+            if(enqueuedCorpus == null && //not enqueued
+                    fstInfo.allowCreation){ 
+                log.debug(" - enqueue creation of {}", fstInfo);
+                enqueuedCorpus = enqueue(fstInfo);
+            }
+            if(enqueuedCorpus == null){
+                throw new CorpusException("Unable to abtain Fst Corpus for " + fstInfo
+                    + "(message: " + fstInfo.getErrorMessage() + ")!", null);
+            }
+        } else { //fstCorpus != null
+            //check if the current FST corpus is up to date with the Solr index
+            if(indexVersion != null && indexVersion.longValue() != fstCorpus.getIndexVersion()){
+                log.debug(" - FST corpus for language '{}' is outdated", fstInfo.language);
+                fstInfo.corpusLock.readLock().lock();
+                try {
+                    enqueuedCorpus = fstInfo.getEnqueued();
+                } finally {
+                    fstInfo.corpusLock.readLock().unlock();
                 }
-                if (fstInfo.isFstCreationError()) {
-                    throw new CorpusException(fstInfo.getErrorMessage(), null);
+                if(enqueuedCorpus == null && //not already enqueued
+                        fstInfo.allowCreation && config.getExecutorService() != null){
+                    log.debug(" - enqueue creation of {}", fstInfo);
+                    enqueuedCorpus = enqueue(fstInfo);
+                } else {
+                    log.warn("Unable to update outdated FST corpus for language '{}' "
+                            + "because runtimeCreation is {} and ExecutorServic "
+                            + "is {} available!", new Object[]{fstInfo.language,
+                            fstInfo.allowCreation ? "enabled" : "disabled" ,
+                            config.getExecutorService() == null ? "not" : ""});
+                    log.warn("  ... please adapt the Engine configuration for up "
+                        + "to date FST corpora!");
                 }
-                if (fstInfo.isFstFileError() && fstInfo.allowCreation) {
-                    //try to recreate the FST corpus
-                    if(config.getExecutorService() != null){
-                        // TODO: this code should get moved to a CorpusManager class
-                        config.getExecutorService().execute(
-                            new CorpusCreationTask(config, fstInfo));
-                        throw new CorpusException("The FST corpus for language '"
-                                + fstInfo.language + "' was invalid and is now "
-                                + "enqueued for re-creation. Retry at a  later "
-                                + "point in time.", null);
-                    } else {
-                        throw new CorpusException(fstInfo.getErrorMessage(), null);
-                    }
+            } else { //FST corpus is up to date with the current Solr index version
+                log.debug("FST corpus for language '{}' is up to date", fstInfo.language);
+            }
+        }
+        //TODO: maybe make this configurable
+        int waitTime = fstCorpus == null ? 30 : 10; 
+        if(enqueuedCorpus != null){ //we needed to build a new corpus
+            try {
+                log.debug(" - will wait max {}sec for creation of {}", waitTime, fstInfo);
+                fstCorpus = enqueuedCorpus.get(waitTime, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); //recover interrupted state
+            } catch (ExecutionException e) {
+                log.warn("Unable to update outdated FST corpus " + fstInfo 
+                    + " (message: " + fstInfo.getErrorMessage() + ")",e); 
+            } catch (TimeoutException e) {
+                if(fstCorpus != null){
+                    log.debug("unable to build FST corpus for {} in time ({}sec). Will use "
+                        + "previouse version ",fstInfo, waitTime);
+                } else {
+                    throw new CorpusException("Unable to build Fst Corpus for " + fstInfo
+                        + "within " + waitTime+ "sec! Try again later.", null);
                 }
-            } else { //fstCorpus != null
-                if(indexVersion != null && indexVersion.longValue() != fstCorpus.getIndexVersion()){
-                    log.info("FST corpus for language '{}' is outdated ...", fstInfo.language);
-                    if(fstInfo.isEnqueued()){
-                        log.info("  ... already sheduled for recreation. "
-                            + "Use outaded corpus for tagging");
-                    } else if(fstInfo.allowCreation && config.getExecutorService() != null){
-                        log.info("  ... initialise recreation");
-                        config.getExecutorService().execute(
-                            new CorpusCreationTask(config, fstInfo));
-                    } else {
-                        log.warn("Unable to update outdated FST corpus for language '{}' "
-                                + "because runtimeCreation is {} and ExecutorServic "
-                                + "is {} available!", new Object[]{fstInfo.language,
-                                fstInfo.allowCreation ? "enabled" : "disabled" ,
-                                config.getExecutorService() == null ? "not" : ""});
-                        log.warn("  ... please adapt the Engine configuration for up "
-                            + "to date FST corpora!");
-                    }
-                } else { //FST corpus is up to date with the current Solr index version
-                    log.debug("FST corpus for language '{}' is up to date", fstInfo.language);
+            } catch (CancellationException e) {
+                if(fstCorpus != null){
+                    log.debug("building of  FST corpus for {} was cancelled. Will use "
+                        + "previouse version.",fstInfo);
+                } else {
+                    throw new CorpusException("Building of FST Corpus " + fstInfo 
+                        + "was cancelled!", null);
                 }
             }
         }
         return fstCorpus;
+    }
+    /**
+     * @param fstInfo
+     * @return
+     */
+    private Future<TaggerFstCorpus> enqueue(CorpusInfo fstInfo) {
+        Future<TaggerFstCorpus> enqueuedCorpus;
+        fstInfo.corpusLock.writeLock().lock();
+        try {
+            enqueuedCorpus = fstInfo.getEnqueued(); //check again in write lock
+            if(enqueuedCorpus == null){
+                //enqueue for re-creation
+                enqueuedCorpus = config.getExecutorService().submit(
+                    new CorpusCreationTask(config, fstInfo));
+                fstInfo.enqueued(enqueuedCorpus);;
+            }
+        } finally {
+            fstInfo.corpusLock.writeLock().unlock();
+        }
+        return enqueuedCorpus;
     }
     /**
      * The current version of the SolrIndex as reported by the {@link IndexReader}

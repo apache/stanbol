@@ -39,13 +39,12 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  *
  */
-public class CorpusCreationTask implements Runnable{
+public class CorpusCreationTask implements Callable<TaggerFstCorpus>{
 
     private final Logger log = LoggerFactory.getLogger(CorpusCreationTask.class);
     
     private final CorpusInfo fstInfo;
     private final IndexConfiguration indexConfig;
-    private final long enqueued;
     
     public CorpusCreationTask(IndexConfiguration indexConfig, CorpusInfo fstInfo){
         if(indexConfig == null || fstInfo == null){
@@ -53,22 +52,20 @@ public class CorpusCreationTask implements Runnable{
         }
         this.indexConfig = indexConfig;
         this.fstInfo = fstInfo;
-        this.enqueued = fstInfo.enqueue();
     }
     
     @Override
-    public void run() {
+    public TaggerFstCorpus call() {
         if(!indexConfig.isActive()){
-            return; //task cancelled
-        }
-        //check if the FST corpus was enqueued a 2nd time
-        if(enqueued != fstInfo.getEnqueued()){
-            return;
+            String msg = "Index Configuration already deactivated";
+            fstInfo.setError(msg);
+            throw new IllegalStateException(msg);
         }
         SolrCore core = indexConfig.getIndex();
         if(core.isClosed()){
-            log.warn("Unable to build {} becuase SolrCore {} is closed!",fstInfo,core.getName());
-            return;
+            String msg = "Unable to build " + fstInfo + " becuase SolrCore " + core.getName() + " is closed!";
+            fstInfo.setError(msg);
+            throw new IllegalStateException(msg);
         }
         final TaggerFstCorpus corpus;
         RefCounted<SolrIndexSearcher> searcherRef = core.getSearcher();
@@ -85,6 +82,14 @@ public class CorpusCreationTask implements Runnable{
                         fstInfo.partialMatches,1,100);
                 }
             });
+            if(indexConfig.isActive()){
+                //set the created corpus to the FST Info
+                fstInfo.setCorpus(corpus);
+            } else { //index configuration no longer active ... ignore the built FST
+                log.warn("Index Config for "+ fstInfo + "was deactivated while building FST. "
+                        + "Built FST will be ignored.");
+            }
+            return corpus;
         } catch (PrivilegedActionException pae) {
             Exception e = pae.getException();
             if(e instanceof IOException){ //IO Exception while loading the file
@@ -96,31 +101,6 @@ public class CorpusCreationTask implements Runnable{
         } finally {
             searcherRef.decref(); //ensure that we dereference the searcher
         }
-        if(indexConfig.isActive()){
-            //set the created corpus to the FST Info
-            fstInfo.setCorpus(enqueued, corpus);
-            try { //STANBOL-1177: save FST models in AccessController.doPrivileged(..)
-                AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-                    public Object run() throws IOException {
-                        if(fstInfo.fst.exists()){
-                            if(!FileUtils.deleteQuietly(fstInfo.fst)){
-                                log.warn("Unable to delete existing FST file for {}", fstInfo);
-                            }
-                        }
-                        corpus.save(fstInfo.fst);
-                        return null; //not used
-                    }
-                });
-            } catch (PrivilegedActionException pae) {
-                Exception e = pae.getException();
-                if(e instanceof IOException){ //IO Exception while loading the file
-                    log.warn("Unable to store FST corpus " + fstInfo + " to "
-                            + fstInfo.fst.getAbsolutePath() + "!", e);
-                } else { //Runtime exception
-                    throw RuntimeException.class.cast(e);
-                }
-            }
-        } //else index configuration no longer active ... ignore the built FST
     }
     
     @Override

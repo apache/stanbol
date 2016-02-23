@@ -196,7 +196,7 @@ public class FstLinkingEngineTest {
         //setup the index configuration
         LanguageConfiguration langConf = new LanguageConfiguration("not.used", 
             new String[]{"en;field=dbpedia-ont:surfaceForm;generate=true"});
-        fstConfig = new IndexConfiguration(langConf, core, FieldEncodingEnum.SolrYard);
+        fstConfig = new IndexConfiguration(langConf, core, FieldEncodingEnum.SolrYard,"");
         fstConfig.setExecutorService(Executors.newFixedThreadPool(1));
         fstConfig.setTypeField("rdf:type");
         fstConfig.setRankingField("entityhub:entityRank");
