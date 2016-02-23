@@ -240,6 +240,10 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
         } catch (CorpusException e) {
             throw new EngineException(this, ci, e);
         }
+        if(!session.hasCorpus()){
+            //no corpus available for processing the request
+            return;
+        }
         long taggingStart = System.currentTimeMillis();
         final NavigableMap<int[],Tag> tags = new TreeMap<int[],Tag>(Tag.SPAN_COMPARATOR);
         try {
