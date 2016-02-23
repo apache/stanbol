@@ -183,14 +183,6 @@ public class TaggingSession implements Closeable {
             this.defaultLabelField = null;
             this.defaultLabelLang = null;
         }
-        if(this.defaultCorpus == null && this.langCorpus == null){
-            throw new CorpusException("Unable to initialise a FST corpus for language '"
-                + language+"'. Neigher the language specific Coprpus (field : "
-                + langCorpusInfo != null ? langCorpusInfo.indexedField : "<undefined>" 
-                + ") nor for the default language (field: " 
-                + defaultCorpusInfo != null ? defaultCorpusInfo.indexedField : "<undefined>"
-                + ") is currently available!",null);
-        }
         if(config.getEncodedTypeField() != null){
             this.typeField = config.getEncodedTypeField();
             solrDocfields.add(typeField);
