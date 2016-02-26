@@ -35,6 +35,7 @@ import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.engines.dbpspotlight.Constants;
+import org.apache.stanbol.enhancer.engines.dbpspotlight.TestDefaults;
 import org.apache.stanbol.enhancer.engines.dbpspotlight.model.SurfaceForm;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -46,6 +47,7 @@ import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper;
 import org.apache.stanbol.enhancer.test.helper.RemoteServiceHelper;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -58,7 +60,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Iavor Jelev, babelmonkeys / GzEvD
  */
-public class DBPSpotlightSpotEnhancementTest {
+public class DBPSpotlightSpotEnhancementTest implements TestDefaults {
 
 	/**
 	 * This contains the logger.
@@ -66,8 +68,7 @@ public class DBPSpotlightSpotEnhancementTest {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DBPSpotlightSpotEnhancementTest.class);
 	private static String SPL_URL = System
-			.getProperty(Constants.PARAM_URL_KEY) == null ? 
-					"http://spotlight.dbpedia.org/rest/spot" :
+			.getProperty(Constants.PARAM_URL_KEY) == null ? DEFAULT_SPL_URL :
                 System.getProperty(Constants.PARAM_URL_KEY);
 	private static String TEST_TEXT = "President Obama is meeting Angela Merkel in Berlin on Monday";
 	private static DBPSpotlightSpotEnhancementEngine dbpslight;
@@ -79,8 +80,9 @@ public class DBPSpotlightSpotEnhancementTest {
 	
 	@BeforeClass
 	public static void oneTimeSetup() throws Exception {
+	    Assume.assumeNotNull(SPL_URL);
 		//and the enhancement engine instance
-		dbpslight = new DBPSpotlightSpotEnhancementEngine(new URL(SPL_URL),null,10);
+		dbpslight = new DBPSpotlightSpotEnhancementEngine(new URL(SPL_URL + "/spot"),null,10);
 	}
 
 	@Before

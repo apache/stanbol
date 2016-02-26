@@ -412,8 +412,12 @@ public class ValueConverterFactory {
                 return valueFactory.createReference(value);
             } else {
                 try {
-                    new URI(value.toString()); //just for validating the string
-                    return valueFactory.createReference(value);
+                    //For converting we only accept absolute URIs
+                    if(new URI(value.toString()).isAbsolute()){;
+                        return valueFactory.createReference(value);
+                    } else {
+                        return null;
+                    }
                 } catch (URISyntaxException e){ return null;}
             }
         }

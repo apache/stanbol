@@ -34,6 +34,7 @@ import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.engines.dbpspotlight.Constants;
+import org.apache.stanbol.enhancer.engines.dbpspotlight.TestDefaults;
 import org.apache.stanbol.enhancer.engines.dbpspotlight.model.Annotation;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -46,6 +47,7 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 import org.apache.stanbol.enhancer.test.helper.EnhancementStructureHelper;
 import org.apache.stanbol.enhancer.test.helper.RemoteServiceHelper;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -58,15 +60,16 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Iavor Jelev, babelmonkeys / GzEvD
  */
-public class DBPSpotlightAnnotateEnhancementTest {
+public class DBPSpotlightAnnotateEnhancementTest implements TestDefaults{
 
+    
 	/**
 	 * This contains the logger.
 	 */
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DBPSpotlightAnnotateEnhancementTest.class);
 	private static String SPL_URL = System
-			.getProperty(Constants.PARAM_URL_KEY) == null ? "http://spotlight.dbpedia.org/rest/annotate"
+			.getProperty(Constants.PARAM_URL_KEY) == null ? DEFAULT_SPL_URL
 			: System.getProperty(Constants.PARAM_URL_KEY);
 	private static String TEST_TEXT = "President Obama is meeting Angela Merkel in Berlin on Monday";
 	private static DBPSpotlightAnnotateEnhancementEngine dbpslight;
@@ -78,7 +81,8 @@ public class DBPSpotlightAnnotateEnhancementTest {
 
 	@BeforeClass
 	public static void oneTimeSetup() throws Exception {
-		dbpslight = new DBPSpotlightAnnotateEnhancementEngine(new URL(SPL_URL),10);
+	    Assume.assumeNotNull(SPL_URL);
+		dbpslight = new DBPSpotlightAnnotateEnhancementEngine(new URL(SPL_URL + "/annotate"),10);
 	}
 	@Before
 	public void initTest() throws IOException {
