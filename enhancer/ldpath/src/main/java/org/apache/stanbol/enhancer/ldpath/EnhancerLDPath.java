@@ -26,7 +26,7 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHAN
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TEXTANNOTATION;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses.ENHANCER_TOPICANNOTATION;
 
-import org.apache.clerezza.rdf.core.Resource;
+import org.apache.clerezza.commons.rdf.RDFTerm;
 import org.apache.marmotta.ldpath.api.functions.SelectorFunction;
 import org.apache.marmotta.ldpath.api.selectors.NodeSelector;
 import org.apache.marmotta.ldpath.model.Constants;
@@ -46,7 +46,7 @@ public final class EnhancerLDPath {
     
     private EnhancerLDPath(){}
     
-    private static Configuration<Resource> CONFIG;
+    private static Configuration<RDFTerm> CONFIG;
     
     /**
      * The LDPath configuration including the <ul>
@@ -55,9 +55,9 @@ public final class EnhancerLDPath {
      * </ul>
      * @return the LDPath configuration for the Stanbol Enhancer
      */
-    public static final Configuration<Resource> getConfig(){
+    public static final Configuration<RDFTerm> getConfig(){
         if(CONFIG == null){
-            CONFIG = new DefaultConfiguration<Resource>();
+            CONFIG = new DefaultConfiguration<RDFTerm>();
             //add the namespaces
             for(NamespaceEnum ns : NamespaceEnum.values()){
                 CONFIG.addNamespace(ns.getPrefix(), ns.getNamespace());
@@ -65,7 +65,7 @@ public final class EnhancerLDPath {
             //now add the functions
             addFunction(CONFIG, new ContentFunction());
             String path;
-            NodeSelector<Resource> selector;
+            NodeSelector<RDFTerm> selector;
             //TextAnnotations
             path = String.format("^%s[%s is %s]",
                 ENHANCER_EXTRACTED_FROM,RDF_TYPE,ENHANCER_TEXTANNOTATION);
@@ -75,7 +75,7 @@ public final class EnhancerLDPath {
                 throw new IllegalStateException("Unable to parse the ld-path selector '" +
                         path + "'used to select all TextAnnotations of a contentItem!", e);
             }
-            addFunction(CONFIG, new PathFunction<Resource>(
+            addFunction(CONFIG, new PathFunction<RDFTerm>(
                     "textAnnotation",selector));
             
             //EntityAnnotations
@@ -87,7 +87,7 @@ public final class EnhancerLDPath {
                 throw new IllegalStateException("Unable to parse the ld-path selector '" +
                         path + "'used to select all EntityAnnotations of a contentItem!", e);
             }
-            addFunction(CONFIG,new PathFunction<Resource>(
+            addFunction(CONFIG,new PathFunction<RDFTerm>(
                     "entityAnnotation", selector));
             
             //TopicAnnotations
@@ -99,7 +99,7 @@ public final class EnhancerLDPath {
                 throw new IllegalStateException("Unable to parse the ld-path selector '" +
                         path + "'used to select all TopicAnnotations of a contentItem!", e);
             }
-            addFunction(CONFIG,new PathFunction<Resource>(
+            addFunction(CONFIG,new PathFunction<RDFTerm>(
                     "topicAnnotation",selector));
             //Enhancements
             path = String.format("^%s[%s is %s]",
@@ -110,13 +110,13 @@ public final class EnhancerLDPath {
                 throw new IllegalStateException("Unable to parse the ld-path selector '" +
                         path + "'used to select all Enhancements of a contentItem!", e);
             }
-            addFunction(CONFIG,new PathFunction<Resource>(
+            addFunction(CONFIG,new PathFunction<RDFTerm>(
                     "enhancement",selector));
             
             //Suggested EntityAnnotations for Text/TopicAnnotations
             
             //(1) to select the suggestions
-            NodeSelector<Resource> linkedEntityAnnotations;
+            NodeSelector<RDFTerm> linkedEntityAnnotations;
             path = String.format("^%s[%s is %s]",
                 DC_RELATION,RDF_TYPE,ENHANCER_ENTITYANNOTATION,ENHANCER_CONFIDENCE);
             try {
@@ -126,7 +126,7 @@ public final class EnhancerLDPath {
                         path + "'used to select all entity suggestions for an Enhancement!", e);
             }
             //(2) to select the confidence value of Enhancements
-            NodeSelector<Resource> confidenceSelector;
+            NodeSelector<RDFTerm> confidenceSelector;
             path = ENHANCER_CONFIDENCE.toString();
             try {
                 confidenceSelector = Utils.parseSelector(path);
@@ -141,7 +141,7 @@ public final class EnhancerLDPath {
             
             //The suggestion and confidence selectors can be the same as above,
             //but we need an additional result selector
-            NodeSelector<Resource> entityReferenceSelector;
+            NodeSelector<RDFTerm> entityReferenceSelector;
             path = ENHANCER_ENTITY_REFERENCE.toString();
             try {
                 entityReferenceSelector = Utils.parseSelector(path);

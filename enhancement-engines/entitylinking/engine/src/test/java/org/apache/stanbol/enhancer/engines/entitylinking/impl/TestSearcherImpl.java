@@ -29,10 +29,10 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
 import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
 import org.apache.stanbol.enhancer.engines.entitylinking.LabelTokenizer;
@@ -40,29 +40,29 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 
 public class TestSearcherImpl implements EntitySearcher {
 
-    private final UriRef nameField;
+    private final IRI nameField;
     private final LabelTokenizer tokenizer;
     
     private SortedMap<String,Collection<Entity>> data = new TreeMap<String,Collection<Entity>>(String.CASE_INSENSITIVE_ORDER);
-    private Map<UriRef,Entity> entities = new HashMap<UriRef,Entity>();
-    private Map<UriRef,Collection<Resource>> originInfo;
+    private Map<IRI,Entity> entities = new HashMap<IRI,Entity>();
+    private Map<IRI,Collection<RDFTerm>> originInfo;
 
     
-    public TestSearcherImpl(String siteId,UriRef nameField, LabelTokenizer tokenizer) {
+    public TestSearcherImpl(String siteId,IRI nameField, LabelTokenizer tokenizer) {
         this.nameField = nameField;
         this.tokenizer = tokenizer;
         this.originInfo = Collections.singletonMap(
-            new UriRef(NamespaceEnum.entityhub+"site"), 
-            (Collection<Resource>)Collections.singleton(
-                (Resource)new PlainLiteralImpl(siteId)));
+            new IRI(NamespaceEnum.entityhub+"site"), 
+            (Collection<RDFTerm>)Collections.singleton(
+                (RDFTerm)new PlainLiteralImpl(siteId)));
     }
     
     
     public void addEntity(Entity rep){
         entities.put(rep.getUri(), rep);
-        Iterator<PlainLiteral> labels = rep.getText(nameField);
+        Iterator<Literal> labels = rep.getText(nameField);
         while(labels.hasNext()){
-            PlainLiteral label = labels.next();
+            Literal label = labels.next();
             for(String token : tokenizer.tokenize(label.getLexicalForm(),null)){
                 Collection<Entity> values = data.get(token);
                 if(values == null){
@@ -76,13 +76,13 @@ public class TestSearcherImpl implements EntitySearcher {
     }
     
     @Override
-    public Entity get(UriRef id, Set<UriRef> includeFields, String...lanuages) throws IllegalStateException {
+    public Entity get(IRI id, Set<IRI> includeFields, String...lanuages) throws IllegalStateException {
         return entities.get(id);
     }
 
     @Override
-    public Collection<? extends Entity> lookup(UriRef field,
-                                           Set<UriRef> includeFields,
+    public Collection<? extends Entity> lookup(IRI field,
+                                           Set<IRI> includeFields,
                                            List<String> search,
                                            String[] languages,Integer numResults, Integer offset) throws IllegalStateException {
         if(field.equals(nameField)){
@@ -124,7 +124,7 @@ public class TestSearcherImpl implements EntitySearcher {
     }
 
     @Override
-    public Map<UriRef,Collection<Resource>> getOriginInformation() {
+    public Map<IRI,Collection<RDFTerm>> getOriginInformation() {
         return originInfo;
     }
 }

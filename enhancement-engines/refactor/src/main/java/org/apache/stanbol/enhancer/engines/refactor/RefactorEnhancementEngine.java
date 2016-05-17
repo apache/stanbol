@@ -30,11 +30,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -44,7 +44,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.commons.owl.transformation.OWLAPIToClerezzaConverter;
 import org.apache.stanbol.enhancer.engines.refactor.dereferencer.Dereferencer;
 import org.apache.stanbol.enhancer.engines.refactor.dereferencer.DereferencerImpl;
@@ -85,7 +85,6 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentFactory;
 import org.osgi.service.component.ComponentInstance;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyID;
@@ -123,7 +122,7 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
      */
     private class GraphContentSourceWithPhysicalIRI extends GraphContentInputSource {
 
-        public GraphContentSourceWithPhysicalIRI(InputStream content, IRI physicalIri) {
+        public GraphContentSourceWithPhysicalIRI(InputStream content, org.semanticweb.owlapi.model.IRI physicalIri) {
             super(content);
             bindPhysicalOrigin(Origin.create(physicalIri));
         }
@@ -238,31 +237,31 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
         log.debug("Refactor enhancement job will run in session '{}'.", session.getID());
 
         // Retrieve and filter the metadata graph for entities recognized by the engines.
-        final MGraph metadataGraph = ci.getMetadata(), signaturesGraph = new IndexedMGraph();
+        final Graph metadataGraph = ci.getMetadata(), signaturesGraph = new IndexedGraph();
         // FIXME the Stanbol Enhancer vocabulary should be retrieved from somewhere in the enhancer API.
-        final UriRef ENHANCER_ENTITY_REFERENCE = new UriRef(
+        final IRI ENHANCER_ENTITY_REFERENCE = new IRI(
                 "http://fise.iks-project.eu/ontology/entity-reference");
         Iterator<Triple> tripleIt = metadataGraph.filter(null, ENHANCER_ENTITY_REFERENCE, null);
         while (tripleIt.hasNext()) {
             // Get the entity URI
-            Resource obj = tripleIt.next().getObject();
-            if (!(obj instanceof UriRef)) {
-                log.warn("Invalid UriRef for entity reference {}. Skipping.", obj);
+            RDFTerm obj = tripleIt.next().getObject();
+            if (!(obj instanceof IRI)) {
+                log.warn("Invalid IRI for entity reference {}. Skipping.", obj);
                 continue;
             }
-            final String entityReference = ((UriRef) obj).getUnicodeString();
+            final String entityReference = ((IRI) obj).getUnicodeString();
             log.debug("Trying to resolve entity {}", entityReference);
 
             // Populate the entity signatures graph, by querying either the Entity Hub or the dereferencer.
             if (engineConfiguration.isEntityHubUsed()) {
-                MGraph result = populateWithEntity(entityReference, signaturesGraph);
+                Graph result = populateWithEntity(entityReference, signaturesGraph);
                 if (result != signaturesGraph && result != null) {
                     log.warn("Entity Hub query added triples to a new graph instead of populating the supplied one!"
                              + " New signatures will be discarded.");
                 }
             } else try {
-                OntologyInputSource<TripleCollection> source = new GraphContentSourceWithPhysicalIRI(
-                        dereferencer.resolve(entityReference), IRI.create(entityReference));
+                OntologyInputSource<Graph> source = new GraphContentSourceWithPhysicalIRI(
+                        dereferencer.resolve(entityReference), org.semanticweb.owlapi.model.IRI.create(entityReference));
                 signaturesGraph.addAll(source.getRootOntology());
             } catch (FileNotFoundException e) {
                 log.error("Failed to dereference entity " + entityReference + ". Skipping.", e);
@@ -301,17 +300,17 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
              * 
              * To perform the refactoring of the ontology to a given vocabulary we use the Stanbol Refactor.
              */
-            Recipe recipe = ruleStore.getRecipe(new UriRef(engineConfiguration.getRecipeId()));
+            Recipe recipe = ruleStore.getRecipe(new IRI(engineConfiguration.getRecipeId()));
 
             log.debug("Recipe {} contains {} rules.", recipe, recipe.getRuleList().size());
             log.debug("The ontology to be refactor is {}", ontology);
 
-            TripleCollection tc = refactorer.graphRefactoring(
-                OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(ontology), recipe);
+            Graph tc = refactorer.graphRefactoring(
+                OWLAPIToClerezzaConverter.owlOntologyToClerezzaGraph(ontology), recipe);
 
             /*
              * ontology = refactorer .ontologyRefactoring(ontology,
-             * IRI.create(engineConfiguration.getRecipeId()));
+             * org.semanticweb.owlapi.model.IRI.create(engineConfiguration.getRecipeId()));
              */
             /*
              * The newly generated ontology is converted to Clarezza format and then added os substitued to
@@ -346,7 +345,7 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
             for (OWLOntologyID id : session.listManagedOntologies()) {
                 try {
                     String key = ontologyProvider.getKey(id.getOntologyIRI());
-                    ontologyProvider.getStore().deleteTripleCollection(new UriRef(key));
+                    ontologyProvider.getStore().deleteGraph(new IRI(key));
                 } catch (Exception ex) {
                     log.error("Failed to delete triple collection " + id, ex);
                     continue;
@@ -374,7 +373,7 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
 
         // Deactivation clears all the rules and releases OntoNet resources.
 
-        UriRef recipeId = new UriRef(engineConfiguration.getRecipeId());
+        IRI recipeId = new IRI(engineConfiguration.getRecipeId());
         try {
             // step 1: get all the rules
             log.debug("Recipe {} and its associated rules will be removed from the rule store.", recipeId);
@@ -420,9 +419,9 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
      *            {@link String}
      * @return the {@link OWLOntology} of the entity
      */
-    private MGraph populateWithEntity(String entityURI, MGraph target) {
+    private Graph populateWithEntity(String entityURI, Graph target) {
         log.debug("Requesting signature of entity {}", entityURI);
-        MGraph graph = target != null ? target : new IndexedMGraph();
+        Graph graph = target != null ? target : new IndexedGraph();
         // Query the Entity Hub
         Entity signature = referencedSiteManager.getEntity(entityURI);
         if (signature != null) {
@@ -451,7 +450,7 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
      */
     private void initEngine(RefactorEnhancementEngineConf engineConfiguration) {
 
-        // IRI dulcifierScopeIRI = IRI.create((String) context.getProperties().get(SCOPE));
+        // IRI dulcifierScopeIRI = org.semanticweb.owlapi.model.IRI.create((String) context.getProperties().get(SCOPE));
         String scopeId = engineConfiguration.getScope();
 
         // Create or get the scope with the configured ID
@@ -470,11 +469,11 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
         try {
             log.info("Will now load requested ontology into the core space of scope '{}'.", scopeId);
             OWLOntologyManager sharedManager = OWLManager.createOWLOntologyManager();
-            IRI physicalIRI = null;
+            org.semanticweb.owlapi.model.IRI physicalIRI = null;
             for (int o = 0; o < coreScopeOntologySet.length; o++) {
                 String url = coreScopeOntologySet[o];
                 try {
-                    physicalIRI = IRI.create(url);
+                    physicalIRI = org.semanticweb.owlapi.model.IRI.create(url);
                 } catch (Exception e) {
                     failed.add(url);
                 }
@@ -506,7 +505,7 @@ public class RefactorEnhancementEngine extends AbstractEnhancementEngine<Runtime
         String recipeId = engineConfiguration.getRecipeId();
         Recipe recipe = null;
         try {
-            recipe = ruleStore.createRecipe(new UriRef(recipeId), null);
+            recipe = ruleStore.createRecipe(new IRI(recipeId), null);
         } catch (AlreadyExistingRecipeException e1) {
             log.error("A recipe with ID {} already exists in the store.", recipeId);
         }

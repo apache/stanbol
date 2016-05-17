@@ -47,16 +47,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -199,8 +199,8 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
         linkerConfig.setRedirectProcessingMode(RedirectProcessingMode.IGNORE);
         //remove all type mappings
         linkerConfig.setDefaultDcType(null);
-        Set<UriRef> mappedUris = new HashSet<UriRef>(linkerConfig.getTypeMappings().keySet());
-        for(UriRef mappedUri : mappedUris){
+        Set<IRI> mappedUris = new HashSet<IRI>(linkerConfig.getTypeMappings().keySet());
+        for(IRI mappedUri : mappedUris){
             linkerConfig.setTypeMapping(mappedUri.getUnicodeString(), null);
         }
         //parse confidence adjustment value (STANBOL-1219)
@@ -283,12 +283,12 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
         //create the in-memory database for the mentioned Entities
         ContentItemMentionBuilder entityMentionIndex = new ContentItemMentionBuilder(
             labelTokenizer, language, linkerConfig.getDefaultLanguage());
-        MGraph metadata = ci.getMetadata();
-        Set<UriRef> textAnnotations = new HashSet<UriRef>();
+        Graph metadata = ci.getMetadata();
+        Set<IRI> textAnnotations = new HashSet<IRI>();
         ci.getLock().readLock().lock();
         try { //iterate over all TextAnnotations (mentions of Entities)
             for(Iterator<Triple> it = metadata.filter(null, RDF_TYPE, ENHANCER_TEXTANNOTATION); it.hasNext();){
-                UriRef ta = (UriRef)it.next().getSubject();
+                IRI ta = (IRI)it.next().getSubject();
                 entityMentionIndex.registerTextAnnotation(ta, metadata);
                 textAnnotations.add(ta); //store the registered text annotations
             }
@@ -314,21 +314,21 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
     }
 
     private void writeComentions(ContentItem ci,Collection<LinkedEntity> comentions, String language,
-            Set<UriRef> textAnnotations) {
+            Set<IRI> textAnnotations) {
         Language languageObject = null;
         if(language != null && !language.isEmpty()){
             languageObject = new Language(language);
         }
         
-        MGraph metadata = ci.getMetadata();
+        Graph metadata = ci.getMetadata();
         //we MUST adjust the confidence level of existing annotations only once
         //se we need to keep track of those
-        Set<NonLiteral> adjustedSuggestions = new HashSet<NonLiteral>();
+        Set<BlankNodeOrIRI> adjustedSuggestions = new HashSet<BlankNodeOrIRI>();
         log.debug("Write Co-Mentions:");
         for(LinkedEntity comention : comentions){
             log.debug(" > {}",comention);
             //URIs of TextAnnotations for the initial mention of this co-mention
-            Collection<UriRef> initialMentions = new ArrayList<UriRef>(comention.getSuggestions().size());
+            Collection<IRI> initialMentions = new ArrayList<IRI>(comention.getSuggestions().size());
             for(Suggestion suggestion : comention.getSuggestions()){
                 Entity entity = suggestion.getEntity();
                 if(textAnnotations.contains(entity.getUri())){
@@ -344,14 +344,14 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                 //search for existing text annotation
                 boolean ignore = false;
                 //search for textAnnotations with the same end
-                UriRef textAnnotation = null;
+                IRI textAnnotation = null;
                 Iterator<Triple> it = metadata.filter(null, ENHANCER_START, startLiteral);
                 while(it.hasNext()){
                     Triple t = it.next();
                     Integer end = EnhancementEngineHelper.get(metadata, t.getSubject(), ENHANCER_END, Integer.class, literalFactory);
                     if(end != null && textAnnotations.contains(t.getSubject())){
                             //metadata.filter(t.getSubject(), RDF_TYPE, ENHANCER_TEXTANNOTATION).hasNext()){
-                        textAnnotation = (UriRef)t.getSubject();
+                        textAnnotation = (IRI)t.getSubject();
                         if(end > occurrence.getEnd()){
                             // there is an other TextAnnotation selecting a bigger Span
                             //so we should ignore this Occurrence
@@ -365,7 +365,7 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                     Integer start = EnhancementEngineHelper.get(metadata, t.getSubject(), ENHANCER_START, Integer.class, literalFactory);
                     if(start != null && textAnnotations.contains(t.getSubject())){
                             //metadata.filter(t.getSubject(), RDF_TYPE, ENHANCER_TEXTANNOTATION).hasNext()){
-                        textAnnotation = (UriRef)t.getSubject();
+                        textAnnotation = (IRI)t.getSubject();
                         if(start < occurrence.getStart()){
                             // there is an other TextAnnotation selecting a bigger Span
                             //so we should ignore this Occurrence
@@ -399,10 +399,10 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                         //    ENHANCER_CONFIDENCE, Double.class, literalFactory);
                     }
                     //now process initial mention(s) for the co-mention
-                    Set<UriRef> dcTypes = new HashSet<UriRef>();
-                    for(UriRef initialMention : initialMentions){
+                    Set<IRI> dcTypes = new HashSet<IRI>();
+                    for(IRI initialMention : initialMentions){
                         //get the dc:type(s) of the initial mentions
-                        Iterator<UriRef> dcTypesIt = getReferences(metadata, initialMention, DC_TYPE);
+                        Iterator<IRI> dcTypesIt = getReferences(metadata, initialMention, DC_TYPE);
                         while(dcTypesIt.hasNext()){
                             dcTypes.add(dcTypesIt.next());
                         }
@@ -419,12 +419,12 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                         //now we need to compare the suggestions of the initial
                         //mention(s) with the existing one. 
                         //Get information about the suggestions of the initial mention
-                        Map<Resource,Double> initialSuggestions = new HashMap<Resource,Double>();
-                        Map<Resource, Resource> initialSuggestedEntities = new HashMap<Resource,Resource>();
+                        Map<RDFTerm,Double> initialSuggestions = new HashMap<RDFTerm,Double>();
+                        Map<RDFTerm, RDFTerm> initialSuggestedEntities = new HashMap<RDFTerm,RDFTerm>();
                         for(Iterator<Triple> suggestions = metadata.filter(null, DC_RELATION, initialMention); suggestions.hasNext();){
                             if(!textAnnotations.contains(suggestions)) {
-                                NonLiteral suggestion = suggestions.next().getSubject();
-                                Resource suggestedEntity = EnhancementEngineHelper.getReference(metadata, suggestion, ENHANCER_ENTITY_REFERENCE);
+                                BlankNodeOrIRI suggestion = suggestions.next().getSubject();
+                                RDFTerm suggestedEntity = EnhancementEngineHelper.getReference(metadata, suggestion, ENHANCER_ENTITY_REFERENCE);
                                 if(suggestedEntity != null){ //it has a suggestion
                                     Double confidence = EnhancementEngineHelper.get(
                                         metadata, suggestion, ENHANCER_CONFIDENCE, Double.class, literalFactory);
@@ -441,18 +441,18 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                         }
                         //now we collect existing Suggestions for this TextAnnoation where we need
                         //to adjust the confidence (quite some things to check ....)
-                        Map<NonLiteral, Double> existingSuggestions = new HashMap<NonLiteral,Double>();
+                        Map<BlankNodeOrIRI, Double> existingSuggestions = new HashMap<BlankNodeOrIRI,Double>();
                     	if(maxConfidence != null && confidenceAdjustmentFactor < 1){
                     	    //suggestions are defined by incoming dc:releation
 	                        for(Iterator<Triple> esIt = metadata.filter(null, DC_RELATION, textAnnotation);esIt.hasNext();){
-	                        	NonLiteral existingSuggestion = esIt.next().getSubject();
+	                        	BlankNodeOrIRI existingSuggestion = esIt.next().getSubject();
 	                        	//but not all of them are suggestions
 	                        	if(!textAnnotations.contains(existingSuggestion)) { //ignore fise:TextAnnotations
 	                                Double existingConfidence = EnhancementEngineHelper.get(metadata, existingSuggestion, 
                                         ENHANCER_CONFIDENCE, Double.class, literalFactory);
 	                                //ignore fise:TextAnnotations also suggested for the initial mention
                                     if(!initialSuggestions.containsKey(existingSuggestion)){
-                                        Resource suggestedEntity = EnhancementEngineHelper.getReference(metadata, existingSuggestion, ENHANCER_ENTITY_REFERENCE);
+                                        RDFTerm suggestedEntity = EnhancementEngineHelper.getReference(metadata, existingSuggestion, ENHANCER_ENTITY_REFERENCE);
                                         //we might also have different fise:TextAnnotations that
                                         //fise:entity-reference to an Entity present in the
                                         //suggestions for the initial mention
@@ -463,7 +463,7 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                                             } //else confidence already adjusted
                                         } else { // different fise:EntityAnnotation, but same reference Entity
                                             //we need to check confidences to decide what to do
-                                            Resource initialSuggestion = initialSuggestedEntities.get(suggestedEntity);
+                                            RDFTerm initialSuggestion = initialSuggestedEntities.get(suggestedEntity);
                                             Double initialConfidence = initialSuggestions.get(initialSuggestion);
                                             if(initialConfidence == null || (existingConfidence != null && 
                                                     existingConfidence.compareTo(initialConfidence) >= 0)){
@@ -493,7 +493,7 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                                     }
 	                        	} //else ignore dc:relations to other fise:TextAnnotations
  	                        }
-	                        for(Entry<NonLiteral,Double> entry : existingSuggestions.entrySet()){
+	                        for(Entry<BlankNodeOrIRI,Double> entry : existingSuggestions.entrySet()){
 	                        	if(entry.getValue() != null){
 	                        		double adjustedConfidence = entry.getValue() * confidenceAdjustmentFactor;
 	                        		if(maxExistingConfidence == null || adjustedConfidence > maxExistingConfidence){
@@ -506,8 +506,8 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
 	                        }
                     	}
                     	//add the suggestions of the initial mention to this one
-                        for(Resource suggestion : initialSuggestions.keySet()){
-                            metadata.add(new TripleImpl((NonLiteral)suggestion, DC_RELATION, textAnnotation));
+                        for(RDFTerm suggestion : initialSuggestions.keySet()){
+                            metadata.add(new TripleImpl((BlankNodeOrIRI)suggestion, DC_RELATION, textAnnotation));
     
                         }
                         //finally link the co-mentation with the initial one
@@ -524,7 +524,7 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                     		maxConfidence.compareTo(maxExistingConfidence) >= 0);
                     boolean addCoMentionDcTypes = maxExistingConfidence == null ||
                     		(maxConfidence != null && maxConfidence.compareTo(maxExistingConfidence) >= 1);
-                    Iterator<UriRef> existingDcTypesIt = getReferences(metadata, textAnnotation, DC_TYPE);
+                    Iterator<IRI> existingDcTypesIt = getReferences(metadata, textAnnotation, DC_TYPE);
                     while(existingDcTypesIt.hasNext()){ //do not add existing
                     	//remove dc:type triples if they are not re-added later and
                     	//removeExistingDcTypes == true
@@ -534,7 +534,7 @@ public class EntityCoMentionEngine extends AbstractEnhancementEngine<RuntimeExce
                         }
                     }
                     if(addCoMentionDcTypes){
-	                    for(UriRef dcType : dcTypes){ //add missing
+	                    for(IRI dcType : dcTypes){ //add missing
 	                        metadata.add(new TripleImpl(textAnnotation, DC_TYPE, dcType));
 	                    }
                     }

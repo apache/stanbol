@@ -209,8 +209,8 @@ public class RdfIndexingSourceTest {
             9, count);
     }
     @Test
-    public void testBNodeSupport(){
-        log.info(" --- testBNodeSupport ---");
+    public void testBlankNodeSupport(){
+        log.info(" --- testBlankNodeSupport ---");
         String testName = "bnode";
         IndexingConfig config = new IndexingConfig(CONFIG_ROOT+File.separatorChar+testName,
             CONFIG_ROOT+'/'+testName){};
@@ -231,7 +231,7 @@ public class RdfIndexingSourceTest {
         }
         //check if all entities where indexed
         //Expected are 3 entities First France from france.rdf
-        //and two from BNode Entities in bnode.nt
+        //and two from BlankNode Entities in bnode.nt
         assertEquals(String.format("> %s Entities expected but only %s processed!",
             3, count), 
             3, count);

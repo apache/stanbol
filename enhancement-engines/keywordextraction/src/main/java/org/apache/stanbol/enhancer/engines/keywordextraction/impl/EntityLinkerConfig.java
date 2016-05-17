@@ -25,7 +25,7 @@ import java.util.Set;
 import opennlp.tools.chunker.Chunker;
 import opennlp.tools.postag.POSTagger;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText.Chunk;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText.Token;
@@ -95,10 +95,10 @@ public class EntityLinkerConfig {
      * Default mapping for Concept types to dc:type values added for
      * TextAnnotations.
      */
-    public static final Map<String,UriRef> DEFAULT_ENTITY_TYPE_MAPPINGS;
+    public static final Map<String,IRI> DEFAULT_ENTITY_TYPE_MAPPINGS;
     
     static { //the default mappings for the three types used by the Stanbol Enhancement Structure
-        Map<String,UriRef> mappings = new HashMap<String,UriRef>();
+        Map<String,IRI> mappings = new HashMap<String,IRI>();
         mappings.put(OntologicalClasses.DBPEDIA_ORGANISATION.getUnicodeString(), 
             OntologicalClasses.DBPEDIA_ORGANISATION);
         mappings.put("http://dbpedia.org/ontology/Newspaper", OntologicalClasses.DBPEDIA_ORGANISATION);
@@ -120,22 +120,22 @@ public class EntityLinkerConfig {
 
         mappings.put(OntologicalClasses.DBPEDIA_ORGANISATION.getUnicodeString(), 
             OntologicalClasses.DBPEDIA_ORGANISATION);
-//        UriRef DRUG = new UriRef(NamespaceEnum.drugbank+"drugs");
+//        IRI DRUG = new IRI(NamespaceEnum.drugbank+"drugs");
 //        mappings.put(DRUG.getUnicodeString(), DRUG);
 //        mappings.put(NamespaceEnum.dbpediaOnt+"Drug", DRUG);
 //        mappings.put(NamespaceEnum.dailymed+"drugs", DRUG);
 //        mappings.put(NamespaceEnum.sider+"drugs", DRUG);
 //        mappings.put(NamespaceEnum.tcm+"Medicine", DRUG);
 //        
-//        UriRef DISEASE = new UriRef(NamespaceEnum.diseasome+"diseases");
+//        IRI DISEASE = new IRI(NamespaceEnum.diseasome+"diseases");
 //        mappings.put(DISEASE.getUnicodeString(), DISEASE);
 //        mappings.put(NamespaceEnum.linkedct+"condition", DISEASE);
 //        mappings.put(NamespaceEnum.tcm+"Disease", DISEASE);
 //
-//        UriRef SIDE_EFFECT = new UriRef(NamespaceEnum.sider+"side_effects");
+//        IRI SIDE_EFFECT = new IRI(NamespaceEnum.sider+"side_effects");
 //        mappings.put(SIDE_EFFECT.getUnicodeString(), SIDE_EFFECT);
 //        
-//        UriRef INGREDIENT = new UriRef(NamespaceEnum.dailymed+"ingredients");
+//        IRI INGREDIENT = new IRI(NamespaceEnum.dailymed+"ingredients");
 //        mappings.put(INGREDIENT.getUnicodeString(), INGREDIENT);
                 
         DEFAULT_ENTITY_TYPE_MAPPINGS = Collections.unmodifiableMap(mappings);
@@ -198,8 +198,8 @@ public class EntityLinkerConfig {
      * Holds the mappings of rdf:type used by concepts to dc:type values used
      * by TextAnnotations. 
      */
-    private Map<String,UriRef> typeMappings;
-    private Map<String, UriRef> unmodTypeMappings;
+    private Map<String,IRI> typeMappings;
+    private Map<String, IRI> unmodTypeMappings;
     /**
      * The mode on how to process redirect for Entities. 
      */
@@ -207,7 +207,7 @@ public class EntityLinkerConfig {
     /**
      * the default DC Type
      */
-    private UriRef defaultDcType;
+    private IRI defaultDcType;
     private String nameField;
     private String redirectField;
     private String typeField;
@@ -265,7 +265,7 @@ public class EntityLinkerConfig {
         setMaxSuggestions(DEFAULT_SUGGESTIONS);
         setMaxSearchTokens(DEFAULT_MAX_SEARCH_TOKENS);
         setRedirectProcessingMode(DEFAULT_REDIRECT_PROCESSING_MODE);
-        typeMappings = new HashMap<String,UriRef>(DEFAULT_ENTITY_TYPE_MAPPINGS);
+        typeMappings = new HashMap<String,IRI>(DEFAULT_ENTITY_TYPE_MAPPINGS);
         unmodTypeMappings = Collections.unmodifiableMap(typeMappings);
         setDefaultDcType(typeMappings.remove(null));
         setNameField(DEFAULT_NAME_FIELD);
@@ -445,23 +445,23 @@ public class EntityLinkerConfig {
      * @return the previously mapped dc:type value or <code>null</code> if
      * no mapping for the parsed concept type was present
      */
-    public UriRef removeTypeMapping(String conceptType){
+    public IRI removeTypeMapping(String conceptType){
         return typeMappings.remove(conceptType);
     }
     /**
      * 
      * @param conceptType the type of the concept or <code>null</code> to
-     * add the default dc:type mapping. See also {@link #setDefaultDcType(UriRef)}
+     * add the default dc:type mapping. See also {@link #setDefaultDcType(IRI)}
      * @param dcType the dc:type for the parsed concept type
      * @return the previously mapped dc:type value if an existing mapping
      * was updated or <code>null</code> if a new mapping was added.
      */
-    public UriRef setTypeMapping(String conceptType, UriRef dcType){
+    public IRI setTypeMapping(String conceptType, IRI dcType){
         if(dcType == null) {
             throw new IllegalArgumentException("The parsed dc:type URI MUST NOT be NULL!");
         }
         if(conceptType == null){ //handle setting of the default dc:type value
-            UriRef oldDefault = getDefaultDcType();
+            IRI oldDefault = getDefaultDcType();
             setDefaultDcType(dcType);
             return oldDefault;
         }
@@ -475,7 +475,7 @@ public class EntityLinkerConfig {
      * cases.
      * @param defaultDcType the defaultDcType to set
      */
-    public void setDefaultDcType(UriRef defaultDcType) {
+    public void setDefaultDcType(IRI defaultDcType) {
         this.defaultDcType = defaultDcType;
     }
     /**
@@ -484,7 +484,7 @@ public class EntityLinkerConfig {
      * explicit mapping exists
      * @return the defaultDcType
      */
-    public UriRef getDefaultDcType() {
+    public IRI getDefaultDcType() {
         return defaultDcType;
     }
     /**
@@ -505,7 +505,7 @@ public class EntityLinkerConfig {
      * Getter for the read only mappings of type mappings
      * @return the type mappings (read only)
      */
-    public Map<String,UriRef> getTypeMappings() {
+    public Map<String,IRI> getTypeMappings() {
         return unmodTypeMappings;
     }
     /**

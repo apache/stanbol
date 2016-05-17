@@ -28,11 +28,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Language;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
@@ -65,7 +64,7 @@ public class RdfRepresentationTest extends RepresentationTest {
      * Additional Tests for special Features of the Clerezza based implementation
      * 
      * This includes mainly support for additional types like PlainLiteral,
-     * TypedLiteral, UriRefs. The conversion to such types as well as getter for
+     * TypedLiteral, IRIs. The conversion to such types as well as getter for
      * such types.
      *--------------------------------------------------------------------------
      */
@@ -79,11 +78,11 @@ public class RdfRepresentationTest extends RepresentationTest {
     @Test
     public void testPlainLiteralToTextConversion(){
         String field = "urn:test.RdfRepresentation:test.field";
-        PlainLiteral noLangLiteral = new PlainLiteralImpl("A plain literal without Language");
-        PlainLiteral enLiteral = new PlainLiteralImpl("An english literal",new Language("en"));
-        PlainLiteral deLiteral = new PlainLiteralImpl("Ein Deutsches Literal",new Language("de"));
-        PlainLiteral deATLiteral = new PlainLiteralImpl("Ein Topfen Verband hilft bei Zerrungen",new Language("de-AT"));
-        Collection<PlainLiteral> plainLiterals = Arrays.asList(noLangLiteral,enLiteral,deLiteral,deATLiteral);
+        Literal noLangLiteral = new PlainLiteralImpl("A plain literal without Language");
+        Literal enLiteral = new PlainLiteralImpl("An english literal",new Language("en"));
+        Literal deLiteral = new PlainLiteralImpl("Ein Deutsches Literal",new Language("de"));
+        Literal deATLiteral = new PlainLiteralImpl("Ein Topfen Verband hilft bei Zerrungen",new Language("de-AT"));
+        Collection<Literal> plainLiterals = Arrays.asList(noLangLiteral,enLiteral,deLiteral,deATLiteral);
         Representation rep = createRepresentation(null);
         rep.add(field, plainLiterals);
         //now test, that the Plain Literals are available as natural language
@@ -104,7 +103,7 @@ public class RdfRepresentationTest extends RepresentationTest {
         assertFalse(enLangaugeTexts.hasNext());//only a single result
         //3) test to get all natural language values
         Set<String> stringValues = new HashSet<String>();
-        for(PlainLiteral plainLiteral : plainLiterals){
+        for(Literal plainLiteral : plainLiterals){
             stringValues.add(plainLiteral.getLexicalForm());
         }
         Iterator<Text> texts = rep.getText(field);
@@ -123,9 +122,9 @@ public class RdfRepresentationTest extends RepresentationTest {
     @Test
     public void testTypedLiteralToTextConversion(){
         String field = "urn:test.RdfRepresentation:test.field";
-        TypedLiteral stringLiteral = literalFactory.createTypedLiteral("This is a stirng value");
+        Literal stringLiteral = literalFactory.createTypedLiteral("This is a stirng value");
         //also add an integer to test that other typed literals are not used as texts
-        TypedLiteral integerLiteral = literalFactory.createTypedLiteral(new Integer(5));
+        Literal integerLiteral = literalFactory.createTypedLiteral(new Integer(5));
         Representation rep = createRepresentation(null);
         rep.add(field, Arrays.asList(stringLiteral,integerLiteral));
         //test if the literal is returned when asking for natural language text without language
@@ -151,20 +150,20 @@ public class RdfRepresentationTest extends RepresentationTest {
     public void testTypedLiteralToValueConversion(){
         String field = "urn:test.RdfRepresentation:test.field";
         Integer integerValue = 5;
-        TypedLiteral integerLiteral = literalFactory.createTypedLiteral(integerValue);
+        Literal integerLiteral = literalFactory.createTypedLiteral(integerValue);
         Date dateValue = new Date();
-        TypedLiteral dateLiteeral = literalFactory.createTypedLiteral(dateValue);
+        Literal dateLiteeral = literalFactory.createTypedLiteral(dateValue);
         Double doubleValue = Math.PI;
-        TypedLiteral doubleLiteral = literalFactory.createTypedLiteral(doubleValue);
+        Literal doubleLiteral = literalFactory.createTypedLiteral(doubleValue);
         String stringValue = "This is a string literal value";
-        TypedLiteral stringLiteral = literalFactory.createTypedLiteral(stringValue);
+        Literal stringLiteral = literalFactory.createTypedLiteral(stringValue);
         Representation rep = createRepresentation(null);
-        Collection<TypedLiteral> typedLiterals = 
+        Collection<Literal> typedLiterals = 
             Arrays.asList(integerLiteral,doubleLiteral,stringLiteral,dateLiteeral);
         rep.add(field, typedLiterals);
         
         //now check that such values are available via TypedLiteral
-        Iterator<TypedLiteral> typedLiteralValues = rep.get(field, TypedLiteral.class);
+        Iterator<Literal> typedLiteralValues = rep.get(field, Literal.class);
         int size = 0;
         while(typedLiteralValues.hasNext()){
             assertTrue(typedLiterals.contains(typedLiteralValues.next()));

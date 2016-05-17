@@ -16,10 +16,9 @@
  */
 package org.apache.stanbol.entityhub.model.clerezza;
 
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 
 public class RdfText implements Text, Cloneable {
@@ -41,14 +40,14 @@ public class RdfText implements Text, Cloneable {
 
     protected RdfText(Literal literal) {
         this.literal = literal;
-        this.isPlain = literal instanceof PlainLiteral;
+        this.isPlain = literal instanceof Literal;
     }
 
     @Override
     public String getLanguage() {
         return isPlain && 
-            ((PlainLiteral) literal).getLanguage() != null ? 
-                ((PlainLiteral) literal).getLanguage().toString() : null;
+            (literal).getLanguage() != null ? 
+                (literal).getLanguage().toString() : null;
     }
 
     @Override
@@ -62,7 +61,7 @@ public class RdfText implements Text, Cloneable {
 
     @Override
     public RdfText clone() {
-        Language language = isPlain ? ((PlainLiteral) literal).getLanguage() : null;
+        Language language = isPlain ? (literal).getLanguage() : null;
         return new RdfText(new PlainLiteralImpl(literal.getLexicalForm(), language));
     }
 

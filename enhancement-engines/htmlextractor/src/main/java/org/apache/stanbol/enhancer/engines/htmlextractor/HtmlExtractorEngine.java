@@ -25,9 +25,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -153,7 +153,7 @@ public class HtmlExtractorEngine extends AbstractEnhancementEngine<IOException,R
     @Override
     public void computeEnhancements(ContentItem ci) throws EngineException {
         HtmlExtractor extractor = new HtmlExtractor(htmlExtractorRegistry, htmlParser);
-        MGraph model = new SimpleMGraph();
+        Graph model = new SimpleGraph();
         ci.getLock().readLock().lock();
         try {
             extractor.extract(ci.getUri().getUnicodeString(), ci.getStream(),null, ci.getMimeType(), model);
@@ -166,7 +166,7 @@ public class HtmlExtractorEngine extends AbstractEnhancementEngine<IOException,R
         ClerezzaRDFUtils.urifyBlankNodes(model);
         // make the model single rooted
         if (singleRootRdf) {
-            ClerezzaRDFUtils.makeConnected(model,ci.getUri(),new UriRef(NIE_NS+"contains"));
+            ClerezzaRDFUtils.makeConnected(model,ci.getUri(),new IRI(NIE_NS+"contains"));
         }
         //add the extracted triples to the metadata of the ContentItem
         ci.getLock().writeLock().lock();

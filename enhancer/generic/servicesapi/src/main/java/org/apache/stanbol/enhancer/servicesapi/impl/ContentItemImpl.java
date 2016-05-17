@@ -22,10 +22,8 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.access.LockableMGraph;
-import org.apache.clerezza.rdf.core.access.LockableMGraphWrapper;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
@@ -44,7 +42,7 @@ import org.apache.stanbol.enhancer.servicesapi.NoSuchPartException;
  * it is marked as abstract and has only a protected constructor because it is
  * not intended that users directly instantiate it. The intended usage is to
  * create subclasses that instantiate ContentItmes with specific combinations
- * of {@link Blob} nad {@link MGraph} implementations.<p>
+ * of {@link Blob} nad {@link Graph} implementations.<p>
  * Examples are: <ul>
  * <li>The {@link InMemoryContentItem} intended for in-memory
  * storage of ContentItems during the stateless enhancement workflow
@@ -61,22 +59,22 @@ public abstract class ContentItemImpl implements ContentItem {
     /**
      * Holds the content parts of this ContentItem
      */
-	private final Map<UriRef, Object> parts = new LinkedHashMap<UriRef, Object>();
+	private final Map<IRI, Object> parts = new LinkedHashMap<IRI, Object>();
 	/**
 	 * The uri of the ContentItem
 	 */
-	private final UriRef uri;
+	private final IRI uri;
 	/**
 	 * The uri of the main content part (the {@link Blob} parsed with the constructor)
 	 */
-	private final UriRef mainBlobUri;
+	private final IRI mainBlobUri;
 
-    private final LockableMGraph metadata; 
+    private final Graph metadata; 
 
     protected final Lock readLock;
     protected final Lock writeLock;
     
-	protected ContentItemImpl(UriRef uri, Blob main, MGraph metadata) {
+	protected ContentItemImpl(IRI uri, Blob main, Graph metadata) {
 	    if(uri == null){
 	        throw new IllegalArgumentException("The URI for the ContentItem MUST NOT be NULL!");
 	    }
@@ -87,19 +85,15 @@ public abstract class ContentItemImpl implements ContentItem {
 	        throw new IllegalArgumentException("Tha parsed graph MUST NOT be NULL!");
 	    }
         this.uri = uri;
-        this.mainBlobUri = new UriRef(uri.getUnicodeString()+MAIN_BLOB_SUFFIX);
+        this.mainBlobUri = new IRI(uri.getUnicodeString()+MAIN_BLOB_SUFFIX);
         this.parts.put(mainBlobUri, main);
-        if(metadata instanceof LockableMGraph){
-            this.metadata = (LockableMGraph)metadata;
-        } else {
-            this.metadata = new LockableMGraphWrapper(metadata);
-        }
+        this.metadata = metadata;
         //init the read and write lock
         this.readLock = this.metadata.getLock().readLock();
         this.writeLock = this.metadata.getLock().writeLock();
 		//Better parse the Blob in the Constructor than calling a public
 		//method on a may be not fully initialised instance
-		//parts.put(new UriRef(uri.getUnicodeString()+"_main"), getBlob());
+		//parts.put(new IRI(uri.getUnicodeString()+"_main"), getBlob());
 	}
 	
 	@Override
@@ -108,7 +102,7 @@ public abstract class ContentItemImpl implements ContentItem {
 	}
 	
 	/**
-	 * Final getter retrieving the Blob via {@link #getPart(UriRef, Class)}
+	 * Final getter retrieving the Blob via {@link #getPart(IRI, Class)}
 	 * with <code>{@link #getUri()}+{@link #MAIN_BLOB_SUFFIX}</code>
 	 */
 	@Override
@@ -131,7 +125,7 @@ public abstract class ContentItemImpl implements ContentItem {
 	
     @SuppressWarnings("unchecked")
 	@Override
-	public <T> T getPart(UriRef uri, Class<T> clazz) throws NoSuchPartException {
+	public <T> T getPart(IRI uri, Class<T> clazz) throws NoSuchPartException {
         readLock.lock();
         try {
             Object part = parts.get(uri);
@@ -151,11 +145,11 @@ public abstract class ContentItemImpl implements ContentItem {
 	}
 
 	@Override
-	public UriRef getPartUri(int index) throws NoSuchPartException {
+	public IRI getPartUri(int index) throws NoSuchPartException {
         readLock.lock();
         try {
     		int count = 0;
-    		for(Map.Entry<UriRef, Object> entry : parts.entrySet()) {
+    		for(Map.Entry<IRI, Object> entry : parts.entrySet()) {
     			if (count == index) {
     				return entry.getKey();
     			}
@@ -174,7 +168,7 @@ public abstract class ContentItemImpl implements ContentItem {
         try {
     		Object result = null;
     		int count = 0;
-    		for(Map.Entry<UriRef, Object> entry : parts.entrySet()) {
+    		for(Map.Entry<IRI, Object> entry : parts.entrySet()) {
     			if (count == index) {
     				result = entry.getValue();
     				if (!result.getClass().isAssignableFrom(clazz)) {
@@ -191,7 +185,7 @@ public abstract class ContentItemImpl implements ContentItem {
 	}
 	
 	@Override
-	public Object addPart(UriRef uriRef, Object object) {
+	public Object addPart(IRI uriRef, Object object) {
         writeLock.lock();
         try {
     	    if(uriRef == null || object == null){
@@ -219,20 +213,20 @@ public abstract class ContentItemImpl implements ContentItem {
 	    }
         writeLock.lock();
         try {
-            UriRef partUri = getPartUri(index);
+            IRI partUri = getPartUri(index);
             parts.remove(partUri);
         } finally {
             writeLock.unlock();
         }
 	}
 	@Override
-	public void removePart(UriRef uriRef) {
+	public void removePart(IRI uriRef) {
 	    if(uriRef == null){
 	        throw new IllegalArgumentException("The parsed uriRef MUST NOT be NULL!");
 	    }
         writeLock.lock();
         try {
-            UriRef mainContentPartUri = parts.keySet().iterator().next();
+            IRI mainContentPartUri = parts.keySet().iterator().next();
             if(uriRef.equals(mainContentPartUri)){
                 throw new IllegalStateException("The main ContentPart (uri '"
                     + uriRef+"') CAN NOT be removed!");
@@ -246,12 +240,12 @@ public abstract class ContentItemImpl implements ContentItem {
 	}
 	
     @Override
-	public UriRef getUri() {
+	public IRI getUri() {
 		return uri;
 	}
 
 	@Override
-	public LockableMGraph getMetadata() {
+	public Graph getMetadata() {
 	    return metadata;
 	}
 	@Override

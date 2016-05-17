@@ -98,7 +98,7 @@ public class BundleDataFileProvider implements DataFileProvider {
     public InputStream getInputStream(String bundleSymbolicName,
             String filename, Map<String, String> comments) throws IOException {
         URL resource = getDataFile(bundleSymbolicName, filename);
-        log.debug("Resource {} found: {}", (resource == null ? "NOT" : ""), filename);
+        log.debug("RDFTerm {} found: {}", (resource == null ? "NOT" : ""), filename);
         return resource != null ? resource.openStream() : null;
     }
 

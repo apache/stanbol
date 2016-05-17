@@ -32,7 +32,7 @@ import org.apache.stanbol.rules.manager.atoms.IObjectAtom;
 import org.apache.stanbol.rules.manager.atoms.StringFunctionAtom;
 
 /**
- * It adapts any NewIRIAtom to the BIND built in call in Clerezza for creating new UriRef resources binding
+ * It adapts any NewIRIAtom to the BIND built in call in Clerezza for creating new IRI resources binding
  * the value to a variable.
  * 
  * @author anuzzolese

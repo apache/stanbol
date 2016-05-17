@@ -19,26 +19,26 @@ package org.apache.stanbol.enhancer.nlp.model;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 
 /**
  * Provides access to NLP processing results of the <code>text/plain</code>
  * {@link Blob} of an ContentItem. Intended to be
- * {@link ContentItem#addPart(org.apache.clerezza.rdf.core.UriRef, Object) added
+ * {@link ContentItem#addPart(org.apache.clerezza.commons.rdf.IRI, Object) added
  * as ContentPart} by using {@link #ANALYSED_TEXT_URI}.
- * @see ContentItem#addPart(UriRef, Object)
+ * @see ContentItem#addPart(IRI, Object)
  */
 public interface AnalysedText extends Section{
 
     
     /**
-     * The {@link UriRef} used to register the {@link AnalysedText} instance
-     * as {@link ContentItem#addPart(org.apache.clerezza.rdf.core.UriRef, Object) 
+     * The {@link IRI} used to register the {@link AnalysedText} instance
+     * as {@link ContentItem#addPart(org.apache.clerezza.commons.rdf.IRI, Object) 
      * ContentPart} to the {@link ContentItem}
      */
-    public static final UriRef ANALYSED_TEXT_URI = new UriRef("urn:stanbol.enhancer:nlp.analysedText");
+    public static final IRI ANALYSED_TEXT_URI = new IRI("urn:stanbol.enhancer:nlp.analysedText");
 
     /**
      * Returns {@link SpanTypeEnum#Text}

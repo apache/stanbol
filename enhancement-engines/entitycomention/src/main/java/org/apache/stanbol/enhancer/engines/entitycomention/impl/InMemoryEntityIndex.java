@@ -32,13 +32,11 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
 import org.apache.stanbol.enhancer.engines.entitylinking.LabelTokenizer;
@@ -58,13 +56,13 @@ public class InMemoryEntityIndex implements EntitySearcher {
     protected final LabelTokenizer tokenizer;
     //Holds Entity data
     private SortedMap<String,Collection<Entity>> index = new TreeMap<String,Collection<Entity>>(String.CASE_INSENSITIVE_ORDER);
-    private Map<UriRef,Entity> entities = new HashMap<UriRef,Entity>();
+    private Map<IRI,Entity> entities = new HashMap<IRI,Entity>();
     private Set<String> indexLanguages;
     protected String language;
-    protected UriRef nameField;
+    protected IRI nameField;
 
     
-    public InMemoryEntityIndex(LabelTokenizer tokenizer, UriRef nameField, String...languages) {
+    public InMemoryEntityIndex(LabelTokenizer tokenizer, IRI nameField, String...languages) {
         this.indexLanguages = languages == null || languages.length < 1 ? 
                 Collections.singleton((String)null) : 
                         new HashSet<String>(Arrays.asList(languages));
@@ -80,9 +78,9 @@ public class InMemoryEntityIndex implements EntitySearcher {
             log.debug(" > register {}",entity);
         }
         entities.put(entity.getUri(), entity);
-        Iterator<PlainLiteral> labels = entity.getText(nameField);
+        Iterator<Literal> labels = entity.getText(nameField);
         while(labels.hasNext()){
-            PlainLiteral label = labels.next();
+            Literal label = labels.next();
             String lang = label.getLanguage() == null ? null : label.getLanguage().toString();
             if(indexLanguages.contains(lang)){
                 for(String token : tokenizer.tokenize(label.getLexicalForm(),null)){
@@ -100,13 +98,13 @@ public class InMemoryEntityIndex implements EntitySearcher {
     }
     
     @Override
-    public Entity get(UriRef id, Set<UriRef> includeFields, String...languages) throws IllegalStateException {
+    public Entity get(IRI id, Set<IRI> includeFields, String...languages) throws IllegalStateException {
         return entities.get(id);
     }
 
     @Override
-    public Collection<? extends Entity> lookup(UriRef field,
-                                           Set<UriRef> includeFields,
+    public Collection<? extends Entity> lookup(IRI field,
+                                           Set<IRI> includeFields,
                                            List<String> search, String[] languages,
                                            Integer numResults, Integer offset) throws IllegalStateException {
         //this assumes that 
@@ -233,7 +231,7 @@ public class InMemoryEntityIndex implements EntitySearcher {
     }
 
     @Override
-    public Map<UriRef,Collection<Resource>> getOriginInformation() {
+    public Map<IRI,Collection<RDFTerm>> getOriginInformation() {
         return Collections.emptyMap();
     }
 }

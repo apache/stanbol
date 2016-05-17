@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import org.ontoware.rdf2go.model.Model;
-import org.ontoware.rdf2go.model.node.Resource;
+import org.ontoware.rdf2go.model.node.RDFTerm;
 import org.ontoware.rdf2go.model.node.URI;
 import org.ontoware.rdf2go.vocabulary.RDF;
 import org.semanticdesktop.aperture.extractor.AbstractFileExtractor;
@@ -112,7 +112,7 @@ public class MP3FileExtractor extends AbstractFileExtractor {
   
   protected void addSimpleContact(URI property, String fullname, RDFContainer container) {
     Model model = container.getModel();
-    Resource resource = ModelUtil.generateRandomResource(model);
+    RDFTerm resource = ModelUtil.generateRandomResource(model);
     model.addStatement(resource, RDF.type, NCO.Contact);
     model.addStatement(resource, NCO.fullname, fullname);
     model.addStatement(container.getDescribedUri(), property, resource);

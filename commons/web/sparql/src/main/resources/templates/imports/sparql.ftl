@@ -16,23 +16,23 @@
 -->
 <#macro form>
 <fieldset>
-  <legend>Registered TripleCollections</legend>
+  <legend>Registered Graphs</legend>
   <#-- graph list -->
-  <#if it.tripleCollectionList?size &gt; 0>
+  <#if it.graphList?size &gt; 0>
     <select id="graphList" onChange='javascript:graphChangeHandler();'>
-    	<#list it.tripleCollectionList as tcInfo>
+    	<#list it.graphList as tcInfo>
     		<option value="${tcInfo.graphUri}">${tcInfo.graphUri}</option>
     	</#list>
     </select>
   <#else>
-    There is no registered TripleCollection.
+    There is no registered Graph.
   </#if>
 </fieldset>
 
-<#if it.tripleCollectionList?size &gt; 0>
+<#if it.graphList?size &gt; 0>
   <fieldset>
     <legend>Details of Selected Graph</legend>
-    <#list it.tripleCollectionList as tcInfo>
+    <#list it.graphList as tcInfo>
     	<ul id="${tcInfo.graphUri}" class="graphDetailInvisible">
     		<li>Graph Name: ${tcInfo.graphName}</li>
     		<li>Graph Description: ${tcInfo.graphDescription}</li>

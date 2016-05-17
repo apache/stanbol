@@ -72,7 +72,7 @@ import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.marmotta.ldpath.exception.LDPathParseException;
 import org.apache.marmotta.ldpath.model.programs.Program;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.web.viewable.Viewable;
@@ -109,7 +109,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 
 /**
- * Resource to provide a REST API for the {@link SiteManager}
+ * RDFTerm to provide a REST API for the {@link SiteManager}
  * <p/>
  * TODO: add description
  */
@@ -665,7 +665,7 @@ public class ReferencedSiteRootResource extends BaseStanbolResource {
      */
     private Response executeLDPathQuery(Site site, FieldQuery query, String ldpathProgramString, MediaType mediaType, HttpHeaders headers) {
         QueryResultList<Representation> result;
-        ValueFactory vf = new RdfValueFactory(new IndexedMGraph());
+        ValueFactory vf = new RdfValueFactory(new IndexedGraph());
         SiteBackend backend = new SiteBackend(site,vf);
         EntityhubLDPath ldPath = new EntityhubLDPath(backend,vf);
         //copy the selected fields, because we might need to delete some during

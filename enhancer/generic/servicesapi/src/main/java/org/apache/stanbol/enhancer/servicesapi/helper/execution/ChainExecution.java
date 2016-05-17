@@ -16,8 +16,8 @@
 */
 package org.apache.stanbol.enhancer.servicesapi.helper.execution;
 
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionPlan;
@@ -32,9 +32,9 @@ public class ChainExecution extends Execution {
     
     private final String chainName;
     
-    public ChainExecution(TripleCollection graph, NonLiteral node) {
+    public ChainExecution(Graph graph, BlankNodeOrIRI node) {
         super(null,graph,node);
-        NonLiteral ep = ExecutionMetadataHelper.getExecutionPlanNode(graph, node);
+        BlankNodeOrIRI ep = ExecutionMetadataHelper.getExecutionPlanNode(graph, node);
         if(ep != null){
             chainName = EnhancementEngineHelper.getString(graph, ep, ExecutionPlan.CHAIN);
         } else {

@@ -30,15 +30,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.BNode;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.BlankNode;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.impl.TypedLiteralImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -98,7 +98,7 @@ public class MetaxaEngine
     /**
      * Plain text content of a content item.
       */
-    public static final UriRef NIE_PLAINTEXTCONTENT = new UriRef(NamespaceEnum.nie + "plainTextContent");
+    public static final IRI NIE_PLAINTEXTCONTENT = new IRI(NamespaceEnum.nie + "plainTextContent");
     private static final URIImpl NIE_PLAINTEXT_PROPERTY = new URIImpl(NIE_PLAINTEXTCONTENT.getUnicodeString());
     /**
      * The default value for the Execution of this Engine. Currently set to
@@ -230,7 +230,7 @@ public class MetaxaEngine
         } finally {
             ci.getLock().readLock().unlock();
         }
-        // Convert the RDF2go model to a Clerezza Graph and also extract
+        // Convert the RDF2go model to a Clerezza ImmutableGraph and also extract
         // the extracted plain text from the model
         if (null == m) {
             log.debug("Unable to preocess ContentItem {} (mime type {}) with Metaxa",
@@ -245,14 +245,14 @@ public class MetaxaEngine
             throw new EngineException("Unable to initialise Blob for storing" +
             		"the plain text content",e);
         }
-        HashMap<BlankNode, BNode> blankNodeMap = new HashMap<BlankNode, BNode>();
+        HashMap<BlankNode, BlankNode> blankNodeMap = new HashMap<BlankNode, BlankNode>();
         RDF2GoUtils.urifyBlankNodes(m);
         ClosableIterator<Statement> it = m.iterator();
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
             plainTextSink.getOutputStream(), UTF8));
         boolean textExtracted = false; //used to detect if some text was extracted
         try {
-            MGraph g = new SimpleMGraph(); //first add to a temporary graph
+            Graph g = new SimpleGraph(); //first add to a temporary graph
             while (it.hasNext()) {
                 Statement oneStmt = it.next();
                 //we need to treat triples that provide the plain/text
@@ -271,16 +271,16 @@ public class MetaxaEngine
                         }
                         textExtracted = true;
                         if (includeText) {
-                            NonLiteral subject = (NonLiteral) asClerezzaResource(oneStmt.getSubject(), blankNodeMap);
-                            UriRef predicate = (UriRef) asClerezzaResource(oneStmt.getPredicate(), blankNodeMap);
-                            Resource object = asClerezzaResource(oneStmt.getObject(), blankNodeMap);
+                            BlankNodeOrIRI subject = (BlankNodeOrIRI) asClerezzaResource(oneStmt.getSubject(), blankNodeMap);
+                            IRI predicate = (IRI) asClerezzaResource(oneStmt.getPredicate(), blankNodeMap);
+                            RDFTerm object = asClerezzaResource(oneStmt.getObject(), blankNodeMap);
                             g.add(new TripleImpl(subject, predicate, object));
                         }
                     }
                 } else { //add metadata to the metadata of the contentItem
-                    NonLiteral subject = (NonLiteral) asClerezzaResource(oneStmt.getSubject(), blankNodeMap);
-                    UriRef predicate = (UriRef) asClerezzaResource(oneStmt.getPredicate(), blankNodeMap);
-                    Resource object = asClerezzaResource(oneStmt.getObject(), blankNodeMap);
+                    BlankNodeOrIRI subject = (BlankNodeOrIRI) asClerezzaResource(oneStmt.getSubject(), blankNodeMap);
+                    IRI predicate = (IRI) asClerezzaResource(oneStmt.getPredicate(), blankNodeMap);
+                    RDFTerm object = asClerezzaResource(oneStmt.getObject(), blankNodeMap);
 
                     if (null != subject && null != predicate && null != object) {
                         Triple t = new TripleImpl(subject, predicate, object);
@@ -304,7 +304,7 @@ public class MetaxaEngine
         }
         if(textExtracted){
             //add plain text to the content item
-            UriRef blobUri = new UriRef("urn:metaxa:plain-text:"+randomUUID());
+            IRI blobUri = new IRI("urn:metaxa:plain-text:"+randomUUID());
             ci.addPart(blobUri, plainTextSink.getBlob());
         }
     }
@@ -313,22 +313,22 @@ public class MetaxaEngine
      * Converts the given RDF2Go node into a corresponding Clerezza object.
      *
      * @param node a {@link Node}
-     * @return a {@link Resource}
+     * @return a {@link RDFTerm}
      */
-    public static Resource asClerezzaResource(Node node, HashMap<BlankNode, BNode> blankNodeMap) {
+    public static RDFTerm asClerezzaResource(Node node, HashMap<BlankNode, BlankNode> blankNodeMap) {
 
         if (node instanceof URI) {
-            return new UriRef(node.asURI().toString());
+            return new IRI(node.asURI().toString());
         } else if (node instanceof BlankNode) {
-            BNode bNode = blankNodeMap.get(node);
+            BlankNode bNode = blankNodeMap.get(node);
             if (bNode == null) {
-                bNode = new BNode();
+                bNode = new BlankNode();
                 blankNodeMap.put(node.asBlankNode(), bNode);
             }
             return bNode;
         } else if (node instanceof DatatypeLiteral) {
             DatatypeLiteral dtl = node.asDatatypeLiteral();
-            return new TypedLiteralImpl(dtl.getValue(), new UriRef(dtl.getDatatype().asURI().toString()));
+            return new TypedLiteralImpl(dtl.getValue(), new IRI(dtl.getDatatype().asURI().toString()));
         } else if (node instanceof PlainLiteral) {
             return new PlainLiteralImpl(node.asLiteral().getValue());
         }

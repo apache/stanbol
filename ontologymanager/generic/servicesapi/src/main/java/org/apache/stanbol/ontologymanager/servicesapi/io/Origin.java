@@ -16,9 +16,8 @@
  */
 package org.apache.stanbol.ontologymanager.servicesapi.io;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcProvider;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 
 /**
@@ -27,7 +26,7 @@ import org.semanticweb.owlapi.model.OWLOntologyID;
  * <ul>
  * <li> {@link IRI}, which is interpreted as the physical location of the resource.
  * <li> {@link OWLOntologyID}, which is interpreted as the public key of an ontology already stored by Stanbol.
- * <li> {@link UriRef}, which is interpreted as the name of a graph to be retrieved from an underlying Clerezza
+ * <li> {@link IRI}, which is interpreted as the name of a graph to be retrieved from an underlying Clerezza
  * store (typically a {@link TcProvider}).
  * </ul>
  * 
@@ -45,8 +44,8 @@ public class Origin<R> {
      *            the physical location of the resource
      * @return the origin that wraps this IRI.
      */
-    public static Origin<IRI> create(IRI physicalURL) {
-        return new Origin<IRI>(physicalURL);
+    public static Origin<org.semanticweb.owlapi.model.IRI> create(org.semanticweb.owlapi.model.IRI physicalURL) {
+        return new Origin<org.semanticweb.owlapi.model.IRI>(physicalURL);
     }
 
     /**
@@ -69,8 +68,8 @@ public class Origin<R> {
      *            the graph name
      * @return the origin that wraps this graph name.
      */
-    public static Origin<UriRef> create(UriRef graphName) {
-        return new Origin<UriRef>(graphName);
+    public static Origin<IRI> create(IRI graphName) {
+        return new Origin<IRI>(graphName);
     }
 
     private R ref;

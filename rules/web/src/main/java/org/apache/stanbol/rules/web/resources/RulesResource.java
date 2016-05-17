@@ -52,7 +52,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.jaxrs.utils.form.MultiPartBody;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -232,10 +232,10 @@ public class RulesResource extends BaseStanbolResource {
 				log.info("The recipe ID is a URI without scheme. The ID is set to " + recipeID);
 			}
         	
-            recipe = ruleStore.getRecipe(new UriRef(recipeID));
+            recipe = ruleStore.getRecipe(new IRI(recipeID));
 
             if (ruleID != null && !ruleID.isEmpty()) {
-                rule = ruleStore.getRule(recipe, new UriRef(ruleID));
+                rule = ruleStore.getRule(recipe, new IRI(ruleID));
                 RuleList ruleList = new RuleList();
                 ruleList.add(rule);
 
@@ -281,10 +281,10 @@ public class RulesResource extends BaseStanbolResource {
 				log.info("The recipe ID is a URI without scheme. The ID is set to " + recipeID);
 			}
 			
-            recipe = ruleStore.getRecipe(new UriRef(recipeID));
+            recipe = ruleStore.getRecipe(new IRI(recipeID));
 
             if (ruleID != null && !ruleID.isEmpty()) {
-                rule = ruleStore.getRule(recipe, new UriRef(ruleID));
+                rule = ruleStore.getRule(recipe, new IRI(ruleID));
                 RuleList ruleList = new RuleList();
                 ruleList.add(rule);
 
@@ -343,7 +343,7 @@ public class RulesResource extends BaseStanbolResource {
 				recipeID = "urn:" + recipeID;
 				log.info("The recipe ID is a URI without scheme. The ID is set to " + recipeID);
 			}
-            ruleStore.createRecipe(new UriRef(recipeID), description);
+            ruleStore.createRecipe(new IRI(recipeID), description);
 
             responseBuilder = Response.ok();
         } catch (AlreadyExistingRecipeException e) {
@@ -435,8 +435,8 @@ public class RulesResource extends BaseStanbolResource {
 	
 	            Recipe rcp;
 	            try {
-	            	rcp = ruleStore.getRecipe(new UriRef(recipe));
-	                Rule rl = ruleStore.getRule(rcp, new UriRef(rule));
+	            	rcp = ruleStore.getRecipe(new IRI(recipe));
+	                Rule rl = ruleStore.getRule(rcp, new IRI(rule));
 	                ruleStore.removeRule(rcp, rl);
 	            } catch (NoSuchRecipeException e) {
 	                log.error(e.getMessage(), e);
@@ -451,7 +451,7 @@ public class RulesResource extends BaseStanbolResource {
 	
 	        } else {
 	            try {
-	                ruleStore.removeRecipe(new UriRef(recipe));
+	                ruleStore.removeRecipe(new IRI(recipe));
 	            } catch (RecipeEliminationException e) {
 	                log.error(e.getMessage(), e);
 	                responseBuilder = Response.status(Status.INTERNAL_SERVER_ERROR);
@@ -515,7 +515,7 @@ public class RulesResource extends BaseStanbolResource {
 				log.info("The recipe ID is a URI without scheme. The ID is set to " + recipe);
 			}
         	
-            rcp = ruleStore.getRecipe(new UriRef(recipe));
+            rcp = ruleStore.getRecipe(new IRI(recipe));
             ruleStore.addRulesToRecipe(rcp, rules, description);
 
             responseBuilder = Response.ok();
@@ -576,7 +576,7 @@ public class RulesResource extends BaseStanbolResource {
 				log.info("The recipe ID is a URI without scheme. The ID is set to " + recipe);
 			}
             
-            Recipe rcp = ruleStore.getRecipe(new UriRef(recipe));
+            Recipe rcp = ruleStore.getRecipe(new IRI(recipe));
             RuleAdapter adapter = adapterManager.getAdapter(rcp, classToLoad);
 
             Object adaptedRecipe = adapter.adaptTo(rcp, classToLoad);

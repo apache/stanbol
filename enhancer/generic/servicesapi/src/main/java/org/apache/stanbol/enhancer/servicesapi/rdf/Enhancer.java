@@ -16,7 +16,7 @@
 */
 package org.apache.stanbol.enhancer.servicesapi.rdf;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 
 public final class Enhancer {
 
@@ -25,12 +25,12 @@ public final class Enhancer {
      */
     private Enhancer() {}
 
-    public static final UriRef CONTENT_ITEM = new UriRef(NamespaceEnum.enhancer+"ContentItem");
-    public static final UriRef ENHANCEMENT_ENGINE = new UriRef(NamespaceEnum.enhancer+"EnhancementEngine");
-    public static final UriRef ENHANCEMENT_CHAIN = new UriRef(NamespaceEnum.enhancer+"EnhancementChain");
-    public static final UriRef ENHANCER = new UriRef(NamespaceEnum.enhancer+"Enhancer");
-    public static final UriRef HAS_ENGINE = new UriRef(NamespaceEnum.enhancer+"hasEngine");
-    public static final UriRef HAS_CHAIN = new UriRef(NamespaceEnum.enhancer+"hasChain");
-    public static final UriRef HAS_DEFAULT_CHAIN = new UriRef(NamespaceEnum.enhancer+"hasDefaultChain");
+    public static final IRI CONTENT_ITEM = new IRI(NamespaceEnum.enhancer+"ContentItem");
+    public static final IRI ENHANCEMENT_ENGINE = new IRI(NamespaceEnum.enhancer+"EnhancementEngine");
+    public static final IRI ENHANCEMENT_CHAIN = new IRI(NamespaceEnum.enhancer+"EnhancementChain");
+    public static final IRI ENHANCER = new IRI(NamespaceEnum.enhancer+"Enhancer");
+    public static final IRI HAS_ENGINE = new IRI(NamespaceEnum.enhancer+"hasEngine");
+    public static final IRI HAS_CHAIN = new IRI(NamespaceEnum.enhancer+"hasChain");
+    public static final IRI HAS_DEFAULT_CHAIN = new IRI(NamespaceEnum.enhancer+"hasDefaultChain");
     
 }

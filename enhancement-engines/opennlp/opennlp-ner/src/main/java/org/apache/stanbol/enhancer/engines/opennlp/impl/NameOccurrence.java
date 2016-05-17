@@ -16,13 +16,13 @@
  */
 package org.apache.stanbol.enhancer.engines.opennlp.impl;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 
 public class NameOccurrence {
 
     public final String name;
     
-    public final UriRef type;
+    public final IRI type;
     
     public final Integer start;
 
@@ -32,7 +32,7 @@ public class NameOccurrence {
 
     public final Double confidence;
 
-    public NameOccurrence(String name, Integer start, Integer end, UriRef type,
+    public NameOccurrence(String name, Integer start, Integer end, IRI type,
             String context, Double confidence) {
         this.name = name;
         this.type = type;

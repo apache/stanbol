@@ -19,8 +19,8 @@ package org.apache.stanbol.rules.base.api;
 import java.io.InputStream;
 import java.util.List;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.rules.base.api.util.RecipeList;
 import org.apache.stanbol.rules.base.api.util.RuleList;
 
@@ -54,13 +54,13 @@ public interface RuleStore {
      * If some error occurs during the creation of the recipe a {@link RecipeConstructionException} is thrown.
      * 
      * @param recipeID
-     *            {@link UriRef}
+     *            {@link IRI}
      * @param recipeDescription
      *            {@link String}
      * @return a {@link Recipe}
      * @throws AlreadyExistingRecipeException
      */
-    Recipe createRecipe(UriRef recipeID, String recipeDescription) throws AlreadyExistingRecipeException;
+    Recipe createRecipe(IRI recipeID, String recipeDescription) throws AlreadyExistingRecipeException;
 
     /**
      * The method adds a new rule passed as second parameter to a recipe passed as first parameter. <br/>
@@ -134,11 +134,11 @@ public interface RuleStore {
      * @param recipe
      *            {@link Recipe}
      * @param ruleID
-     *            {@link UriRef}
+     *            {@link IRI}
      * @return {@link Rule}
      * @throws NoSuchRuleInRecipeException
      */
-    Rule getRule(Recipe recipe, UriRef ruleID) throws NoSuchRuleInRecipeException;
+    Rule getRule(Recipe recipe, IRI ruleID) throws NoSuchRuleInRecipeException;
 
     /**
      * It returns the set of rules that realize the recipe passed as parameter.
@@ -150,13 +150,13 @@ public interface RuleStore {
     RuleList listRules(Recipe recipe);
 
     /**
-     * It returns the {@link List} or rules' identifiers ({@link UriRef}).
+     * It returns the {@link List} or rules' identifiers ({@link IRI}).
      * 
      * @param recipe
      *            {@link Recipe}
-     * @return {@link List} of {@link UriRef}
+     * @return {@link List} of {@link IRI}
      */
-    List<UriRef> listRuleIDs(Recipe recipe);
+    List<IRI> listRuleIDs(Recipe recipe);
 
     /**
      * It returns the {@link List} of rules' names.
@@ -175,19 +175,19 @@ public interface RuleStore {
      * thrown.
      * 
      * @param recipeID
-     *            {@link UriRef}
+     *            {@link IRI}
      * @return {@link Recipe}
      * @throws NoSuchRecipeException
      * @throws RecipeConstructionException
      */
-    Recipe getRecipe(UriRef recipeID) throws NoSuchRecipeException, RecipeConstructionException;
+    Recipe getRecipe(IRI recipeID) throws NoSuchRecipeException, RecipeConstructionException;
 
     /**
      * It returns a list of existing recipes' IDs in the store.<br/>
      * 
-     * @return {@link List} of {@link UriRef}
+     * @return {@link List} of {@link IRI}
      */
-    List<UriRef> listRecipeIDs();
+    List<IRI> listRecipeIDs();
 
     /**
      * It returns the list of exisitng recipes in the RuleStore.<br/>
@@ -202,11 +202,11 @@ public interface RuleStore {
      * {@link RecipeEliminationException} is thrown.
      * 
      * @param recipeID
-     *            {@link UriRef}
+     *            {@link IRI}
      * @return <code>true</code> if the recipe has been removed, false otherwise.
      * @throws RecipeEliminationException
      */
-    boolean removeRecipe(UriRef recipeID) throws RecipeEliminationException;
+    boolean removeRecipe(IRI recipeID) throws RecipeEliminationException;
 
     /**
      * It removes the recipe passed as parameter.<br/>
@@ -232,13 +232,13 @@ public interface RuleStore {
     Recipe removeRule(Recipe recipe, Rule rule);
 
     /**
-     * It allows to export recipes as Clerezza's {@link TripleCollection} objects.
+     * It allows to export recipes as Clerezza's {@link Graph} objects.
      * 
      * @param recipe
      * @return
      * @throws NoSuchRecipeException
      */
-    TripleCollection exportRecipe(Recipe recipe) throws NoSuchRecipeException;
+    Graph exportRecipe(Recipe recipe) throws NoSuchRecipeException;
 
     /**
      * Find the set of recipes in the rule store whose description matches the <code>term</code>

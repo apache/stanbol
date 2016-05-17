@@ -17,13 +17,13 @@
 
 package org.apache.stanbol.rules.adapters.clerezza;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.sparql.query.Expression;
 import org.apache.clerezza.rdf.core.sparql.query.TriplePattern;
 
 /**
  * 
- * This object represents either a {@link TriplePattern} or an {@link Expression} or a {@link UriRef}
+ * This object represents either a {@link TriplePattern} or an {@link Expression} or a {@link IRI}
  * internally to the Clerezza adpter.
  * 
  * @author anuzzolese
@@ -33,7 +33,7 @@ public class ClerezzaSparqlObject {
 
     private TriplePattern triplePattern;
     private Expression expression;
-    private UriRef uriRef;
+    private IRI uriRef;
 
     public ClerezzaSparqlObject(TriplePattern triplePattern) {
         this.triplePattern = triplePattern;
@@ -43,7 +43,7 @@ public class ClerezzaSparqlObject {
         this.expression = expression;
     }
 
-    public ClerezzaSparqlObject(UriRef uriRef) {
+    public ClerezzaSparqlObject(IRI uriRef) {
         this.uriRef = uriRef;
     }
 
@@ -54,10 +54,10 @@ public class ClerezzaSparqlObject {
      * <ul>
      * <li>a {@link TriplePattern}
      * <li>an {@link Expression}
-     * <li>a {@link UriRef}
+     * <li>a {@link IRI}
      * 
      * @return the object that can be in turn a {@link TriplePattern}, an {@link Expression}, and a
-     *         {@link UriRef}
+     *         {@link IRI}
      */
     public Object getClerezzaObject() {
         if (triplePattern != null) {

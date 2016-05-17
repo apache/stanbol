@@ -23,8 +23,8 @@ import java.util.List;
 
 import org.junit.*;
 import org.osgi.service.permissionadmin.PermissionInfo;
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.stanbol.commons.security.PermissionDefinitions;
 
@@ -52,11 +52,11 @@ public class PermissionDefinitionsTest {
 	@Before
 	public void setUp() {
 
-		final Graph graph = Parser.getInstance()
+		final ImmutableGraph graph = Parser.getInstance()
 				.parse(getClass().getResourceAsStream("systemgraph.nt"),
 						"text/rdf+n3");		
 		this.permissionDefinitions = new PermissionDefinitions(
-				new SimpleMGraph(graph.iterator()));
+				new SimpleGraph(graph.iterator()));
 
 		this.allPermissions = new PermissionInfo[] {
 				new PermissionInfo(

@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.rules.adapters.clerezza.atoms;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
 import org.apache.clerezza.rdf.core.sparql.query.ResourceOrVariable;
 import org.apache.clerezza.rdf.core.sparql.query.UriRefOrVariable;
@@ -64,16 +64,16 @@ public class ClassAtom extends AbstractAdaptableAtom {
 
         if (arg instanceof Variable) {
             subject = new UriRefOrVariable((Variable) arg);
-        } else if (arg instanceof UriRef) {
-            subject = new UriRefOrVariable((UriRef) arg);
+        } else if (arg instanceof IRI) {
+            subject = new UriRefOrVariable((IRI) arg);
         } else {
             throw new RuleAtomCallExeption(getClass());
         }
 
         if (cl instanceof Variable) {
             object = new ResourceOrVariable((Variable) cl);
-        } else if (cl instanceof UriRef) {
-            object = new ResourceOrVariable((UriRef) cl);
+        } else if (cl instanceof IRI) {
+            object = new ResourceOrVariable((IRI) cl);
         } else {
             throw new RuleAtomCallExeption(getClass());
         }

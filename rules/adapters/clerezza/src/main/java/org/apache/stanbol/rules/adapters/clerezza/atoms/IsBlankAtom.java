@@ -19,7 +19,7 @@ package org.apache.stanbol.rules.adapters.clerezza.atoms;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.sparql.query.BuiltInCall;
 import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
 import org.apache.clerezza.rdf.core.sparql.query.Expression;
@@ -60,8 +60,8 @@ public class IsBlankAtom extends AbstractAdaptableAtom {
         Expression argumentExpression;
         if (arg instanceof Variable) {
             argumentExpression = (Variable) arg;
-        } else if (arg instanceof UriRef) {
-            argumentExpression = new UriRefExpression((UriRef) arg);
+        } else if (arg instanceof IRI) {
+            argumentExpression = new UriRefExpression((IRI) arg);
         } else {
             throw new RuleAtomCallExeption(getClass());
         }

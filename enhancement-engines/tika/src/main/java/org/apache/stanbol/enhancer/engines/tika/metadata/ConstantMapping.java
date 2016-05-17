@@ -21,19 +21,19 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.tika.metadata.Metadata;
 
 public class ConstantMapping extends Mapping{
 
     
-    private Collection<Resource> values;
+    private Collection<RDFTerm> values;
 
-    public ConstantMapping(UriRef ontProperty, Resource...values) {
+    public ConstantMapping(IRI ontProperty, RDFTerm...values) {
         super(ontProperty, null);
         if(values == null || values.length < 1){
             throw new IllegalArgumentException("The parsed values MUST NOT be NULL nor an empty array");
@@ -46,8 +46,8 @@ public class ConstantMapping extends Mapping{
     }
 
     @Override
-    public boolean apply(MGraph graph, NonLiteral subject, Metadata metadata) {
-        for(Resource value : values){
+    public boolean apply(Graph graph, BlankNodeOrIRI subject, Metadata metadata) {
+        for(RDFTerm value : values){
             graph.add(new TripleImpl(subject, ontProperty, value));
             mappingLogger.log(subject, ontProperty, null, value);
         }

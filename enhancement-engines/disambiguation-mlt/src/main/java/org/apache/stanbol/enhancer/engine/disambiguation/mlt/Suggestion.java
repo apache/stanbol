@@ -24,10 +24,10 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SE
 import java.util.SortedMap;
 import java.util.SortedSet;
 
-import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
@@ -47,10 +47,10 @@ public class Suggestion implements Comparable<Suggestion> {
 
     private static final LiteralFactory lf = LiteralFactory.getInstance();
 
-    private static final UriRef ENTITYHUB_SITE = new UriRef(RdfResourceEnum.site.getUri());
+    private static final IRI ENTITYHUB_SITE = new IRI(RdfResourceEnum.site.getUri());
 
-    private UriRef entityAnnotation;
-    private UriRef entityUri;
+    private IRI entityAnnotation;
+    private IRI entityUri;
     private Double originalConfidnece;
 
     private Entity entity;
@@ -58,13 +58,13 @@ public class Suggestion implements Comparable<Suggestion> {
     private Double disambiguatedConfidence;
     private String site;
 
-    private Suggestion(UriRef entityAnnotation) {
+    private Suggestion(IRI entityAnnotation) {
         this.entityAnnotation = entityAnnotation;
     }
 
     public Suggestion(Entity entity) {
         this.entity = entity;
-        this.entityUri = new UriRef(entity.getId());
+        this.entityUri = new IRI(entity.getId());
         this.site = entity.getSite();
     }
 
@@ -76,7 +76,7 @@ public class Suggestion implements Comparable<Suggestion> {
      * @param entityAnnotation
      * @return
      */
-    public static Suggestion createFromEntityAnnotation(TripleCollection graph, UriRef entityAnnotation) {
+    public static Suggestion createFromEntityAnnotation(Graph graph, IRI entityAnnotation) {
         Suggestion suggestion = new Suggestion(entityAnnotation);
         suggestion.entityUri =
                 EnhancementEngineHelper.getReference(graph, entityAnnotation, ENHANCER_ENTITY_REFERENCE);
@@ -110,7 +110,7 @@ public class Suggestion implements Comparable<Suggestion> {
      * 
      * @return the URI of the fise:EntityAnnotation or <code>null</code> if not present.
      */
-    public UriRef getEntityAnnotation() {
+    public IRI getEntityAnnotation() {
         return entityAnnotation;
     }
 
@@ -124,7 +124,7 @@ public class Suggestion implements Comparable<Suggestion> {
      * @param uri
      *            the uri of the cloned fise:EntityAnnotation
      */
-    public void setEntityAnnotation(UriRef uri) {
+    public void setEntityAnnotation(IRI uri) {
         this.entityAnnotation = uri;
     }
 
@@ -133,7 +133,7 @@ public class Suggestion implements Comparable<Suggestion> {
      * 
      * @return the URI
      */
-    public UriRef getEntityUri() {
+    public IRI getEntityUri() {
         return entityUri;
     }
 
@@ -238,8 +238,8 @@ public class Suggestion implements Comparable<Suggestion> {
                 : result;
     }
     
-    private static String getOrigin(TripleCollection graph, UriRef entityAnnotation) {
-        UriRef uOrigin = EnhancementEngineHelper.getReference(graph, entityAnnotation, ENHANCER_ORIGIN);
+    private static String getOrigin(Graph graph, IRI entityAnnotation) {
+        IRI uOrigin = EnhancementEngineHelper.getReference(graph, entityAnnotation, ENHANCER_ORIGIN);
         if (uOrigin != null) {
             return uOrigin.getUnicodeString();
         } else {

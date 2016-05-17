@@ -25,9 +25,9 @@ import java.util.Hashtable;
 
 import junit.framework.Assert;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.sparql.QueryEngine;
@@ -69,7 +69,7 @@ public class RefactoringTest {
     private static Refactorer refactorer;
     private static TcManager tcm;
     private static RuleStore store;
-    private TripleCollection tripleCollection;
+    private Graph tripleCollection;
     private String rule;
 
     @BeforeClass
@@ -125,15 +125,15 @@ public class RefactoringTest {
         Model jenaModel = ModelFactory.createDefaultModel();
         jenaModel = jenaModel.read(inputStream, null);
 
-        tripleCollection = JenaToClerezzaConverter.jenaModelToClerezzaMGraph(jenaModel);
+        tripleCollection = JenaToClerezzaConverter.jenaModelToClerezzaGraph(jenaModel);
 
-        MGraph mGraph = tcm.createMGraph(new UriRef(
+        Graph mGraph = tcm.createGraph(new IRI(
                 "http://incubator.apache.com/stanbol/rules/refactor/test/graph"));
         mGraph.addAll(tripleCollection);
 
         Recipe recipe;
         try {
-            recipe = store.createRecipe(new UriRef(
+            recipe = store.createRecipe(new IRI(
                     "http://incubator.apache.com/stanbol/rules/refactor/test/recipeA"),
                 "Recipe for testing the Refactor.");
             recipe = store.addRulesToRecipe(recipe, rule, "Test");
@@ -145,10 +145,10 @@ public class RefactoringTest {
 
     @After
     public void tearDown() {
-        tcm.deleteTripleCollection(new UriRef("http://incubator.apache.com/stanbol/rules/refactor/test/graph"));
+        tcm.deleteGraph(new IRI("http://incubator.apache.com/stanbol/rules/refactor/test/graph"));
 
         try {
-            store.removeRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/refactor/test/recipeA"));
+            store.removeRecipe(new IRI("http://incubator.apache.com/stanbol/rules/refactor/test/recipeA"));
         } catch (RecipeEliminationException e) {
             Assert.fail(e.getMessage());
         }
@@ -157,10 +157,10 @@ public class RefactoringTest {
     @Test
     public void refactoringTest() throws Exception {
 
-        Recipe recipe = store.getRecipe(new UriRef(
+        Recipe recipe = store.getRecipe(new IRI(
                 "http://incubator.apache.com/stanbol/rules/refactor/test/recipeA"));
 
-        TripleCollection tc = refactorer.graphRefactoring(new UriRef(
+        Graph tc = refactorer.graphRefactoring(new IRI(
                 "http://incubator.apache.com/stanbol/rules/refactor/test/graph"), recipe.getRecipeID());
 
         Assert.assertNotNull(tc);
@@ -170,11 +170,11 @@ public class RefactoringTest {
     @Test
     public void easyRefactoringTest() throws Exception {
 
-        Recipe recipe = store.getRecipe(new UriRef(
+        Recipe recipe = store.getRecipe(new IRI(
                 "http://incubator.apache.com/stanbol/rules/refactor/test/recipeA"));
         try {
 
-            TripleCollection tc = refactorer.graphRefactoring(tripleCollection, recipe);
+            Graph tc = refactorer.graphRefactoring(tripleCollection, recipe);
 
             Assert.assertNotNull(tc);
 
@@ -188,9 +188,9 @@ public class RefactoringTest {
 
         try {
 
-            refactorer.graphRefactoring(new UriRef(
-                    "http://incubator.apache.com/stanbol/rules/refactor/test/refactoredGraph"), new UriRef(
-                    "http://incubator.apache.com/stanbol/rules/refactor/test/graph"), new UriRef(
+            refactorer.graphRefactoring(new IRI(
+                    "http://incubator.apache.com/stanbol/rules/refactor/test/refactoredGraph"), new IRI(
+                    "http://incubator.apache.com/stanbol/rules/refactor/test/graph"), new IRI(
                     "http://incubator.apache.com/stanbol/rules/refactor/test/recipeB"));
             Assert.fail();
 
@@ -210,14 +210,14 @@ public class RefactoringTest {
                       + "rule2[ is(kres:Person, ?x) . same(localname(?y), \"text\") -> is(foaf:Person, ?x) ]";
 
         try {
-            Recipe recipe = store.getRecipe(new UriRef(
+            Recipe recipe = store.getRecipe(new IRI(
                     "http://incubator.apache.com/stanbol/rules/refactor/test/recipeA"));
 
             recipe = store.addRulesToRecipe(recipe, rule, "Test");
 
-            refactorer.graphRefactoring(new UriRef(
-                    "http://incubator.apache.com/stanbol/rules/refactor/test/refactoredGraph"), new UriRef(
-                    "http://incubator.apache.com/stanbol/rules/refactor/test/graph"), new UriRef(
+            refactorer.graphRefactoring(new IRI(
+                    "http://incubator.apache.com/stanbol/rules/refactor/test/refactoredGraph"), new IRI(
+                    "http://incubator.apache.com/stanbol/rules/refactor/test/graph"), new IRI(
                     "http://incubator.apache.com/stanbol/rules/refactor/test/recipeA"));
 
         } catch (NoSuchRecipeException e) {
@@ -235,12 +235,12 @@ public class RefactoringTest {
 
         try {
 
-            refactorer.graphRefactoring(new UriRef(
-                    "http://incubator.apache.com/stanbol/rules/refactor/test/refactoredGraph"), new UriRef(
-                    "http://incubator.apache.com/stanbol/rules/refactor/test/graph"), new UriRef(
+            refactorer.graphRefactoring(new IRI(
+                    "http://incubator.apache.com/stanbol/rules/refactor/test/refactoredGraph"), new IRI(
+                    "http://incubator.apache.com/stanbol/rules/refactor/test/graph"), new IRI(
                     "http://incubator.apache.com/stanbol/rules/refactor/test/recipeA"));
 
-            TripleCollection tc = tcm.getMGraph(new UriRef(
+            Graph tc = tcm.getGraph(new IRI(
                     "http://incubator.apache.com/stanbol/rules/refactor/test/refactoredGraph"));
 
             Assert.assertNotNull(tc);

@@ -26,11 +26,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
@@ -79,7 +79,7 @@ public class TestOpenCalaisEngine {
     @BeforeClass
     public static void oneTimeSetup() throws ConfigurationException {
         calaisExtractor = new OpenCalaisEngine();
-        calaisExtractor.setCalaisTypeMap(new HashMap<UriRef,UriRef>());
+        calaisExtractor.setCalaisTypeMap(new HashMap<IRI,IRI>());
         calaisExtractor.tcManager = TcManager.getInstance();
         if (TEST_LICENSE_KEY != null && TEST_LICENSE_KEY.matches("\\w+")) {
             calaisExtractor.setLicenseKey(TEST_LICENSE_KEY);
@@ -96,7 +96,7 @@ public class TestOpenCalaisEngine {
         String format = "application/rdf+xml";
         InputStream in = this.getClass().getClassLoader().getResourceAsStream(testFile);
         Assert.assertNotNull("failed to load resource " + testFile, in);
-        MGraph model = calaisExtractor.readModel(in, format);
+        Graph model = calaisExtractor.readModel(in, format);
         Assert.assertNotNull("model reader failed with format: " + format, model);
         Collection<CalaisEntityOccurrence> entities;
         try {
@@ -111,7 +111,7 @@ public class TestOpenCalaisEngine {
         //test the generation of the Enhancements
         ContentItem ci = wrapAsContentItem(TEST_TEXT);
         calaisExtractor.createEnhancements(entities, ci);
-        Map<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+        Map<IRI,RDFTerm> expectedValues = new HashMap<IRI,RDFTerm>();
         expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(Properties.DC_CREATOR, 
             LiteralFactory.getInstance().createTypedLiteral(
@@ -130,7 +130,7 @@ public class TestOpenCalaisEngine {
         ci.getMetadata().add(
             new TripleImpl(ci.getUri(), Properties.DC_LANGUAGE, LiteralFactory.getInstance()
                     .createTypedLiteral("en")));
-        MGraph model;
+        Graph model;
         try {
             model = calaisExtractor.getCalaisAnalysis(TEST_TEXT, "text/plain");
         } catch (EngineException e) {

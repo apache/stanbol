@@ -22,7 +22,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.InputStream;
 
-import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.Scope;
@@ -51,7 +51,7 @@ public class TestAxiomInterpretation {
         OntologyInputSource<?> custSrc = new GraphContentInputSource(content, SupportedFormat.TURTLE);
         scope.getCustomSpace().addOntology(custSrc);
 
-        Graph g = scope.export(Graph.class, true);
+        ImmutableGraph g = scope.export(ImmutableGraph.class, true);
 
         // for (Triple t : g)
         // System.out.println(t);

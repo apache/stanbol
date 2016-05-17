@@ -39,21 +39,19 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.UUID;
 
-import org.apache.clerezza.rdf.core.BNode;
+import org.apache.clerezza.commons.rdf.BlankNode;
 import org.apache.clerezza.rdf.core.InvalidLiteralTypeException;
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
@@ -117,22 +115,22 @@ public final class EnhancementEngineHelper {
      * Create a new instance with the types enhancer:Enhancement and
      * enhancer:TextAnnotation in the metadata-graph of the content
      * item along with default properties (dc:creator and dc:created) and return
-     * the UriRef of the extraction so that engines can further add.
+     * the IRI of the extraction so that engines can further add.
      *
      * @param ci the ContentItem being under analysis
      * @param engine the Engine performing the analysis
      *
      * @return the URI of the new enhancement instance
      */
-    public static UriRef createTextEnhancement(ContentItem ci,
+    public static IRI createTextEnhancement(ContentItem ci,
             EnhancementEngine engine){
-        return createTextEnhancement(ci.getMetadata(), engine, new UriRef(ci.getUri().getUnicodeString()));
+        return createTextEnhancement(ci.getMetadata(), engine, new IRI(ci.getUri().getUnicodeString()));
     }
     /**
      * Create a new instance with the types enhancer:Enhancement and
      * enhancer:TextAnnotation in the parsed graph along with default properties
      * (dc:creator, dc:created and enhancer:extracted-form) and return
-     * the UriRef of the extraction so that engines can further add.
+     * the IRI of the extraction so that engines can further add.
      *
      * @param metadata the graph
      * @param engine the engine
@@ -140,9 +138,9 @@ public final class EnhancementEngineHelper {
      *
      * @return the URI of the new enhancement instance
      */
-    public static UriRef createTextEnhancement(MGraph metadata,
-                EnhancementEngine engine, UriRef contentItemId){
-        UriRef enhancement = createEnhancement(metadata, engine,contentItemId);
+    public static IRI createTextEnhancement(Graph metadata,
+                EnhancementEngine engine, IRI contentItemId){
+        IRI enhancement = createEnhancement(metadata, engine,contentItemId);
         //add the Text Annotation Type
         metadata.add(new TripleImpl(enhancement, RDF_TYPE,
                 ENHANCER_TEXTANNOTATION));
@@ -153,7 +151,7 @@ public final class EnhancementEngineHelper {
      * fise:selected-text and fise:selection-suffix properties for the 
      * parsed fise:TextAnnotation instance according to the parsed parameters.<p>
      * While it is intended to be used for TextAnnotations this method can also
-     * be used to add the mentioned properties to {@link UriRef}s with different
+     * be used to add the mentioned properties to {@link IRI}s with different
      * type.<p>
      * <b>NOTE</b> the <code>allowSelectionHeadTail</code>: This parameter allows
      * to deactivate the usage of fise:selection-head and fise:selection-tail.
@@ -161,7 +159,7 @@ public final class EnhancementEngineHelper {
      * and <code>true</code> in case sections of the text (e.g. phrases, sentences,
      * chapters ...) are selected.
      * @param metadata The RDF graph to add the information
-     * @param textAnnotation the UriRef of the fise:TextAnnotation
+     * @param textAnnotation the IRI of the fise:TextAnnotation
      * @param content the plain text content as String
      * @param start the start index of the occurrence 
      * @param end the end index of the occurrence
@@ -175,7 +173,7 @@ public final class EnhancementEngineHelper {
      * size of the selected area.
      * @since 0.11.0
      */
-    public static void setOccurrence(MGraph metadata, UriRef textAnnotation,
+    public static void setOccurrence(Graph metadata, IRI textAnnotation,
             String content, Integer start, Integer end, Language lang, int prefixSuffixSize, 
             boolean allowSelectionHeadTail){
         //set start, end
@@ -275,21 +273,21 @@ public final class EnhancementEngineHelper {
      * Create a new instance with the types enhancer:Enhancement and
      * enhancer:EntityAnnotation in the metadata-graph of the content
      * item along with default properties (dc:creator and dc:created) and return
-     * the UriRef of the extraction so that engines can further add
+     * the IRI of the extraction so that engines can further add
      *
      * @param ci the ContentItem being under analysis
      * @param engine the Engine performing the analysis
      * @return the URI of the new enhancement instance
      */
-    public static UriRef createEntityEnhancement(ContentItem ci,
+    public static IRI createEntityEnhancement(ContentItem ci,
             EnhancementEngine engine){
-        return createEntityEnhancement(ci.getMetadata(), engine, new UriRef(ci.getUri().getUnicodeString()));
+        return createEntityEnhancement(ci.getMetadata(), engine, new IRI(ci.getUri().getUnicodeString()));
     }
     /**
      * Create a new instance with the types enhancer:Enhancement and
      * enhancer:EntityAnnotation in the parsed graph along with default properties
      * (dc:creator, dc:created and enhancer:extracted-form) and return
-     * the UriRef of the extraction so that engines can further add.
+     * the IRI of the extraction so that engines can further add.
      *
      * @param metadata the graph
      * @param engine the engine
@@ -297,9 +295,9 @@ public final class EnhancementEngineHelper {
      *
      * @return the URI of the new enhancement instance
      */
-    public static UriRef createEntityEnhancement(MGraph metadata,
-                EnhancementEngine engine, UriRef contentItemId){
-        UriRef enhancement = createEnhancement(metadata, engine, contentItemId);
+    public static IRI createEntityEnhancement(Graph metadata,
+                EnhancementEngine engine, IRI contentItemId){
+        IRI enhancement = createEnhancement(metadata, engine, contentItemId);
         metadata.add(new TripleImpl(enhancement, RDF_TYPE, ENHANCER_ENTITYANNOTATION));
         return enhancement;
     }
@@ -307,7 +305,7 @@ public final class EnhancementEngineHelper {
      * Create a new instance with the types enhancer:Enhancement and
      * enhancer:TopicAnnotation in the parsed graph along with default properties
      * (dc:creator, dc:created and enhancer:extracted-form) and return
-     * the UriRef of the extraction so that engines can further add.
+     * the IRI of the extraction so that engines can further add.
      *
      * @param metadata the graph
      * @param engine the engine
@@ -315,9 +313,9 @@ public final class EnhancementEngineHelper {
      *
      * @return the URI of the new enhancement instance
      */
-    public static UriRef createTopicEnhancement(MGraph metadata,
-                 EnhancementEngine engine, UriRef contentItemId){
-         UriRef enhancement = createEnhancement(metadata, engine, contentItemId);
+    public static IRI createTopicEnhancement(Graph metadata,
+                 EnhancementEngine engine, IRI contentItemId){
+         IRI enhancement = createEnhancement(metadata, engine, contentItemId);
          metadata.add(new TripleImpl(enhancement, RDF_TYPE, ENHANCER_TOPICANNOTATION));
          return enhancement;
      }
@@ -325,20 +323,20 @@ public final class EnhancementEngineHelper {
      * Create a new instance with the types enhancer:Enhancement and
      * enhancer:TopicAnnotation in the metadata-graph of the content
      * item along with default properties (dc:creator and dc:created) and return
-     * the UriRef of the extraction so that engines can further add
+     * the IRI of the extraction so that engines can further add
      *
      * @param ci the ContentItem being under analysis
      * @param engine the Engine performing the analysis
      * @return the URI of the new enhancement instance
      */
-    public static UriRef createTopicEnhancement(ContentItem ci,
+    public static IRI createTopicEnhancement(ContentItem ci,
             EnhancementEngine engine){
-        return createTopicEnhancement(ci.getMetadata(), engine, new UriRef(ci.getUri().getUnicodeString()));
+        return createTopicEnhancement(ci.getMetadata(), engine, new IRI(ci.getUri().getUnicodeString()));
     }
     /**
      * Create a new enhancement instance in the metadata-graph of the content
      * item along with default properties (dc:creator and dc:created) and return
-     * the UriRef of the extraction so that engines can further add. <p>
+     * the IRI of the extraction so that engines can further add. <p>
      * <i>NOTE:</i> This method was protected prior to <code>0.12.1</code> (see
      * <a href="https://issues.apache.org/jira/browse/STANBOL-1321">STANBOL-1321</a>)
      *
@@ -348,11 +346,11 @@ public final class EnhancementEngineHelper {
      * @return the URI of the new enhancement instance
      * @since 0.12.1
      */
-    public static UriRef createEnhancement(MGraph metadata,
-            EnhancementEngine engine, UriRef contentItemId){
+    public static IRI createEnhancement(Graph metadata,
+            EnhancementEngine engine, IRI contentItemId){
         LiteralFactory literalFactory = LiteralFactory.getInstance();
 
-        UriRef enhancement = new UriRef("urn:enhancement-"
+        IRI enhancement = new IRI("urn:enhancement-"
                 + EnhancementEngineHelper.randomUUID());
         //add the Enhancement Type
         metadata.add(new TripleImpl(enhancement, RDF_TYPE,
@@ -386,7 +384,7 @@ public final class EnhancementEngineHelper {
      * @param enhancement the enhancement
      * @param engine the engine
      */
-    public static void addContributingEngine(MGraph metadata, UriRef enhancement,
+    public static void addContributingEngine(Graph metadata, IRI enhancement,
                                              EnhancementEngine engine){
         LiteralFactory literalFactory = LiteralFactory.getInstance();
         // TODO: use a public dereferencing URI instead?
@@ -399,7 +397,7 @@ public final class EnhancementEngineHelper {
     /**
      * Create a new extraction instance in the metadata-graph of the content
      * item along with default properties (dc:creator and dc:created) and return
-     * the UriRef of the extraction so that engines can further add
+     * the IRI of the extraction so that engines can further add
      *
      * @param ci the ContentItem being under analysis
      * @param engine the Engine performing the analysis
@@ -409,12 +407,12 @@ public final class EnhancementEngineHelper {
      * @see EnhancementEngineHelper#createTextEnhancement(ContentItem, EnhancementEngine)
      */
     @Deprecated
-    public static UriRef createNewExtraction(ContentItem ci,
+    public static IRI createNewExtraction(ContentItem ci,
             EnhancementEngine engine) {
         LiteralFactory literalFactory = LiteralFactory.getInstance();
 
-        MGraph metadata = ci.getMetadata();
-        UriRef extraction = new UriRef("urn:extraction-"
+        Graph metadata = ci.getMetadata();
+        IRI extraction = new IRI("urn:extraction-"
                 + EnhancementEngineHelper.randomUUID());
 
         metadata.add(new TripleImpl(extraction, RDF_TYPE,
@@ -422,7 +420,7 @@ public final class EnhancementEngineHelper {
 
         // relate the extraction to the content item
         metadata.add(new TripleImpl(extraction,
-                ENHANCER_RELATED_CONTENT_ITEM, new UriRef(ci.getUri().getUnicodeString())));
+                ENHANCER_RELATED_CONTENT_ITEM, new IRI(ci.getUri().getUnicodeString())));
 
         // creation date
         metadata.add(new TripleImpl(extraction, DC_CREATED,
@@ -459,16 +457,16 @@ public final class EnhancementEngineHelper {
      * @param literalFactory the literalFactory
      * @return the value
      */
-    public static <T> T get(TripleCollection graph, NonLiteral resource, UriRef property, Class<T> type,
+    public static <T> T get(Graph graph, BlankNodeOrIRI resource, IRI property, Class<T> type,
             LiteralFactory literalFactory){
         Iterator<Triple> results = graph.filter(resource, property, null);
         if(results.hasNext()){
             while(results.hasNext()){
                 Triple result = results.next();
-                if(result.getObject() instanceof TypedLiteral){
-                    return literalFactory.createObject(type, (TypedLiteral)result.getObject());
+                if(result.getObject() instanceof Literal){
+                    return literalFactory.createObject(type, (Literal)result.getObject());
                 } else {
-                    log.debug("Triple {} does not have a TypedLiteral as object! -> ignore",result);
+                    log.debug("Triple {} does not have a Literal as object! -> ignore",result);
                 }
             }
             log.info("No value for {} and property {} had the requested Type {} -> return null",
@@ -487,7 +485,7 @@ public final class EnhancementEngineHelper {
      * @param property the property
      * @param value the value
      */
-    public static void set(MGraph graph, NonLiteral resource, UriRef property, Resource value){
+    public static void set(Graph graph, BlankNodeOrIRI resource, IRI property, RDFTerm value){
         set(graph,resource,property,value == null ? null : singleton(value),null);
     }
     /**
@@ -498,7 +496,7 @@ public final class EnhancementEngineHelper {
      * @param property the property
      * @param value the value
      */
-    public static void set(MGraph graph, NonLiteral resource, UriRef property, Collection<Resource> values){
+    public static void set(Graph graph, BlankNodeOrIRI resource, IRI property, Collection<RDFTerm> values){
         set(graph,resource,property,values,null);
     }
 
@@ -508,13 +506,13 @@ public final class EnhancementEngineHelper {
      * @param graph the graph
      * @param resource the resource
      * @param property the property
-     * @param value the value. In case it is an instance of {@link Resource} it
+     * @param value the value. In case it is an instance of {@link RDFTerm} it
      * is directly added to the graph. Otherwise the parsed {@link LiteralFactory}
      * is used to create a {@link TypedLiteral} for the parsed value.
      * @param literalFactory the {@link LiteralFactory} used in case the parsed
-     * value is not an {@link Resource}
+     * value is not an {@link RDFTerm}
      */
-    public static void set(MGraph graph, NonLiteral resource, UriRef property,
+    public static void set(Graph graph, BlankNodeOrIRI resource, IRI property,
                            Object value, LiteralFactory literalFactory){
         set(graph,resource,property,value == null ? null : singleton(value),literalFactory);
     }
@@ -524,13 +522,13 @@ public final class EnhancementEngineHelper {
      * @param graph the graph
      * @param resource the resource
      * @param property the property
-     * @param value the value. In case it is an instance of {@link Resource} it
+     * @param value the value. In case it is an instance of {@link RDFTerm} it
      * is directly added to the graph. Otherwise the parsed {@link LiteralFactory}
      * is used to create a {@link TypedLiteral} for the parsed value.
      * @param literalFactory the {@link LiteralFactory} used in case the parsed
-     * value is not an {@link Resource}
+     * value is not an {@link RDFTerm}
      */
-    public static void set(MGraph graph, NonLiteral resource, UriRef property,
+    public static void set(Graph graph, BlankNodeOrIRI resource, IRI property,
                                Collection<?> values, LiteralFactory literalFactory){
         Iterator<Triple> currentValues = graph.filter(resource, property, null);
         while(currentValues.hasNext()){
@@ -539,8 +537,8 @@ public final class EnhancementEngineHelper {
         }
         if(values != null){
             for(Object value : values){
-                if(value instanceof Resource){
-                    graph.add(new TripleImpl(resource, property, (Resource) value));
+                if(value instanceof RDFTerm){
+                    graph.add(new TripleImpl(resource, property, (RDFTerm) value));
                 } else if (value != null){
                     graph.add(new TripleImpl(resource, property, 
                         literalFactory.createTypedLiteral(value)));
@@ -560,16 +558,16 @@ public final class EnhancementEngineHelper {
      * @param literalFactory the literalFactory
      * @return the value
      */
-    public static <T> Iterator<T> getValues(TripleCollection graph, NonLiteral resource,
-            UriRef property, final Class<T> type, final  LiteralFactory literalFactory){
+    public static <T> Iterator<T> getValues(Graph graph, BlankNodeOrIRI resource,
+            IRI property, final Class<T> type, final  LiteralFactory literalFactory){
         final Iterator<Triple> results = graph.filter(resource, property, null);
         return new Iterator<T>() {
-            //TODO: dose not check if the object of the triple is of type UriRef
+            //TODO: dose not check if the object of the triple is of type IRI
             @Override
             public boolean hasNext() {    return results.hasNext(); }
             @Override
             public T next() {
-                return literalFactory.createObject(type, (TypedLiteral)results.next().getObject());
+                return literalFactory.createObject(type, (Literal)results.next().getObject());
             }
             @Override
             public void remove() { results.remove(); }
@@ -582,7 +580,7 @@ public final class EnhancementEngineHelper {
      * @param property the property
      * @return the value
      */
-    public static String getString(TripleCollection graph, NonLiteral resource, UriRef property){
+    public static String getString(Graph graph, BlankNodeOrIRI resource, IRI property){
         Iterator<Triple> results = graph.filter(resource, property, null);
         if(results.hasNext()){
             while (results.hasNext()){
@@ -608,10 +606,10 @@ public final class EnhancementEngineHelper {
      * @param property the property
      * @return the value
      */
-    public static Iterator<String> getStrings(TripleCollection graph, NonLiteral resource, UriRef property){
+    public static Iterator<String> getStrings(Graph graph, BlankNodeOrIRI resource, IRI property){
         final Iterator<Triple> results = graph.filter(resource, property, null);
         return new Iterator<String>() {
-            //TODO: dose not check if the object of the triple is of type UriRef
+            //TODO: dose not check if the object of the triple is of type IRI
             @Override
             public boolean hasNext() { return results.hasNext(); }
             @Override
@@ -629,18 +627,18 @@ public final class EnhancementEngineHelper {
      * @param property the property
      * @return the value
      */
-    public static UriRef getReference(TripleCollection graph, NonLiteral resource, UriRef property){
+    public static IRI getReference(Graph graph, BlankNodeOrIRI resource, IRI property){
         Iterator<Triple> results = graph.filter(resource, property, null);
         if(results.hasNext()){
             while(results.hasNext()){
             Triple result = results.next();
-                if(result.getObject() instanceof UriRef){
-                    return (UriRef)result.getObject();
+                if(result.getObject() instanceof IRI){
+                    return (IRI)result.getObject();
                 } else {
-                    log.debug("Triple "+result+" does not have a UriRef as object! -> ignore");
+                    log.debug("Triple "+result+" does not have a IRI as object! -> ignore");
                 }
             }
-            log.info("No UriRef value for {} and property {} -> return null",resource,property);
+            log.info("No IRI value for {} and property {} -> return null",resource,property);
             return null;
         } else {
             log.debug("No Triple found for {} and property {}! -> return null",resource,property);
@@ -655,14 +653,14 @@ public final class EnhancementEngineHelper {
      * @param property the property
      * @return The iterator over all the values (
      */
-    public static Iterator<UriRef> getReferences(TripleCollection graph, NonLiteral resource, UriRef property){
+    public static Iterator<IRI> getReferences(Graph graph, BlankNodeOrIRI resource, IRI property){
         final Iterator<Triple> results = graph.filter(resource, property, null);
-        return new Iterator<UriRef>() {
-            //TODO: dose not check if the object of the triple is of type UriRef
+        return new Iterator<IRI>() {
+            //TODO: dose not check if the object of the triple is of type IRI
             @Override
             public boolean hasNext() { return results.hasNext(); }
             @Override
-            public UriRef next() { return (UriRef)results.next().getObject(); }
+            public IRI next() { return (IRI)results.next().getObject(); }
             @Override
             public void remove() { results.remove(); }
         };
@@ -717,16 +715,16 @@ public final class EnhancementEngineHelper {
      * @return the sorted list of language annotations or an empty list if none.
      * @throws IllegalArgumentException if <code>null</code> is parsed as graph
      */
-    public static List<NonLiteral> getLanguageAnnotations(TripleCollection graph){
+    public static List<BlankNodeOrIRI> getLanguageAnnotations(Graph graph){
         if(graph == null){
             throw new IllegalArgumentException("The parsed graph MUST NOT be NULL!");
         }
         // I do not use SPARQL, because I do not want to instantiate a QueryEngine
-        final Map<NonLiteral,Double> confidences = new HashMap<NonLiteral,Double>();
-        List<NonLiteral> langAnnotations = new ArrayList<NonLiteral>();
+        final Map<BlankNodeOrIRI,Double> confidences = new HashMap<BlankNodeOrIRI,Double>();
+        List<BlankNodeOrIRI> langAnnotations = new ArrayList<BlankNodeOrIRI>();
         Iterator<Triple> textAnnoataions = graph.filter(null, RDF_TYPE, ENHANCER_TEXTANNOTATION);
         while(textAnnoataions.hasNext()){
-            NonLiteral textAnnotation = textAnnoataions.next().getSubject();
+            BlankNodeOrIRI textAnnotation = textAnnoataions.next().getSubject();
             String language = getString(graph, textAnnotation, DC_LANGUAGE);
             if(language != null){
                 Double confidence = null;
@@ -748,9 +746,9 @@ public final class EnhancementEngineHelper {
             }
         }
         if(langAnnotations.size() > 1){
-            Collections.sort(langAnnotations,new Comparator<NonLiteral>() {
+            Collections.sort(langAnnotations,new Comparator<BlankNodeOrIRI>() {
                 @Override
-                public int compare(NonLiteral o1, NonLiteral o2) {
+                public int compare(BlankNodeOrIRI o1, BlankNodeOrIRI o2) {
                     Double c1 = confidences.get(o1);
                     Double c2 = confidences.get(o2);
                     //decrising order (values without confidence last)
@@ -772,13 +770,13 @@ public final class EnhancementEngineHelper {
      * 'fise:confidence' value - or if no annotations are present - the
      * 'dc-terms:language' value of the {@link ContentItem#getUri()}.<p>
      * Users that want to obtain all language annotations should use
-     * {@link #getLanguageAnnotations(TripleCollection)} instead.<p>
+     * {@link #getLanguageAnnotations(Graph)} instead.<p>
      * This method ensures a write lock on the {@link ContentItem}.
      * @param ci the contentItem
      * @return the identified language of the parsed {@link ContentItem}.
      * <code>null</code> if not available.
      * @throws IllegalArgumentException if <code>null</code> is parsed as content item
-     * @see #getLanguageAnnotations(TripleCollection)
+     * @see #getLanguageAnnotations(Graph)
      */
     public static String getLanguage(ContentItem ci){
         if(ci == null){
@@ -786,7 +784,7 @@ public final class EnhancementEngineHelper {
         }
         ci.getLock().readLock().lock();
         try {
-            List<NonLiteral> langAnnotations = getLanguageAnnotations(ci.getMetadata());
+            List<BlankNodeOrIRI> langAnnotations = getLanguageAnnotations(ci.getMetadata());
             if(langAnnotations.isEmpty()){ //fallback
                 return getString(ci.getMetadata(), ci.getUri(), DC_LANGUAGE);
             } else {
@@ -921,10 +919,10 @@ public final class EnhancementEngineHelper {
         Map<String,Object> engineExProps = new HashMap<String,Object>();
         ci.getLock().readLock().lock();
         try{
-            MGraph em = ExecutionMetadataHelper.getExecutionMetadata(ci);
+            Graph em = ExecutionMetadataHelper.getExecutionMetadata(ci);
             //(1.a) retrieve EnhancementProperties from the ep:ExecutionPlan
             log.debug("> extract EnhancementProperties form the ExecutionPlan");
-            NonLiteral executionPlanNode = ExecutionMetadataHelper.getExecutionPlanNode(em, 
+            BlankNodeOrIRI executionPlanNode = ExecutionMetadataHelper.getExecutionPlanNode(em, 
                 ExecutionMetadataHelper.getChainExecution(em, ci.getUri()));
             extractEnhancementProperties(chainExProps, em, executionPlanNode, "Chain Execution");
             //(1.b) retrieve Enhancement Properties from the ep:ExectutionNode
@@ -935,7 +933,7 @@ public final class EnhancementEngineHelper {
             //NOTE: we expect only a single execution node for an engine, but if
             //      there are multiple we will merge the properties of those
             while(engineExecutions.hasNext()){
-                NonLiteral engineExecution = engineExecutions.next().getSubject();
+                BlankNodeOrIRI engineExecution = engineExecutions.next().getSubject();
                 if(em.contains(new TripleImpl(executionPlanNode, ExecutionPlan.HAS_EXECUTION_NODE, engineExecution))){
                     extractEnhancementProperties(engineExProps,em, engineExecution, "Engine Execution");
                 } //else engine execution of a different execution plan
@@ -959,8 +957,8 @@ public final class EnhancementEngineHelper {
      * @param node the node to extract the properties from
      * @param level the name of the level (only used for logging)
      */
-    private static void extractEnhancementProperties(Map<String,Object> properties, TripleCollection graph,
-            NonLiteral node, String level) {
+    private static void extractEnhancementProperties(Map<String,Object> properties, Graph graph,
+            BlankNodeOrIRI node, String level) {
         log.debug(" - extract {} properties from {}", level, node);
         Iterator<Triple> props = graph.filter(node, null, null);
         while(props.hasNext()){
@@ -968,7 +966,7 @@ public final class EnhancementEngineHelper {
             String propUri =  t.getPredicate().getUnicodeString();
             if(propUri.startsWith(EHPROP_NS)){
                 String prop = propUri.substring(EHPROP_NS_LENGTH);
-                Resource resource = t.getObject();
+                RDFTerm resource = t.getObject();
                 Object value = extractEnhancementPropertyValue(resource);
                 if(value != null && !prop.isEmpty()){
                     Object current = properties.get(prop);
@@ -997,17 +995,17 @@ public final class EnhancementEngineHelper {
     }
 
     /**
-     * Extracts the EnhancementProperty value from the parsed Resource.<p>
-     * Currently this will return {@link UriRef#getUnicodeString()} or
-     * {@link Literal#getLexicalForm()}. For {@link BNode}s <code>null</code> 
+     * Extracts the EnhancementProperty value from the parsed RDFTerm.<p>
+     * Currently this will return {@link IRI#getUnicodeString()} or
+     * {@link Literal#getLexicalForm()}. For {@link BlankNode}s <code>null</code> 
      * is returned.
      * @param r the resource to parse the value form
      * @return the parsed value
      */
-    private static Object extractEnhancementPropertyValue(Resource r) {
+    private static Object extractEnhancementPropertyValue(RDFTerm r) {
         Object value;
-        if(r instanceof UriRef){
-            value = ((UriRef)r).getUnicodeString();
+        if(r instanceof IRI){
+            value = ((IRI)r).getUnicodeString();
         } else if(r instanceof Literal){
             value = ((Literal) r).getLexicalForm();
         } else {

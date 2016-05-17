@@ -34,7 +34,7 @@ import com.hp.hpl.jena.reasoner.rulesys.Rule;
 
 /**
  * 
- * It adapts a IsBlankAtom to the isBNode functor of Jena.
+ * It adapts a IsBlankAtom to the isBlankNode functor of Jena.
  * 
  * @author anuzzolese
  * 
@@ -65,7 +65,7 @@ public class IsBlankAtom extends AbstractAdaptableAtom {
 
         nodes.add(argNode);
 
-        return (T) new Functor("isBNode", nodes, BuiltinRegistry.theRegistry);
+        return (T) new Functor("isBlankNode", nodes, BuiltinRegistry.theRegistry);
 
     }
 

@@ -15,26 +15,26 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import org.apache.clerezza.jaxrs.utils.TrailingSlash;
-import org.apache.clerezza.rdf.core.BNode;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.BlankNode;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.EntityAlreadyExistsException;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.security.TcAccessController;
 import org.apache.clerezza.rdf.core.access.security.TcPermission;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
 import org.apache.clerezza.rdf.ontologies.DC;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.clerezza.rdf.utils.GraphNode;
-import org.apache.clerezza.rdf.utils.UnionMGraph;
+import org.apache.clerezza.rdf.utils.UnionGraph;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.commons.web.viewable.RdfViewable;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
@@ -75,13 +75,13 @@ public class ResourceResolver {
     /**
      * This is the name of the graph in which we "log" the requests
      */
-    private UriRef REQUEST_LOG_GRAPH_NAME = new UriRef("http://example.org/resource-resolver-log.graph");
+    private IRI REQUEST_LOG_GRAPH_NAME = new IRI("http://example.org/resource-resolver-log.graph");
     
     @Activate
     protected void activate(ComponentContext context) {
         log.info("The example service is being activated");
         try {
-            tcManager.createMGraph(REQUEST_LOG_GRAPH_NAME);
+            tcManager.createGraph(REQUEST_LOG_GRAPH_NAME);
             //now make sure everybody can read from the graph
             //or more precisly, anybody who can read the content-graph
             TcAccessController tca = tcManager.getTcAccessController();
@@ -105,7 +105,7 @@ public class ResourceResolver {
      */
     @GET
     public RdfViewable serviceEntry(@Context final UriInfo uriInfo, 
-            @QueryParam("iri") final UriRef iri, 
+            @QueryParam("iri") final IRI iri, 
             @HeaderParam("user-agent") String userAgent) throws Exception {
         //this maks sure we are nt invoked with a trailing slash which would affect
         //relative resolution of links (e.g. css)
@@ -113,18 +113,18 @@ public class ResourceResolver {
         final String resourcePath = uriInfo.getAbsolutePath().toString();
         //The URI at which this service was accessed accessed, this will be the 
         //central serviceUri in the response
-        final UriRef serviceUri = new UriRef(resourcePath);
+        final IRI serviceUri = new IRI(resourcePath);
         //the in memory graph to which the triples for the response are added
-        final MGraph responseGraph = new IndexedMGraph();
+        final Graph responseGraph = new IndexedGraph();
         //A union graph containing both the response specif triples as well 
         //as the log-graph
-        final UnionMGraph resultGraph = new UnionMGraph(responseGraph, getRequestLogGraph());
+        final UnionGraph resultGraph = new UnionGraph(responseGraph, getRequestLogGraph());
         //This GraphNode represents the service within our result graph
         final GraphNode node = new GraphNode(serviceUri, resultGraph);
         //The triples will be added to the first graph of the union
         //i.e. to the in-memory responseGraph
         node.addProperty(RDF.type, Ontology.ResourceResolver);
-        node.addProperty(RDFS.comment, new PlainLiteralImpl("A Resource Resolver"));
+        node.addProperty(RDFS.comment, new PlainLiteralImpl("A RDFTerm Resolver"));
         if (iri != null) {
             node.addProperty(Ontology.describes, iri);
             addResourceDescription(iri, responseGraph);
@@ -136,11 +136,11 @@ public class ResourceResolver {
     
 
     /**
-     * Add the description of a serviceUri to the specified MGraph using SiteManager.
+     * Add the description of a serviceUri to the specified Graph using SiteManager.
      * The description includes the metadata provided by the SiteManager.
      * 
      */
-    private void addResourceDescription(UriRef iri, MGraph mGraph) {
+    private void addResourceDescription(IRI iri, Graph mGraph) {
         final Entity entity = siteManager.getEntity(iri.getUnicodeString());
         if (entity != null) {
             final RdfValueFactory valueFactory = new RdfValueFactory(mGraph);
@@ -158,15 +158,15 @@ public class ResourceResolver {
     /**
      * Logs a request to the log-graph
      */
-    private void logRequest(final UriRef iri, final String userAgent) {
+    private void logRequest(final IRI iri, final String userAgent) {
         //writing to a persistent graph requires some special permission
         //by executing the code in a do-priviledged section
         //the user doesn't need this permissions, anonymous users are thus not
         //asked to log in
         AccessController.doPrivileged(new PrivilegedAction<Object>() {
             public Object run() {
-                final MGraph logGraph = getRequestLogGraph();
-                GraphNode loggedRequest = new GraphNode(new BNode(), logGraph);
+                final Graph logGraph = getRequestLogGraph();
+                GraphNode loggedRequest = new GraphNode(new BlankNode(), logGraph);
                 loggedRequest.addProperty(RDF.type, Ontology.LoggedRequest);
                 loggedRequest.addPropertyValue(DC.date, new Date());
                 loggedRequest.addPropertyValue(Ontology.userAgent, userAgent);
@@ -178,12 +178,12 @@ public class ResourceResolver {
     }
 
     /**
-     * This returns the existing MGraph for the log .
+     * This returns the existing Graph for the log .
      * 
-     * @return the MGraph to which the requests are logged
+     * @return the Graph to which the requests are logged
      */
-    private MGraph getRequestLogGraph() {
-        return tcManager.getMGraph(REQUEST_LOG_GRAPH_NAME);
+    private Graph getRequestLogGraph() {
+        return tcManager.getGraph(REQUEST_LOG_GRAPH_NAME);
     }
     
 }

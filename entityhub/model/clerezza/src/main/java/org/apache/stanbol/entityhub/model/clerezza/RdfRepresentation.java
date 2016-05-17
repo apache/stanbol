@@ -22,11 +22,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.NoConvertorException;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.stanbol.entityhub.servicesapi.util.AdaptingIterator;
 import org.apache.stanbol.entityhub.servicesapi.util.FilteringIterator;
@@ -35,8 +35,8 @@ import org.apache.stanbol.entityhub.model.clerezza.impl.Literal2TextAdapter;
 import org.apache.stanbol.entityhub.model.clerezza.impl.LiteralAdapter;
 import org.apache.stanbol.entityhub.model.clerezza.impl.NaturalTextFilter;
 import org.apache.stanbol.entityhub.model.clerezza.impl.Resource2ValueAdapter;
-import org.apache.stanbol.entityhub.model.clerezza.impl.UriRef2ReferenceAdapter;
-import org.apache.stanbol.entityhub.model.clerezza.impl.UriRefAdapter;
+import org.apache.stanbol.entityhub.model.clerezza.impl.IRI2ReferenceAdapter;
+import org.apache.stanbol.entityhub.model.clerezza.impl.IRIAdapter;
 import org.apache.stanbol.entityhub.model.clerezza.utils.Resource2StringAdapter;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
@@ -59,7 +59,7 @@ public class RdfRepresentation implements Representation{
         return graphNode;
     }
 
-    protected RdfRepresentation(UriRef resource, TripleCollection graph) {
+    protected RdfRepresentation(IRI resource, Graph graph) {
         this.graphNode = new GraphNode(resource, graph);
     }
 
@@ -68,12 +68,12 @@ public class RdfRepresentation implements Representation{
      *
      * @return The RDF graph of this Representation
      */
-    public TripleCollection getRdfGraph(){
+    public Graph getRdfGraph(){
         return graphNode.getGraph();
     }
 
-//    protected UriRef getRepresentationType(){
-//        Iterator<UriRef> it = this.graphNode.getUriRefObjects(REPRESENTATION_TYPE_PROPERTY);
+//    protected IRI getRepresentationType(){
+//        Iterator<IRI> it = this.graphNode.getIRIObjects(REPRESENTATION_TYPE_PROPERTY);
 //        return it.hasNext()?it.next():null;
 //    }
     @Override
@@ -86,32 +86,32 @@ public class RdfRepresentation implements Representation{
         if(value == null){
             throw new IllegalArgumentException("NULL values are not supported by Representations");
         }
-        UriRef fieldUriRef = new UriRef(field);
+        IRI fieldIRI = new IRI(field);
         Collection<Object> values = new ArrayList<Object>();
         //process the parsed value with the Utility Method ->
         // this converts Objects as defined in the specification
         ModelUtils.checkValues(valueFactory, value, values);
         //We still need to implement support for specific types supported by this implementation
         for (Object current : values){
-            if (current instanceof Resource){ //native support for Clerezza types!
-                graphNode.addProperty(fieldUriRef, (Resource)current);
+            if (current instanceof RDFTerm){ //native support for Clerezza types!
+                graphNode.addProperty(fieldIRI, (RDFTerm)current);
             } else if (current instanceof RdfReference){
                 //treat RDF Implementations special to avoid creating new instances
-                graphNode.addProperty(fieldUriRef, ((RdfReference) current).getUriRef());
+                graphNode.addProperty(fieldIRI, ((RdfReference) current).getIRI());
             } else if (current instanceof Reference){
-                graphNode.addProperty(fieldUriRef, new UriRef(((Reference) current).getReference()));
+                graphNode.addProperty(fieldIRI, new IRI(((Reference) current).getReference()));
             } else if (current instanceof RdfText){
                 //treat RDF Implementations special to avoid creating new instances
-                graphNode.addProperty(fieldUriRef,((RdfText) current).getLiteral());
+                graphNode.addProperty(fieldIRI,((RdfText) current).getLiteral());
             } else if (current instanceof Text){
-                addNaturalText(fieldUriRef, ((Text)current).getText(), ((Text)current).getLanguage());
+                addNaturalText(fieldIRI, ((Text)current).getText(), ((Text)current).getLanguage());
             } else { //else add an typed Literal!
-                addTypedLiteral(fieldUriRef, current);
+                addTypedLiteral(fieldIRI, current);
             }
         }
     }
 
-    private void addTypedLiteral(UriRef field, Object literalValue){
+    private void addTypedLiteral(IRI field, Object literalValue){
         Literal literal;
         try {
             literal = RdfResourceUtils.createLiteral(literalValue);
@@ -134,7 +134,7 @@ public class RdfRepresentation implements Representation{
         } else if (reference.isEmpty()) {
             throw new IllegalArgumentException("References MUST NOT be empty!");
         }
-        graphNode.addProperty(new UriRef(field), new UriRef(reference));
+        graphNode.addProperty(new IRI(field), new IRI(reference));
     }
     @Override
     public void addNaturalText(String field, String text, String...languages) {
@@ -146,9 +146,9 @@ public class RdfRepresentation implements Representation{
         if(text == null){
             throw new IllegalArgumentException("NULL values are not supported by Representations");
         }
-        this.addNaturalText(new UriRef(field), text, languages);
+        this.addNaturalText(new IRI(field), text, languages);
     }
-    private void addNaturalText(UriRef field, String text, String...languages) {
+    private void addNaturalText(IRI field, String text, String...languages) {
         if(languages == null || languages.length == 0){
             languages = new String []{null};
         }
@@ -165,36 +165,36 @@ public class RdfRepresentation implements Representation{
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
-        UriRef fieldUriRef = new UriRef(field);
-        if(Resource.class.isAssignableFrom(type)){ //native support for Clerezza types
-            return new TypeSafeIterator<T>(graphNode.getObjects(fieldUriRef), type);
+        IRI fieldIRI = new IRI(field);
+        if(RDFTerm.class.isAssignableFrom(type)){ //native support for Clerezza types
+            return new TypeSafeIterator<T>(graphNode.getObjects(fieldIRI), type);
 // NOTE: (Rupert Westenthaler 12.01.2011)
 //     Converting everything to String is not an intended functionality. When
 //     someone parsed String.class he rather assumes that he gets only string
 //     values and not also string representations for Dates, Integer ...
 //       
 //        } else if(type.equals(String.class)){ //support to convert anything to String
-//            return (Iterator<T>) new AdaptingIterator<Resource,String>(
-//                    graphNode.getObjects(fieldUriRef),
-//                    new Resource2StringAdapter<Resource>(),
+//            return (Iterator<T>) new AdaptingIterator<RDFTerm,String>(
+//                    graphNode.getObjects(fieldIRI),
+//                    new Resource2StringAdapter<RDFTerm>(),
 //                    String.class);
         } else if(type.equals(URI.class) || type.equals(URL.class)){ //support for References
-            return new AdaptingIterator<UriRef, T>(
-                    graphNode.getUriRefObjects(fieldUriRef),
-                    new UriRefAdapter<T>(),
+            return new AdaptingIterator<IRI, T>(
+                    graphNode.getIRIObjects(fieldIRI),
+                    new IRIAdapter<T>(),
                     type);
         } else if(Reference.class.isAssignableFrom(type)){
-            return (Iterator<T>) new AdaptingIterator<UriRef,Reference>(
-                    graphNode.getUriRefObjects(fieldUriRef),
-                    new UriRef2ReferenceAdapter(),Reference.class);
+            return (Iterator<T>) new AdaptingIterator<IRI,Reference>(
+                    graphNode.getIRIObjects(fieldIRI),
+                    new IRI2ReferenceAdapter(),Reference.class);
         } else if(Text.class.isAssignableFrom(type)){
             return (Iterator<T>)new AdaptingIterator<Literal, Text>(
-                    graphNode.getLiterals(fieldUriRef),
+                    graphNode.getLiterals(fieldIRI),
                     new Literal2TextAdapter<Literal>(),
                     Text.class);
         } else { //support for Literals -> Type conversions
             return new AdaptingIterator<Literal, T>(
-                    graphNode.getLiterals(fieldUriRef),
+                    graphNode.getLiterals(fieldIRI),
                     new LiteralAdapter<Literal, T>(),
                     type);
         }
@@ -207,9 +207,9 @@ public class RdfRepresentation implements Representation{
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
-        return new AdaptingIterator<UriRef,Reference>(
-                graphNode.getUriRefObjects(new UriRef(field)),
-                new UriRef2ReferenceAdapter(),Reference.class);
+        return new AdaptingIterator<IRI,Reference>(
+                graphNode.getIRIObjects(new IRI(field)),
+                new IRI2ReferenceAdapter(),Reference.class);
     }
 
     @Override
@@ -220,7 +220,7 @@ public class RdfRepresentation implements Representation{
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
         return new AdaptingIterator<Literal, Text>(
-                graphNode.getLiterals(new UriRef(field)),
+                graphNode.getLiterals(new IRI(field)),
                 new Literal2TextAdapter<Literal>(),
                 Text.class);
     }
@@ -232,8 +232,8 @@ public class RdfRepresentation implements Representation{
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
-        return new AdaptingIterator<Resource, Object>(graphNode.getObjects(new UriRef(field)),
-                new Resource2ValueAdapter<Resource>(),Object.class);
+        return new AdaptingIterator<RDFTerm, Object>(graphNode.getObjects(new IRI(field)),
+                new Resource2ValueAdapter<RDFTerm>(),Object.class);
     }
 
     @Override
@@ -244,15 +244,15 @@ public class RdfRepresentation implements Representation{
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
         return new AdaptingIterator<Literal, Text>(
-                graphNode.getLiterals(new UriRef(field)),
+                graphNode.getLiterals(new IRI(field)),
                 new Literal2TextAdapter<Literal>(languages),
                 Text.class);
     }
 
     @Override
     public Iterator<String> getFieldNames() {
-        return new AdaptingIterator<UriRef, String>(graphNode.getProperties(),
-                new Resource2StringAdapter<UriRef>(), String.class);
+        return new AdaptingIterator<IRI, String>(graphNode.getProperties(),
+                new Resource2StringAdapter<IRI>(), String.class);
     }
 
     @Override
@@ -318,11 +318,11 @@ public class RdfRepresentation implements Representation{
         return getNode().getUnicodeString();
     }
     /**
-     * Getter for the UriRef representing the ID of this Representation.
-     * @return The UriRef representing the ID of this Representation.
+     * Getter for the IRI representing the ID of this Representation.
+     * @return The IRI representing the ID of this Representation.
      */
-    public UriRef getNode(){
-        return (UriRef)graphNode.getNode();
+    public IRI getNode(){
+        return (IRI)graphNode.getNode();
     }
 
     @Override
@@ -337,26 +337,26 @@ public class RdfRepresentation implements Representation{
                     +" and field "+field+" -> call ignored");
             return;
         }
-        UriRef fieldUriRef = new UriRef(field);
+        IRI fieldIRI = new IRI(field);
         Collection<Object> removeValues = new ArrayList<Object>();
         
         ModelUtils.checkValues(valueFactory, parsedValue, removeValues);
         //We still need to implement support for specific types supported by this implementation
         for (Object current : removeValues){
-            if (current instanceof Resource){ //native support for Clerezza types!
-                graphNode.deleteProperty(fieldUriRef, (Resource)current);
+            if (current instanceof RDFTerm){ //native support for Clerezza types!
+                graphNode.deleteProperty(fieldIRI, (RDFTerm)current);
             } else if (current instanceof RdfReference){
                 //treat RDF Implementations special to avoid creating new instances
-                graphNode.deleteProperty(fieldUriRef, ((RdfReference) current).getUriRef());
+                graphNode.deleteProperty(fieldIRI, ((RdfReference) current).getIRI());
             } else if (current instanceof Reference){
-                graphNode.deleteProperty(fieldUriRef, new UriRef(((Reference) current).getReference()));
+                graphNode.deleteProperty(fieldIRI, new IRI(((Reference) current).getReference()));
             } else if (current instanceof RdfText){
                 //treat RDF Implementations special to avoid creating new instances
-                graphNode.deleteProperty(fieldUriRef,((RdfText) current).getLiteral());
+                graphNode.deleteProperty(fieldIRI,((RdfText) current).getLiteral());
             } else if (current instanceof Text){
                 removeNaturalText(field,((Text)current).getText(),((Text)current).getLanguage());
             } else { //else add an typed Literal!
-                removeTypedLiteral(fieldUriRef, current);
+                removeTypedLiteral(fieldIRI, current);
             }
         }
     }
@@ -371,9 +371,9 @@ public class RdfRepresentation implements Representation{
         if(reference == null){
             log.warn("NULL parsed as value in remove method for symbol "+getId()+" and field "+field+" -> call ignored");
         }
-        graphNode.deleteProperty(new UriRef(field), new UriRef(reference));
+        graphNode.deleteProperty(new IRI(field), new IRI(reference));
     }
-    protected void removeTypedLiteral(UriRef field, Object object){
+    protected void removeTypedLiteral(IRI field, Object object){
         Literal literal;
         try{
             literal = RdfResourceUtils.createLiteral(object);
@@ -398,13 +398,13 @@ public class RdfRepresentation implements Representation{
             //need to be interpreted as default language
             languages = new String []{null};
         }
-        UriRef fieldUriRef = new UriRef(field);
+        IRI fieldIRI = new IRI(field);
         for(String language : languages){
-            graphNode.deleteProperty(fieldUriRef,RdfResourceUtils.createLiteral(value, language));
+            graphNode.deleteProperty(fieldIRI,RdfResourceUtils.createLiteral(value, language));
             if(language == null){ //if the language is null
                 //we need also try to remove a typed Literal with the data type
                 //xsd:string and the parsed value!
-                graphNode.deleteProperty(fieldUriRef,RdfResourceUtils.createLiteral(value));
+                graphNode.deleteProperty(fieldIRI,RdfResourceUtils.createLiteral(value));
             }
         }
     }
@@ -415,7 +415,7 @@ public class RdfRepresentation implements Representation{
         } else if(field.isEmpty()){
             throw new IllegalArgumentException("The parsed field MUST NOT be Empty");
         }
-        graphNode.deleteProperties(new UriRef(field));
+        graphNode.deleteProperties(new IRI(field));
     }
     @Override
     public void removeAllNaturalText(String field, String... languages) {
@@ -427,17 +427,17 @@ public class RdfRepresentation implements Representation{
 //        if(languages == null || languages.length == 0){
 //            languages = new String []{null};
 //        }
-        UriRef fieldUriRef = new UriRef(field);
+        IRI fieldIRI = new IRI(field);
         //get all the affected Literals
         Collection<Literal> toRemove = new ArrayList<Literal>();
         Iterator<Literal> it =  new FilteringIterator<Literal>(
-                graphNode.getLiterals(fieldUriRef),
+                graphNode.getLiterals(fieldIRI),
                 new NaturalTextFilter(languages),Literal.class);
         while(it.hasNext()){
             toRemove.add(it.next());
         }
         for(Literal l : toRemove){
-            graphNode.deleteProperty(fieldUriRef, l);
+            graphNode.deleteProperty(fieldIRI, l);
         }
     }
 

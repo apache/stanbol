@@ -9,10 +9,10 @@ import java.util.Dictionary;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.DCTERMS;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.felix.scr.annotations.Activate;
@@ -138,7 +138,7 @@ public class ExampleEnhancer extends AbstractEnhancementEngine<RuntimeException,
     public int canEnhance(ContentItem ci) throws EngineException {
         // check if a Content in the supported type is available
         //NOTE: you can parse multiple content types
-        Entry<UriRef,Blob> textBlob = ContentItemHelper.getBlob(
+        Entry<IRI,Blob> textBlob = ContentItemHelper.getBlob(
             ci, Collections.singleton("text/plain"));
         if(textBlob == null) {
             return CANNOT_ENHANCE;
@@ -168,15 +168,15 @@ public class ExampleEnhancer extends AbstractEnhancementEngine<RuntimeException,
         
         //(3) write the enhancement results        
         // get the metadata graph
-        MGraph metadata = ci.getMetadata();
+        Graph metadata = ci.getMetadata();
         //NOTE: as we allow synchronous calls we need to use read/write
         // locks on the ContentItem
         ci.getLock().writeLock().lock();
         try {
             // TODO: replace this with real enhancements
-            UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
+            IRI textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
             metadata.add(new TripleImpl(textAnnotation, DCTERMS.type, 
-                    new UriRef("http://example.org/ontology/LengthEnhancement")));
+                    new IRI("http://example.org/ontology/LengthEnhancement")));
             metadata.add(new TripleImpl(textAnnotation, RDFS.comment,
                     new PlainLiteralImpl("A text of " + contentLength + " charaters")));
         } finally {

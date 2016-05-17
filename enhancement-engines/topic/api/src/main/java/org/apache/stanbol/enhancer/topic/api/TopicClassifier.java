@@ -16,8 +16,8 @@
  */
 package org.apache.stanbol.enhancer.topic.api;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.topic.api.training.TrainingSet;
 import org.apache.stanbol.enhancer.topic.api.training.TrainingSetException;
 import org.osgi.framework.InvalidSyntaxException;
@@ -180,5 +180,5 @@ public interface TopicClassifier {
      * 
      * @return the number of concepts successfully imported (including roots).
      */
-    int importConceptsFromGraph(Graph graph, UriRef conceptClass, UriRef broaderProperty) throws ClassifierException;
+    int importConceptsFromGraph(ImmutableGraph graph, IRI conceptClass, IRI broaderProperty) throws ClassifierException;
 }

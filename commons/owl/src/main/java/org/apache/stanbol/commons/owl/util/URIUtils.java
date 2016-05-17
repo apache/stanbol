@@ -18,7 +18,6 @@ package org.apache.stanbol.commons.owl.util;
 
 import java.net.URI;
 
-import org.apache.clerezza.rdf.core.UriRef;
 import org.semanticweb.owlapi.model.IRI;
 
 /**
@@ -35,25 +34,25 @@ public final class URIUtils {
     private URIUtils() {}
 
     /**
-     * Converts a UriRef to an IRI.
+     * Converts a IRI to an IRI.
      * 
      * @param uri
-     *            the UriRef to convert
-     * @return the IRI form of the UriRef
+     *            the IRI to convert
+     * @return the IRI form of the IRI
      */
-    public static IRI createIRI(UriRef uri) {
+    public static IRI createIRI(org.apache.clerezza.commons.rdf.IRI uri) {
         return IRI.create(uri.getUnicodeString());
     }
 
     /**
-     * Converts an IRI to a UriRef.
+     * Converts an IRI to a IRI.
      * 
      * @param uri
      *            the IRI to convert
-     * @return the UriRef form of the IRI
+     * @return the IRI form of the IRI
      */
-    public static UriRef createUriRef(IRI uri) {
-        return new UriRef(uri.toString());
+    public static org.apache.clerezza.commons.rdf.IRI createIRI(IRI uri) {
+        return new org.apache.clerezza.commons.rdf.IRI(uri.toString());
     }
 
     /**

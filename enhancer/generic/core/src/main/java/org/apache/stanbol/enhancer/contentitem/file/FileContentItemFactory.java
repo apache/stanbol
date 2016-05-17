@@ -30,8 +30,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -39,7 +39,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
@@ -159,12 +159,12 @@ public class FileContentItemFactory extends AbstractContentItemFactory implement
     }
         
     @Override
-    protected ContentItem createContentItem(UriRef id, Blob blob, MGraph metadata) {
+    protected ContentItem createContentItem(IRI id, Blob blob, Graph metadata) {
         return new FileContentItem(id, blob, metadata);
     }
 
     @Override
-    protected ContentItem createContentItem(String prefix, Blob blob, MGraph metadata) {
+    protected ContentItem createContentItem(String prefix, Blob blob, Graph metadata) {
         return new FileContentItem(prefix, blob, metadata);
     }
 
@@ -391,7 +391,7 @@ public class FileContentItemFactory extends AbstractContentItemFactory implement
      * prefix is <code>null</code>
      * @throws IllegalStateException if the parsed blob is not an {@link FileBlob}
      */
-    protected UriRef getDefaultUri(Blob blob, String prefix) {
+    protected IRI getDefaultUri(Blob blob, String prefix) {
         if(blob == null){
             throw new IllegalArgumentException("The parsed Blob MUST NOT be NULL!");
         }
@@ -399,7 +399,7 @@ public class FileContentItemFactory extends AbstractContentItemFactory implement
             throw new IllegalArgumentException("The parsed prefix MUST NOT be NULL!");
         }
         if(blob instanceof FileBlob) {
-            return new UriRef(prefix+SHA1.toLowerCase()+ '-' + ((FileBlob)blob).getSha1());
+            return new IRI(prefix+SHA1.toLowerCase()+ '-' + ((FileBlob)blob).getSha1());
         } else {
             throw new IllegalStateException("FileContentItem expects FileBlobs to be used" +
                     "as Blob implementation (found: "+blob.getClass()+")!");
@@ -408,13 +408,13 @@ public class FileContentItemFactory extends AbstractContentItemFactory implement
 
     protected class FileContentItem extends ContentItemImpl implements ContentItem {
         
-        public FileContentItem(UriRef id, Blob blob,MGraph metadata) {
+        public FileContentItem(IRI id, Blob blob,Graph metadata) {
             super(id == null ? getDefaultUri(blob, DEFAULT_CONTENT_ITEM_PREFIX) : id, blob,
-                    metadata == null ? new IndexedMGraph() : metadata);
+                    metadata == null ? new IndexedGraph() : metadata);
         }
-        public FileContentItem(String prefix, Blob blob,MGraph metadata) {
+        public FileContentItem(String prefix, Blob blob,Graph metadata) {
             super(getDefaultUri(blob, prefix), blob,
-                metadata == null ? new IndexedMGraph() : metadata);
+                metadata == null ? new IndexedGraph() : metadata);
         }
 
         

@@ -23,10 +23,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
 import org.apache.clerezza.rdf.core.serializedform.ParsingProvider;
 import org.apache.clerezza.rdf.core.serializedform.SerializingProvider;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
@@ -52,9 +51,9 @@ import com.hp.hpl.jena.rdf.model.Model;
  * 
  * <ul>
  * <li>a Jena Model (see {@link Model}) to a list of Clerezza triples (see {@link Triple})
- * <li>a Jena Model to a Clerezza MGraph (see {@link MGraph})
- * <li>a Clerezza MGraph a Jena Model
- * <li>a Clerezza MGraph a Jena Graph (see {@link Graph}
+ * <li>a Jena Model to a Clerezza Graph (see {@link Graph})
+ * <li>a Clerezza Graph a Jena Model
+ * <li>a Clerezza Graph a Jena ImmutableGraph (see {@link ImmutableGraph}
  * </ul>
  * 
  * 
@@ -82,7 +81,7 @@ public final class OWLAPIToClerezzaConverter {
      */
     public static List<Triple> owlOntologyToClerezzaTriples(OWLOntology ontology) {
         ArrayList<Triple> clerezzaTriples = new ArrayList<Triple>();
-        TripleCollection mGraph = owlOntologyToClerezzaMGraph(ontology);
+        org.apache.clerezza.commons.rdf.Graph mGraph = owlOntologyToClerezzaGraph(ontology);
         Iterator<Triple> tripleIterator = mGraph.iterator();
         while (tripleIterator.hasNext()) {
             Triple triple = tripleIterator.next();
@@ -93,22 +92,22 @@ public final class OWLAPIToClerezzaConverter {
 
     /**
      * 
-     * Converts a OWL API {@link OWLOntology} to Clerezza {@link MGraph}.
+     * Converts a OWL API {@link OWLOntology} to Clerezza {@link Graph}.
      * 
      * @param ontology
      *            {@link OWLOntology}
-     * @return the equivalent Clerezza {@link MGraph}.
+     * @return the equivalent Clerezza {@link Graph}.
      */
 
-    public static TripleCollection owlOntologyToClerezzaMGraph(OWLOntology ontology) {
-        MGraph mGraph = null;
+    public static org.apache.clerezza.commons.rdf.Graph owlOntologyToClerezzaGraph(OWLOntology ontology) {
+        org.apache.clerezza.commons.rdf.Graph mGraph = null;
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         OWLOntologyManager manager = ontology.getOWLOntologyManager();
         try {
             manager.saveOntology(ontology, new RDFXMLOntologyFormat(), out);
             ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
             ParsingProvider parser = new JenaParserProvider();
-            mGraph = new SimpleMGraph();
+            mGraph = new SimpleGraph();
             parser.parse(mGraph, in, SupportedFormat.RDF_XML, null);
         } catch (OWLOntologyStorageException e) {
             log.error("Failed to serialize OWL Ontology " + ontology + "for conversion", e);
@@ -118,20 +117,20 @@ public final class OWLAPIToClerezzaConverter {
     }
 
     /**
-     * Converts a Clerezza {@link MGraph} to an OWL API {@link OWLOntology}.
+     * Converts a Clerezza {@link Graph} to an OWL API {@link OWLOntology}.
      * 
      * @param mGraph
-     *            {@link MGraph}
+     *            {@link org.apache.clerezza.commons.rdf.Graph}
      * @return the equivalent OWL API {@link OWLOntology}.
      */
-    public static OWLOntology clerezzaGraphToOWLOntology(TripleCollection graph) {
+    public static OWLOntology clerezzaGraphToOWLOntology(org.apache.clerezza.commons.rdf.Graph graph) {
         OWLOntologyManager mgr = OWLManager.createOWLOntologyManager();
         // Never try to import
         mgr.addIRIMapper(new PhonyIRIMapper(Collections.<IRI> emptySet()));
         return clerezzaGraphToOWLOntology(graph, mgr);
     }
 
-    public static OWLOntology clerezzaGraphToOWLOntology(TripleCollection graph,
+    public static OWLOntology clerezzaGraphToOWLOntology(org.apache.clerezza.commons.rdf.Graph graph,
                                                          OWLOntologyManager ontologyManager) {
 
         /*
@@ -145,7 +144,7 @@ public final class OWLAPIToClerezzaConverter {
          * Alternatively, construct the whole reverse imports stack, then traverse it again, get the
          * OWLOntology version for each (with the phony mapper set) and add it to the merge pool
          * 
-         * If it works, just add all the triples to a TripleCollection, but no, we don't want to store that
+         * If it works, just add all the triples to a Graph, but no, we don't want to store that
          * change.
          */
 

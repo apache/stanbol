@@ -36,11 +36,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -218,15 +218,15 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
         long start = System.nanoTime();
         Map<String,Object> enhancemntProps = EnhancementEngineHelper.getEnhancementProperties(this, ci);
         final DereferenceContext derefContext;
-        final MGraph metadata = ci.getMetadata();
-        Set<UriRef> referencedEntities = new HashSet<UriRef>();
+        final Graph metadata = ci.getMetadata();
+        Set<IRI> referencedEntities = new HashSet<IRI>();
         ci.getLock().readLock().lock();
         try {
             //(1) Create the DereferenceContext
             if(filterContentLanguages){
                 //parse the languages detected for the content
                 Set<String> contentLanguages = new HashSet<String>();
-                for(NonLiteral langAnno : EnhancementEngineHelper.getLanguageAnnotations(metadata)){
+                for(BlankNodeOrIRI langAnno : EnhancementEngineHelper.getLanguageAnnotations(metadata)){
                     contentLanguages.add(EnhancementEngineHelper.getString(metadata, langAnno, DC_LANGUAGE));
                 }
                 enhancemntProps.put(DereferenceContext.INTERNAL_CONTENT_LANGUAGES, contentLanguages);
@@ -250,18 +250,18 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
             
             //parse the referenced entities from the graph
             //(2) read all Entities we need to dereference from the parsed contentItem
-            Set<UriRef> checked = new HashSet<UriRef>();
+            Set<IRI> checked = new HashSet<IRI>();
             //since STANBOL-1334 the list of properties that refer to entities can be configured
-            for(UriRef referenceProperty : derefContext.getEntityReferences()){
+            for(IRI referenceProperty : derefContext.getEntityReferences()){
                 Iterator<Triple> entityReferences = metadata.filter(null, referenceProperty, null);
                 while(entityReferences.hasNext()){
                     Triple triple = entityReferences.next();
-                    Resource entityReference = triple.getObject();
-                    if((entityReference instanceof UriRef) && //only URIs
-                    		checked.add((UriRef)entityReference) && //do not check a URI twice
-                    		chekcFallbackMode((UriRef)entityReference, metadata) && //fallback mode
-                    		checkURI((UriRef)entityReference)){ //URI prefixes and patterns
-                        boolean added = referencedEntities.add((UriRef)entityReference);
+                    RDFTerm entityReference = triple.getObject();
+                    if((entityReference instanceof IRI) && //only URIs
+                    		checked.add((IRI)entityReference) && //do not check a URI twice
+                    		chekcFallbackMode((IRI)entityReference, metadata) && //fallback mode
+                    		checkURI((IRI)entityReference)){ //URI prefixes and patterns
+                        boolean added = referencedEntities.add((IRI)entityReference);
                         if(added && log.isTraceEnabled()){
                             log.trace("  ... schedule Entity {} (referenced-by: {})", 
                                 entityReference, referenceProperty);
@@ -282,13 +282,13 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
             referencedEntities.size());
         //(2) dereference the Entities
         ExecutorService executor = dereferencer.getExecutor();
-        Set<UriRef> failedEntities = new HashSet<UriRef>();
+        Set<IRI> failedEntities = new HashSet<IRI>();
         int dereferencedCount = 0;
         List<DereferenceJob> dereferenceJobs = new ArrayList<DereferenceJob>(
                 referencedEntities.size());
         if(executor != null && !executor.isShutdown()){ //dereference using executor
             //schedule all entities to dereference
-            for(final UriRef entity : referencedEntities){
+            for(final IRI entity : referencedEntities){
                 DereferenceJob dereferenceJob = new DereferenceJob(entity, 
                     metadata, writeLock, derefContext);
                 dereferenceJob.setFuture(executor.submit(dereferenceJob));
@@ -318,7 +318,7 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
                 }
             }
         } else { //dereference using the current thread
-            for(UriRef entity : referencedEntities){
+            for(IRI entity : referencedEntities){
                 try {
                     log.trace("  ... dereference {}", entity);
                     if(dereferencer.dereference(entity, metadata, writeLock, derefContext)){
@@ -357,7 +357,7 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
         return name;
     }
 
-    protected boolean chekcFallbackMode(UriRef entityReference, MGraph metadata) {
+    protected boolean chekcFallbackMode(IRI entityReference, Graph metadata) {
 		return fallbackMode ? //in case we use fallback mode
 				//filter entities for those an outgoing relation is present
 				!metadata.filter(entityReference, null, null).hasNext() :
@@ -370,7 +370,7 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
      * @return <code>true</code> if this entity should be scheduled for
      * dereferencing. <code>false</code> if not.
      */
-    protected boolean checkURI(UriRef entity){
+    protected boolean checkURI(IRI entity){
     	if(!uriFilterPresent){ //if no prefix nor pattern is set
     		return true; //accept all
     	}
@@ -454,14 +454,14 @@ public class EntityDereferenceEngine implements EnhancementEngine, ServiceProper
      */
     class DereferenceJob implements Callable<Boolean> {
         
-        final UriRef entity;
-        final MGraph metadata;
+        final IRI entity;
+        final Graph metadata;
         final Lock writeLock;
         final DereferenceContext derefContext;
 
         private Future<Boolean> future;
         
-        DereferenceJob(UriRef entity, MGraph metadata, Lock writeLock, 
+        DereferenceJob(IRI entity, Graph metadata, Lock writeLock, 
             DereferenceContext derefContext){
             this.entity = entity;
             this.metadata = metadata;

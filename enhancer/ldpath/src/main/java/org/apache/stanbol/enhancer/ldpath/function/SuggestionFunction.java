@@ -25,7 +25,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.apache.clerezza.rdf.core.Resource;
+import org.apache.clerezza.commons.rdf.RDFTerm;
 import org.apache.marmotta.ldpath.api.backend.RDFBackend;
 import org.apache.marmotta.ldpath.api.functions.SelectorFunction;
 import org.apache.marmotta.ldpath.api.selectors.NodeSelector;
@@ -34,13 +34,13 @@ import org.apache.marmotta.ldpath.model.transformers.StringTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SuggestionFunction extends SelectorFunction<Resource> {
+public class SuggestionFunction extends SelectorFunction<RDFTerm> {
     
-    private static final Comparator<Entry<Double,Resource>> SUGGESTION_COMPARATOR = 
-            new Comparator<Entry<Double,Resource>>() {
+    private static final Comparator<Entry<Double,RDFTerm>> SUGGESTION_COMPARATOR = 
+            new Comparator<Entry<Double,RDFTerm>>() {
 
         @Override
-        public int compare(Entry<Double,Resource> e1, Entry<Double,Resource> e2) {
+        public int compare(Entry<Double,RDFTerm> e1, Entry<Double,RDFTerm> e2) {
             return e2.getKey().compareTo(e1.getKey());
         }
         
@@ -58,22 +58,22 @@ public class SuggestionFunction extends SelectorFunction<Resource> {
     Logger log = LoggerFactory.getLogger(SuggestionFunction.class);
 
     private final String name;
-    private final IntTransformer<Resource> intTransformer;
-    private final StringTransformer<Resource> stringTransformer;
-    private final NodeSelector<Resource> suggestionSelector;
-    private final NodeSelector<Resource> confidenceSelector;
-    private final NodeSelector<Resource> resultSelector;
+    private final IntTransformer<RDFTerm> intTransformer;
+    private final StringTransformer<RDFTerm> stringTransformer;
+    private final NodeSelector<RDFTerm> suggestionSelector;
+    private final NodeSelector<RDFTerm> confidenceSelector;
+    private final NodeSelector<RDFTerm> resultSelector;
     public SuggestionFunction(String name,
-                              NodeSelector<Resource> suggestionSelector,
-                              NodeSelector<Resource> confidenceSelector){
+                              NodeSelector<RDFTerm> suggestionSelector,
+                              NodeSelector<RDFTerm> confidenceSelector){
         this(name,null,suggestionSelector,confidenceSelector);
     }
     public SuggestionFunction(String name,
-                              NodeSelector<Resource> suggestionSelector,
-                              NodeSelector<Resource> confidenceSelector,
-                              NodeSelector<Resource> resultSelector) {
-        intTransformer = new IntTransformer<Resource>();
-        stringTransformer = new StringTransformer<Resource>();
+                              NodeSelector<RDFTerm> suggestionSelector,
+                              NodeSelector<RDFTerm> confidenceSelector,
+                              NodeSelector<RDFTerm> resultSelector) {
+        intTransformer = new IntTransformer<RDFTerm>();
+        stringTransformer = new StringTransformer<RDFTerm>();
         if(name == null || name.isEmpty()){
             throw new IllegalArgumentException("The parsed function name MUST NOT be NULL nor empty!");
         }
@@ -90,12 +90,12 @@ public class SuggestionFunction extends SelectorFunction<Resource> {
     }
     
     @Override
-    public Collection<Resource> apply(final RDFBackend<Resource> backend, Resource context, Collection<Resource>... args) throws IllegalArgumentException {
+    public Collection<RDFTerm> apply(final RDFBackend<RDFTerm> backend, RDFTerm context, Collection<RDFTerm>... args) throws IllegalArgumentException {
         int paramIndex = 0;
-        Collection<Resource> contexts = null;
+        Collection<RDFTerm> contexts = null;
         if(args != null && args.length > 0 && args[0] != null && !args[0].isEmpty()){
-            contexts = new ArrayList<Resource>();
-            for(Resource r : args[0]){
+            contexts = new ArrayList<RDFTerm>();
+            for(RDFTerm r : args[0]){
                 if(backend.isURI(r)){
                     contexts.add(r);
                     paramIndex = 1;
@@ -108,11 +108,11 @@ public class SuggestionFunction extends SelectorFunction<Resource> {
         Integer limit = parseParamLimit(backend, args,paramIndex);
 //        final String processingMode = parseParamProcessingMode(backend, args,2);
         final int missingConfidenceMode = parseParamMissingConfidenceMode(backend, args,paramIndex+1);
-        List<Resource> result = new ArrayList<Resource>();
+        List<RDFTerm> result = new ArrayList<RDFTerm>();
 //        if(processingMode.equals(ANNOTATION_PROCESSING_MODE_UNION)){
             processAnnotations(backend, contexts, limit, missingConfidenceMode, result);
 //        } else {
-//            for(Resource context : args[0]){
+//            for(RDFTerm context : args[0]){
 //                processAnnotations(backend, singleton(context),
 //                    limit, missingConfidenceMode, result);
 //            }
@@ -131,16 +131,16 @@ public class SuggestionFunction extends SelectorFunction<Resource> {
      * @param missingConfidenceMode
      * @param result results are added to this list.
      */
-    private void processAnnotations(final RDFBackend<Resource> backend,
-                                    Collection<Resource> annotations,
+    private void processAnnotations(final RDFBackend<RDFTerm> backend,
+                                    Collection<RDFTerm> annotations,
                                     Integer limit,
                                     final int missingConfidenceMode,
-                                    List<Resource> result) {
-        List<Entry<Double,Resource>> suggestions = new ArrayList<Entry<Double,Resource>>();
-        for(Resource annotation : annotations){
+                                    List<RDFTerm> result) {
+        List<Entry<Double,RDFTerm>> suggestions = new ArrayList<Entry<Double,RDFTerm>>();
+        for(RDFTerm annotation : annotations){
             //NOTE: no Path Tracking support possible for selectors wrapped in functions
-            for(Resource suggestion : suggestionSelector.select(backend, annotation,null,null)){
-                Collection<Resource> cs = confidenceSelector.select(backend, suggestion,null,null);
+            for(RDFTerm suggestion : suggestionSelector.select(backend, annotation,null,null)){
+                Collection<RDFTerm> cs = confidenceSelector.select(backend, suggestion,null,null);
                 Double confidence = !cs.isEmpty() ? backend.doubleValue(cs.iterator().next()) : 
                         missingConfidenceMode == MISSING_CONFIDENCE_FILTER ?
                                 null : missingConfidenceMode == MISSING_CONFIDENCE_FIRST ?
@@ -153,7 +153,7 @@ public class SuggestionFunction extends SelectorFunction<Resource> {
         }
         Collections.sort(suggestions, SUGGESTION_COMPARATOR);
         int resultSize = limit != null ? Math.min(limit, suggestions.size()) : suggestions.size();
-        for(Entry<Double,Resource> suggestion : suggestions.subList(0, resultSize)){
+        for(Entry<Double,RDFTerm> suggestion : suggestions.subList(0, resultSize)){
             if(resultSelector == null){
                 result.add(suggestion.getValue());
             } else {
@@ -169,8 +169,8 @@ public class SuggestionFunction extends SelectorFunction<Resource> {
      * @param args
      * @return
      */
-    private int parseParamMissingConfidenceMode(final RDFBackend<Resource> backend,
-                                                Collection<Resource>[] args, int index) {
+    private int parseParamMissingConfidenceMode(final RDFBackend<RDFTerm> backend,
+                                                Collection<RDFTerm>[] args, int index) {
         final int missingConfidenceMode;
         if(args.length > index && !args[index].isEmpty()){
             String mode = stringTransformer.transform(backend, args[index].iterator().next(),
@@ -196,7 +196,7 @@ public class SuggestionFunction extends SelectorFunction<Resource> {
 //     * @param args
 //     * @return
 //     */
-//    private String parseParamProcessingMode(final RDFBackend<Resource> backend, Collection<Resource>[] args, int index) {
+//    private String parseParamProcessingMode(final RDFBackend<RDFTerm> backend, Collection<RDFTerm>[] args, int index) {
 //        final String processingMode;
 //        if(args.length > index && !args[index].isEmpty()){
 //            String mode = stringTransformer.transform(backend, args[index].iterator().next());
@@ -219,10 +219,10 @@ public class SuggestionFunction extends SelectorFunction<Resource> {
      * @param args
      * @return
      */
-    private Integer parseParamLimit(final RDFBackend<Resource> backend, Collection<Resource>[] args,int index) {
+    private Integer parseParamLimit(final RDFBackend<RDFTerm> backend, Collection<RDFTerm>[] args,int index) {
         Integer limit = null;
         if(args.length > index && !args[index].isEmpty()){
-            Resource value = args[index].iterator().next();
+            RDFTerm value = args[index].iterator().next();
             try {
                 limit = intTransformer.transform(backend, value, Collections.<String,String>emptyMap());
                 if(limit < 1){

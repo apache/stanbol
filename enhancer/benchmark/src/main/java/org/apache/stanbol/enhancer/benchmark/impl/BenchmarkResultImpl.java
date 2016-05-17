@@ -18,8 +18,8 @@ package org.apache.stanbol.enhancer.benchmark.impl;
 
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.benchmark.BenchmarkResult;
 import org.apache.stanbol.enhancer.benchmark.TripleMatcherGroup;
 
@@ -28,9 +28,9 @@ public class BenchmarkResultImpl implements BenchmarkResult {
     private final TripleMatcherGroup tmg;
     private final boolean successful;
     private String info;
-    private final Set<UriRef> matchingSubjects;
+    private final Set<IRI> matchingSubjects;
     
-    BenchmarkResultImpl(TripleMatcherGroup tmg, Graph graph) {
+    BenchmarkResultImpl(TripleMatcherGroup tmg, ImmutableGraph graph) {
         this.tmg = tmg;
         matchingSubjects = tmg.getMatchingSubjects(graph);
         
@@ -82,7 +82,7 @@ public class BenchmarkResultImpl implements BenchmarkResult {
     }
     
     @Override
-    public Set<UriRef> getMatchingSubjects() {
+    public Set<IRI> getMatchingSubjects() {
         return matchingSubjects;
     }
 }

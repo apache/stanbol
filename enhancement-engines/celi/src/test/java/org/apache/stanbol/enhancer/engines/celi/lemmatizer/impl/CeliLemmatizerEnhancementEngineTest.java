@@ -37,15 +37,14 @@ import java.util.Hashtable;
 import java.util.Iterator;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.engines.celi.CeliConstants;
 import org.apache.stanbol.enhancer.engines.celi.CeliMorphoFeatures;
@@ -118,17 +117,17 @@ public class CeliLemmatizerEnhancementEngineTest {
 
 		TestUtils.logEnhancements(ci);
 		//validate enhancement
-        HashMap<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+        HashMap<IRI,RDFTerm> expectedValues = new HashMap<IRI,RDFTerm>();
         expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(
             morphoAnalysisEngine.getClass().getName()));
         Iterator<Triple> lemmaTextAnnotationIterator = ci.getMetadata().filter(null, RDF_TYPE, ENHANCER_TEXTANNOTATION);
         assertTrue("A TextAnnotation is expected by this Test", lemmaTextAnnotationIterator.hasNext());
-        NonLiteral lemmaTextAnnotation = lemmaTextAnnotationIterator.next().getSubject();
-        assertTrue("TextAnnoations MUST BE UriRefs!",lemmaTextAnnotation instanceof UriRef);
+        BlankNodeOrIRI lemmaTextAnnotation = lemmaTextAnnotationIterator.next().getSubject();
+        assertTrue("TextAnnoations MUST BE IRIs!",lemmaTextAnnotation instanceof IRI);
         assertFalse("Only a single TextAnnotation is expected by this Test", lemmaTextAnnotationIterator.hasNext());
         //validate the enhancement metadata
-        validateEnhancement(ci.getMetadata(), (UriRef)lemmaTextAnnotation, expectedValues);
+        validateEnhancement(ci.getMetadata(), (IRI)lemmaTextAnnotation, expectedValues);
         //validate the lemma form TextAnnotation
         int lemmaForms = validateLemmaFormProperty(ci.getMetadata(), lemmaTextAnnotation,"it");
         assertTrue("Only a single LemmaForm property is expected if '"+ MORPHOLOGICAL_ANALYSIS+"=false'",lemmaForms == 1);
@@ -154,7 +153,7 @@ public class CeliLemmatizerEnhancementEngineTest {
 
         TestUtils.logEnhancements(ci);
         //validate enhancements
-        HashMap<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+        HashMap<IRI,RDFTerm> expectedValues = new HashMap<IRI,RDFTerm>();
         expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(
             morphoAnalysisEngine.getClass().getName()));
@@ -166,7 +165,7 @@ public class CeliLemmatizerEnhancementEngineTest {
         //  -> this might be used to test that there are no TextAnnotations
         int textAnnotationCount = 0;
         while (textAnnotationIterator.hasNext()) {
-            UriRef textAnnotation = (UriRef) textAnnotationIterator.next().getSubject();
+            IRI textAnnotation = (IRI) textAnnotationIterator.next().getSubject();
             // test if selected Text is added
             validateTextAnnotation(ci.getMetadata(), textAnnotation,TERM,expectedValues);
             textAnnotationCount++;
@@ -187,18 +186,18 @@ public class CeliLemmatizerEnhancementEngineTest {
      * @param lang the language of the analyzed text
      * @return The number of lemma forms found
      */
-    private int validateLemmaFormProperty(TripleCollection enhancements, NonLiteral textAnnotation, String lang) {
+    private int validateLemmaFormProperty(Graph enhancements, BlankNodeOrIRI textAnnotation, String lang) {
         Iterator<Triple> lemmaFormsIterator = enhancements.filter(textAnnotation, hasLemmaForm, null);
         assertTrue("No lemma form value found for TextAnnotation "+textAnnotation+"!", lemmaFormsIterator.hasNext());
         int lemmaFormCount = 0;
         while(lemmaFormsIterator.hasNext()){
             lemmaFormCount++;
-            Resource lemmaForms = lemmaFormsIterator.next().getObject();
-            assertTrue("Lemma Forms value are expected of type PlainLiteral", lemmaForms instanceof PlainLiteral);
-            assertFalse("Lemma forms MUST NOT be empty",((PlainLiteral)lemmaForms).getLexicalForm().isEmpty());
-            assertNotNull("Language of the Lemma Form literal MUST BE not null",((PlainLiteral)lemmaForms).getLanguage());
+            RDFTerm lemmaForms = lemmaFormsIterator.next().getObject();
+            assertTrue("Lemma Forms value are expected of type Literal", lemmaForms instanceof Literal);
+            assertFalse("Lemma forms MUST NOT be empty",((Literal)lemmaForms).getLexicalForm().isEmpty());
+            assertNotNull("Language of the Lemma Form literal MUST BE not null",((Literal)lemmaForms).getLanguage());
             assertEquals("Language of the Lemma Form literal MUST BE the same as for the parsed text",
-                lang, ((PlainLiteral)lemmaForms).getLanguage().toString());
+                lang, ((Literal)lemmaForms).getLanguage().toString());
         }
         return lemmaFormCount;
     }
@@ -207,14 +206,14 @@ public class CeliLemmatizerEnhancementEngineTest {
      * @param enhancements The graph with the enhancements
      * @param textAnnotation the TextAnnotation to check
      */
-    private void validateMorphoFeatureProperty(TripleCollection enhancements, NonLiteral textAnnotation) {
+    private void validateMorphoFeatureProperty(Graph enhancements, BlankNodeOrIRI textAnnotation) {
     	//This taste checks for known morpho features of a given input (constant TERM)
         Iterator<Triple> morphoFeatureIterator = enhancements.filter(textAnnotation, RDF_TYPE, null);
         assertTrue("No POS Morpho Feature value found for TextAnnotation "+textAnnotation+"!", morphoFeatureIterator.hasNext());
         while(morphoFeatureIterator.hasNext()){
-            Resource morphoFeature = morphoFeatureIterator.next().getObject();
-            assertTrue("Morpho Feature value are expected of typed literal", morphoFeature instanceof UriRef);
-            String feature=((UriRef)morphoFeature).getUnicodeString();
+            RDFTerm morphoFeature = morphoFeatureIterator.next().getObject();
+            assertTrue("Morpho Feature value are expected of typed literal", morphoFeature instanceof IRI);
+            String feature=((IRI)morphoFeature).getUnicodeString();
             assertFalse("Morpho Feature MUST NOT be empty",feature.isEmpty());
             if(feature.startsWith(OLIA_NAMESPACE)){
             	String key=feature.substring(OLIA_NAMESPACE.length());
@@ -225,9 +224,9 @@ public class CeliLemmatizerEnhancementEngineTest {
         morphoFeatureIterator = enhancements.filter(textAnnotation, CeliMorphoFeatures.HAS_GENDER, null);
         assertTrue("No Gender Morpho Feature value found for TextAnnotation "+textAnnotation+"!", morphoFeatureIterator.hasNext());
         if(morphoFeatureIterator.hasNext()){
-            Resource morphoFeature = morphoFeatureIterator.next().getObject();
-            assertTrue("Morpho Feature value are expected of typed literal", morphoFeature instanceof UriRef);
-            String feature=((UriRef)morphoFeature).getUnicodeString();
+            RDFTerm morphoFeature = morphoFeatureIterator.next().getObject();
+            assertTrue("Morpho Feature value are expected of typed literal", morphoFeature instanceof IRI);
+            String feature=((IRI)morphoFeature).getUnicodeString();
             assertFalse("Morpho Feature MUST NOT be empty",feature.isEmpty());
             if(feature.startsWith(OLIA_NAMESPACE)){
             	String key=feature.substring(OLIA_NAMESPACE.length());
@@ -238,9 +237,9 @@ public class CeliLemmatizerEnhancementEngineTest {
         morphoFeatureIterator = enhancements.filter(textAnnotation, CeliMorphoFeatures.HAS_NUMBER, null);
         assertTrue("No Number Morpho Feature value found for TextAnnotation "+textAnnotation+"!", morphoFeatureIterator.hasNext());
         if(morphoFeatureIterator.hasNext()){
-            Resource morphoFeature = morphoFeatureIterator.next().getObject();
-            assertTrue("Morpho Feature value are expected of typed literal", morphoFeature instanceof UriRef);
-            String feature=((UriRef)morphoFeature).getUnicodeString();
+            RDFTerm morphoFeature = morphoFeatureIterator.next().getObject();
+            assertTrue("Morpho Feature value are expected of typed literal", morphoFeature instanceof IRI);
+            String feature=((IRI)morphoFeature).getUnicodeString();
             assertFalse("Morpho Feature MUST NOT be empty",feature.isEmpty());
             if(feature.startsWith(OLIA_NAMESPACE)){
             	String key=feature.substring(OLIA_NAMESPACE.length());
@@ -251,10 +250,10 @@ public class CeliLemmatizerEnhancementEngineTest {
         morphoFeatureIterator = enhancements.filter(textAnnotation, CeliLemmatizerEnhancementEngine.hasLemmaForm, null);
         assertTrue("No Number Morpho Feature value found for TextAnnotation "+textAnnotation+"!", morphoFeatureIterator.hasNext());
         if(morphoFeatureIterator.hasNext()){
-            Resource morphoFeature = morphoFeatureIterator.next().getObject();
-            assertTrue("Lemma Forms value are expected of type PlainLiteral", morphoFeature instanceof PlainLiteral);
-            assertFalse("Lemma forms MUST NOT be empty",((PlainLiteral)morphoFeature).getLexicalForm().isEmpty());
-            String feature=((PlainLiteral)morphoFeature).getLexicalForm();
+            RDFTerm morphoFeature = morphoFeatureIterator.next().getObject();
+            assertTrue("Lemma Forms value are expected of type Literal", morphoFeature instanceof Literal);
+            assertFalse("Lemma forms MUST NOT be empty",((Literal)morphoFeature).getLexicalForm().isEmpty());
+            String feature=((Literal)morphoFeature).getLexicalForm();
             assertTrue("Lemma of "+TERM+" should be "+TERM , (feature.equals(TERM)));
         }
         

@@ -68,7 +68,7 @@ public class ClasspathDataFileProvider implements DataFileProvider {
         // load default OpenNLP models from classpath (embedded in the defaultdata bundle)
         final String resourcePath = RESOURCE_BASE_PATH + filename;
         final URL dataFile = getClass().getClassLoader().getResource(resourcePath);
-        //log.debug("Resource {} found: {}", (in == null ? "NOT" : ""), resourcePath);
+        //log.debug("RDFTerm {} found: {}", (in == null ? "NOT" : ""), resourcePath);
         return dataFile;
     }
 }

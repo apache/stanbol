@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 
 /**
  * Memory cache for storing often used Entity Type (Class) information.
@@ -32,10 +32,10 @@ public class InMemoryEntityTypeIndex {
     /**
      * The index having as key the Uri of the class and the value the set of labels ordered by language.
      */
-    private Map<UriRef,Map<String,Set<String>>> index;
+    private Map<IRI,Map<String,Set<String>>> index;
 
     public InMemoryEntityTypeIndex() {
-        index = new HashMap<UriRef,Map<String,Set<String>>>();
+        index = new HashMap<IRI,Map<String,Set<String>>>();
     }
 
     /**
@@ -45,7 +45,7 @@ public class InMemoryEntityTypeIndex {
      * @param language
      * @return
      */
-    public Set<String> lookupEntityType(UriRef uri, String language) {
+    public Set<String> lookupEntityType(IRI uri, String language) {
         Map<String,Set<String>> langMap = index.get(uri);
 
         if (langMap != null) {
@@ -62,7 +62,7 @@ public class InMemoryEntityTypeIndex {
      * @param language
      * @param labels
      */
-    public void addEntityType(UriRef uri, String language, Set<String> labels) {
+    public void addEntityType(IRI uri, String language, Set<String> labels) {
         Map<String,Set<String>> langMap = index.get(uri);
 
         if (langMap == null) {

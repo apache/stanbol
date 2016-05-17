@@ -16,10 +16,7 @@
  */
 package org.apache.stanbol.commons.usermanagement.resource;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.security.Policy;
@@ -31,7 +28,6 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -40,7 +36,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -48,21 +43,17 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.apache.clerezza.platform.config.SystemConfig;
-import org.apache.clerezza.rdf.core.BNode;
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.access.LockableMGraph;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.SimpleGraph;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.BlankNode;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
@@ -74,8 +65,6 @@ import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.clerezza.rdf.ontologies.SIOC;
 import org.apache.clerezza.rdf.utils.GraphNode;
-import org.apache.clerezza.rdf.utils.MGraphUtils;
-import org.apache.clerezza.rdf.utils.MGraphUtils.NoSuchSubGraphException;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -98,7 +87,7 @@ public class UserResource {
 
     private static Logger log = LoggerFactory.getLogger(UserResource.class);
     @Reference(target = SystemConfig.SYSTEM_GRAPH_FILTER)
-    private LockableMGraph systemGraph;
+    private Graph systemGraph;
     @Reference
     private Serializer serializer;
     @Reference
@@ -106,7 +95,7 @@ public class UserResource {
     private static GraphNode dummyNode;
 
     static {
-        dummyNode = new GraphNode(new BNode(), new SimpleMGraph());
+        dummyNode = new GraphNode(new BlankNode(), new SimpleGraph());
         dummyNode.addProperty(RDF.type, FOAF.Agent);
     }
     // **********************************
@@ -128,11 +117,11 @@ public class UserResource {
      */
     @GET
     @Path("users/{username}")
-    public TripleCollection getUserContext(@PathParam("username") String userName)
+    public Graph getUserContext(@PathParam("username") String userName)
             throws UnsupportedEncodingException {
         GraphNode userNode = getUser(userName);
         if (userNode == null) { // a kludge
-            return new SimpleMGraph();
+            return new SimpleGraph();
         }
         return userNode.getNodeContext();
     }
@@ -180,9 +169,9 @@ public class UserResource {
     @GET
     @Path("roles/{username}")
     @Produces(SupportedFormat.TURTLE)
-    public TripleCollection getUserRoles(@PathParam("username") String userName)
+    public Graph getUserRoles(@PathParam("username") String userName)
             throws UnsupportedEncodingException {
-        MGraph rolesGraph = getUserRolesGraph(userName);
+        Graph rolesGraph = getUserRolesGraph(userName);
 
         // case of no roles not handled - what best to return : empty graph or
         // 404?
@@ -238,7 +227,7 @@ public class UserResource {
     @POST
     @Consumes(SupportedFormat.TURTLE)
     @Path("change-user")
-    public Response changeUser(Graph inputGraph) {
+    public Response changeUser(ImmutableGraph inputGraph) {
 
         Lock readLock = systemGraph.getLock().readLock();
         readLock.lock();
@@ -252,7 +241,7 @@ public class UserResource {
         if (changes.hasNext()) {
             Triple changeTriple = changes.next();
 
-            NonLiteral changeNode = changeTriple.getSubject();
+            BlankNodeOrIRI changeNode = changeTriple.getSubject();
 
             Literal userName = (Literal) inputGraph
                     .filter(changeNode, PLATFORM.userName, null).next()
@@ -262,10 +251,10 @@ public class UserResource {
                     .filter(null, PLATFORM.userName, userName);
 
             //     if (userTriples.hasNext()) {
-            NonLiteral userNode = userTriples.next()
+            BlankNodeOrIRI userNode = userTriples.next()
                     .getSubject();
 
-            UriRef predicateUriRef = (UriRef) inputGraph
+            IRI predicateIRI = (IRI) inputGraph
                     .filter(changeNode, Ontology.predicate, null).next()
                     .getObject();
 
@@ -273,25 +262,25 @@ public class UserResource {
             Iterator<Triple> iterator = inputGraph.filter(changeNode,
                     Ontology.oldValue, null);
 
-            Resource oldValue = null;
+            RDFTerm oldValue = null;
 
             if (iterator.hasNext()) {
 
                 oldValue = iterator.next().getObject();
-                // Triple oldTriple = systemGraph.filter(null, predicateUriRef,
+                // Triple oldTriple = systemGraph.filter(null, predicateIRI,
                 // oldValue).next();
                 Iterator<Triple> oldTriples = systemGraph.filter(userNode,
-                        predicateUriRef, oldValue);
+                        predicateIRI, oldValue);
                 if (oldTriples.hasNext()) {
                     oldTriple = oldTriples.next();
                 }
             }
 
-            Resource newValue = inputGraph
+            RDFTerm newValue = inputGraph
                     .filter(changeNode, Ontology.newValue, null).next()
                     .getObject();
 
-            newTriple = new TripleImpl(userNode, predicateUriRef,
+            newTriple = new TripleImpl(userNode, predicateIRI,
                     newValue);
             // }
         }
@@ -346,7 +335,7 @@ public class UserResource {
             readLock.unlock();
         }
 
-        MGraph rolesGraph = getUserRolesGraph(userName);
+        Graph rolesGraph = getUserRolesGraph(userName);
 
         ArrayList<String> userRoleNames = new ArrayList<String>();
 
@@ -400,7 +389,7 @@ public class UserResource {
     @PUT
     @Path("users/{username}")
     @Consumes(SupportedFormat.TURTLE)
-    public Response createUser(@Context UriInfo uriInfo, @PathParam("username") String userName, Graph inputGraph) {
+    public Response createUser(@Context UriInfo uriInfo, @PathParam("username") String userName, ImmutableGraph inputGraph) {
         Lock writeLock = systemGraph.getLock().writeLock();
         writeLock.lock();
         systemGraph.addAll(inputGraph);
@@ -439,11 +428,11 @@ public class UserResource {
     @POST
     @Consumes(SupportedFormat.TURTLE)
     @Path("add-user")
-    public Response addUser(@Context UriInfo uriInfo, Graph inputGraph) {
+    public Response addUser(@Context UriInfo uriInfo, ImmutableGraph inputGraph) {
 
         Iterator<Triple> agents = inputGraph.filter(null, null, FOAF.Agent);
 
-        NonLiteral userNode = agents.next().getSubject();
+        BlankNodeOrIRI userNode = agents.next().getSubject();
 
         Iterator<Triple> userTriples = inputGraph.filter(userNode, null, null);
 
@@ -492,8 +481,8 @@ public class UserResource {
      * @param userName
      */
     private void remove(String userName) {
-        Resource userResource = getNamedUser(userName).getNode();
-        Iterator<Triple> userTriples = systemGraph.filter((NonLiteral) userResource, null, null);
+        RDFTerm userResource = getNamedUser(userName).getNode();
+        Iterator<Triple> userTriples = systemGraph.filter((BlankNodeOrIRI) userResource, null, null);
 
         ArrayList<Triple> buffer = new ArrayList<Triple>();
 
@@ -508,7 +497,7 @@ public class UserResource {
             readLock.unlock();
         }
 
-        // Graph context = getNamedUser(userName).getNodeContext();
+        // ImmutableGraph context = getNamedUser(userName).getNodeContext();
         Lock writeLock = systemGraph.getLock().writeLock();
         writeLock.lock();
         try {
@@ -544,7 +533,7 @@ public class UserResource {
     @POST
     @Consumes(SupportedFormat.TURTLE)
     @Path("delete-user")
-    public Response deleteUser(Graph inputGraph) {
+    public Response deleteUser(ImmutableGraph inputGraph) {
 
         Iterator<Triple> userNameTriples = inputGraph.filter(null,
                 PLATFORM.userName, null);
@@ -662,7 +651,7 @@ public class UserResource {
 
         try {
             while (roleIterator.hasNext()) {
-                NonLiteral role = roleIterator.next().getSubject();
+                BlankNodeOrIRI role = roleIterator.next().getSubject();
                 Iterator<Triple> roleNameTriples = systemGraph.filter(role, DC.title,
                         null);
                 while (roleNameTriples.hasNext()) {
@@ -706,8 +695,8 @@ public class UserResource {
      * @param userName
      */
     private void deleteRole(String roleName) {
-        Resource roleResource = getNamedRole(roleName).getNode();
-        Iterator<Triple> roleTriples = systemGraph.filter((NonLiteral) roleResource, null, null);
+        RDFTerm roleResource = getNamedRole(roleName).getNode();
+        Iterator<Triple> roleTriples = systemGraph.filter((BlankNodeOrIRI) roleResource, null, null);
 
         ArrayList<Triple> buffer = new ArrayList<Triple>();
 
@@ -766,7 +755,7 @@ public class UserResource {
      * @return user node in system graph
      */
     private GraphNode createRole(String newRoleName, String comment) {
-        BNode subject = new BNode();
+        BlankNode subject = new BlankNode();
         GraphNode roleNode = new GraphNode(subject, systemGraph);
         roleNode.addProperty(RDF.type, PERMISSION.Role);
         roleNode.addProperty(DC.title, new PlainLiteralImpl(newRoleName));
@@ -779,7 +768,7 @@ public class UserResource {
             String comment,
             List<String> permissions) {
 
-        NonLiteral roleResource = (NonLiteral) roleNode.getNode();
+        BlankNodeOrIRI roleResource = (BlankNodeOrIRI) roleNode.getNode();
 
         if (permissions != null) {
             clearPermissions(roleResource);
@@ -899,10 +888,10 @@ public class UserResource {
             changeLiteral(userNode, PERMISSION.passwordSha1, passwordSha1);
         }
         if (email != null && !email.equals("")) {
-            changeResource(userNode, FOAF.mbox, new UriRef("mailto:" + email));
+            changeResource(userNode, FOAF.mbox, new IRI("mailto:" + email));
         }
 
-        NonLiteral userResource = (NonLiteral) userNode.getNode();
+        BlankNodeOrIRI userResource = (BlankNodeOrIRI) userNode.getNode();
 
         if (roles != null) {
             clearRoles(userResource);
@@ -964,7 +953,7 @@ public class UserResource {
         try {
             while (permissionTriples.hasNext()) {
                 Triple triple = permissionTriples.next();
-                Resource permissionResource = triple.getObject();
+                RDFTerm permissionResource = triple.getObject();
                 buffer.add(new GraphNode(permissionResource, systemGraph));
             }
         } finally {
@@ -988,13 +977,13 @@ public class UserResource {
      * @param userName
      * @return roles graph
      */
-    private MGraph getUserRolesGraph(String userName) {
+    private Graph getUserRolesGraph(String userName) {
         GraphNode userNode = getUser(userName);
 
-        Iterator<Resource> functionIterator = userNode
+        Iterator<RDFTerm> functionIterator = userNode
                 .getObjects(SIOC.has_function);
 
-        SimpleMGraph rolesGraph = new SimpleMGraph();
+        SimpleGraph rolesGraph = new SimpleGraph();
 
         while (functionIterator.hasNext()) {
 
@@ -1002,14 +991,14 @@ public class UserResource {
                     systemGraph);
 
             Iterator<Triple> roleIterator = systemGraph.filter(
-                    (NonLiteral) functionNode.getNode(), RDF.type,
+                    (BlankNodeOrIRI) functionNode.getNode(), RDF.type,
                     PERMISSION.Role);
 
             // needs lock?
             while (roleIterator.hasNext()) {
                 Triple roleTriple = roleIterator.next();
                 // rolesGraph.add(roleTriple);
-                NonLiteral roleNode = roleTriple.getSubject();
+                BlankNodeOrIRI roleNode = roleTriple.getSubject();
                 SimpleGraph detailsGraph = new SimpleGraph(systemGraph.filter(
                         roleNode, null, null));
                 rolesGraph.addAll(detailsGraph);
@@ -1025,7 +1014,7 @@ public class UserResource {
      * @return user node in system graph
      */
     private GraphNode createUser(String newUserName) {
-        BNode subject = new BNode();
+        BlankNode subject = new BlankNode();
 
         GraphNode userNode = new GraphNode(subject, systemGraph);
         userNode.addProperty(RDF.type, FOAF.Agent);
@@ -1036,7 +1025,7 @@ public class UserResource {
     // move later?
     public final static String rolesBase = "urn:x-localhost/role/";
 
-    private void clearRoles(NonLiteral userResource) {
+    private void clearRoles(BlankNodeOrIRI userResource) {
         systemGraph.removeAll(filterToArray(userResource, SIOC.has_function, null));
     }
 
@@ -1048,7 +1037,7 @@ public class UserResource {
      * @param object
      * @return
      */
-    private List<Triple> filterToArray(NonLiteral subject, UriRef predicate, Resource object) {
+    private List<Triple> filterToArray(BlankNodeOrIRI subject, IRI predicate, RDFTerm object) {
         Iterator<Triple> triples = systemGraph.filter(subject, predicate, object);
         ArrayList<Triple> buffer = new ArrayList<Triple>();
         Lock readLock = systemGraph.getLock().readLock();
@@ -1077,12 +1066,12 @@ public class UserResource {
 
         // otherwise make a new one as a named node
         if (roleNode == null) {
-            UriRef roleUriRef = new UriRef(rolesBase + roleName);
+            IRI roleIRI = new IRI(rolesBase + roleName);
 
-            roleNode = new GraphNode(roleUriRef, systemGraph);
+            roleNode = new GraphNode(roleIRI, systemGraph);
             roleNode.addProperty(RDF.type, PERMISSION.Role);
             roleNode.addProperty(DC.title, new PlainLiteralImpl(roleName));
-            userNode.addProperty(SIOC.has_function, roleUriRef);
+            userNode.addProperty(SIOC.has_function, roleIRI);
         } else {
             userNode.addProperty(SIOC.has_function, roleNode.getNode());
         }
@@ -1095,7 +1084,7 @@ public class UserResource {
         if (hasPermission(subjectNode, permissionString)) {
             return subjectNode;
         }
-        GraphNode permissionNode = new GraphNode(new BNode(), systemGraph);
+        GraphNode permissionNode = new GraphNode(new BlankNode(), systemGraph);
         permissionNode.addProperty(RDF.type, PERMISSION.Permission);
         // permissionNode.addProperty(DC.title, new PlainLiteralImpl(permissionName));
         subjectNode.addProperty(PERMISSION.hasPermission, permissionNode.getNode());
@@ -1105,12 +1094,12 @@ public class UserResource {
 
     private boolean hasPermission(GraphNode userNode, String permissionString) {
         boolean has = false;
-        Iterator<Triple> existingPermissions = systemGraph.filter((NonLiteral) userNode.getNode(), PERMISSION.hasPermission, null);
+        Iterator<Triple> existingPermissions = systemGraph.filter((BlankNodeOrIRI) userNode.getNode(), PERMISSION.hasPermission, null);
         Lock readLock = systemGraph.getLock().readLock();
         readLock.lock();
         try { // check to see if the user already has this permission
             while (existingPermissions.hasNext()) {
-                NonLiteral permissionNode = (NonLiteral) existingPermissions.next().getObject();
+                BlankNodeOrIRI permissionNode = (BlankNodeOrIRI) existingPermissions.next().getObject();
                 Iterator<Triple> permissionTriples = systemGraph.filter(permissionNode, PERMISSION.javaPermissionEntry, null);
                 while (permissionTriples.hasNext()) {
                     Literal permission = (Literal) permissionTriples.next().getObject();
@@ -1132,7 +1121,7 @@ public class UserResource {
 //                <http://clerezza.org/2008/10/permission#javaPermissionEntry>
 //                        "(java.security.AllPermission \"\" \"\")"
 //              ] ;
-    private void clearPermissions(NonLiteral subject) {
+    private void clearPermissions(BlankNodeOrIRI subject) {
         ArrayList<Triple> buffer = new ArrayList<Triple>();
 
         Lock readLock = systemGraph.getLock().readLock();
@@ -1142,7 +1131,7 @@ public class UserResource {
             while (permissions.hasNext()) {
                 Triple permissionTriple = permissions.next();
                 buffer.add(permissionTriple);
-                NonLiteral permissionNode = (NonLiteral) permissionTriple.getObject();
+                BlankNodeOrIRI permissionNode = (BlankNodeOrIRI) permissionTriple.getObject();
                 Iterator<Triple> permissionTriples = systemGraph.filter(permissionNode, null, null);
                 while (permissionTriples.hasNext()) {
                     buffer.add(permissionTriples.next());
@@ -1160,7 +1149,7 @@ public class UserResource {
     private GraphNode getTitleNode(String title) {
         Iterator<Triple> triples = systemGraph.filter(null, DC.title, new PlainLiteralImpl(title));
         if (triples.hasNext()) {
-            Resource resource = triples.next().getSubject();
+            RDFTerm resource = triples.next().getSubject();
             return new GraphNode(resource, systemGraph);
         }
         return null;
@@ -1176,15 +1165,15 @@ public class UserResource {
      * @param predicate property of the triple to change
      * @param newValue new value for given predicate
      */
-    private void changeLiteral(GraphNode userNode, UriRef predicate,
+    private void changeLiteral(GraphNode userNode, IRI predicate,
             String newValue) {
 
         Iterator<Triple> oldTriples = systemGraph.filter(
-                (NonLiteral) userNode.getNode(), predicate, null);
+                (BlankNodeOrIRI) userNode.getNode(), predicate, null);
 
         ArrayList<Triple> oldBuffer = new ArrayList<Triple>();
 
-        Resource oldObject = null;
+        RDFTerm oldObject = null;
 
         Lock readLock = systemGraph.getLock().readLock();
         readLock.lock();
@@ -1201,7 +1190,7 @@ public class UserResource {
         // filter appears to see plain literals and xsd:strings as differerent
         // so not
         // userNode.addPropertyValue(predicate, newValue);
-        PlainLiteral newObject = new PlainLiteralImpl(newValue);
+        Literal newObject = new PlainLiteralImpl(newValue);
         userNode.addProperty(predicate, newObject);
 
         if (newObject.equals(oldObject)) {
@@ -1218,11 +1207,11 @@ public class UserResource {
      * @param predicate property of the triple to change
      * @param newValue new value for given predicate
      */
-    private void changeResource(GraphNode userNode, UriRef predicate,
-            UriRef newValue) {
+    private void changeResource(GraphNode userNode, IRI predicate,
+            IRI newValue) {
 
         Iterator<Triple> oldTriples = systemGraph.filter(
-                (NonLiteral) userNode.getNode(), predicate, null);
+                (BlankNodeOrIRI) userNode.getNode(), predicate, null);
 
         ArrayList<Triple> oldBuffer = new ArrayList<Triple>();
 
@@ -1232,7 +1221,7 @@ public class UserResource {
             while (oldTriples.hasNext()) {
                 Triple triple = oldTriples.next();
 
-                Resource oldValue = triple.getObject();
+                RDFTerm oldValue = triple.getObject();
                 if (newValue.equals(oldValue)) {
                     return;
                 }
@@ -1272,7 +1261,7 @@ public class UserResource {
         return getResourcesOfType(FOAF.Agent);
     }
 
-    private Set<GraphNode> getResourcesOfType(UriRef type) {
+    private Set<GraphNode> getResourcesOfType(IRI type) {
         Lock readLock = systemGraph.getLock().readLock();
         readLock.lock();
         try {

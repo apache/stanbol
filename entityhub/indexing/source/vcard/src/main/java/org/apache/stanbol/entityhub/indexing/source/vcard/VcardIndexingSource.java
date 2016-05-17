@@ -331,7 +331,7 @@ public class VcardIndexingSource implements EntityDataIterable, ResourceImporter
             }
             return ResourceState.LOADED;
         } else {
-            log.debug("Resource {} ignored: Not an Vcard file.",resourceName);
+            log.debug("RDFTerm {} ignored: Not an Vcard file.",resourceName);
             return ResourceState.IGNORED;
         }
     }
@@ -620,7 +620,7 @@ public class VcardIndexingSource implements EntityDataIterable, ResourceImporter
                                 unitHierarchy[0] != null && unitHierarchy[0].trim().length()>0){
                             String orgName = unitHierarchy[0];
                             if(current == null){ //create new Representation for the Organisation
-                                //Note: this is an Entity and no sub-Resource!
+                                //Note: this is an Entity and no sub-RDFTerm!
                                 String orgEntityId = entityByName(entityMap, EntityType.organization, 
                                     orgName, null, false);
                                 if(orgEntityId == null){

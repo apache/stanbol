@@ -26,10 +26,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -158,9 +158,9 @@ public class UIMAToTriples extends AbstractEnhancementEngine<RuntimeException, R
 
 
         try {
-            UriRef uimaUriRef = new UriRef(uimaUri);
+            IRI uimaIRI = new IRI(uimaUri);
             logger.info(new StringBuilder("Trying to load holder for ref:").append(uimaUri).toString());
-            holder = ci.getPart(uimaUriRef, FeatureStructureListHolder.class);
+            holder = ci.getPart(uimaIRI, FeatureStructureListHolder.class);
             for (String source : sourceNames) {
                 logger.info(new StringBuilder("Processing UIMA source:").append(source).toString());
                 List<FeatureStructure> sourceList = holder.getFeatureStructureList(source);
@@ -176,14 +176,14 @@ public class UIMAToTriples extends AbstractEnhancementEngine<RuntimeException, R
                     logger.debug(new StringBuilder("Checking ").append(typeName).toString());
                     if (tnfs.checkFeatureStructureAllowed(typeName, fs.getFeatures())) {
                         logger.debug(new StringBuilder("Adding ").append(typeName).toString());
-                        UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(
+                        IRI textAnnotation = EnhancementEngineHelper.createTextEnhancement(
                                 ci, this);
-                        MGraph metadata = ci.getMetadata();
+                        Graph metadata = ci.getMetadata();
                         String uriRefStr = uimaUri + ":" + typeName;
                         if (mappings.containsKey(typeName)) {
                             uriRefStr = mappings.get(typeName);
                         }
-                        metadata.add(new TripleImpl(textAnnotation, DC_TYPE, new UriRef(uriRefStr)));
+                        metadata.add(new TripleImpl(textAnnotation, DC_TYPE, new IRI(uriRefStr)));
 
                         if (fs.getFeature("begin") != null) {
                             metadata.add(new TripleImpl(textAnnotation, ENHANCER_START,
@@ -205,7 +205,7 @@ public class UIMAToTriples extends AbstractEnhancementEngine<RuntimeException, R
                                     predRefStr = mappings.get(f.getName());
                                 }
 
-                                UriRef predicate = new UriRef(predRefStr);
+                                IRI predicate = new IRI(predRefStr);
 
                                 metadata.add(new TripleImpl(textAnnotation, predicate, new PlainLiteralImpl(f.getValueAsString())));
                             }

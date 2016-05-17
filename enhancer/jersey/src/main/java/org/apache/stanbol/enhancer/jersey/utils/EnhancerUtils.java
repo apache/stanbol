@@ -23,10 +23,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
@@ -98,7 +98,7 @@ public final class EnhancerUtils {
      * @param graph the RDF graph to add the triples
      * @param rootUrl the root URL used by the current request
      */
-    public static void addActiveEngines(EnhancementEngineManager engineManager,MGraph graph, String rootUrl) {
+    public static void addActiveEngines(EnhancementEngineManager engineManager,Graph graph, String rootUrl) {
         addActiveEngines(buildEnginesMap(engineManager).values(), graph, rootUrl);
     }
     /**
@@ -114,11 +114,11 @@ public final class EnhancerUtils {
      * @param rootUrl the root URL used by the current request
      * @see EnhancerUtils#buildEnginesMap(EnhancementEngineManager)
      */
-    public static void addActiveEngines(Iterable<Entry<ServiceReference,EnhancementEngine>> activeEngines,MGraph graph, String rootUrl) {
-        UriRef enhancerResource = new UriRef(rootUrl+"enhancer");
+    public static void addActiveEngines(Iterable<Entry<ServiceReference,EnhancementEngine>> activeEngines,Graph graph, String rootUrl) {
+        IRI enhancerResource = new IRI(rootUrl+"enhancer");
         graph.add(new TripleImpl(enhancerResource, RDF.type, Enhancer.ENHANCER));
         for(Entry<ServiceReference,EnhancementEngine> entry : activeEngines){
-            UriRef engineResource = new UriRef(rootUrl+"enhancer/engine/"+entry.getValue().getName());
+            IRI engineResource = new IRI(rootUrl+"enhancer/engine/"+entry.getValue().getName());
             graph.add(new TripleImpl(enhancerResource, Enhancer.HAS_ENGINE, engineResource));
             graph.add(new TripleImpl(engineResource, RDF.type, ENHANCEMENT_ENGINE));
             graph.add(new TripleImpl(engineResource, RDFS.label, new PlainLiteralImpl(entry.getValue().getName())));
@@ -137,7 +137,7 @@ public final class EnhancerUtils {
      * @param graph the RDF graph to add the triples
      * @param rootUrl the root URL used by the current request
      */
-    public static void addActiveChains(ChainManager chainManager, MGraph graph, String rootUrl) {
+    public static void addActiveChains(ChainManager chainManager, Graph graph, String rootUrl) {
         addActiveChains(buildChainsMap(chainManager).values(), chainManager.getDefault(), graph, rootUrl);
     }
     /**
@@ -153,11 +153,11 @@ public final class EnhancerUtils {
      * @param graph the RDF graph to add the triples
      * @param rootUrl the root URL used by the current request
      */
-    public static void addActiveChains(Iterable<Entry<ServiceReference,Chain>> activeChains, Chain defaultChain, MGraph graph, String rootUrl) {
-        UriRef enhancer = new UriRef(rootUrl+"enhancer");
+    public static void addActiveChains(Iterable<Entry<ServiceReference,Chain>> activeChains, Chain defaultChain, Graph graph, String rootUrl) {
+        IRI enhancer = new IRI(rootUrl+"enhancer");
         graph.add(new TripleImpl(enhancer, RDF.type, Enhancer.ENHANCER));
         for(Entry<ServiceReference,Chain> entry : activeChains){
-            UriRef chainResource = new UriRef(rootUrl+"enhancer/chain/"+entry.getValue().getName());
+            IRI chainResource = new IRI(rootUrl+"enhancer/chain/"+entry.getValue().getName());
             graph.add(new TripleImpl(enhancer, Enhancer.HAS_CHAIN, chainResource));
             if(entry.getValue().equals(defaultChain)){
                 graph.add(new TripleImpl(enhancer, Enhancer.HAS_DEFAULT_CHAIN, chainResource));

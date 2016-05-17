@@ -37,12 +37,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.Language;
+import org.apache.clerezza.commons.rdf.Language;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.commons.io.input.CharSequenceReader;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -185,7 +185,7 @@ public class KuromojiNlpEngine extends AbstractEnhancementEngine<IOException,Run
     @Override
     public int canEnhance(ContentItem ci) throws EngineException {
         // check if content is present
-        Map.Entry<UriRef,Blob> entry = NlpEngineHelper.getPlainText(this, ci, false);
+        Map.Entry<IRI,Blob> entry = NlpEngineHelper.getPlainText(this, ci, false);
         if(entry == null || entry.getValue() == null) {
             return CANNOT_ENHANCE;
         }
@@ -323,12 +323,12 @@ public class KuromojiNlpEngine extends AbstractEnhancementEngine<IOException,Run
             } catch (IOException e) {/* ignore */}
         }
         //finally write the NER annotations to the metadata of the ContentItem
-        final MGraph metadata = ci.getMetadata();
+        final Graph metadata = ci.getMetadata();
         ci.getLock().writeLock().lock();
         try {
             Language lang = new Language("ja");
             for(NerData nerData : nerList){
-                UriRef ta = EnhancementEngineHelper.createTextEnhancement(ci, this);
+                IRI ta = EnhancementEngineHelper.createTextEnhancement(ci, this);
                 metadata.add(new TripleImpl(ta, ENHANCER_SELECTED_TEXT, new PlainLiteralImpl(
                     at.getSpan().substring(nerData.start, nerData.end),lang)));
                 metadata.add(new TripleImpl(ta, DC_TYPE, nerData.tag.getType()));

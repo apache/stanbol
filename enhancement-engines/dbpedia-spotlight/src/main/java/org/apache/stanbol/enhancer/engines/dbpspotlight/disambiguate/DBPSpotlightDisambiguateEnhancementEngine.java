@@ -49,14 +49,14 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -137,7 +137,7 @@ public class DBPSpotlightDisambiguateEnhancementEngine extends
 	 * holds the existing TextAnnotations, which are used as input for DBpedia
 	 * Spotlight, and later for linking of the results
 	 */
-	private Hashtable<String, UriRef> textAnnotationsMap;
+	private Hashtable<String, IRI> textAnnotationsMap;
 
     private int connectionTimeout;
 	/**
@@ -207,7 +207,7 @@ public class DBPSpotlightDisambiguateEnhancementEngine extends
 
 
 		// Retrieve the existing text annotations (requires read lock)
-		MGraph graph = ci.getMetadata();
+		Graph graph = ci.getMetadata();
 		String xmlTextAnnotations = this.getSpottedXml(text, graph);
 		Collection<Annotation> dbpslGraph = doPostRequest(text,
 				xmlTextAnnotations, ci.getUri());
@@ -247,14 +247,14 @@ public class DBPSpotlightDisambiguateEnhancementEngine extends
 	 */
 	public void createEnhancements(Collection<Annotation> occs,
 			ContentItem ci, Language language) {
-		HashMap<Resource, UriRef> entityAnnotationMap = new HashMap<Resource, UriRef>();
+		HashMap<RDFTerm, IRI> entityAnnotationMap = new HashMap<RDFTerm, IRI>();
 
 		for (Annotation occ : occs) {
 
 			if (textAnnotationsMap.get(occ.surfaceForm) != null) {
-				UriRef textAnnotation = textAnnotationsMap.get(occ.surfaceForm);
-				MGraph model = ci.getMetadata();
-				UriRef entityAnnotation = EnhancementEngineHelper
+				IRI textAnnotation = textAnnotationsMap.get(occ.surfaceForm);
+				Graph model = ci.getMetadata();
+				IRI entityAnnotation = EnhancementEngineHelper
 						.createEntityEnhancement(ci, this);
 				entityAnnotationMap.put(occ.uri, entityAnnotation);
 				Literal label = new PlainLiteralImpl(occ.surfaceForm.name, language);
@@ -268,7 +268,7 @@ public class DBPSpotlightDisambiguateEnhancementEngine extends
 					Iterator<String> it = t.iterator();
 					while (it.hasNext())
 						model.add(new TripleImpl(entityAnnotation,
-								ENHANCER_ENTITY_TYPE, new UriRef(it.next())));
+								ENHANCER_ENTITY_TYPE, new IRI(it.next())));
 				}
 				model.add(new TripleImpl(entityAnnotation,
 						ENHANCER_ENTITY_REFERENCE, occ.uri));
@@ -290,7 +290,7 @@ public class DBPSpotlightDisambiguateEnhancementEngine extends
 	 *             if the request cannot be sent
 	 */
 	protected Collection<Annotation> doPostRequest(String text,
-			String xmlTextAnnotations, UriRef contentItemUri) throws EngineException {
+			String xmlTextAnnotations, IRI contentItemUri) throws EngineException {
 		HttpURLConnection connection = null;
 		BufferedWriter wr = null;
 		try {
@@ -381,16 +381,16 @@ public class DBPSpotlightDisambiguateEnhancementEngine extends
 		return Annotation.parseAnnotations(xmlDoc);
 	}
 
-	private String getSpottedXml(String text, MGraph graph) {
+	private String getSpottedXml(String text, Graph graph) {
 		StringBuilder xml = new StringBuilder();
-		textAnnotationsMap = new Hashtable<String, UriRef>();
+		textAnnotationsMap = new Hashtable<String, IRI>();
 
 		xml.append(String.format("<annotation text=\"%s\">", text));
 		try {
 			for (Iterator<Triple> it = graph.filter(null, RDF_TYPE,
 					TechnicalClasses.ENHANCER_TEXTANNOTATION); it.hasNext();) {
 				// Triple tAnnotation = it.next();
-				UriRef uri = (UriRef) it.next().getSubject();
+				IRI uri = (IRI) it.next().getSubject();
 				String surfaceForm = EnhancementEngineHelper.getString(graph,
 						uri, ENHANCER_SELECTED_TEXT);
 				if (surfaceForm != null) {

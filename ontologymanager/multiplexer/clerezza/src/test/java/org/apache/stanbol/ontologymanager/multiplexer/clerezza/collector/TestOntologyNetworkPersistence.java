@@ -34,10 +34,10 @@ import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcProvider;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 import org.apache.stanbol.ontologymanager.core.OfflineConfigurationImpl;
@@ -51,7 +51,6 @@ import org.apache.stanbol.ontologymanager.servicesapi.session.Session;
 import org.apache.stanbol.ontologymanager.sources.clerezza.GraphContentInputSource;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.slf4j.Logger;
@@ -82,10 +81,10 @@ public class TestOntologyNetworkPersistence {
     @Test
     public void canRetrieveOntologyImported() throws Exception {
         String pcomics = "http://stanbol.apache.org/ontologies/pcomics/";
-        OWLOntologyID foaf = new OWLOntologyID(IRI.create("http://xmlns.com/foaf/0.1/")), all = new OWLOntologyID(
-                IRI.create(pcomics + "characters_all.owl")), main = new OWLOntologyID(
-                IRI.create(pcomics + "maincharacters.owl")), minor = new OWLOntologyID(
-                IRI.create(pcomics + "minorcharacters.owl"));
+        OWLOntologyID foaf = new OWLOntologyID(org.semanticweb.owlapi.model.IRI.create("http://xmlns.com/foaf/0.1/")), all = new OWLOntologyID(
+                org.semanticweb.owlapi.model.IRI.create(pcomics + "characters_all.owl")), main = new OWLOntologyID(
+                org.semanticweb.owlapi.model.IRI.create(pcomics + "maincharacters.owl")), minor = new OWLOntologyID(
+                org.semanticweb.owlapi.model.IRI.create(pcomics + "minorcharacters.owl"));
         OWLOntology oAll, oMain, oMinor, oFoaf;
         final int total = 4;
 
@@ -133,7 +132,7 @@ public class TestOntologyNetworkPersistence {
     @Test
     public void canRetrieveOntologySingleton() throws Exception {
 
-        OWLOntologyID foaf = new OWLOntologyID(IRI.create("http://xmlns.com/foaf/0.1/"));
+        OWLOntologyID foaf = new OWLOntologyID(org.semanticweb.owlapi.model.IRI.create("http://xmlns.com/foaf/0.1/"));
         OWLOntology o1;
 
         // Get the fake FOAF and load it into the ontology provider
@@ -286,18 +285,18 @@ public class TestOntologyNetworkPersistence {
     public void updatesGraphOnSpaceModification() throws Exception {
 
         // Ensure the metadata graph is there.
-        TripleCollection meta = ontologyProvider.getMetaGraph(TripleCollection.class);
+        Graph meta = ontologyProvider.getMetaGraph(Graph.class);
         assertNotNull(meta);
 
         String scopeId = "updateTest";
         Scope scope = onm.createOntologyScope(scopeId, new GraphContentInputSource(getClass()
                 .getResourceAsStream("/ontologies/test1.owl")));
 
-        UriRef collector = new UriRef(_NS_STANBOL_INTERNAL + OntologySpace.shortName + "/"
+        IRI collector = new IRI(_NS_STANBOL_INTERNAL + OntologySpace.shortName + "/"
                                       + scope.getCoreSpace().getID());
-        UriRef test1id = new UriRef("http://stanbol.apache.org/ontologies/test1.owl"); // Has no versionIRI
+        IRI test1id = new IRI("http://stanbol.apache.org/ontologies/test1.owl"); // Has no versionIRI
         // Be strict: the whole property pair must be there.
-        UriRef predicate = MANAGES_URIREF;
+        IRI predicate = MANAGES_URIREF;
         assertTrue(meta.contains(new TripleImpl(collector, predicate, test1id)));
         predicate = IS_MANAGED_BY_URIREF;
         assertTrue(meta.contains(new TripleImpl(test1id, predicate, collector)));
@@ -306,7 +305,7 @@ public class TestOntologyNetworkPersistence {
 
         scope.getCoreSpace().addOntology(
             new GraphContentInputSource(getClass().getResourceAsStream("/ontologies/minorcharacters.owl")));
-        UriRef minorId = new UriRef("http://stanbol.apache.org/ontologies/pcomics/minorcharacters.owl");
+        IRI minorId = new IRI("http://stanbol.apache.org/ontologies/pcomics/minorcharacters.owl");
         predicate = MANAGES_URIREF;
         assertTrue(meta.contains(new TripleImpl(collector, predicate, minorId)));
         predicate = IS_MANAGED_BY_URIREF;

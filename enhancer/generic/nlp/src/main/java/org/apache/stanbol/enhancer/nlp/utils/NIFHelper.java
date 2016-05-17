@@ -29,12 +29,12 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.Language;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
@@ -60,9 +60,9 @@ public final class NIFHelper {
 
     private NIFHelper(){}
     
-    public static final Map<SpanTypeEnum,UriRef> SPAN_TYPE_TO_SSO_TYPE;
+    public static final Map<SpanTypeEnum,IRI> SPAN_TYPE_TO_SSO_TYPE;
     static {
-        Map<SpanTypeEnum,UriRef> mapping = new EnumMap<SpanTypeEnum,UriRef>(SpanTypeEnum.class);
+        Map<SpanTypeEnum,IRI> mapping = new EnumMap<SpanTypeEnum,IRI>(SpanTypeEnum.class);
         //mapping.put(SpanTypeEnum.Text, null);
         //mapping.put(SpanTypeEnum.TextSection, null);
         mapping.put(SpanTypeEnum.Sentence, SsoOntology.Sentence.getUri());
@@ -76,15 +76,15 @@ public final class NIFHelper {
      * Concept representing the Phrase (e.g. {@link LexicalCategory#Noun} maps
      * to "<code>http://purl.org/olia/olia.owl#NounPhrase</code>").
      */
-    public static final Map<LexicalCategory,UriRef> LEXICAL_TYPE_TO_PHRASE_TYPE;
+    public static final Map<LexicalCategory,IRI> LEXICAL_TYPE_TO_PHRASE_TYPE;
     static {
         String olia = "http://purl.org/olia/olia.owl#";
-        Map<LexicalCategory,UriRef> mapping = new EnumMap<LexicalCategory,UriRef>(LexicalCategory.class);
-        mapping.put(LexicalCategory.Noun, new UriRef(olia+"NounPhrase"));
-        mapping.put(LexicalCategory.Verb, new UriRef(olia+"VerbPhrase"));
-        mapping.put(LexicalCategory.Adjective, new UriRef(olia+"AdjectivePhrase"));
-        mapping.put(LexicalCategory.Adverb, new UriRef(olia+"AdverbPhrase"));
-        mapping.put(LexicalCategory.Conjuction, new UriRef(olia+"ConjuctionPhrase"));
+        Map<LexicalCategory,IRI> mapping = new EnumMap<LexicalCategory,IRI>(LexicalCategory.class);
+        mapping.put(LexicalCategory.Noun, new IRI(olia+"NounPhrase"));
+        mapping.put(LexicalCategory.Verb, new IRI(olia+"VerbPhrase"));
+        mapping.put(LexicalCategory.Adjective, new IRI(olia+"AdjectivePhrase"));
+        mapping.put(LexicalCategory.Adverb, new IRI(olia+"AdverbPhrase"));
+        mapping.put(LexicalCategory.Conjuction, new IRI(olia+"ConjuctionPhrase"));
         LEXICAL_TYPE_TO_PHRASE_TYPE = Collections.unmodifiableMap(mapping);
     }    
     /**
@@ -95,10 +95,10 @@ public final class NIFHelper {
      * @param end the end position or values &lt; 1 when open ended.
      * @return the NIF 2.0 Fragment URI
      * @throws IllegalArgumentException if <code>null</code> is parsed as base
-     * {@link UriRef} or the end position is &gt;=0 but &lt= the parsed start
+     * {@link IRI} or the end position is &gt;=0 but &lt= the parsed start
      * position.
      */
-    public static final UriRef getNifFragmentURI(UriRef base, int start,int end){
+    public static final IRI getNifFragmentURI(IRI base, int start,int end){
         if(base == null){
             throw new IllegalArgumentException("Base URI MUST NOT be NULL!");
         }
@@ -111,10 +111,10 @@ public final class NIFHelper {
             }
             sb.append(end);
         } //else open ended ...
-        return new UriRef(sb.toString());
+        return new IRI(sb.toString());
     }
  
-    public static final UriRef getNifOffsetURI(UriRef base, int start, int end){
+    public static final IRI getNifOffsetURI(IRI base, int start, int end){
         if(base == null){
             throw new IllegalArgumentException("Base URI MUST NOT be NULL!");
         }
@@ -127,7 +127,7 @@ public final class NIFHelper {
             }
             sb.append(end);
         } //else open ended ...
-        return new UriRef(sb.toString());
+        return new IRI(sb.toString());
     }
     
     public static final int NIF_HASH_CONTEXT_LENGTH = 10;
@@ -135,7 +135,7 @@ public final class NIFHelper {
     
     public static final Charset UTF8 = Charset.forName("UTF8");
     
-    public static final UriRef getNifHashURI(UriRef base, int start, int end, String text){
+    public static final IRI getNifHashURI(IRI base, int start, int end, String text){
         if(base == null){
             throw new IllegalArgumentException("Base URI MUST NOT be NULL!");
         }
@@ -160,7 +160,7 @@ public final class NIFHelper {
         sb.append('_');
         sb.append(text.substring(start, 
             Math.min(end,start+NIF_HASH_MAX_STRING_LENGTH)));
-        return new UriRef(sb.toString());
+        return new IRI(sb.toString());
     }
 
     /**
@@ -215,11 +215,11 @@ public final class NIFHelper {
      * @param text the {@link AnalysedText}
      * @param language the {@link Language} or <code>null</code> if not known
      * @param span the {@link Span} to write.
-     * @return the {@link UriRef} representing the parsed {@link Span} in the
+     * @return the {@link IRI} representing the parsed {@link Span} in the
      * graph
      */
-    public static UriRef writeSpan(MGraph graph, UriRef base, AnalysedText text, Language language, Span span){
-        UriRef segment = getNifOffsetURI(base, span.getStart(), span.getEnd());
+    public static IRI writeSpan(Graph graph, IRI base, AnalysedText text, Language language, Span span){
+        IRI segment = getNifOffsetURI(base, span.getStart(), span.getEnd());
         graph.add(new TripleImpl(segment, RDF_TYPE, StringOntology.OffsetBasedString.getUri()));
         graph.add(new TripleImpl(segment, StringOntology.anchorOf.getUri(), 
             new PlainLiteralImpl(span.getSpan(),language)));
@@ -252,7 +252,7 @@ public final class NIFHelper {
      * @param segmentUri the URI of the resource representing the parsed 
      * annotated element in the graph
      */
-    public static void writePos(MGraph graph, Annotated annotated, UriRef segmentUri) {
+    public static void writePos(Graph graph, Annotated annotated, IRI segmentUri) {
         Value<PosTag> posTag = annotated.getAnnotation(NlpAnnotations.POS_ANNOTATION);
         if(posTag != null){
             if(posTag.value().isMapped()){
@@ -280,10 +280,10 @@ public final class NIFHelper {
      * @param segmentUri the URI of the resource representing the parsed 
      * annotated element in the graph
      */
-    public static void writePhrase(MGraph graph, Annotated annotated, UriRef segmentUri) {
+    public static void writePhrase(Graph graph, Annotated annotated, IRI segmentUri) {
         Value<PhraseTag> phraseTag = annotated.getAnnotation(NlpAnnotations.PHRASE_ANNOTATION);
         if(phraseTag != null){
-            UriRef phraseTypeUri = LEXICAL_TYPE_TO_PHRASE_TYPE.get(phraseTag.value().getCategory());
+            IRI phraseTypeUri = LEXICAL_TYPE_TO_PHRASE_TYPE.get(phraseTag.value().getCategory());
             if(phraseTypeUri != null){ //add the oliaLink for the Phrase
                 graph.add(new TripleImpl(segmentUri, SsoOntology.oliaLink.getUri(), phraseTypeUri));
                 graph.add(new TripleImpl(segmentUri, ENHANCER_CONFIDENCE, 

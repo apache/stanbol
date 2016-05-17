@@ -20,9 +20,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Service;
@@ -38,8 +38,8 @@ import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
  * Abstract implementation of the {@link ContentItemFactory} that requires only
  * the three abstract methods <ul>
  * <li> {@link #createBlob(ContentSource)}
- * <li> {@link #createContentItem(String, Blob, MGraph)}
- * <li> {@link #createContentItem(UriRef, Blob, MGraph)}
+ * <li> {@link #createContentItem(String, Blob, Graph)}
+ * <li> {@link #createContentItem(IRI, Blob, Graph)}
  * </ul> to be overridden.<p>
  * Implementers should NOTE that {@link #createBlob(ContentSource)} will be
  * called to create the main {@link Blob} instance for a contentItem before
@@ -77,7 +77,7 @@ public abstract class AbstractContentItemFactory implements ContentItemFactory {
     
     @Override
     public final ContentItem createContentItem(ContentSource source) throws IOException {
-        return createContentItem((UriRef)null, source, null);
+        return createContentItem((IRI)null, source, null);
     }
 
     @Override
@@ -86,7 +86,7 @@ public abstract class AbstractContentItemFactory implements ContentItemFactory {
     }
 
     @Override
-    public final ContentItem createContentItem(UriRef id, ContentSource source) throws IOException {
+    public final ContentItem createContentItem(IRI id, ContentSource source) throws IOException {
         return createContentItem(id, source, null);
     }
 
@@ -96,14 +96,14 @@ public abstract class AbstractContentItemFactory implements ContentItemFactory {
     }
 
     @Override
-    public final ContentItem createContentItem(ContentReference reference, MGraph metadata) throws IOException {
+    public final ContentItem createContentItem(ContentReference reference, Graph metadata) throws IOException {
         if(reference == null){
             throw new IllegalArgumentException("The parsed ContentReference MUST NOT be NULL!");
         }
-        return createContentItem(new UriRef(reference.getReference()),createBlob(reference),metadata);
+        return createContentItem(new IRI(reference.getReference()),createBlob(reference),metadata);
     }
     @Override
-    public final ContentItem createContentItem(String prefix, ContentSource source,MGraph metadata) throws IOException {
+    public final ContentItem createContentItem(String prefix, ContentSource source,Graph metadata) throws IOException {
         if(prefix == null){
             throw new IllegalArgumentException("The parsed prefix MUST NOT be NULL!");
         }
@@ -114,7 +114,7 @@ public abstract class AbstractContentItemFactory implements ContentItemFactory {
     }
 
     @Override
-    public final ContentItem createContentItem(UriRef id, ContentSource source, MGraph metadata) throws IOException {
+    public final ContentItem createContentItem(IRI id, ContentSource source, Graph metadata) throws IOException {
         if(source == null){
             throw new IllegalArgumentException("The parsed ContentSource MUST NOT be NULL!");
         }
@@ -136,7 +136,7 @@ public abstract class AbstractContentItemFactory implements ContentItemFactory {
      * returned ContentItem.
      * @return the created content item
      */
-    protected abstract ContentItem createContentItem(UriRef id, Blob blob, MGraph metadata);
+    protected abstract ContentItem createContentItem(IRI id, Blob blob, Graph metadata);
     
     /**
      * Creates a ContentItem for the parsed parameters
@@ -152,7 +152,7 @@ public abstract class AbstractContentItemFactory implements ContentItemFactory {
      * returned ContentItem.
      * @return the created content item
      */
-    protected abstract ContentItem createContentItem(String prefix, Blob blob, MGraph metadata);
+    protected abstract ContentItem createContentItem(String prefix, Blob blob, Graph metadata);
 
     @Override
     public abstract Blob createBlob(ContentSource source) throws IOException;

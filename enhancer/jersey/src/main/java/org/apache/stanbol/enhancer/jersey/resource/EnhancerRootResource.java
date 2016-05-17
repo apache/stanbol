@@ -47,10 +47,10 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
 import org.apache.clerezza.rdf.core.sparql.QueryEngine;
@@ -62,6 +62,7 @@ import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Enhancer;
 import org.apache.stanbol.commons.viewable.Viewable;
@@ -95,7 +96,7 @@ public final class EnhancerRootResource extends BaseStanbolResource {
     private ContentItemFactory ciFactory;
     @Reference
     private Serializer serializer;
-    @Reference
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY)
     private QueryEngine queryEngine;
     
     @Path("")
@@ -123,7 +124,7 @@ public final class EnhancerRootResource extends BaseStanbolResource {
         @GET
         @Produces(value = {JSON_LD, APPLICATION_JSON, N3, N_TRIPLE, RDF_JSON, RDF_XML, TURTLE, X_TURTLE})
         public Response getEngines(@Context HttpHeaders headers) {
-            MGraph graph = getEnhancerConfigGraph();
+            Graph graph = getEnhancerConfigGraph();
             ResponseBuilder res = Response.ok(graph);
             //addCORSOrigin(servletContext,res, headers);
             return res.build();
@@ -134,10 +135,10 @@ public final class EnhancerRootResource extends BaseStanbolResource {
          *
          * @return the graph with the configuration
          */
-        private MGraph getEnhancerConfigGraph() {
+        private Graph getEnhancerConfigGraph() {
             String rootUrl = getUriInfo().getBaseUriBuilder().path(getRootUrl()).build().toString();
-            UriRef enhancerResource = new UriRef(rootUrl + "enhancer");
-            MGraph graph = new SimpleMGraph();
+            IRI enhancerResource = new IRI(rootUrl + "enhancer");
+            Graph graph = new SimpleGraph();
             graph.add(new TripleImpl(enhancerResource, RDF.type, Enhancer.ENHANCER));
             addActiveEngines(engineManager, graph, rootUrl);
             addActiveChains(chainManager, graph, rootUrl);

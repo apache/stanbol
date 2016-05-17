@@ -19,7 +19,7 @@ package org.apache.stanbol.rules.manager;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.rules.base.api.NoSuchRuleInRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.Rule;
@@ -37,7 +37,7 @@ import com.hp.hpl.jena.rdf.model.Model;
  */
 public class RecipeImpl implements Recipe {
 
-    private UriRef recipeID;
+    private IRI recipeID;
     private String recipeDescription;
     private RuleList ruleList = new RuleList();
 
@@ -48,7 +48,7 @@ public class RecipeImpl implements Recipe {
      * @param recipeDescription
      * @param ruleList
      */
-    public RecipeImpl(UriRef recipeID, String recipeDescription, RuleList ruleList) {
+    public RecipeImpl(IRI recipeID, String recipeDescription, RuleList ruleList) {
         this.recipeID = recipeID;
         this.recipeDescription = recipeDescription;
         if ( ruleList != null ) {
@@ -60,7 +60,7 @@ public class RecipeImpl implements Recipe {
         return ruleList;
     }
 
-    public UriRef getRecipeID() {
+    public IRI getRecipeID() {
         return recipeID;
     }
 
@@ -137,7 +137,7 @@ public class RecipeImpl implements Recipe {
     }
 
     @Override
-    public Rule getRule(UriRef ruleID) throws NoSuchRuleInRecipeException {
+    public Rule getRule(IRI ruleID) throws NoSuchRuleInRecipeException {
         for (Rule rule : ruleList) {
             if (rule.getRuleID().toString().equals(ruleID.toString())) {
                 return rule;
@@ -155,8 +155,8 @@ public class RecipeImpl implements Recipe {
     }
 
     @Override
-    public List<UriRef> listRuleIDs() {
-        List<UriRef> ruleIDs = new ArrayList<UriRef>();
+    public List<IRI> listRuleIDs() {
+        List<IRI> ruleIDs = new ArrayList<IRI>();
 
         for (Rule rule : ruleList) {
             ruleIDs.add(rule.getRuleID());

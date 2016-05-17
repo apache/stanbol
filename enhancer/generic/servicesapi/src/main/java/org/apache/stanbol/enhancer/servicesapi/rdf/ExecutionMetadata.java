@@ -16,7 +16,7 @@
 */
 package org.apache.stanbol.enhancer.servicesapi.rdf;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainManager;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -38,41 +38,41 @@ public final class ExecutionMetadata {
      * This is considered an abstract concept. Use {@link #CHAIN_EXECUTION} or
      * {@link #ENGINE_EXECUTION} depending on the type of the executed component.
      */
-    public static final UriRef EXECUTION = new UriRef(NamespaceEnum.em+"Execution");
+    public static final IRI EXECUTION = new IRI(NamespaceEnum.em+"Execution");
 
     /**
      * Property that links {@link #EXECUTION} to its parent 
      * {@link #CHAIN_EXECUTION}.
      */
-    public static final UriRef EXECUTION_PART = new UriRef(NamespaceEnum.em+"executionPart");
+    public static final IRI EXECUTION_PART = new IRI(NamespaceEnum.em+"executionPart");
     
     /**
      * The current status of an {@link #EXECUTION}. Values are expected to be
      * one of {@link #EXECUTION_STATUS}.
      */
-    public static final UriRef STATUS = new UriRef(NamespaceEnum.em+"status");
+    public static final IRI STATUS = new IRI(NamespaceEnum.em+"status");
 
     /**
      * The 'xsd:startTime' when an {@link #EXECUTION} started
      */
-    public static final UriRef STARTED = new UriRef(NamespaceEnum.em+"started");
+    public static final IRI STARTED = new IRI(NamespaceEnum.em+"started");
 
     /**
      * The 'xsd:dateTime' when an {@link #EXECUTION} execution completed or
      * failed.
      */
-    public static final UriRef COMPLETED = new UriRef(NamespaceEnum.em+"completed");
+    public static final IRI COMPLETED = new IRI(NamespaceEnum.em+"completed");
 
     /**
      * Allows to add a status message to a {@link #EXECUTION} node.
      */
-    public static final UriRef STATUS_MESSAGE = new UriRef(NamespaceEnum.em+"statusMessage");
+    public static final IRI STATUS_MESSAGE = new IRI(NamespaceEnum.em+"statusMessage");
     
     /**
      * Class representing the execution of a {@link Chain}. This class is a 
      * sub-class of {@link #EXECUTION}
      */
-    public static final UriRef CHAIN_EXECUTION = new UriRef(NamespaceEnum.em+"ChainExecution");
+    public static final IRI CHAIN_EXECUTION = new IRI(NamespaceEnum.em+"ChainExecution");
 
     /**
      * Property indicating if the {@link ExecutionPlan#EXECUTION_PLAN} executed
@@ -80,65 +80,65 @@ public final class ExecutionMetadata {
      * {@link Chain} at that time. Values are expected to be of data type
      * 'xsd:boolean'.
      */
-    public static final UriRef IS_DEFAULT_CHAIN = new UriRef(NamespaceEnum.em+"defualtChain");
+    public static final IRI IS_DEFAULT_CHAIN = new IRI(NamespaceEnum.em+"defualtChain");
 
     /**
      * Property that links from the {@link #CHAIN_EXECUTION} to the
      * {@link ExecutionPlan#EXECUTION_PLAN}
      */
-    public static final UriRef EXECUTION_PLAN = new UriRef(NamespaceEnum.em+"executionPlan");
+    public static final IRI EXECUTION_PLAN = new IRI(NamespaceEnum.em+"executionPlan");
 
     /**
      * Property that links from the {@link #CHAIN_EXECUTION} node to the
      * enhanced {@link ContentItem#getUri()}
      */
-    public static final UriRef ENHANCES = new UriRef(NamespaceEnum.em+"enhances");
+    public static final IRI ENHANCES = new IRI(NamespaceEnum.em+"enhances");
 
     /**
      * Property that links from {@link ContentItem#getUri()} to the 
      * {@link #CHAIN_EXECUTION} defining the root node of the execution metadata
      */
-    public static final UriRef ENHANCED_BY = new UriRef(NamespaceEnum.em+"enhancedBy");
+    public static final IRI ENHANCED_BY = new IRI(NamespaceEnum.em+"enhancedBy");
 
     /**
      * Class that represents the execution of an {@link EnhancementEngine}.
      *  This is a sub-class of {@link #EXECUTION}.
      */
-    public static final UriRef ENGINE_EXECUTION = new UriRef(NamespaceEnum.em+"EngineExecution");
+    public static final IRI ENGINE_EXECUTION = new IRI(NamespaceEnum.em+"EngineExecution");
 
     /**
      * Property that links from the {@link #ENGINE_EXECUTION} to the
      * {@link ExecutionPlan#EXECUTION_NODE}
      */
-    public static final UriRef EXECUTION_NODE = new UriRef(NamespaceEnum.em+"executionNode");
+    public static final IRI EXECUTION_NODE = new IRI(NamespaceEnum.em+"executionNode");
 
     /**
      * Type for all ExecutionStatus values: {@link #STATUS_SCHEDULED},
      * {@link #STATUS_IN_PROGRESS}, {@link #STATUS_COMPLETED}, {@link #STATUS_SKIPPED},
      * {@link #STATUS_FAILED}.
      */
-    public static final UriRef EXECUTION_STATUS = new UriRef(NamespaceEnum.em+"ExecutionStatus");
+    public static final IRI EXECUTION_STATUS = new IRI(NamespaceEnum.em+"ExecutionStatus");
 
     /**
      * em:ExecutionStatus indicating that the execution is scheduled, but has not yet started
      */
-    public static final UriRef STATUS_SCHEDULED = new UriRef(NamespaceEnum.em+"StatusSheduled");
+    public static final IRI STATUS_SCHEDULED = new IRI(NamespaceEnum.em+"StatusSheduled");
     /**
      * em:ExecutionStatus indicating that the execution was skipped 
      */
-    public static final UriRef STATUS_SKIPPED = new UriRef(NamespaceEnum.em+"StatusSkipped");
+    public static final IRI STATUS_SKIPPED = new IRI(NamespaceEnum.em+"StatusSkipped");
     /**
      * em:ExecutionStatus indicating that the execution is in progress
      */
-    public static final UriRef STATUS_IN_PROGRESS = new UriRef(NamespaceEnum.em+"StatusInProgress");
+    public static final IRI STATUS_IN_PROGRESS = new IRI(NamespaceEnum.em+"StatusInProgress");
     /**
      * em:ExecutionStatus indicating that the execution has completed successfully
      */
-    public static final UriRef STATUS_COMPLETED = new UriRef(NamespaceEnum.em+"StatusCompleted");
+    public static final IRI STATUS_COMPLETED = new IRI(NamespaceEnum.em+"StatusCompleted");
     /**
      * em:ExecutionStatus indicating that the execution has failed
      */
-    public static final UriRef STATUS_FAILED = new UriRef(NamespaceEnum.em+"StatusFailed");
+    public static final IRI STATUS_FAILED = new IRI(NamespaceEnum.em+"StatusFailed");
 
     
 }

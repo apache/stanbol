@@ -18,10 +18,9 @@ package org.apache.stanbol.enhancer.engines.entitycomention.impl;
 
 import java.util.Iterator;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.stanbol.enhancer.engines.entitycomention.CoMentionConstants;
 import org.apache.stanbol.enhancer.engines.entitycomention.EntityCoMentionEngine;
@@ -31,7 +30,7 @@ import org.apache.stanbol.enhancer.engines.entitylinking.impl.EntityLinker;
 
 /**
  * {@link Entity} implementation used by the {@link EntityCoMentionEngine}. It
- * overrides the {@link #getText(UriRef)} and {@link #getReferences(UriRef)}
+ * overrides the {@link #getText(IRI)} and {@link #getReferences(IRI)}
  * methods to use the a different labelField if 
  * {@link CoMentionConstants#CO_MENTION_LABEL_FIELD} is parsed as parameter.
  * This allows the {@link EntityLinker} to use different properties for different
@@ -43,11 +42,11 @@ public class EntityMention extends Entity {
     /**
      * The label field of this Entity
      */
-    private final UriRef nameField;
+    private final IRI nameField;
     /**
      * The type field of this Entity
      */
-    private final UriRef typeField;
+    private final IRI typeField;
     /**
      * The start/end char indexes char index of the first mention
      */
@@ -58,15 +57,15 @@ public class EntityMention extends Entity {
 
     /**
      * Creates a new MentionEntity for the parsed parameters
-     * @param uri the {@link UriRef} of the Entity 
-     * @param data the {@link MGraph} with the data for the Entity
-     * @param labelField the {@link UriRef} of the property holding the
+     * @param uri the {@link IRI} of the Entity 
+     * @param data the {@link Graph} with the data for the Entity
+     * @param labelField the {@link IRI} of the property holding the
      * labels of this Entity. This property will be used for all calls to
-     * {@link #getText(UriRef)} and {@link #getReferences(UriRef)} if
+     * {@link #getText(IRI)} and {@link #getReferences(IRI)} if
      * {@link CoMentionConstants#CO_MENTION_LABEL_FIELD} is parsed as parameter
      * @param span the start/end char indexes of the mention
      */
-    public EntityMention(UriRef uri, TripleCollection data, UriRef labelField, UriRef typeField, Integer[] span) {
+    public EntityMention(IRI uri, Graph data, IRI labelField, IRI typeField, Integer[] span) {
         super(uri, data);
         if(labelField == null){
             throw new IllegalArgumentException("The LabelField MUST NOT be NULL!");
@@ -87,18 +86,18 @@ public class EntityMention extends Entity {
      * Wrapps the parsed Entity and redirects calls to 
      * {@link CoMentionConstants#CO_MENTION_LABEL_FIELD} to the parsed labelField
      * @param entity the Entity to wrap
-     * @param labelField the {@link UriRef} of the property holding the
+     * @param labelField the {@link IRI} of the property holding the
      * labels of this Entity. This property will be used for all calls to
-     * {@link #getText(UriRef)} and {@link #getReferences(UriRef)} if
+     * {@link #getText(IRI)} and {@link #getReferences(IRI)} if
      * {@link CoMentionConstants#CO_MENTION_LABEL_FIELD} is parsed as parameter
      * @param index the char index of the initial mention in the document
      */
-    public EntityMention(Entity entity, UriRef labelField, UriRef typeField, Integer[] span) {
+    public EntityMention(Entity entity, IRI labelField, IRI typeField, Integer[] span) {
         this(entity.getUri(), entity.getData(),labelField,typeField,span);
     }
 
     @Override
-    public Iterator<PlainLiteral> getText(UriRef field) {
+    public Iterator<Literal> getText(IRI field) {
         if(CO_MENTION_FIELD_HASH == field.hashCode() && //avoid calling equals
                 CoMentionConstants.CO_MENTION_LABEL_FIELD.equals(field)){
             return super.getText(nameField);
@@ -111,7 +110,7 @@ public class EntityMention extends Entity {
     }
     
     @Override
-    public Iterator<UriRef> getReferences(UriRef field) {
+    public Iterator<IRI> getReferences(IRI field) {
         if(CO_MENTION_FIELD_HASH == field.hashCode() && //avoid calling equals
                 CoMentionConstants.CO_MENTION_LABEL_FIELD.equals(field)){
             return super.getReferences(nameField);
@@ -155,7 +154,7 @@ public class EntityMention extends Entity {
      * @return the field (property) used to obtain the labels of this mention
      * @see EntityLinkerConfig#getNameField()
      */
-    public UriRef getNameField() {
+    public IRI getNameField() {
         return nameField;
     }
     /**
@@ -165,7 +164,7 @@ public class EntityMention extends Entity {
      * @return the field (property) used to obtain the type of this mention
      * @see EntityLinkerConfig#getTypeField()
      */
-    public UriRef getTypeField() {
+    public IRI getTypeField() {
         return typeField;
     }
     

@@ -31,16 +31,16 @@ import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.EntityAlreadyExistsException;
 import org.apache.clerezza.rdf.core.access.NoSuchEntityException;
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
 import org.apache.clerezza.rdf.core.sparql.QueryParser;
 import org.apache.clerezza.rdf.core.sparql.ResultSet;
@@ -48,7 +48,7 @@ import org.apache.clerezza.rdf.core.sparql.SolutionMapping;
 import org.apache.clerezza.rdf.core.sparql.query.Query;
 import org.apache.clerezza.rdf.core.sparql.query.SelectQuery;
 import org.apache.clerezza.rdf.ontologies.RDF;
-import org.apache.clerezza.rdf.utils.UnionMGraph;
+import org.apache.clerezza.rdf.utils.UnionGraph;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -73,7 +73,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class provides an implementation of the {@link RuleStore} based on Clerezza.<br/>
- * Recipe are managed as {@link TripleCollection} graphs. <br/>
+ * Recipe are managed as {@link Graph} graphs. <br/>
  * The vocabulary used in these graphs is provided by {@link Symbols}.
  * 
  * @author elvio
@@ -94,7 +94,7 @@ public class ClerezzaRuleStore implements RuleStore {
     @Property(name = RuleStore.RECIPE_INDEX_LOCATION, value = _RECIPE_INDEX_LOCATION_DEFAULT)
     private String recipeIndexLocation;
 
-    private List<UriRef> recipes;
+    private List<IRI> recipes;
 
     /**
      * This construct returns RuleStoreImpl object with inside an ontology where to store the rules.
@@ -163,17 +163,17 @@ public class ClerezzaRuleStore implements RuleStore {
             else recipeIndexLocation = _RECIPE_INDEX_LOCATION_DEFAULT;
         }
 
-        recipes = new ArrayList<UriRef>();
+        recipes = new ArrayList<IRI>();
 
-        TripleCollection tripleCollection = null;
+        Graph tripleCollection = null;
         try {
-            tripleCollection = tcManager.getMGraph(new UriRef(recipeIndexLocation));
+            tripleCollection = tcManager.getGraph(new IRI(recipeIndexLocation));
         } catch (NoSuchEntityException e) {
-            tripleCollection = tcManager.createMGraph(new UriRef(recipeIndexLocation));
+            tripleCollection = tcManager.createGraph(new IRI(recipeIndexLocation));
         }
 
         for (Triple triple : tripleCollection) {
-            UriRef recipeID = (UriRef) triple.getSubject();
+            IRI recipeID = (IRI) triple.getSubject();
             recipes.add(recipeID);
         }
 
@@ -184,27 +184,27 @@ public class ClerezzaRuleStore implements RuleStore {
      * Moved form AddRecipe class. The AddRecipe should not be used anymore.
      */
     @Override
-    public Recipe createRecipe(UriRef recipeID, String recipeDescription) throws AlreadyExistingRecipeException {
+    public Recipe createRecipe(IRI recipeID, String recipeDescription) throws AlreadyExistingRecipeException {
 
-        TripleCollection tripleCollection;
+        Graph tripleCollection;
         try {
-            // create the MGraph in the TcManager
-            tripleCollection = tcManager.createMGraph(recipeID);
+            // create the Graph in the TcManager
+            tripleCollection = tcManager.createGraph(recipeID);
         } catch (EntityAlreadyExistsException e) {
             throw new AlreadyExistingRecipeException(e.getMessage());
         }
 
         Triple recipeTriple = new TripleImpl(recipeID, RDF.type, Symbols.Recipe);
 
-        TripleCollection recipeIndexTripleCollection = tcManager.getMGraph(new UriRef(recipeIndexLocation));
-        recipeIndexTripleCollection.add(recipeTriple);
+        Graph recipeIndexGraph = tcManager.getGraph(new IRI(recipeIndexLocation));
+        recipeIndexGraph.add(recipeTriple);
 
         if (recipeDescription != null && !recipeDescription.isEmpty()) {
             Triple descriptionTriple = new TripleImpl(recipeID, Symbols.description, new PlainLiteralImpl(
                     recipeDescription));
             tripleCollection.add(descriptionTriple);
 
-            recipeIndexTripleCollection.add(descriptionTriple);
+            recipeIndexGraph.add(descriptionTriple);
         }
 
         // add the recpe ID to the list of known recipes
@@ -227,9 +227,9 @@ public class ClerezzaRuleStore implements RuleStore {
         log.debug("Adding rule to recipe " + recipe);
         log.info("Rule : " + rule.toString());
 
-        UriRef recipeID = recipe.getRecipeID();
+        IRI recipeID = recipe.getRecipeID();
 
-        TripleCollection tripleCollection = tcManager.getMGraph(recipeID);
+        Graph tripleCollection = tcManager.getGraph(recipeID);
 
         // add the rule object to the graph representation of the recipe by the TcManager
         tripleCollection.add(new TripleImpl(recipeID, Symbols.hasRule, rule.getRuleID()));
@@ -270,7 +270,7 @@ public class ClerezzaRuleStore implements RuleStore {
      * 
      * Parse the set of rules provided by the rulesStream parameter as Stanbol syntax rules and add them to
      * the Recipe in the store.<br/>
-     * The recipe is a {@link TripleCollection} managed by the {@link TcManager}.
+     * The recipe is a {@link Graph} managed by the {@link TcManager}.
      * 
      * 
      * @param recipe
@@ -284,7 +284,7 @@ public class ClerezzaRuleStore implements RuleStore {
     public Recipe addRulesToRecipe(Recipe recipe, InputStream rulesStream, String description) {
         log.debug("Adding rule to recipe " + recipe);
 
-        UriRef recipeID = recipe.getRecipeID();
+        IRI recipeID = recipe.getRecipeID();
         String namespace = recipeID.toString().substring(1, recipeID.toString().length() - 1) + "/";
         
         log.info("Rule Namespace is " + namespace);
@@ -307,7 +307,7 @@ public class ClerezzaRuleStore implements RuleStore {
     @Override
     public Recipe addRulesToRecipe(Recipe recipe, String stanbolRule, String description) {
 
-        UriRef recipeID = recipe.getRecipeID();
+        IRI recipeID = recipe.getRecipeID();
         String namespace = recipeID.toString().substring(1, recipeID.toString().length() - 1) + "/";
 
         RuleList ruleList = RuleParserImpl.parse(namespace, stanbolRule).getRuleList();
@@ -326,18 +326,18 @@ public class ClerezzaRuleStore implements RuleStore {
     }
 
     @Override
-    public Recipe getRecipe(UriRef recipeID) throws NoSuchRecipeException, RecipeConstructionException {
+    public Recipe getRecipe(IRI recipeID) throws NoSuchRecipeException, RecipeConstructionException {
 
         log.info("Called get recipe for id: " + recipeID);
 
-        TripleCollection recipeGraph = null;
+        Graph recipeGraph = null;
 
         /**
          * Throw a NoSuchRecipeException in case of the TcManager throws a NoSuchEntityException with respect
-         * to UriRef representing the recipe.
+         * to IRI representing the recipe.
          */
         try {
-            recipeGraph = tcManager.getMGraph(recipeID);
+            recipeGraph = tcManager.getGraph(recipeID);
         } catch (NoSuchEntityException e) {
             throw new NoSuchRecipeException(recipeID.toString());
         }
@@ -365,9 +365,9 @@ public class ClerezzaRuleStore implements RuleStore {
             boolean firstIteration = true;
             while (resultSet.hasNext()) {
                 SolutionMapping solutionMapping = resultSet.next();
-                Resource nameResource = solutionMapping.get("ruleName");
-                Resource bodyResource = solutionMapping.get("ruleBody");
-                Resource headResource = solutionMapping.get("ruleHead");
+                RDFTerm nameResource = solutionMapping.get("ruleName");
+                RDFTerm bodyResource = solutionMapping.get("ruleBody");
+                RDFTerm headResource = solutionMapping.get("ruleHead");
 
                 StringBuilder stanbolRuleBuilder = new StringBuilder();
                 stanbolRuleBuilder.append(((Literal) nameResource).getLexicalForm());
@@ -406,7 +406,7 @@ public class ClerezzaRuleStore implements RuleStore {
     }
 
     @Override
-    public List<UriRef> listRecipeIDs() {
+    public List<IRI> listRecipeIDs() {
 
         return recipes;
     }
@@ -415,7 +415,7 @@ public class ClerezzaRuleStore implements RuleStore {
     public RecipeList listRecipes() throws NoSuchRecipeException, RecipeConstructionException {
         RecipeList recipeList = new RecipeList();
 
-        for (UriRef recipeID : recipes) {
+        for (IRI recipeID : recipes) {
             Recipe recipe;
             try {
                 recipe = getRecipe(recipeID);
@@ -434,18 +434,18 @@ public class ClerezzaRuleStore implements RuleStore {
     }
 
     @Override
-    public boolean removeRecipe(UriRef recipeID) throws RecipeEliminationException {
+    public boolean removeRecipe(IRI recipeID) throws RecipeEliminationException {
 
         // remove the recipe from the TcManager
         try {
-            tcManager.deleteTripleCollection(recipeID);
+            tcManager.deleteGraph(recipeID);
         } catch (NoSuchEntityException e) {
             throw new RecipeEliminationException(e);
         }
 
-        TripleCollection recipeIndexTripleCollection = tcManager.getTriples(new UriRef(recipeIndexLocation));
+        Graph recipeIndexGraph = tcManager.getGraph(new IRI(recipeIndexLocation));
         Triple triple = new TripleImpl(recipeID, RDF.type, Symbols.Recipe);
-        recipeIndexTripleCollection.remove(triple);
+        recipeIndexGraph.remove(triple);
 
         // System.out.println("Recipes: " +recipes.size());
         // remove the recipe ID from in-memory list
@@ -464,7 +464,7 @@ public class ClerezzaRuleStore implements RuleStore {
 
     @Override
     public Recipe removeRule(Recipe recipe, Rule rule) {
-        TripleCollection tripleCollection = tcManager.getMGraph(recipe.getRecipeID());
+        Graph tripleCollection = tcManager.getGraph(recipe.getRecipeID());
 
         // remove from the graph recipe all the triples having the ruleID as subject.
         Iterator<Triple> triplesIterator = tripleCollection.filter(rule.getRuleID(), null, null);
@@ -487,13 +487,13 @@ public class ClerezzaRuleStore implements RuleStore {
     }
 
     @Override
-    public Rule getRule(Recipe recipe, UriRef ruleID) throws NoSuchRuleInRecipeException {
+    public Rule getRule(Recipe recipe, IRI ruleID) throws NoSuchRuleInRecipeException {
 
         return recipe.getRule(ruleID);
     }
 
     @Override
-    public List<UriRef> listRuleIDs(Recipe recipe) {
+    public List<IRI> listRuleIDs(Recipe recipe) {
         return recipe.listRuleIDs();
     }
 
@@ -508,10 +508,10 @@ public class ClerezzaRuleStore implements RuleStore {
     }
 
     @Override
-    public TripleCollection exportRecipe(Recipe recipe) throws NoSuchRecipeException {
+    public Graph exportRecipe(Recipe recipe) throws NoSuchRecipeException {
 
         try {
-            return tcManager.getMGraph(recipe.getRecipeID());
+            return tcManager.getGraph(recipe.getRecipeID());
         } catch (NoSuchEntityException e) {
             throw new NoSuchRecipeException(recipe.toString());
         }
@@ -524,7 +524,7 @@ public class ClerezzaRuleStore implements RuleStore {
                         + "?recipe " + Symbols.description + " ?description . "
                         + "FILTER (regex(?description, \"" + term + "\", \"i\"))" + "}";
 
-        TripleCollection tripleCollection = tcManager.getMGraph(new UriRef(recipeIndexLocation));
+        Graph tripleCollection = tcManager.getGraph(new IRI(recipeIndexLocation));
 
         RecipeList matchingRecipes = new RecipeList();
 
@@ -536,7 +536,7 @@ public class ClerezzaRuleStore implements RuleStore {
 
             while (resultSet.hasNext()) {
                 SolutionMapping solutionMapping = resultSet.next();
-                UriRef recipeID = (UriRef) solutionMapping.get("recipe");
+                IRI recipeID = (IRI) solutionMapping.get("recipe");
 
                 try {
                     Recipe recipe = getRecipe(recipeID);
@@ -565,15 +565,15 @@ public class ClerezzaRuleStore implements RuleStore {
                         + Symbols.description + " ?description . " + "FILTER (regex(?name, \"" + term
                         + "\", \"i\"))" + "}";
 
-        List<UriRef> recipeIDs = listRecipeIDs();
+        List<IRI> recipeIDs = listRecipeIDs();
 
-        TripleCollection[] tripleCollections = new TripleCollection[recipeIDs.size()];
+        Graph[] tripleCollections = new Graph[recipeIDs.size()];
 
         for (int i = 0; i < tripleCollections.length; i++) {
-            tripleCollections[i] = tcManager.getMGraph(recipeIDs.get(i));
+            tripleCollections[i] = tcManager.getGraph(recipeIDs.get(i));
         }
 
-        UnionMGraph unionMGraph = new UnionMGraph(tripleCollections);
+        UnionGraph unionGraph = new UnionGraph(tripleCollections);
 
         RuleList matchingRules = new RuleList();
 
@@ -581,12 +581,12 @@ public class ClerezzaRuleStore implements RuleStore {
 
             SelectQuery query = (SelectQuery) QueryParser.getInstance().parse(sparql);
 
-            ResultSet resultSet = tcManager.executeSparqlQuery(query, unionMGraph);
+            ResultSet resultSet = tcManager.executeSparqlQuery(query, unionGraph);
 
             while (resultSet.hasNext()) {
                 SolutionMapping solutionMapping = resultSet.next();
-                UriRef recipeID = (UriRef) solutionMapping.get("recipe");
-                UriRef ruleID = (UriRef) solutionMapping.get("rule");
+                IRI recipeID = (IRI) solutionMapping.get("recipe");
+                IRI ruleID = (IRI) solutionMapping.get("rule");
                 Literal description = (Literal) solutionMapping.get("description");
 
                 try {
@@ -619,15 +619,15 @@ public class ClerezzaRuleStore implements RuleStore {
                         + " ?rule . " + "?rule " + Symbols.description + " ?description . "
                         + "FILTER (regex(?description, \"" + term + "\", \"i\"))" + "}";
 
-        List<UriRef> recipeIDs = listRecipeIDs();
+        List<IRI> recipeIDs = listRecipeIDs();
 
-        TripleCollection[] tripleCollections = new TripleCollection[recipeIDs.size()];
+        Graph[] tripleCollections = new Graph[recipeIDs.size()];
 
         for (int i = 0; i < tripleCollections.length; i++) {
-            tripleCollections[i] = tcManager.getMGraph(recipeIDs.get(i));
+            tripleCollections[i] = tcManager.getGraph(recipeIDs.get(i));
         }
 
-        UnionMGraph unionMGraph = new UnionMGraph(tripleCollections);
+        UnionGraph unionGraph = new UnionGraph(tripleCollections);
 
         RuleList matchingRules = new RuleList();
 
@@ -635,12 +635,12 @@ public class ClerezzaRuleStore implements RuleStore {
 
             SelectQuery query = (SelectQuery) QueryParser.getInstance().parse(sparql);
 
-            ResultSet resultSet = tcManager.executeSparqlQuery(query, unionMGraph);
+            ResultSet resultSet = tcManager.executeSparqlQuery(query, unionGraph);
 
             while (resultSet.hasNext()) {
                 SolutionMapping solutionMapping = resultSet.next();
-                UriRef recipeID = (UriRef) solutionMapping.get("recipe");
-                UriRef ruleID = (UriRef) solutionMapping.get("rule");
+                IRI recipeID = (IRI) solutionMapping.get("recipe");
+                IRI ruleID = (IRI) solutionMapping.get("rule");
                 Literal description = (Literal) solutionMapping.get("description");
 
                 try {

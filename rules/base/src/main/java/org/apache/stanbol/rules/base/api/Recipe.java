@@ -18,9 +18,8 @@ package org.apache.stanbol.rules.base.api;
 
 import java.util.List;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.rules.base.api.util.RuleList;
-import org.semanticweb.owlapi.model.IRI;
 
 /**
  * It represents a Recipe object.<br/>
@@ -44,10 +43,10 @@ public interface Recipe extends Adaptable {
      * Get the rule of the recipe identified by the rule ID. The rule is returned as a {@link Rule} object.
      * 
      * @param ruleID
-     *            {@link UriRef}
+     *            {@link IRI}
      * @return the object that represents a {@link Rule}
      */
-    Rule getRule(UriRef ruleID) throws NoSuchRuleInRecipeException;
+    Rule getRule(IRI ruleID) throws NoSuchRuleInRecipeException;
 
     /**
      * Get the list of the {@link Rule} contained in the recipe.
@@ -59,23 +58,23 @@ public interface Recipe extends Adaptable {
     /**
      * Get the list of rule IDs contained in the recipe.
      * 
-     * @return the List of {@link UriRef}.
+     * @return the List of {@link IRI}.
      */
-    List<UriRef> listRuleIDs();
+    List<IRI> listRuleIDs();
 
     /**
      * Get the list of rule names contained in the recipe.
      * 
-     * @return the List of {@link UriRef}.
+     * @return the List of {@link IRI}.
      */
     List<String> listRuleNames();
 
     /**
      * Get the ID of the recipe in the {@link RuleStore}.
      * 
-     * @return the {@link UriRef} expressing the recipe's ID.
+     * @return the {@link IRI} expressing the recipe's ID.
      */
-    UriRef getRecipeID();
+    IRI getRecipeID();
 
     /**
      * Get the description about the recipe.

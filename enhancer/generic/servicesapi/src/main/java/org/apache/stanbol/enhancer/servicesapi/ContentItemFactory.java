@@ -20,9 +20,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
 
 /**
  * OSGI service to be used to create {@link ContentItem}s and Blobs.
@@ -101,7 +101,7 @@ public interface ContentItemFactory {
      * @throws IOException on any error while reading the content from the 
      * content source.
      */
-    ContentItem createContentItem(UriRef id, ContentSource source) throws IOException;
+    ContentItem createContentItem(IRI id, ContentSource source) throws IOException;
     /**
      * Creates a new ContentItem for the passed id and content source.
      * @param prefix the URI prefix used generate the URI of the content item.
@@ -118,7 +118,7 @@ public interface ContentItemFactory {
      * Callers can safely close any resource related to the parsed {@link ContentSource}
      * method after this method returns.
      * @param source The content source
-     * @param metadata an {@link MGraph} with the metadata or <code>null</code>
+     * @param metadata an {@link Graph} with the metadata or <code>null</code>
      * if none. Implementation are free to use the passed instance or to generate 
      * a new one. However they MUST ensure that all {@link Triple}s contained by 
      * the passed graph are also added to the {@link ContentItem#getMetadata() 
@@ -131,7 +131,7 @@ public interface ContentItemFactory {
      * @throws IOException on any error while reading the content from the 
      * content source.
      */
-    ContentItem createContentItem(String prefix, ContentSource source, MGraph metadata) throws IOException;
+    ContentItem createContentItem(String prefix, ContentSource source, Graph metadata) throws IOException;
     /**
      * Creates a new ContentItem for the passed id and content source.
      * @param id the id for the ContentItem or <code>null</code> to generate an id.
@@ -146,7 +146,7 @@ public interface ContentItemFactory {
      * Callers can safely close any resource related to the parsed {@link ContentSource}
      * method after this method returns.
      * @param source The content source
-     * @param metadata an {@link MGraph} with the metadata or <code>null</code>
+     * @param metadata an {@link Graph} with the metadata or <code>null</code>
      * if none. Implementation are free to use the passed instance or to generate 
      * a new one. However they MUST ensure that all {@link Triple}s contained by 
      * the passed graph are also added to the {@link ContentItem#getMetadata() 
@@ -159,7 +159,7 @@ public interface ContentItemFactory {
      * @throws IOException on any error while reading the content from the 
      * content source.
      */
-    ContentItem createContentItem(UriRef id, ContentSource source, MGraph metadata) throws IOException;
+    ContentItem createContentItem(IRI id, ContentSource source, Graph metadata) throws IOException;
     /**
      * Creates a new ContentItem for the passed {@link ContentReference}. The
      * {@link ContentReference#getReference()} is used as ID for the content
@@ -183,7 +183,7 @@ public interface ContentItemFactory {
      * dereference}
      * the reference at creation if needed.
      * @param reference the reference to the content
-     * @param metadata an {@link MGraph} with the metadata or <code>null</code>
+     * @param metadata an {@link Graph} with the metadata or <code>null</code>
      * if none. Implementation are free to use the passed instance or to generate 
      * a new one. However they MUST ensure that all {@link Triple}s contained by 
      * the passed graph are also added to the {@link ContentItem#getMetadata() 
@@ -196,7 +196,7 @@ public interface ContentItemFactory {
      * @throws IllegalArgumentException if the passed {@link ContentReference}
      * is <code>null</code>.
      */
-    ContentItem createContentItem(ContentReference reference, MGraph metadata) throws IOException;
+    ContentItem createContentItem(ContentReference reference, Graph metadata) throws IOException;
     /**
      * Creates a new Blob based on the passed {@link ContentSource}<p>
      * The content provided by the {@link ContentSource} is consumed by the

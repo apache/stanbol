@@ -19,9 +19,9 @@ package org.apache.stanbol.enhancer.engines.entitytagging.impl;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_SELECTED_TEXT;
 
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
@@ -30,10 +30,10 @@ import org.slf4j.LoggerFactory;
 
 public final class NamedEntity {
     private static final Logger log = LoggerFactory.getLogger(NamedEntity.class);
-    private final NonLiteral entity;
+    private final BlankNodeOrIRI entity;
     private final String name;
-    private final UriRef type;
-    private NamedEntity(NonLiteral entity, String name, UriRef type) {
+    private final IRI type;
+    private NamedEntity(BlankNodeOrIRI entity, String name, IRI type) {
         this.entity = entity;
         this.name = name;
         this.type = type;
@@ -42,7 +42,7 @@ public final class NamedEntity {
      * Getter for the Node providing the information about that entity
      * @return the entity
      */
-    public final NonLiteral getEntity() {
+    public final BlankNodeOrIRI getEntity() {
         return entity;
     }
     /**
@@ -56,7 +56,7 @@ public final class NamedEntity {
      * Getter for the type
      * @return the type
      */
-    public final UriRef getType() {
+    public final IRI getType() {
         return type;
     }
     @Override
@@ -79,7 +79,7 @@ public final class NamedEntity {
      * @return the {@link NamedEntity} or <code>null</code> if the parsed
      * text annotation is missing required information.
      */
-    public static NamedEntity createFromTextAnnotation(TripleCollection graph, NonLiteral textAnnotation){
+    public static NamedEntity createFromTextAnnotation(Graph graph, BlankNodeOrIRI textAnnotation){
         String selected = EnhancementEngineHelper.getString(graph, textAnnotation, ENHANCER_SELECTED_TEXT);
         if (selected == null) {
             log.debug("Unable to create NamedEntity for TextAnnotation {} "
@@ -100,7 +100,7 @@ public final class NamedEntity {
                     textAnnotation, selected);
             return null;
         }
-        UriRef type = EnhancementEngineHelper.getReference(graph, textAnnotation, DC_TYPE);
+        IRI type = EnhancementEngineHelper.getReference(graph, textAnnotation, DC_TYPE);
         if (type == null) {
             log.warn("Unable to process TextAnnotation {} because property {}"
                      + " is not present!",textAnnotation, DC_TYPE);

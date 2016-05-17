@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
@@ -108,7 +108,7 @@ public class BenchmarkServlet extends HttpServlet {
             serializer = s;
         }
         
-        public String format(Graph g, String mimeType) throws UnsupportedEncodingException {
+        public String format(ImmutableGraph g, String mimeType) throws UnsupportedEncodingException {
             final ByteArrayOutputStream bos = new ByteArrayOutputStream();
             serializer.serialize(bos, g, mimeType);
             return bos.toString("UTF-8");
@@ -128,7 +128,7 @@ public class BenchmarkServlet extends HttpServlet {
         log.info("Servlet mounted at {}", mountPath);
         
         final Properties config = new Properties();
-        config.put("class.resource.loader.description", "Velocity Classpath Resource Loader");
+        config.put("class.resource.loader.description", "Velocity Classpath RDFTerm Loader");
         config.put("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
         config.put("resource.loader","class");
         velocity.init(config);

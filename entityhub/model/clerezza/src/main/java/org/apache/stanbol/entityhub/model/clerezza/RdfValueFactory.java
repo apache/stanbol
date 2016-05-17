@@ -18,13 +18,13 @@ package org.apache.stanbol.entityhub.model.clerezza;
 
 import java.util.Iterator;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.ValueFactory;
 /**
@@ -53,7 +53,7 @@ public final class RdfValueFactory implements ValueFactory {
      * If not <code>null</code> all {@link RdfRepresentation} created by this
      * instance will use this graph.
      */
-    private MGraph graph;
+    private Graph graph;
     private RdfValueFactory(){
         this(null);
     }
@@ -64,7 +64,7 @@ public final class RdfValueFactory implements ValueFactory {
      * graph. 
      * @param graph
      */
-    public RdfValueFactory(MGraph graph){
+    public RdfValueFactory(Graph graph){
         super();
         this.graph = graph;
     }
@@ -73,8 +73,8 @@ public final class RdfValueFactory implements ValueFactory {
     public RdfReference createReference(Object value) {
         if (value == null) {
             throw new IllegalArgumentException("The parsed value MUST NOT be NULL");
-        } else if (value instanceof UriRef) {
-            return new RdfReference((UriRef) value);
+        } else if (value instanceof IRI) {
+            return new RdfReference((IRI) value);
         } else {
             return new RdfReference(value.toString());
         }
@@ -103,14 +103,14 @@ public final class RdfValueFactory implements ValueFactory {
         } else if(id.isEmpty()){
             throw new IllegalArgumentException("The parsed id MUST NOT be empty!");
         } else {
-            return createRdfRepresentation(new UriRef(id), 
-                graph == null ? new IndexedMGraph() : graph);
+            return createRdfRepresentation(new IRI(id), 
+                graph == null ? new IndexedGraph() : graph);
         }
     }
 
     /**
      * {@link RdfRepresentation} specific create Method based on an existing
-     * RDF Graph.
+     * RDF ImmutableGraph.
      *
      * @param node The node of the node used for the representation. If this
      *     node is not part of the parsed graph, the resulting representation
@@ -118,7 +118,7 @@ public final class RdfValueFactory implements ValueFactory {
      * @param graph the graph.
      * @return The representation based on the state of the parsed graph
      */
-    public RdfRepresentation createRdfRepresentation(UriRef node, TripleCollection graph) {
+    public RdfRepresentation createRdfRepresentation(IRI node, Graph graph) {
         if (node == null) {
             throw new IllegalArgumentException("The parsed id MUST NOT be NULL!");
         }
@@ -129,11 +129,11 @@ public final class RdfValueFactory implements ValueFactory {
     }
 
     /**
-     * Extracts the Graph for {@link RdfRepresentation} or creates a {@link Graph}
+     * Extracts the ImmutableGraph for {@link RdfRepresentation} or creates a {@link ImmutableGraph}
      * for all other implementations of {@link Representation}.
      *
      * @param representation the representation
-     * @return the read only RDF Graph.
+     * @return the read only RDF ImmutableGraph.
      */
     public RdfRepresentation toRdfRepresentation(Representation representation) {
         if (representation instanceof RdfRepresentation) {

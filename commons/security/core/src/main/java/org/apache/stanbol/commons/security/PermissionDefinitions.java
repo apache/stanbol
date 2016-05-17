@@ -22,11 +22,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.osgi.service.permissionadmin.PermissionInfo;
-import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.ontologies.OSGI;
 import org.apache.clerezza.rdf.ontologies.PERMISSION;
 import org.apache.clerezza.rdf.ontologies.SIOC;
@@ -38,9 +38,9 @@ import org.apache.clerezza.rdf.ontologies.SIOC;
  */
 class PermissionDefinitions {
 
-	private MGraph systemGraph;
+	private Graph systemGraph;
 
-	PermissionDefinitions(MGraph systeGraph) {
+	PermissionDefinitions(Graph systeGraph) {
 		this.systemGraph = systeGraph;
 	}
 
@@ -55,10 +55,10 @@ class PermissionDefinitions {
 		List<PermissionInfo> permInfoList = new ArrayList<PermissionInfo>();
 
 		Iterator<Triple> ownerTriples =
-				systemGraph.filter(new UriRef(location), OSGI.owner, null);
+				systemGraph.filter(new IRI(location), OSGI.owner, null);
 
 		if (ownerTriples.hasNext()) {
-			NonLiteral user = (NonLiteral) ownerTriples.next().getObject();
+			BlankNodeOrIRI user = (BlankNodeOrIRI) ownerTriples.next().getObject();
 			lookForPermissions(user, permInfoList);
 		}
 
@@ -73,16 +73,16 @@ class PermissionDefinitions {
 	 * And if the role has another role, then execute this function recursively,
 	 * until all permissions are found.
 	 * 
-	 * @param role	a <code>NonLiteral</code> which is either a user or a role
+	 * @param role	a <code>BlankNodeOrIRI</code> which is either a user or a role
 	 * @param permInfoList	a list with all the added permissions of this bundle
 	 */
-	private void lookForPermissions(NonLiteral role, List<PermissionInfo> permInfoList) {
+	private void lookForPermissions(BlankNodeOrIRI role, List<PermissionInfo> permInfoList) {
 		Iterator<Triple> permissionTriples =
 				systemGraph.filter(role, PERMISSION.hasPermission, null);
 
 		while (permissionTriples.hasNext()) {
 
-			NonLiteral permission = (NonLiteral) permissionTriples.next().getObject();
+			BlankNodeOrIRI permission = (BlankNodeOrIRI) permissionTriples.next().getObject();
 
 			Iterator<Triple> javaPermissionTriples =
 					systemGraph.filter(permission, PERMISSION.javaPermissionEntry, null);
@@ -100,7 +100,7 @@ class PermissionDefinitions {
 				systemGraph.filter(role, SIOC.has_function, null);
 
 		while (roleTriples.hasNext()) {
-			NonLiteral anotherRole = (NonLiteral) roleTriples.next().getObject();
+			BlankNodeOrIRI anotherRole = (BlankNodeOrIRI) roleTriples.next().getObject();
 			this.lookForPermissions(anotherRole, permInfoList);
 		}
 	}

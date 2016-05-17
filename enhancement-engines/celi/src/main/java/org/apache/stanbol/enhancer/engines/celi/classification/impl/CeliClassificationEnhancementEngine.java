@@ -37,12 +37,12 @@ import java.util.Vector;
 
 import javax.xml.soap.SOAPException;
 
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -116,7 +116,7 @@ public class CeliClassificationEnhancementEngine extends AbstractEnhancementEngi
 	/**
 	 * Currently used as fise:entity-type for TopicAnnotations
 	 */
-	private static final UriRef OWL_CLASS = new UriRef("http://www.w3.org/2002/07/owl#Class");
+	private static final IRI OWL_CLASS = new IRI("http://www.w3.org/2002/07/owl#Class");
 	
 	private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -204,7 +204,7 @@ public class CeliClassificationEnhancementEngine extends AbstractEnhancementEngi
                     + "in the canEnhance method! -> This indicated an Bug in the "
                     + "implementation of the " + "EnhancementJobManager!");
         }
-		Entry<UriRef, Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMTYPES);
+		Entry<IRI, Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMTYPES);
 		if (contentPart == null) {
 			throw new IllegalStateException("No ContentPart with Mimetype '" 
 			        + TEXT_PLAIN_MIMETYPE + "' found for ContentItem " 
@@ -248,20 +248,20 @@ public class CeliClassificationEnhancementEngine extends AbstractEnhancementEngi
 		if(lista.isEmpty()){ //not topics found
 		    return; //nothing to do
 		}
-		MGraph g = ci.getMetadata();
+		Graph g = ci.getMetadata();
 		//NOTE: EnhancementEngines that use "ENHANCE_ASYNC" need to acquire a
 		//      writeLock before modifications to the enhancement metadata
 		ci.getLock().writeLock().lock();
 		try {
     		//see STANBOL-617 for rules how to encode extracted topics
     		//we need a single TextAnnotation to link all TopicAnnotations
-    		UriRef textAnnotation = createTextEnhancement(ci, this);
+    		IRI textAnnotation = createTextEnhancement(ci, this);
     		// add the dc:type skos:Concept
     		g.add(new TripleImpl(textAnnotation, DC_TYPE, SKOS_CONCEPT));
     		
     		//not create the fise:TopicAnnotations
     		for (Concept ne : lista) {
-    		    UriRef topicAnnotation = EnhancementEngineHelper.createTopicEnhancement(ci, this);
+    		    IRI topicAnnotation = EnhancementEngineHelper.createTopicEnhancement(ci, this);
     	        g.add(new TripleImpl(topicAnnotation, ENHANCER_ENTITY_REFERENCE, ne.getUri()));
                 g.add(new TripleImpl(topicAnnotation, ENHANCER_ENTITY_LABEL, 
                     new PlainLiteralImpl(ne.getLabel())));

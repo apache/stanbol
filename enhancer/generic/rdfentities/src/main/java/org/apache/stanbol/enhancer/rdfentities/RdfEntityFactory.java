@@ -18,8 +18,8 @@ package org.apache.stanbol.enhancer.rdfentities;
 
 import java.util.Collection;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
 import org.apache.stanbol.enhancer.rdfentities.impl.SimpleRdfEntityFactory;
 
 
@@ -31,13 +31,13 @@ import org.apache.stanbol.enhancer.rdfentities.impl.SimpleRdfEntityFactory;
 public abstract class RdfEntityFactory {
 
     /**
-     * Creates a new factory for the parsed {@link MGraph} instance.
+     * Creates a new factory for the parsed {@link Graph} instance.
      *
      * @param graph the graph used by the proxies created by this factory to
      * read/write there data
      * @return the created factory
      */
-    public static RdfEntityFactory createInstance(MGraph graph){
+    public static RdfEntityFactory createInstance(Graph graph){
         return new SimpleRdfEntityFactory(graph);
     }
 
@@ -62,18 +62,18 @@ public abstract class RdfEntityFactory {
      * Proxies returned by this Factory:
      * <ul>
      * <li> MUST NOT have an internal state. They need to represent a view over
-     * the current data within the {@link MGraph} instance. Direct changes to
+     * the current data within the {@link Graph} instance. Direct changes to
      * the graph need to be reflected in calls to proxies.
      * <li> Implementations need to support {@link Collection} as parameter.
      * Collections need to represent a live view over the triples within the
-     * {@link MGraph}. However iterators may throw a
+     * {@link Graph}. However iterators may throw a
      * {@link ConcurrentModificationException} if the graph changes while using
      * the iterator.
      * </ul>
      *
      * @param <T> The interface implemented by the returned proxy
      * @param rdfNode the rdfNode represented by the proxy (created if not
-     * present in the Graph)
+     * present in the ImmutableGraph)
      * @param type The interface for the proxy. Needs to extend {@link RdfEntity}
      * @param additionalInterfaces Additional interfaces the proxy needs to
      * implement.
@@ -85,7 +85,7 @@ public abstract class RdfEntityFactory {
      * @throws NullPointerException if the parameter type, additionalInterfaces
      * or any entry of additionalInterfaces is <code>null</code>.
      */
-    public abstract <T extends RdfEntity> T getProxy(NonLiteral rdfNode,
+    public abstract <T extends RdfEntity> T getProxy(BlankNodeOrIRI rdfNode,
             Class<T> type, Class<?>... additionalInterfaces) throws IllegalArgumentException;
 
 }

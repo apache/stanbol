@@ -23,7 +23,8 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
+
 import org.apache.stanbol.enhancer.engines.entitycoreference.Constants;
 import org.apache.stanbol.enhancer.engines.entitycoreference.datamodel.NounPhrase;
 import org.apache.stanbol.enhancer.engines.entitycoreference.datamodel.PlaceAdjectival;
@@ -38,18 +39,18 @@ import org.osgi.service.cm.ConfigurationException;
  */
 class Dictionaries {
     /**
-     * Contains the list of place adjectivals in the form: language -> adjectival -> UriRef -> adjectival ->
-     * UriRef There are Places that have multiple adjectivals so in this map there are adjectivals that point
-     * to the same UriRef but that ensures a fast lookup.
+     * Contains the list of place adjectivals in the form: language -> adjectival -> IRI -> adjectival ->
+     * IRI There are Places that have multiple adjectivals so in this map there are adjectivals that point
+     * to the same IRI but that ensures a fast lookup.
      */
-    private Map<String,Map<String,UriRef>> placeAdjectivalsMap;
+    private Map<String,Map<String,IRI>> placeAdjectivalsMap;
     
     public Dictionaries(String[] languages, String entityUriBase) throws ConfigurationException {
         placeAdjectivalsMap = new HashMap<>();
 
         for (String language : languages) {
             String line = null;
-            Map<String,UriRef> languagePlaceAdjMap = new HashMap<>();
+            Map<String,IRI> languagePlaceAdjMap = new HashMap<>();
             InputStream langIn = null;
             BufferedReader reader = null;
 
@@ -62,7 +63,7 @@ class Dictionaries {
                     String[] splittedLine = line.split("\t");
                     String place = splittedLine[0];
                     String adjectivals = splittedLine[1];
-                    UriRef ref = new UriRef(entityUriBase + place.trim());
+                    IRI ref = new IRI(entityUriBase + place.trim());
                     String[] adjectivalsArray = adjectivals.split(",");
 
                     for (String adjectival : adjectivalsArray) {
@@ -99,7 +100,7 @@ class Dictionaries {
      */
     public PlaceAdjectival findPlaceAdjectival(String language, NounPhrase nounPhrase) {
         List<Span> tokens = nounPhrase.getTokens();
-        Map<String,UriRef> langPlaceAdjectivalsMap = placeAdjectivalsMap.get(language);
+        Map<String,IRI> langPlaceAdjectivalsMap = placeAdjectivalsMap.get(language);
         /*
          * Go through all 1-grams and 2-grams and see if we have a match in the place adjectivals map. 2-grams
          * should be good enough since there are no 3-gram places at least from what I saw.

@@ -33,8 +33,8 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.rdfentities.RdfEntityFactory;
@@ -102,10 +102,10 @@ public class TestLocationEnhancementEngine {
 
     public static ContentItem getContentItem(final String id,
             final String text) throws IOException {
-    	return ciFactory.createContentItem(new UriRef(id), new StringSource(text));
+    	return ciFactory.createContentItem(new IRI(id), new StringSource(text));
     }
 
-    public static void getTextAnnotation(ContentItem ci, String name, String context, UriRef type) {
+    public static void getTextAnnotation(ContentItem ci, String name, String context, IRI type) {
         String content;
         try {
             content = IOUtils.toString(ci.getStream(),"UTF-8");
@@ -114,8 +114,8 @@ public class TestLocationEnhancementEngine {
             content = "";
         }
         RdfEntityFactory factory = RdfEntityFactory.createInstance(ci.getMetadata());
-        TextAnnotation testAnnotation = factory.getProxy(new UriRef("urn:org.apache:stanbol.enhancer:test:text-annotation:person"), TextAnnotation.class);
-        testAnnotation.setCreator(new UriRef("urn:org.apache:stanbol.enhancer:test:dummyEngine"));
+        TextAnnotation testAnnotation = factory.getProxy(new IRI("urn:org.apache:stanbol.enhancer:test:text-annotation:person"), TextAnnotation.class);
+        testAnnotation.setCreator(new IRI("urn:org.apache:stanbol.enhancer:test:dummyEngine"));
         testAnnotation.setCreated(new Date());
         testAnnotation.setSelectedText(name);
         testAnnotation.setSelectionContext(context);
@@ -144,7 +144,7 @@ public class TestLocationEnhancementEngine {
             RemoteServiceHelper.checkServiceUnavailable(e, "overloaded with requests");
             return;
         }
-        Map<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+        Map<IRI,RDFTerm> expectedValues = new HashMap<IRI,RDFTerm>();
         expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(
             locationEnhancementEngine.getClass().getName()));

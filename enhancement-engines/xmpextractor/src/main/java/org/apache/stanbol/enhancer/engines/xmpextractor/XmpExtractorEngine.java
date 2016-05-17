@@ -23,17 +23,17 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
@@ -90,10 +90,10 @@ public class XmpExtractorEngine extends AbstractEnhancementEngine<IOException,Ru
 		}
     	byte[] bytes = baos.toByteArray();
     	if (bytes.length > 0) {
-	        MGraph model = new IndexedMGraph();
+	        Graph model = new IndexedGraph();
 			parser.parse(model, new ByteArrayInputStream(bytes), "application/rdf+xml");
 	        GraphNode gn = new GraphNode(
-					new UriRef("http://relative-uri.fake/"), model);
+					new IRI("http://relative-uri.fake/"), model);
 			gn.replaceWith(ci.getUri());
 	        ci.getLock().writeLock().lock();
 	        try { 

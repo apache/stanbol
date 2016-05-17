@@ -26,8 +26,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
@@ -35,7 +35,6 @@ import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,9 +61,9 @@ public class TestOWLUtils {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    private IRI ontologyIri = IRI.create("http://stanbol.apache.org/ontologies/test");
+    private org.semanticweb.owlapi.model.IRI ontologyIri = org.semanticweb.owlapi.model.IRI.create("http://stanbol.apache.org/ontologies/test");
 
-    private UriRef uri = new UriRef("ontonet:http://stanbol.apache.org/prova");
+    private IRI uri = new IRI("ontonet:http://stanbol.apache.org/prova");
 
     /*
      * Guessing the ID of a named ontology whose IRI is near the end of the graph.
@@ -111,7 +110,7 @@ public class TestOWLUtils {
         // Minimum offset required is 2 because of an owl:versionInfo triple in-between.
         String location = "/owl/versioned.owl";
         log.info("Testing lookahead for location {}", location);
-        IRI incubatedVersion = IRI
+        org.semanticweb.owlapi.model.IRI incubatedVersion = org.semanticweb.owlapi.model.IRI
                 .create("http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/owl/src/test/resources/owl/versioned.owl");
         OWLOntologyID expectedOntId = new OWLOntologyID(ontologyIri, incubatedVersion);
 
@@ -151,7 +150,7 @@ public class TestOWLUtils {
         // Actual distance is 102
         String location = "/owl/versioned_distance-100.owl";
         log.info("Testing lookahead for location {}", location);
-        IRI incubatedVersion = IRI
+        org.semanticweb.owlapi.model.IRI incubatedVersion = org.semanticweb.owlapi.model.IRI
                 .create("http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/owl/src/test/resources/owl/versioned_distance-100.owl");
         OWLOntologyID expectedOntId = new OWLOntologyID(ontologyIri, incubatedVersion);
 
@@ -176,7 +175,7 @@ public class TestOWLUtils {
         // Actual distance is 102
         String location = "/owl/versioned_distance-100-reversed.owl";
         log.info("Testing lookahead for location {}", location);
-        IRI incubatedVersion = IRI
+        org.semanticweb.owlapi.model.IRI incubatedVersion = org.semanticweb.owlapi.model.IRI
                 .create("http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/owl/src/test/resources/owl/versioned_distance-100-reversed.owl");
         OWLOntologyID expectedOntId = new OWLOntologyID(ontologyIri, incubatedVersion);
 
@@ -200,7 +199,7 @@ public class TestOWLUtils {
     public void lookaheadVersionedImmediate() throws Exception {
         String location = "/owl/versioned_immediate.owl";
         log.info("Testing lookahead for location {}", location);
-        IRI incubatedVersion = IRI
+        org.semanticweb.owlapi.model.IRI incubatedVersion = org.semanticweb.owlapi.model.IRI
                 .create("http://svn.apache.org/repos/asf/incubator/stanbol/trunk/commons/owl/src/test/resources/owl/versioned_immediate.owl");
         OWLOntologyID expectedOntId = new OWLOntologyID(ontologyIri, incubatedVersion);
 
@@ -215,27 +214,27 @@ public class TestOWLUtils {
      * Extracting the OWL ontology identifier on a *whole* ontology.
      */
     @Test
-    public void namedUriRef() throws Exception {
+    public void namedIRI() throws Exception {
         InputStream inputStream = getClass().getResourceAsStream("/owl/maincharacters.owl");
-        MGraph mg = TcManager.getInstance().createMGraph(uri);
+        Graph mg = TcManager.getInstance().createGraph(uri);
         parser.parse(mg, inputStream, "application/rdf+xml", uri);
-        assertNotNull(OWLUtils.extractOntologyID(mg.getGraph()));
+        assertNotNull(OWLUtils.extractOntologyID(mg.getImmutableGraph()));
     }
 
     /*
      * Extracting the OWL ontology identifier on a *whole* nameless ontology must return a null value.
      */
     @Test
-    public void namelessUriRef() throws Exception {
+    public void namelessIRI() throws Exception {
         InputStream inputStream = getClass().getResourceAsStream("/owl/nameless.owl");
-        MGraph mg = TcManager.getInstance().createMGraph(uri);
+        Graph mg = TcManager.getInstance().createGraph(uri);
         parser.parse(mg, inputStream, "application/rdf+xml", uri);
-        assertNull(OWLUtils.extractOntologyID(mg.getGraph()));
+        assertNull(OWLUtils.extractOntologyID(mg.getImmutableGraph()));
     }
 
     @After
     public void reset() throws Exception {
-        if (TcManager.getInstance().listTripleCollections().contains(uri)) TcManager.getInstance()
-                .deleteTripleCollection(uri);
+        if (TcManager.getInstance().listGraphs().contains(uri)) TcManager.getInstance()
+                .deleteGraph(uri);
     }
 }

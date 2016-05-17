@@ -98,7 +98,7 @@ public class StanbolResourceLoader implements ResourceLoader {
             in = classloader.getResourceAsStream(resource);
         }
         if(in == null){
-            throw new IOException("Unable to load Resource '"+resource+"' from "
+            throw new IOException("Unable to load RDFTerm '"+resource+"' from "
                 + (parent != null ? ("parent (message: "+parentMessage+") and from") : "")
                 + "classpath!");
         }

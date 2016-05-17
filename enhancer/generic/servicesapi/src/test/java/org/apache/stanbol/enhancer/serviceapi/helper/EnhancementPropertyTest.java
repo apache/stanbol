@@ -40,16 +40,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
@@ -114,7 +113,7 @@ public class EnhancementPropertyTest {
     private static class TestContentItem extends ContentItemImpl {
 
         protected TestContentItem(String uri, String content) {
-            super(new UriRef(uri), new TestBlob(content), new IndexedMGraph());
+            super(new IRI(uri), new TestBlob(content), new IndexedGraph());
         }
         
     }
@@ -171,7 +170,7 @@ public class EnhancementPropertyTest {
         }
         
         @Override
-        public Graph getExecutionPlan() throws ChainException {
+        public ImmutableGraph getExecutionPlan() throws ChainException {
             return ExecutionPlanHelper.calculateExecutionPlan(name, engines, 
                 Collections.<String>emptySet(), Collections.<String>emptySet(),
                 chainProperties);
@@ -232,8 +231,8 @@ public class EnhancementPropertyTest {
      */
     protected void initExecutionMetadata(Chain chain) throws ChainException {
         //init the ExecutionMetadata ... this is normally done by the EnhancementJobManager
-        MGraph em = ExecutionMetadataHelper.initExecutionMetadataContentPart(contentItem);
-        Graph ep = chain.getExecutionPlan();
+        Graph em = ExecutionMetadataHelper.initExecutionMetadataContentPart(contentItem);
+        ImmutableGraph ep = chain.getExecutionPlan();
         em.addAll(ep);
         ExecutionMetadataHelper.initExecutionMetadata(em, ep, 
             contentItem.getUri(), chain.getName(), false);
@@ -349,8 +348,8 @@ public class EnhancementPropertyTest {
         Collection<String> derefernceLanguages = Arrays.asList("en","de");
         Integer maxSuggestions = Integer.valueOf(5);
         
-        UriRef maxSuggestionsProperty = new UriRef(NamespaceEnum.ehp + PROPERTY_MAX_SUGGESTIONS);
-        UriRef dereferenceLanguagesProperty = new UriRef(NamespaceEnum.ehp + PROPERTY_DEREFERENCE_LANGUAGES);
+        IRI maxSuggestionsProperty = new IRI(NamespaceEnum.ehp + PROPERTY_MAX_SUGGESTIONS);
+        IRI dereferenceLanguagesProperty = new IRI(NamespaceEnum.ehp + PROPERTY_DEREFERENCE_LANGUAGES);
 
         //set up the map with the enhancement properties we want to set for the
         //Enhancement Chain
@@ -363,25 +362,25 @@ public class EnhancementPropertyTest {
         enhancementProperties.put(linking.getName(), linkingProperties);
         
         //create the ExecutionPlan
-        Graph ep = ExecutionPlanHelper.calculateExecutionPlan("test", engines, 
+        ImmutableGraph ep = ExecutionPlanHelper.calculateExecutionPlan("test", engines, 
             Collections.<String>emptySet(), Collections.<String>emptySet(), 
             enhancementProperties);
         
         //now assert that the enhancement properties where correctly written
         //first the property we set on the chain level
-        NonLiteral epNode = ExecutionPlanHelper.getExecutionPlan(ep, "test");
+        BlankNodeOrIRI epNode = ExecutionPlanHelper.getExecutionPlan(ep, "test");
         assertNotNull(epNode);
         Iterator<Triple> maxSuggestionValues = ep.filter(epNode, maxSuggestionsProperty, null);
         assertTrue(maxSuggestionValues.hasNext());
-        Resource maxSuggestionValue = maxSuggestionValues.next().getObject();
+        RDFTerm maxSuggestionValue = maxSuggestionValues.next().getObject();
         assertFalse(maxSuggestionValues.hasNext());
-        assertTrue(maxSuggestionValue instanceof TypedLiteral);
-        assertEquals(maxSuggestions.toString(), ((TypedLiteral)maxSuggestionValue).getLexicalForm());
+        assertTrue(maxSuggestionValue instanceof Literal);
+        assertEquals(maxSuggestions.toString(), ((Literal)maxSuggestionValue).getLexicalForm());
         assertEquals(maxSuggestions, LiteralFactory.getInstance().createObject(
-            Integer.class, (TypedLiteral)maxSuggestionValue));
+            Integer.class, (Literal)maxSuggestionValue));
         //second the property we set for the linking engine
         boolean found = false;
-        for(NonLiteral ee : ExecutionPlanHelper.getExecutionNodes(ep, epNode)){
+        for(BlankNodeOrIRI ee : ExecutionPlanHelper.getExecutionNodes(ep, epNode)){
             String engineName = ExecutionPlanHelper.getEngine(ep, ee);
             if(linking.getName().equals(engineName)){
                 found = true;
@@ -389,9 +388,9 @@ public class EnhancementPropertyTest {
                 assertTrue(derefLangValues.hasNext());
                 int numValues = 0;
                 while(derefLangValues.hasNext()){
-                    Resource r = derefLangValues.next().getObject();
-                    assertTrue(r instanceof PlainLiteral);
-                    assertTrue(derefernceLanguages.contains(((PlainLiteral)r).getLexicalForm()));
+                    RDFTerm r = derefLangValues.next().getObject();
+                    assertTrue(r instanceof Literal);
+                    assertTrue(derefernceLanguages.contains(((Literal)r).getLexicalForm()));
                     numValues++;
                 }
                 assertEquals(derefernceLanguages.size(), numValues);

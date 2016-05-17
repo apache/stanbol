@@ -16,7 +16,7 @@
 */
 package org.apache.stanbol.enhancer.nlp.morpho;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 
 public enum Definitness {
     /**
@@ -38,13 +38,13 @@ public enum Definitness {
      */
     Indefinite;
     static final String OLIA_NAMESPACE = "http://purl.org/olia/olia.owl#";
-    UriRef uri;
+    IRI uri;
 
     Definitness() {
-        uri = new UriRef(OLIA_NAMESPACE + name());
+        uri = new IRI(OLIA_NAMESPACE + name());
     }
 
-    public UriRef getUri() {
+    public IRI getUri() {
         return uri;
     }
 

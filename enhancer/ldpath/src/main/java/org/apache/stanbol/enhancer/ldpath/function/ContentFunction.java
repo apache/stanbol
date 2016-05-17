@@ -26,8 +26,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.commons.io.IOUtils;
 import org.apache.marmotta.ldpath.api.backend.RDFBackend;
 import org.apache.marmotta.ldpath.util.Collections;
@@ -55,15 +55,15 @@ public class ContentFunction extends ContentItemFunction {
     }
     
     @Override
-    public Collection<Resource> apply(ContentItemBackend backend, Resource context, Collection<Resource>... args) throws IllegalArgumentException {
+    public Collection<RDFTerm> apply(ContentItemBackend backend, RDFTerm context, Collection<RDFTerm>... args) throws IllegalArgumentException {
         ContentItem ci = backend.getContentItem();
         Set<String> mimeTypes;
         if(args == null || args.length < 1){
             mimeTypes = null;
         } else {
             mimeTypes = new HashSet<String>();
-            for(Iterator<Resource> params = Collections.concat(args).iterator();params.hasNext();){
-                Resource param = params.next();
+            for(Iterator<RDFTerm> params = Collections.concat(args).iterator();params.hasNext();){
+                RDFTerm param = params.next();
                 String mediaTypeString = backend.stringValue(param);
                 try {
                     mimeTypes.add(parseMimeType(mediaTypeString).get(null));
@@ -73,12 +73,12 @@ public class ContentFunction extends ContentItemFunction {
                 }
             }
         }
-        Collection<Resource> result;
+        Collection<RDFTerm> result;
         Blob blob;
         if(mimeTypes == null || mimeTypes.isEmpty()){
             blob = ci.getBlob();
         } else {
-            Entry<UriRef,Blob> entry = ContentItemHelper.getBlob(ci, mimeTypes);
+            Entry<IRI,Blob> entry = ContentItemHelper.getBlob(ci, mimeTypes);
             blob = entry != null ? entry.getValue() : null;
         }
         if(blob == null){
@@ -92,7 +92,7 @@ public class ContentFunction extends ContentItemFunction {
                 } else { //binary content
                     byte[] data = IOUtils.toByteArray(blob.getStream());
                     result = java.util.Collections.singleton(
-                        (Resource)lf.createTypedLiteral(data));
+                        (RDFTerm)lf.createTypedLiteral(data));
                 }
             } catch (IOException e) {
                 throw new IllegalStateException("Unable to read contents from Blob '"

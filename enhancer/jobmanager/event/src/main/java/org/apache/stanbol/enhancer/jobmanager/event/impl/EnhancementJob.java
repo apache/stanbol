@@ -43,10 +43,10 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.commons.collections.BidiMap;
 import org.apache.commons.collections.bidimap.DualHashBidiMap;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
@@ -88,13 +88,13 @@ public class EnhancementJob {
     /**
      * The read only executionPlan
      */
-    private final Graph executionPlan;
+    private final ImmutableGraph executionPlan;
     /**
      * The read/write able execution metadata. Also accessible via
-     * {@link ContentItem#getPart(UriRef, Class)} with the URI
+     * {@link ContentItem#getPart(IRI, Class)} with the URI
      * {@link ExecutionMetadata#CHAIN_EXECUTION}
      */
-    private final MGraph executionMetadata;
+    private final Graph executionMetadata;
     /**
      * Map with the em:Execution nodes of the em:ChainExecution for this
      * ContentItem. Values are are ep:ExecutionNodes of the ep:ExecutionPlan
@@ -103,11 +103,11 @@ public class EnhancementJob {
     /**
      * The em:ChainExecution for this {@link ContentItem}
      */
-    private final NonLiteral chainExecutionNode;
+    private final BlankNodeOrIRI chainExecutionNode;
     /**
      * The ep:ExecutionPlan for this {@link ContentItem}
      */
-    private final NonLiteral executionPlanNode;
+    private final BlankNodeOrIRI executionPlanNode;
     /**
      * The name of the {@link Chain} used to enhance this {@link ContentItem}.
      */
@@ -121,32 +121,32 @@ public class EnhancementJob {
      * The completed ep:ExecutionPlan nodes. <p>
      * NOTE: This contains ep:ExecutionNodes and NOT em:Exetution instances!
      */
-    private final Set<NonLiteral> completed = new HashSet<NonLiteral>();
+    private final Set<BlankNodeOrIRI> completed = new HashSet<BlankNodeOrIRI>();
     /**
      * Unmodifiable and final set of completed executables. Replaced by a new
      * instance every time {@link #completed} changes
      */
-    private Set<NonLiteral> completedExec = Collections.emptySet();
+    private Set<BlankNodeOrIRI> completedExec = Collections.emptySet();
     /**
      * The running ep:ExecutionPlan nodes <p>
      * NOTE: This contains ep:ExecutionNodes and NOT em:Exetution instances!
      */
-    private final Set<NonLiteral> running = new HashSet<NonLiteral>();
+    private final Set<BlankNodeOrIRI> running = new HashSet<BlankNodeOrIRI>();
     /**
      * Unmodifiable and final set of running executables. Replaced by a new
      * instance every time {@link #running} changes.
      */
-    private Set<NonLiteral> runningExec = Collections.emptySet();
+    private Set<BlankNodeOrIRI> runningExec = Collections.emptySet();
 
     /**
      * Unmodifiable and final set of executable em:Execution nodes. 
      * Replaced by a new instance every time {@link #running} or 
      * {@link #completed} changes.
      */
-    private Set<NonLiteral> executable;
+    private Set<BlankNodeOrIRI> executable;
     /**
      * Used to store any {@link Exception} parsed with the call to
-     * {@link #setFailed(NonLiteral, EnhancementEngine, Exception)} causing the
+     * {@link #setFailed(BlankNodeOrIRI, EnhancementEngine, Exception)} causing the
      * enhancement process to fail. This Exception is typically re-thrown by the
      * {@link EnhancementJobManager#enhanceContent(ContentItem, Chain)} method.
      * @see #getError()
@@ -162,7 +162,7 @@ public class EnhancementJob {
      * @param executionPlan
      * @param isDefaultChain
      */
-    public EnhancementJob(ContentItem contentItem, String chainName, Graph executionPlan, boolean isDefaultChain) {
+    public EnhancementJob(ContentItem contentItem, String chainName, ImmutableGraph executionPlan, boolean isDefaultChain) {
         if (contentItem == null || chainName == null || executionPlan == null) {
             throw new IllegalArgumentException("The parsed contentItem and executionPlan MUST NOT be NULL");
         }
@@ -191,7 +191,7 @@ public class EnhancementJob {
      * Creates an EnhancemenJob based on already existing execution metadata present
      * for a ContentItem.
      * @param contentItem the ContentItem with an already existing content part
-     * containing an {@link MGraph} with all required execution metadata and the 
+     * containing an {@link Graph} with all required execution metadata and the 
      * execution plan.
      * @throws IllegalArgumentException if the parsed {@link ContentItem} does
      * not provide the required data to (re)initialise the EnhancementJob.
@@ -204,13 +204,13 @@ public class EnhancementJob {
         this.readLock = contentItem.getLock().readLock();
         this.writeLock = contentItem.getLock().writeLock();
         try {
-            contentItem.getPart(ExecutionMetadata.CHAIN_EXECUTION, MGraph.class);
+            contentItem.getPart(ExecutionMetadata.CHAIN_EXECUTION, Graph.class);
         } catch (NoSuchPartException e) {
             throw new IllegalArgumentException("Cannot (re)initialise an EnhancementJob" +
                     "without existing execution metadata content part!",e);
         }
         executionMetadata = initExecutionMetadataContentPart(contentItem);
-        this.executionPlan = executionMetadata.getGraph();
+        this.executionPlan = executionMetadata.getImmutableGraph();
         chainExecutionNode = getChainExecution(executionMetadata, contentItem.getUri());
         if(chainExecutionNode == null){
             throw new IllegalArgumentException("Cannot (re)initialise an EnhancementJob" +
@@ -231,10 +231,10 @@ public class EnhancementJob {
                     "enhance  ContentItem '"+contentItem.getUri()+"'!");
         }
         //the executionPlan is part of the execution metadata
-        Map<NonLiteral,NonLiteral> executionsMap = initExecutionMetadata(executionMetadata, 
+        Map<BlankNodeOrIRI,BlankNodeOrIRI> executionsMap = initExecutionMetadata(executionMetadata, 
             executionPlan, contentItem.getUri(), null, null);
-        for(Entry<NonLiteral,NonLiteral> executionEntry : executionsMap.entrySet()){
-            UriRef status = getReference(executionMetadata, executionEntry.getKey(), STATUS);
+        for(Entry<BlankNodeOrIRI,BlankNodeOrIRI> executionEntry : executionsMap.entrySet()){
+            IRI status = getReference(executionMetadata, executionEntry.getKey(), STATUS);
             if(status == null){
                 throw new IllegalArgumentException("The ex:Execution '"
                         + executionEntry.getKey()+"' of the ex:ChainExecution for ContentItme '"
@@ -260,8 +260,8 @@ public class EnhancementJob {
      * @throws IllegalArgumentException if the parsed em:Execution is not
      * part of the execution metadata of this enhancement job
      */
-    public NonLiteral getExecutionNode(NonLiteral execution){
-        NonLiteral node = (NonLiteral)executionsMap.get(execution);
+    public BlankNodeOrIRI getExecutionNode(BlankNodeOrIRI execution){
+        BlankNodeOrIRI node = (BlankNodeOrIRI)executionsMap.get(execution);
         if(node == null){
             throw new IllegalArgumentException("Unknown sp:ExecutionNode instance "+node);
         }
@@ -273,8 +273,8 @@ public class EnhancementJob {
      * @throws IllegalArgumentException if the parsed ep:ExecutionNode is not
      * part of the execution plan of this enhancement job
      */
-    public NonLiteral getExecution(NonLiteral executionNode){
-        NonLiteral execution = (NonLiteral)executionsMap.getKey(executionNode);
+    public BlankNodeOrIRI getExecution(BlankNodeOrIRI executionNode){
+        BlankNodeOrIRI execution = (BlankNodeOrIRI)executionsMap.getKey(executionNode);
         if(execution == null){
             throw new IllegalArgumentException("Unknown em:Execution instance "+executionNode);
         }
@@ -286,7 +286,7 @@ public class EnhancementJob {
      * 
      * @return the executionPlan
      */
-    public final Graph getExecutionPlan() {
+    public final ImmutableGraph getExecutionPlan() {
         return executionPlan;
     }
 
@@ -329,7 +329,7 @@ public class EnhancementJob {
      * 
      * @return the currently running executions.
      */
-    public Set<NonLiteral> getRunning() {
+    public Set<BlankNodeOrIRI> getRunning() {
         log.trace("++ r: {}","getRunning");
         readLock.lock();
         try {
@@ -346,7 +346,7 @@ public class EnhancementJob {
      * 
      * @return the completed execution nodes
      */
-    public Set<NonLiteral> getCompleted() {
+    public Set<BlankNodeOrIRI> getCompleted() {
         log.trace("++ r: {}","getCompleted");
         readLock.lock();
         try {
@@ -371,12 +371,12 @@ public class EnhancementJob {
      *             if the parsed execution node can not be marked as completed because some of its
      *             depended nodes are not yet marked as completed.
      */
-    public void setCompleted(NonLiteral execution) {
+    public void setCompleted(BlankNodeOrIRI execution) {
         if(execution == null) {
             throw new IllegalArgumentException("The parsed em:Execution instance MUST NOT be NULL!");
         }
         writeLock.lock();
-        NonLiteral executionNode = getExecutionNode(execution);
+        BlankNodeOrIRI executionNode = getExecutionNode(execution);
         log.trace("++ w: {}: {}","setCompleted",getEngine(executionPlan, executionNode));
         try {
             log.trace(">> w: {}: {}","setCompleted",getEngine(executionPlan, executionNode));
@@ -390,16 +390,16 @@ public class EnhancementJob {
     /**
      * Internally used to update the state kept in {@link #completed} and
      * {@link #running} and {@link #executable} after an execution was set to
-     * {@link #setCompleted(NonLiteral) completed} or 
-     * {@link #setFailed(NonLiteral, EnhancementEngine, Exception) failed}.<p>
+     * {@link #setCompleted(BlankNodeOrIRI) completed} or 
+     * {@link #setFailed(BlankNodeOrIRI, EnhancementEngine, Exception) failed}.<p>
      * This method expects to be called within an active {@link #writeLock}.
      * @param executionNode the ep:ExecutionNode linked to the em:Execution that
      * finished. 
      */
-    private void setNodeCompleted(NonLiteral executionNode) {
+    private void setNodeCompleted(BlankNodeOrIRI executionNode) {
         String engine = getEngine(executionPlan, executionNode);
         boolean optional = isOptional(executionPlan, executionNode);
-        Set<NonLiteral> dependsOn = getDependend(executionPlan, executionNode);
+        Set<BlankNodeOrIRI> dependsOn = getDependend(executionPlan, executionNode);
         if (completed.contains(executionNode)) {
             log.warn("Execution of Engine '{}' for ContentItem {} already "
                      + "marked as completed(chain: {}, node: {}, optional {})."
@@ -447,14 +447,14 @@ public class EnhancementJob {
      *             if the parsed execution node can not be marked as running because some of its depended
      *             nodes are not yet marked as completed.
      */
-    public void setRunning(NonLiteral execution) {
+    public void setRunning(BlankNodeOrIRI execution) {
         if(execution == null) {
             throw new IllegalArgumentException("The parsed em:Execution instance MUST NOT be NULL!");
         }
-        NonLiteral executionNode = getExecutionNode(execution);
+        BlankNodeOrIRI executionNode = getExecutionNode(execution);
         String engine = getEngine(executionPlan, executionNode);
         boolean optional = isOptional(executionPlan, executionNode);
-        Set<NonLiteral> dependsOn = getDependend(executionPlan, executionNode);
+        Set<BlankNodeOrIRI> dependsOn = getDependend(executionPlan, executionNode);
         log.trace("++ w: {}: {}","setRunning",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
         writeLock.lock();
         try {
@@ -510,8 +510,8 @@ public class EnhancementJob {
      * updates the {@link #runningExec} based on {@link #running}
      */
     private void updateRunningExec() {
-        Set<NonLiteral> runningExec = new HashSet<NonLiteral>(running.size());
-        for(NonLiteral node : running){
+        Set<BlankNodeOrIRI> runningExec = new HashSet<BlankNodeOrIRI>(running.size());
+        for(BlankNodeOrIRI node : running){
             runningExec.add(getExecution(node));
         }
         this.runningExec = Collections.unmodifiableSet(runningExec);
@@ -520,8 +520,8 @@ public class EnhancementJob {
      * updates the {@link #runningExec} based on {@link #running}
      */
     private void updateCompletedExec() {
-        Set<NonLiteral> completedExec = new HashSet<NonLiteral>(completed.size());
-        for(NonLiteral node : completed){
+        Set<BlankNodeOrIRI> completedExec = new HashSet<BlankNodeOrIRI>(completed.size());
+        for(BlankNodeOrIRI node : completed){
             completedExec.add(getExecution(node));
         }
         this.completedExec = Collections.unmodifiableSet(completedExec);
@@ -531,7 +531,7 @@ public class EnhancementJob {
      * Assumed to be called within a write lock!
      */
     private void checkExecutable(){
-        Set<NonLiteral> executeableNodes = 
+        Set<BlankNodeOrIRI> executeableNodes = 
                 ExecutionPlanHelper.getExecutable(executionPlan, completed);
         //a Chain finishes if no engine is running and no more nodes are executable
         if(!ExecutionMetadata.STATUS_FAILED.equals(
@@ -539,7 +539,7 @@ public class EnhancementJob {
             executeableNodes.removeAll(running);
             if(log.isDebugEnabled()){
                 Collection<String> engines = new ArrayList<String>(executeableNodes.size());
-                for(NonLiteral node : executeableNodes){
+                for(BlankNodeOrIRI node : executeableNodes){
                     engines.add(getEngine(executionPlan, node));
                 }
                 log.trace("MARK {} as executeable",engines);
@@ -550,8 +550,8 @@ public class EnhancementJob {
             } else if( executeableNodes.size() == 1){
                 this.executable = Collections.singleton(getExecution(executeableNodes.iterator().next()));
             } else {
-                Set<NonLiteral> executable = new HashSet<NonLiteral>(executeableNodes.size());
-                for(NonLiteral exeutableNode : executeableNodes){
+                Set<BlankNodeOrIRI> executable = new HashSet<BlankNodeOrIRI>(executeableNodes.size());
+                for(BlankNodeOrIRI exeutableNode : executeableNodes){
                     executable.add(getExecution(exeutableNode));
                 }
                 this.executable = Collections.unmodifiableSet(executable);
@@ -570,7 +570,7 @@ public class EnhancementJob {
      * @return the nodes that can be executed next based on the completed and
      * currently running engines.
      */
-    public Set<NonLiteral> getExecutable(){
+    public Set<BlankNodeOrIRI> getExecutable(){
         log.trace("++ r: {}","getExecutable");
         readLock.lock();
         log.trace(">> r: {}","getExecutable");
@@ -598,11 +598,11 @@ public class EnhancementJob {
         }
     }
 
-    public void setFailed(NonLiteral execution, EnhancementEngine engine, Exception exception) {
+    public void setFailed(BlankNodeOrIRI execution, EnhancementEngine engine, Exception exception) {
         if(execution == null) {
             throw new IllegalArgumentException("The parsed em:Execution instance MUST NOT be NULL!");
         }
-        NonLiteral executionNode = getExecutionNode(execution);
+        BlankNodeOrIRI executionNode = getExecutionNode(execution);
         final boolean optional = isOptional(executionPlan, executionNode);
         final String engineName = getEngine(executionPlan, executionNode);
         log.trace("++ w: {}: {}","setFailed",ExecutionPlanHelper.getEngine(executionPlan, executionNode));
@@ -696,7 +696,7 @@ public class EnhancementJob {
      * Getter for the ExecutionMetadata.
      * @return the execution metadata.
      */
-    public MGraph getExecutionMetadata() {
+    public Graph getExecutionMetadata() {
         return executionMetadata;
     }
     /**

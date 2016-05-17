@@ -96,7 +96,7 @@
 
   <build>
     <plugins>
-      <!-- requires Java 6 -->
+      <!-- requires Java 8 -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
@@ -109,8 +109,8 @@
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <message>Java 6 or higher is required to compile this module</message>
-                  <version>1.6</version>
+                  <message>Java 8 or higher is required to compile this module</message>
+                  <version>1.8</version>
                 </requireJavaVersion>
               </rules>
             </configuration>
@@ -646,12 +646,12 @@
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.core</artifactId>
-        <version>0.14</version>
+        <version>1.0.1</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.utils</artifactId>
-        <version>0.14</version>
+        <version>1.0.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
@@ -661,72 +661,72 @@
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.metadata</artifactId>
-        <version>0.2</version>
+        <version>1.0.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.ontologies</artifactId>
-        <version>0.12</version>
+        <version>1.0.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.serializer</artifactId>
-        <version>0.11</version>
+        <version>1.1.1</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.parser</artifactId>
-        <version>0.12</version>
+        <version>1.1.1</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.sparql</artifactId>
-        <version>0.7</version>
+        <version>1.1.1</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.rdfjson</artifactId>
-        <version>0.4</version>
+        <version>1.0.1</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>platform.content</artifactId>
-        <version>0.14</version>
+        <version>1.0.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>platform.graphprovider.content</artifactId>
-        <version>0.7</version>
+        <version>1.0.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>platform.typerendering.scalaserverpages</artifactId>
-        <version>0.4</version>
+        <version>1.0.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>jaxrs.rdf.providers</artifactId>
-        <version>0.15</version>
+        <version>1.0.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.simple.storage</artifactId>
-        <version>0.8</version>
+        <version>1.0.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.jena.facade</artifactId>
-        <version>0.14</version>
+        <version>1.1.1</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>platform.config</artifactId>
-        <version>0.4</version>
+        <version>1.0.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>
         <artifactId>rdf.core.test</artifactId>
-        <version>0.15</version>
+        <version>1.0.0</version>
         <scope>test</scope>
       </dependency>
 

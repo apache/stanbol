@@ -16,21 +16,21 @@
  */
 package org.apache.stanbol.entityhub.model.clerezza;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 
 public class RdfReference implements Reference,Cloneable {
-    private final UriRef uri;
+    private final IRI uri;
     protected RdfReference(String reference){
         if(reference == null){
             throw new IllegalArgumentException("The parsed Reference MUST NOT be NULL!");
         } else if(reference.isEmpty()){
             throw new IllegalArgumentException("The parsed Reference MUST NOT be Empty!");
         } else {
-            this.uri = new UriRef(reference);
+            this.uri = new IRI(reference);
         }
     }
-    protected RdfReference(UriRef uri){
+    protected RdfReference(IRI uri){
         if(uri == null){
             throw new IllegalArgumentException("The parsed Reference MUST NOT be NULL!");
         } else if(uri.getUnicodeString().isEmpty()){
@@ -43,12 +43,12 @@ public class RdfReference implements Reference,Cloneable {
     public String getReference() {
         return uri.getUnicodeString();
     }
-    public UriRef getUriRef(){
+    public IRI getIRI(){
         return uri;
     }
     @Override
     protected Object clone() throws CloneNotSupportedException {
-        return new RdfReference(new UriRef(uri.getUnicodeString()));
+        return new RdfReference(new IRI(uri.getUnicodeString()));
     }
     @Override
     public int hashCode() {

@@ -71,7 +71,7 @@ public class ClasspathDataFileProvider implements DataFileProvider {
         final String resourcePath = RESOURCE_BASE_PATH + filename;
         //final InputStream in = getClass().getClassLoader().getResourceAsStream(resourcePath);
         URL dataFile = getClass().getClassLoader().getResource(resourcePath);
-        //log.debug("Resource {} found: {}", (dataFile == null ? "NOT" : ""), resourcePath);
+        //log.debug("RDFTerm {} found: {}", (dataFile == null ? "NOT" : ""), resourcePath);
         return dataFile;
     }
     @Override

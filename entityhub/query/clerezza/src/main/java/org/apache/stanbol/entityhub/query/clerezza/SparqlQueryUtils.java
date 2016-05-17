@@ -18,8 +18,8 @@ package org.apache.stanbol.entityhub.query.clerezza;
 
 import java.util.Iterator;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.query.sparql.SparqlEndpointTypeEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
@@ -39,19 +39,19 @@ public final class SparqlQueryUtils {
     private SparqlQueryUtils() {}
 
     /**
-     * {@link UriRef} constant for {@link RdfResourceEnum#queryResult}
+     * {@link IRI} constant for {@link RdfResourceEnum#queryResult}
      * 
      * @see ClerezzaQueryUtils#FIELD_QUERY_RESULT
      */
     @Deprecated
-    public static final UriRef FIELD_QUERY_RESULT = ClerezzaQueryUtils.FIELD_QUERY_RESULT;
+    public static final IRI FIELD_QUERY_RESULT = ClerezzaQueryUtils.FIELD_QUERY_RESULT;
     /**
-     * {@link UriRef} constant for {@link RdfResourceEnum#QueryResultSet}
+     * {@link IRI} constant for {@link RdfResourceEnum#QueryResultSet}
      * 
      * @see ClerezzaQueryUtils#FIELD_QUERY_RESULT_SET
      */
     @Deprecated
-    public static final UriRef FIELD_QUERY_RESULT_SET = new UriRef(RdfResourceEnum.QueryResultSet.getUri());
+    public static final IRI FIELD_QUERY_RESULT_SET = new IRI(RdfResourceEnum.QueryResultSet.getUri());
 
     /**
      * Use {@link org.apache.stanbol.entityhub.query.sparql.SparqlQueryUtils}
@@ -246,11 +246,11 @@ public final class SparqlQueryUtils {
      * @param query
      * @param resultGraph
      * @return
-     * @see ClerezzaQueryUtils#parseQueryResultsFromMGraph(TripleCollection)
+     * @see ClerezzaQueryUtils#parseQueryResultsFromGraph(Graph)
      */
     @Deprecated
-    public static Iterator<RdfRepresentation> parseQueryResultsFromMGraph(final TripleCollection resultGraph) {
-        return ClerezzaQueryUtils.parseQueryResultsFromMGraph(resultGraph);
+    public static Iterator<RdfRepresentation> parseQueryResultsFromGraph(final Graph resultGraph) {
+        return ClerezzaQueryUtils.parseQueryResultsFromGraph(resultGraph);
     }
 
 }

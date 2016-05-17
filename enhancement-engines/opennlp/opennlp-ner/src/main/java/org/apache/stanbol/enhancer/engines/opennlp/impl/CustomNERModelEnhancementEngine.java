@@ -32,7 +32,7 @@ import java.util.Set;
 
 import opennlp.tools.namefind.TokenNameFinderModel;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Property;
@@ -175,7 +175,7 @@ public class CustomNERModelEnhancementEngine
                             dcTypeUri,o);
                         continue configs;
                     }
-                    this.config.setMappedType(namedEntityType,new UriRef(dcTypeUri));
+                    this.config.setMappedType(namedEntityType,new IRI(dcTypeUri));
                     log.info("  add mapping {} > {}",namedEntityType,dcTypeUri);
                 }
             }

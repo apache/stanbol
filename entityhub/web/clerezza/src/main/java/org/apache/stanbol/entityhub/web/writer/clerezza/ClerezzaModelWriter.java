@@ -11,13 +11,13 @@ import java.util.List;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 
+
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.ontologies.RDF;
@@ -25,7 +25,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
@@ -82,24 +82,24 @@ public class ClerezzaModelWriter implements ModelWriter {
         Arrays.asList(TURTLE_TYPE, JSONLD_TYPE, N3_TYPE, N_TRIPLE_TYPE, RDF_JSON_TYPE, RDF_XML_TYPE, X_TURTLE_TYPE));
 
     //some Concepts and Relations we use to represent Entities
-    private final static UriRef FOAF_DOCUMENT = new UriRef(NamespaceEnum.foaf+"Document");
-    private final static UriRef FOAF_PRIMARY_TOPIC = new UriRef(NamespaceEnum.foaf+"primaryTopic");
-    private final static UriRef FOAF_PRIMARY_TOPIC_OF = new UriRef(NamespaceEnum.foaf+"isPrimaryTopicOf");
-    private final static UriRef SIGN_SITE = new UriRef(RdfResourceEnum.site.getUri());
-//    private final static UriRef ENTITY_TYPE = new UriRef(RdfResourceEnum.Entity.getUri());
+    private final static IRI FOAF_DOCUMENT = new IRI(NamespaceEnum.foaf+"Document");
+    private final static IRI FOAF_PRIMARY_TOPIC = new IRI(NamespaceEnum.foaf+"primaryTopic");
+    private final static IRI FOAF_PRIMARY_TOPIC_OF = new IRI(NamespaceEnum.foaf+"isPrimaryTopicOf");
+    private final static IRI SIGN_SITE = new IRI(RdfResourceEnum.site.getUri());
+//    private final static IRI ENTITY_TYPE = new IRI(RdfResourceEnum.Entity.getUri());
     private final static RdfValueFactory valueFactory = RdfValueFactory.getInstance();
     /**
      * The URI used for the query result list (static for all responses)
      */
-    private static final UriRef QUERY_RESULT_LIST = new UriRef(RdfResourceEnum.QueryResultSet.getUri());
+    private static final IRI QUERY_RESULT_LIST = new IRI(RdfResourceEnum.QueryResultSet.getUri());
     /**
      * The property used for all results
      */
-    private static final UriRef QUERY_RESULT = new UriRef(RdfResourceEnum.queryResult.getUri());
+    private static final IRI QUERY_RESULT = new IRI(RdfResourceEnum.queryResult.getUri());
     /**
      * The property used for the JSON serialised FieldQuery (STANBOL-298)
      */
-    private static final UriRef FIELD_QUERY = new UriRef(RdfResourceEnum.query.getUri());
+    private static final IRI FIELD_QUERY = new IRI(RdfResourceEnum.query.getUri());
 
     /**
      * This Serializer only supports UTF-8
@@ -158,7 +158,7 @@ public class ClerezzaModelWriter implements ModelWriter {
     @Override
     public void write(QueryResultList<?> result, OutputStream out, MediaType mediaType) throws WebApplicationException,
             IOException {
-        MGraph queryRdf = toRDF(result);
+        Graph queryRdf = toRDF(result);
         //we need also to the JSON formatted FieldQuery as a literal to the
         //RDF data.
         FieldQuery query = result.getQuery();
@@ -186,7 +186,7 @@ public class ClerezzaModelWriter implements ModelWriter {
      * @param out
      * @param mediaType
      */
-    private void writeRdf(TripleCollection tc, OutputStream out, MediaType mediaType) {
+    private void writeRdf(Graph tc, OutputStream out, MediaType mediaType) {
         String charset = mediaType.getParameters().get("charset");
         if(charset == null){
             charset = ModelWriter.DEFAULT_CHARSET;
@@ -198,23 +198,23 @@ public class ClerezzaModelWriter implements ModelWriter {
             .append('/').append(mediaType.getSubtype()).toString());
     }
 
-    private MGraph toRDF(Representation representation) {
-        MGraph graph = new IndexedMGraph();
+    private Graph toRDF(Representation representation) {
+        Graph graph = new IndexedGraph();
         addRDFTo(graph, representation);
         return graph;
     }
 
-    private void addRDFTo(MGraph graph, Representation representation) {
+    private void addRDFTo(Graph graph, Representation representation) {
         graph.addAll(valueFactory.toRdfRepresentation(representation).getRdfGraph());
     }
 
-    private TripleCollection toRDF(Entity entity) {
-        MGraph graph = new IndexedMGraph();
+    private Graph toRDF(Entity entity) {
+        Graph graph = new IndexedGraph();
         addRDFTo(graph, entity);
         return graph;
     }
 
-    private void addRDFTo(MGraph graph, Entity entity) {
+    private void addRDFTo(Graph graph, Entity entity) {
         addRDFTo(graph, entity.getRepresentation());
         addRDFTo(graph, entity.getMetadata());
         //now add some triples that represent the Sign
@@ -230,28 +230,28 @@ public class ClerezzaModelWriter implements ModelWriter {
      * @param graph the graph to add the triples
      * @param sign the sign
      */
-    private void addEntityTriplesToGraph(MGraph graph, Entity sign) {
-        UriRef id = new UriRef(sign.getId());
-        UriRef metaId = new UriRef(sign.getMetadata().getId());
+    private void addEntityTriplesToGraph(Graph graph, Entity sign) {
+        IRI id = new IRI(sign.getId());
+        IRI metaId = new IRI(sign.getMetadata().getId());
         //add the FOAF triples between metadata and content
         graph.add(new TripleImpl(id, FOAF_PRIMARY_TOPIC_OF, metaId));
         graph.add(new TripleImpl(metaId, FOAF_PRIMARY_TOPIC, metaId));
         graph.add(new TripleImpl(metaId, RDF.type, FOAF_DOCUMENT));
         //add the site to the metadata
         //TODO: this should be the HTTP URI and not the id of the referenced site
-        TypedLiteral siteName = literalFactory.createTypedLiteral(sign.getSite());
+        Literal siteName = literalFactory.createTypedLiteral(sign.getSite());
         graph.add(new TripleImpl(metaId, SIGN_SITE, siteName));
         
     }
     
-    private MGraph toRDF(QueryResultList<?> resultList) {
-        final MGraph resultGraph;
+    private Graph toRDF(QueryResultList<?> resultList) {
+        final Graph resultGraph;
         Class<?> type = resultList.getType();
         if (String.class.isAssignableFrom(type)) {
-            resultGraph = new IndexedMGraph(); //create a new Graph
+            resultGraph = new IndexedGraph(); //create a new ImmutableGraph
             for (Object result : resultList) {
                 //add a triple to each reference in the result set
-                resultGraph.add(new TripleImpl(QUERY_RESULT_LIST, QUERY_RESULT, new UriRef(result.toString())));
+                resultGraph.add(new TripleImpl(QUERY_RESULT_LIST, QUERY_RESULT, new IRI(result.toString())));
             }
         } else {
             //first determine the type of the resultList
@@ -277,22 +277,22 @@ public class ClerezzaModelWriter implements ModelWriter {
                     //now add the Sign specific triples and add result triples
                     //to the Sign IDs
                     for (Object result : resultList) {
-                        UriRef signId = new UriRef(((Entity) result).getId());
+                        IRI signId = new IRI(((Entity) result).getId());
                         addEntityTriplesToGraph(resultGraph, (Entity) result);
                         resultGraph.add(new TripleImpl(QUERY_RESULT_LIST, QUERY_RESULT, signId));
                     }
                 }
             } else { //any other implementation of the QueryResultList interface
-                resultGraph = new IndexedMGraph(); //create a new graph
+                resultGraph = new IndexedGraph(); //create a new graph
                 if (Representation.class.isAssignableFrom(type)) {
                     for (Object result : resultList) {
-                        UriRef resultId;
+                        IRI resultId;
                         if (!isSignType) {
                             addRDFTo(resultGraph, (Representation) result);
-                            resultId = new UriRef(((Representation) result).getId());
+                            resultId = new IRI(((Representation) result).getId());
                         } else {
                             addRDFTo(resultGraph, (Entity) result);
-                            resultId = new UriRef(((Entity) result).getId());
+                            resultId = new IRI(((Entity) result).getId());
                         }
                         //Note: In case of Representation this Triple points to
                         //      the representation. In case of Signs it points to

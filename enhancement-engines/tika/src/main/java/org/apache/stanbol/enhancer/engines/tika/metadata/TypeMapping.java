@@ -16,7 +16,7 @@
 */
 package org.apache.stanbol.enhancer.engines.tika.metadata;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.ontologies.RDF;
 
 /**
@@ -27,9 +27,9 @@ import org.apache.clerezza.rdf.ontologies.RDF;
 public class TypeMapping extends ConstantMapping {
 
     public TypeMapping(String type) {
-        this(new UriRef(type));
+        this(new IRI(type));
     }
-    public TypeMapping(UriRef...types) {
+    public TypeMapping(IRI...types) {
         super(RDF.type, types);
     }
 

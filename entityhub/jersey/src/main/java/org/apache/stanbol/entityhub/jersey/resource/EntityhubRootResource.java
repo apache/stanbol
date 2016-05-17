@@ -68,7 +68,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.marmotta.ldpath.exception.LDPathParseException;
 import org.apache.marmotta.ldpath.model.programs.Program;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.web.viewable.Viewable;
@@ -610,7 +610,7 @@ public class EntityhubRootResource extends BaseStanbolResource {
      */
     private Response executeLDPathQuery(Entityhub entityhub,FieldQuery query, String ldpathProgramString, MediaType mediaType, HttpHeaders headers) {
         QueryResultList<Representation> result;
-        ValueFactory vf = new RdfValueFactory(new IndexedMGraph());
+        ValueFactory vf = new RdfValueFactory(new IndexedGraph());
         EntityhubBackend backend = new EntityhubBackend(entityhub);
         EntityhubLDPath ldPath = new EntityhubLDPath(backend,vf);
         //copy the selected fields, because we might need to delete some during

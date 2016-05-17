@@ -70,7 +70,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.jaxrs.utils.form.FormFile;
 import org.apache.clerezza.jaxrs.utils.form.MultiPartBody;
-import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.felix.scr.annotations.Component;
@@ -165,8 +165,8 @@ public class SessionResource extends AbstractOntologyAccessResource {
         session = sesMgr.getSession(sessionId);
         if (session == null) return Response.status(NOT_FOUND).build();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
-        // Export to Clerezza Graph, which can be rendered as JSON-LD.
-        ResponseBuilder rb = Response.ok(session.export(Graph.class, merge, prefix));
+        // Export to Clerezza ImmutableGraph, which can be rendered as JSON-LD.
+        ResponseBuilder rb = Response.ok(session.export(ImmutableGraph.class, merge, prefix));
 //        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
@@ -182,7 +182,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
         ResponseBuilder rb;
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
         // Export smaller graphs to OWLOntology due to the more human-readable rendering.
-        if (merge) rb = Response.ok(session.export(Graph.class, merge, prefix));
+        if (merge) rb = Response.ok(session.export(ImmutableGraph.class, merge, prefix));
         else rb = Response.ok(session.export(OWLOntology.class, merge, prefix));
 //        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
@@ -375,7 +375,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
         session = sesMgr.getSession(sessionId);
         if (session == null) return Response.status(NOT_FOUND).build();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
-        Graph o = session.getOntology(OntologyUtils.decode(ontologyId), Graph.class, merge, prefix);
+        ImmutableGraph o = session.getOntology(OntologyUtils.decode(ontologyId), ImmutableGraph.class, merge, prefix);
         ResponseBuilder rb = (o != null) ? Response.ok(o) : Response.status(NOT_FOUND);
 //        addCORSOrigin(servletContext, rb, headers);
         return rb.build();
@@ -409,7 +409,7 @@ public class SessionResource extends AbstractOntologyAccessResource {
             IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/session/");
             OWLOntologyID id = OntologyUtils.decode(ontologyId);
             if (merge) {
-                Graph g = session.getOntology(id, Graph.class, merge, prefix);
+                ImmutableGraph g = session.getOntology(id, ImmutableGraph.class, merge, prefix);
                 rb = (g != null) ? Response.ok(g) : Response.status(NOT_FOUND);
             } else {
                 OWLOntology o = session.getOntology(id, OWLOntology.class, merge, prefix);

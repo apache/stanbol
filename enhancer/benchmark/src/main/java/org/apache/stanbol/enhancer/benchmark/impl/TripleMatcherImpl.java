@@ -18,15 +18,15 @@ package org.apache.stanbol.enhancer.benchmark.impl;
 
 import java.io.IOException;
 
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.benchmark.TripleMatcher;
 
 class TripleMatcherImpl implements TripleMatcher {
 
     private final String operator;
-    private final UriRef predicateUri;
-    private final UriRef objectUri;
+    private final IRI predicateUri;
+    private final IRI objectUri;
     
     /** Build from a line supplied by the parser.
      *  Format is PREDICATE_URI OPERATOR ARGUMENTS, 
@@ -37,11 +37,11 @@ class TripleMatcherImpl implements TripleMatcher {
             throw new IOException("Invalid TripleMatcher format in line [" + line + "]");
         }
         
-        predicateUri = new UriRef(parts[0]);
+        predicateUri = new IRI(parts[0]);
         
         operator = parts[1];
         if("URI".equals(operator)) {
-            objectUri = new UriRef(parts[2]);
+            objectUri = new IRI(parts[2]);
         } else {
             // TODO support other operators
             objectUri = null;

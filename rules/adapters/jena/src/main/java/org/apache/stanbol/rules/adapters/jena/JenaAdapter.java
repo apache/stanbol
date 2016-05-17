@@ -28,7 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.sparql.ResultSet;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -306,7 +306,7 @@ public class JenaAdapter extends AbstractRuleAdapter {
         try {
             KB kb = RuleParserImpl.parse("http://sssw.org/2012/rules/", new FileInputStream("/Users/mac/Documents/CNR/SSSW2012/rules/exercise1"));
             System.out.println("Rules: " + kb.getRuleList().size());
-            Recipe recipe = new RecipeImpl(new UriRef("http://sssw.org/2012/rules/"), "Recipe", kb.getRuleList());
+            Recipe recipe = new RecipeImpl(new IRI("http://sssw.org/2012/rules/"), "Recipe", kb.getRuleList());
             
             List<com.hp.hpl.jena.reasoner.rulesys.Rule> jenaRules = (List<com.hp.hpl.jena.reasoner.rulesys.Rule>) ruleAdapter.adaptTo(recipe, com.hp.hpl.jena.reasoner.rulesys.Rule.class);
             

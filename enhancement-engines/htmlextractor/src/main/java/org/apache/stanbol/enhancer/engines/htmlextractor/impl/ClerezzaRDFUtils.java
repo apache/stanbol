@@ -23,14 +23,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.BNode;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.BlankNode;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,30 +50,30 @@ public final class ClerezzaRDFUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClerezzaRDFUtils.class);
     
-    public static void urifyBlankNodes(MGraph model) {
-        HashMap<BNode,UriRef> blankNodeMap = new HashMap<BNode,UriRef>();
-        MGraph remove = new SimpleMGraph();
-        MGraph add = new SimpleMGraph();
+    public static void urifyBlankNodes(Graph model) {
+        HashMap<BlankNode,IRI> blankNodeMap = new HashMap<BlankNode,IRI>();
+        Graph remove = new SimpleGraph();
+        Graph add = new SimpleGraph();
         for (Triple t: model) {
-            NonLiteral subj = t.getSubject();
-            Resource obj = t.getObject();
-            UriRef pred = t.getPredicate();
+            BlankNodeOrIRI subj = t.getSubject();
+            RDFTerm obj = t.getObject();
+            IRI pred = t.getPredicate();
             boolean match = false;
-            if (subj instanceof BNode) {
+            if (subj instanceof BlankNode) {
                 match = true;
-                UriRef ru = blankNodeMap.get(subj);
+                IRI ru = blankNodeMap.get(subj);
                 if (ru == null) {
                     ru = createRandomUri();
-                    blankNodeMap.put((BNode)subj, ru);
+                    blankNodeMap.put((BlankNode)subj, ru);
                 }
                 subj = ru;
             }
-            if (obj instanceof BNode)  {
+            if (obj instanceof BlankNode)  {
                 match = true;
-                UriRef ru = blankNodeMap.get(obj);
+                IRI ru = blankNodeMap.get(obj);
                 if (ru == null) {
                     ru = createRandomUri();
-                    blankNodeMap.put((BNode)obj, ru);
+                    blankNodeMap.put((BlankNode)obj, ru);
                 }
                 obj = ru;
             }
@@ -86,31 +86,31 @@ public final class ClerezzaRDFUtils {
         model.addAll(add);
     }
     
-    public static UriRef createRandomUri() {
-        return new UriRef("urn:rnd:"+randomUUID());
+    public static IRI createRandomUri() {
+        return new IRI("urn:rnd:"+randomUUID());
     }
     
-    public static void makeConnected(MGraph model, NonLiteral root, UriRef property) {
-        Set<NonLiteral> roots = findRoots(model);
+    public static void makeConnected(Graph model, BlankNodeOrIRI root, IRI property) {
+        Set<BlankNodeOrIRI> roots = findRoots(model);
         LOG.debug("Roots: {}",roots.size());
         boolean found = roots.remove(root);
         //connect all hanging roots to root by property
-        for (NonLiteral n: roots) {
+        for (BlankNodeOrIRI n: roots) {
             model.add(new TripleImpl(root,property,n));            
         }
     }
     
-    public static Set<NonLiteral> findRoots(MGraph model) {
-        Set<NonLiteral> roots = new HashSet<NonLiteral>();
-        Set<NonLiteral> visited = new HashSet<NonLiteral>();
+    public static Set<BlankNodeOrIRI> findRoots(Graph model) {
+        Set<BlankNodeOrIRI> roots = new HashSet<BlankNodeOrIRI>();
+        Set<BlankNodeOrIRI> visited = new HashSet<BlankNodeOrIRI>();
         for (Triple t: model) {
-            NonLiteral subj = t.getSubject();
+            BlankNodeOrIRI subj = t.getSubject();
             findRoot(model, subj, roots, visited);
         }
         return roots;
     }
     
-    private static void findRoot(MGraph model, NonLiteral node, Set<NonLiteral> roots, Set<NonLiteral> visited) {
+    private static void findRoot(Graph model, BlankNodeOrIRI node, Set<BlankNodeOrIRI> roots, Set<BlankNodeOrIRI> visited) {
         if (visited.contains(node)) {
             return;
         }
@@ -124,7 +124,7 @@ public final class ClerezzaRDFUtils {
         }
         while (it.hasNext()) {
             Triple t = it.next();
-            NonLiteral subj = t.getSubject();
+            BlankNodeOrIRI subj = t.getSubject();
             findRoot(model, subj, roots, visited);
         }
     }

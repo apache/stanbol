@@ -44,12 +44,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -96,9 +96,9 @@ public class LocationEnhancementEngine
     /**
      * This maps geonames.org feature classes to dbpedia.org ontology classes
      */
-    public static final Map<FeatureClass, Collection<UriRef>> FEATURE_CLASS_CONCEPT_MAPPINGS;
+    public static final Map<FeatureClass, Collection<IRI>> FEATURE_CLASS_CONCEPT_MAPPINGS;
 
-    public static final Map<String, Collection<UriRef>> FEATURE_TYPE_CONCEPT_MAPPINGS;
+    public static final Map<String, Collection<IRI>> FEATURE_TYPE_CONCEPT_MAPPINGS;
 
     private static final Logger log = LoggerFactory.getLogger(LocationEnhancementEngine.class);
 
@@ -129,7 +129,7 @@ public class LocationEnhancementEngine
     @Property(doubleValue = DEFAULT_MIN_HIERARCHY_SCORE)
     public static final String MIN_HIERARCHY_SCORE = "org.apache.stanbol.enhancer.engines.geonames.locationEnhancementEngine.min-hierarchy-score";
 
-    public static final UriRef CONCEPT_GEONAMES_FEATURE = new UriRef(NamespaceEnum.geonames.toString() + "Feature");
+    public static final IRI CONCEPT_GEONAMES_FEATURE = new IRI(NamespaceEnum.geonames.toString() + "Feature");
     @Property(value = GeonamesAPIWrapper.DEFAULT_GEONAMES_ORG_WEBSERVICE_URL)
     public static final String GEONAMES_SERVER_URL = "org.apache.stanbol.enhancer.engines.geonames.locationEnhancementEngine.serverURL";
     /**
@@ -156,28 +156,28 @@ public class LocationEnhancementEngine
     protected GeonamesAPIWrapper geonamesService;
 
     static {
-        Map<FeatureClass, Collection<UriRef>> mappings = new EnumMap<FeatureClass, Collection<UriRef>>(FeatureClass.class);
+        Map<FeatureClass, Collection<IRI>> mappings = new EnumMap<FeatureClass, Collection<IRI>>(FeatureClass.class);
         //first add the concepts of the geonames ontology
         for (FeatureClass fc : FeatureClass.values()) {
-            List<UriRef> conceptMappings = new ArrayList<UriRef>();
+            List<IRI> conceptMappings = new ArrayList<IRI>();
             conceptMappings.add(CONCEPT_GEONAMES_FEATURE); //all things are features
             conceptMappings.add(DBPEDIA_PLACE); //all things are dbpedia places
             mappings.put(fc, conceptMappings);
         }
         //now add additional mappings to the dbpedia Ontology
-        UriRef populatedPlace = new UriRef(dbpedia_ont + "PopulatedPlace");
-        mappings.get(FeatureClass.P).addAll(Arrays.asList(populatedPlace, new UriRef(dbpedia_ont + "Settlement")));
-        mappings.get(FeatureClass.A).addAll(Arrays.asList(populatedPlace, new UriRef(dbpedia_ont + "AdministrativeRegion")));
-        mappings.get(FeatureClass.H).add(new UriRef(dbpedia_ont + "BodyOfWater"));
-        mappings.get(FeatureClass.R).add(new UriRef(dbpedia_ont + "Infrastructure"));
-        mappings.get(FeatureClass.S).add(new UriRef(dbpedia_ont + "Building"));
-        mappings.get(FeatureClass.T).add(new UriRef(dbpedia_ont + "Mountain"));
+        IRI populatedPlace = new IRI(dbpedia_ont + "PopulatedPlace");
+        mappings.get(FeatureClass.P).addAll(Arrays.asList(populatedPlace, new IRI(dbpedia_ont + "Settlement")));
+        mappings.get(FeatureClass.A).addAll(Arrays.asList(populatedPlace, new IRI(dbpedia_ont + "AdministrativeRegion")));
+        mappings.get(FeatureClass.H).add(new IRI(dbpedia_ont + "BodyOfWater"));
+        mappings.get(FeatureClass.R).add(new IRI(dbpedia_ont + "Infrastructure"));
+        mappings.get(FeatureClass.S).add(new IRI(dbpedia_ont + "Building"));
+        mappings.get(FeatureClass.T).add(new IRI(dbpedia_ont + "Mountain"));
         //now write the unmodifiable static final constant
         FEATURE_CLASS_CONCEPT_MAPPINGS = Collections.unmodifiableMap(mappings);
 
         //Mappings for known FeatureTypes
-        Map<String, Collection<UriRef>> typeMappings = new HashMap<String, Collection<UriRef>>();
-        Collection<UriRef> lakeTypes = Arrays.asList(new UriRef(dbpedia_ont + "Lake"));
+        Map<String, Collection<IRI>> typeMappings = new HashMap<String, Collection<IRI>>();
+        Collection<IRI> lakeTypes = Arrays.asList(new IRI(dbpedia_ont + "Lake"));
         typeMappings.put("H.LK", lakeTypes);
         typeMappings.put("H.LKS", lakeTypes);
         typeMappings.put("H.LKI", lakeTypes);
@@ -195,8 +195,8 @@ public class LocationEnhancementEngine
         typeMappings.put("H.LKSNI", lakeTypes);
         typeMappings.put("H.RSV", lakeTypes);
 
-        UriRef stream = new UriRef(dbpedia_ont + " Stream");
-        Collection<UriRef> canalTypes = Arrays.asList(stream, new UriRef(dbpedia_ont + "Canal"));
+        IRI stream = new IRI(dbpedia_ont + " Stream");
+        Collection<IRI> canalTypes = Arrays.asList(stream, new IRI(dbpedia_ont + "Canal"));
         typeMappings.put("H.CNL", canalTypes);
         typeMappings.put("H.CNLA", canalTypes);
         typeMappings.put("H.CNLB", canalTypes);
@@ -207,7 +207,7 @@ public class LocationEnhancementEngine
         typeMappings.put("H.CNLQ", canalTypes);
         typeMappings.put("H.CNLX", canalTypes);
 
-        Collection<UriRef> riverTypes = Arrays.asList(stream, new UriRef(dbpedia_ont + "River"));
+        Collection<IRI> riverTypes = Arrays.asList(stream, new IRI(dbpedia_ont + "River"));
         typeMappings.put("H.STM", riverTypes);
         typeMappings.put("H.STMI", riverTypes);
         typeMappings.put("H.STMB", riverTypes);
@@ -225,18 +225,18 @@ public class LocationEnhancementEngine
         typeMappings.put("H.STM", riverTypes);
         typeMappings.put("H.STM", riverTypes);
 
-        Collection<UriRef> caveTypes = Arrays.asList(new UriRef(dbpedia_ont + "Cave"));
+        Collection<IRI> caveTypes = Arrays.asList(new IRI(dbpedia_ont + "Cave"));
         typeMappings.put("H.LKSB", caveTypes);
         typeMappings.put("R.TNLN", caveTypes);
         typeMappings.put("S.CAVE", caveTypes);
         typeMappings.put("S.BUR", caveTypes);
 
-        Collection<UriRef> countryTypes = Arrays.asList(new UriRef(dbpedia_ont + "Country"));
+        Collection<IRI> countryTypes = Arrays.asList(new IRI(dbpedia_ont + "Country"));
         typeMappings.put("A.PCLI", countryTypes);
 
-        UriRef settlement = new UriRef(dbpedia_ont + "Settlement");
-        Collection<UriRef> cityTypes = Arrays.asList(settlement, new UriRef(dbpedia_ont + "City"));
-        Collection<UriRef> villageTypes = Arrays.asList(settlement, new UriRef(dbpedia_ont + "Village"));
+        IRI settlement = new IRI(dbpedia_ont + "Settlement");
+        Collection<IRI> cityTypes = Arrays.asList(settlement, new IRI(dbpedia_ont + "City"));
+        Collection<IRI> villageTypes = Arrays.asList(settlement, new IRI(dbpedia_ont + "Village"));
         typeMappings.put("P.PPLG", cityTypes);
         typeMappings.put("P.PPLC", cityTypes);
         typeMappings.put("P.PPLF", villageTypes);
@@ -314,8 +314,8 @@ public class LocationEnhancementEngine
 
     @Override
     public void computeEnhancements(ContentItem ci) throws EngineException {
-        UriRef contentItemId = ci.getUri();
-        MGraph graph = ci.getMetadata();
+        IRI contentItemId = ci.getUri();
+        Graph graph = ci.getMetadata();
         LiteralFactory literalFactory = LiteralFactory.getInstance();
         //get all the textAnnotations
         /*
@@ -324,10 +324,10 @@ public class LocationEnhancementEngine
          * this map is used to avoid multiple lookups for text annotations
          * selecting the same name.
          */
-        Map<String, Collection<NonLiteral>> name2placeEnhancementMap = new HashMap<String, Collection<NonLiteral>>();
+        Map<String, Collection<BlankNodeOrIRI>> name2placeEnhancementMap = new HashMap<String, Collection<BlankNodeOrIRI>>();
         Iterator<Triple> iterator = graph.filter(null, DC_TYPE, DBPEDIA_PLACE);
         while (iterator.hasNext()) {
-            NonLiteral placeEnhancement = iterator.next().getSubject(); //the enhancement annotating an place
+            BlankNodeOrIRI placeEnhancement = iterator.next().getSubject(); //the enhancement annotating an place
             //this can still be an TextAnnotation of an EntityAnnotation
             //so we need to filter TextAnnotation
             Triple isTextAnnotation = new TripleImpl(placeEnhancement, RDF_TYPE, ENHANCER_TEXTANNOTATION);
@@ -338,9 +338,9 @@ public class LocationEnhancementEngine
                     log.warn("Unable to process TextAnnotation " + placeEnhancement
                             + " because property" + ENHANCER_SELECTED_TEXT + " is not present");
                 } else {
-                    Collection<NonLiteral> placeEnhancements = name2placeEnhancementMap.get(name);
+                    Collection<BlankNodeOrIRI> placeEnhancements = name2placeEnhancementMap.get(name);
                     if (placeEnhancements == null) {
-                        placeEnhancements = new ArrayList<NonLiteral>();
+                        placeEnhancements = new ArrayList<BlankNodeOrIRI>();
                         name2placeEnhancementMap.put(name, placeEnhancements);
                     }
                     placeEnhancements.add(placeEnhancement);
@@ -355,7 +355,7 @@ public class LocationEnhancementEngine
         if (getMaxLocationEnhancements() != null) {
             requestParams.put(SearchRequestPropertyEnum.maxRows, Collections.singleton(getMaxLocationEnhancements().toString()));
         }
-        for (Map.Entry<String, Collection<NonLiteral>> entry : name2placeEnhancementMap.entrySet()) {
+        for (Map.Entry<String, Collection<BlankNodeOrIRI>> entry : name2placeEnhancementMap.entrySet()) {
             List<Toponym> results;
             try {
                 requestParams.put(SearchRequestPropertyEnum.name, Collections.singleton(entry.getKey()));
@@ -391,7 +391,7 @@ public class LocationEnhancementEngine
                          */
                     }
                     //write the enhancement!
-                    NonLiteral locationEnhancement = writeEntityEnhancement(
+                    BlankNodeOrIRI locationEnhancement = writeEntityEnhancement(
                             contentItemId, graph, literalFactory, result, entry.getValue(), null, score);
                     log.debug("  > {}  >= {}",score,minHierarchyScore);
                     if (score != null && score >= minHierarchyScore) {
@@ -475,24 +475,24 @@ public class LocationEnhancementEngine
      * used to parse the score of the Toponym if this method is used to add a
      * parent Toponym.
      *
-     * @return The UriRef of the created entity enhancement
+     * @return The IRI of the created entity enhancement
      */
-    private UriRef writeEntityEnhancement(UriRef contentItemId, MGraph graph,
+    private IRI writeEntityEnhancement(IRI contentItemId, Graph graph,
             LiteralFactory literalFactory, Toponym toponym,
-            Collection<NonLiteral> relatedEnhancements, Collection<NonLiteral> requiresEnhancements,
+            Collection<BlankNodeOrIRI> relatedEnhancements, Collection<BlankNodeOrIRI> requiresEnhancements,
             Double score) {
-        UriRef entityRef = new UriRef("http://sws.geonames.org/" + toponym.getGeoNameId() + '/');
+        IRI entityRef = new IRI("http://sws.geonames.org/" + toponym.getGeoNameId() + '/');
         FeatureClass featureClass = toponym.getFeatureClass();
         log.debug("  > featureClass " + featureClass);
-        UriRef entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(graph, this, contentItemId);
+        IRI entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(graph, this, contentItemId);
         // first relate this entity annotation to the text annotation(s)
         if (relatedEnhancements != null) {
-            for (NonLiteral related : relatedEnhancements) {
+            for (BlankNodeOrIRI related : relatedEnhancements) {
                 graph.add(new TripleImpl(entityAnnotation, DC_RELATION, related));
             }
         }
         if (requiresEnhancements != null) {
-            for (NonLiteral requires : requiresEnhancements) {
+            for (BlankNodeOrIRI requires : requiresEnhancements) {
                 graph.add(new TripleImpl(entityAnnotation, DC_REQUIRES, requires));
                 //STANBOL-767: also add dc:relation link
                 graph.add(new TripleImpl(entityAnnotation, DC_RELATION, requires));
@@ -505,22 +505,22 @@ public class LocationEnhancementEngine
             graph.add(new TripleImpl(entityAnnotation, ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(score)));
         }
         //now get all the entity types for the results
-        Set<UriRef> entityTypes = new HashSet<UriRef>();
+        Set<IRI> entityTypes = new HashSet<IRI>();
         //first based on the feature class
-        Collection<UriRef> featureClassTypes = FEATURE_CLASS_CONCEPT_MAPPINGS.get(featureClass);
+        Collection<IRI> featureClassTypes = FEATURE_CLASS_CONCEPT_MAPPINGS.get(featureClass);
         if (featureClassTypes != null) {
             entityTypes.addAll(featureClassTypes);
         }
         //second for the feature Code
         String featureCode = toponym.getFeatureCode();
-        Collection<UriRef> featureCodeTypes = FEATURE_TYPE_CONCEPT_MAPPINGS.get(featureCode);
+        Collection<IRI> featureCodeTypes = FEATURE_TYPE_CONCEPT_MAPPINGS.get(featureCode);
         if (featureCodeTypes != null) {
             entityTypes.addAll(featureCodeTypes);
         }
         //third add the feature Code as additional type
-        entityTypes.add(new UriRef(NamespaceEnum.geonames + featureClass.name() + '.' + featureCode));
+        entityTypes.add(new IRI(NamespaceEnum.geonames + featureClass.name() + '.' + featureCode));
         //finally add the type triples to the enhancement
-        for (UriRef entityType : entityTypes) {
+        for (IRI entityType : entityTypes) {
             graph.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_TYPE, entityType));
         }
         return entityAnnotation;

@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText.Token;
 import org.apache.stanbol.enhancer.engines.keywordextraction.impl.EntityLinkerConfig.RedirectProcessingMode;
 import org.apache.stanbol.enhancer.engines.keywordextraction.impl.Suggestion.MATCH;
@@ -205,17 +205,17 @@ public class EntityLinker {
      * @param conceptTypes The list of suggestions
      * @return the types values for the {@link LinkedEntity}
      */
-    private Set<UriRef> getLinkedEntityTypes(Collection<Suggestion> suggestions){
+    private Set<IRI> getLinkedEntityTypes(Collection<Suggestion> suggestions){
         Collection<String> conceptTypes = new HashSet<String>();
         for(Suggestion suggestion : suggestions){
             for(Iterator<Reference> types = 
                 suggestion.getRepresentation().getReferences(config.getTypeField()); 
                 types.hasNext();conceptTypes.add(types.next().getReference()));
         }
-        Map<String,UriRef> typeMappings = config.getTypeMappings();
-        Set<UriRef> dcTypes = new HashSet<UriRef>();
+        Map<String,IRI> typeMappings = config.getTypeMappings();
+        Set<IRI> dcTypes = new HashSet<IRI>();
         for(String conceptType : conceptTypes){
-            UriRef dcType = typeMappings.get(conceptType);
+            IRI dcType = typeMappings.get(conceptType);
             if(dcType != null){
                 dcTypes.add(dcType);
             }

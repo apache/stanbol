@@ -23,12 +23,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.BNode;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.BlankNode;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.tika.metadata.Metadata;
 
 public final class ResourceMapping extends Mapping{
@@ -41,16 +41,16 @@ public final class ResourceMapping extends Mapping{
     Set<String> mappedTikaProperties;
     
     public ResourceMapping(String ontProperty, Mapping...required) {
-        this(new UriRef(ontProperty), required);
+        this(new IRI(ontProperty), required);
     }
     public ResourceMapping(String ontProperty, Mapping[] required, Mapping[] optional,Mapping[] additional) {
-        this(new UriRef(ontProperty), required,optional,additional);
+        this(new IRI(ontProperty), required,optional,additional);
     }
 
-    public ResourceMapping(UriRef ontProperty, Mapping...requried) {
+    public ResourceMapping(IRI ontProperty, Mapping...requried) {
         this(ontProperty,requried,null,null);
     }
-    public ResourceMapping(UriRef ontProperty, Mapping[] required, Mapping[] optional,Mapping[] additional) {
+    public ResourceMapping(IRI ontProperty, Mapping[] required, Mapping[] optional,Mapping[] additional) {
         super(ontProperty,null);
         required = required == null ? EMPTY : required;
         optional = optional == null ? EMPTY : optional;
@@ -91,12 +91,12 @@ public final class ResourceMapping extends Mapping{
     }
 
     @Override
-    public boolean apply(MGraph graph, NonLiteral subject, Metadata metadata) {
+    public boolean apply(Graph graph, BlankNodeOrIRI subject, Metadata metadata) {
         boolean added = false;
-        NonLiteral s = new BNode();
+        BlankNodeOrIRI s = new BlankNode();
         mappingLogger.log(subject, ontProperty, null, s);
         if(!required.isEmpty()) {
-            MGraph g = new SimpleMGraph();
+            Graph g = new SimpleGraph();
             for(Mapping m : required){
                 if(!m.apply(g, s, metadata)){
                     return false;

@@ -25,8 +25,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.clerezza.commons.rdf.IRI;
 
-import org.apache.clerezza.rdf.core.UriRef;
+
 import org.apache.stanbol.enhancer.engines.entitycoreference.Constants;
 import org.apache.stanbol.enhancer.engines.entitycoreference.datamodel.NounPhrase;
 import org.apache.stanbol.enhancer.engines.entitycoreference.datamodel.PlaceAdjectival;
@@ -251,7 +252,7 @@ public class CoreferenceFinder {
          */
         if (nounPhrase.hasNers()) {
             List<Span> npNers = nounPhrase.getNerChunks();
-            UriRef nerType = ner.getAnnotation(NlpAnnotations.NER_ANNOTATION).value().getType();
+            IRI nerType = ner.getAnnotation(NlpAnnotations.NER_ANNOTATION).value().getType();
 
             for (Span npNer : npNers) {
                 /*
@@ -264,7 +265,7 @@ public class CoreferenceFinder {
                 Entity npEntity = lookupEntity(npNer, language);
 
                 if (npEntity != null) {
-                    UriRef npNerType = npNer.getAnnotation(NlpAnnotations.NER_ANNOTATION).value().getType();
+                    IRI npNerType = npNer.getAnnotation(NlpAnnotations.NER_ANNOTATION).value().getType();
                     Set<String> rulesOntologyAttr = new HashSet<String>();
 
                     if (OntologicalClasses.DBPEDIA_PLACE.equals(npNerType)) {
@@ -327,7 +328,7 @@ public class CoreferenceFinder {
             if (this.config.shouldExcludeClass(typeUri)) continue;
 
             // First try the in memory index
-            Set<String> labels = this.entityTypeIndex.lookupEntityType(new UriRef(typeUri), language);
+            Set<String> labels = this.entityTypeIndex.lookupEntityType(new IRI(typeUri), language);
 
             if (labels == null) {
                 Site site = getReferencedSite();
@@ -343,7 +344,7 @@ public class CoreferenceFinder {
                         labels.add(labelIterator.next().getText());
                     }
 
-                    this.entityTypeIndex.addEntityType(new UriRef(typeUri), language, labels);
+                    this.entityTypeIndex.addEntityType(new IRI(typeUri), language, labels);
                 }
             }
             

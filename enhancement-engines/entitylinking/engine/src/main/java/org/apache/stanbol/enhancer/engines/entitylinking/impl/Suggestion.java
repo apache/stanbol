@@ -27,9 +27,9 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
 
@@ -106,18 +106,18 @@ public class Suggestion {
      * @param language the language
      * @return the best match or {@link Suggestion#getMatchedLabel()} if non is found
      */
-    public PlainLiteral getBestLabel(UriRef nameField, String language){
+    public Literal getBestLabel(IRI nameField, String language){
         Entity rep = getEntity();
         //start with the matched label -> so if we do not find a better one
         //we will use the matched!
-        PlainLiteral matchedLabel = getMatchedLabel();
-        PlainLiteral label = matchedLabel;
+        Literal matchedLabel = getMatchedLabel();
+        Literal label = matchedLabel;
         // 1. check if the returned Entity does has a label -> if not return null
         // add labels (set only a single label. Use "en" if available!
-        Iterator<PlainLiteral> labels = rep.getText(nameField);
+        Iterator<Literal> labels = rep.getText(nameField);
         boolean matchFound = false;
         while (labels.hasNext() && !matchFound) {
-            PlainLiteral actLabel = labels.next();
+            Literal actLabel = labels.next();
             if(label == null){
                 label = actLabel;
             }
@@ -142,7 +142,7 @@ public class Suggestion {
      * Shorthand for {@link #getLabelMatch()}.getMatchedLabel()
      * @return the label or <code>null</code> if {@link MATCH#NONE}
      */
-    public PlainLiteral getMatchedLabel() {
+    public Literal getMatchedLabel() {
         return getLabelMatch().getMatchedLabel();
     }
     protected void setMatch(MATCH matchType) {

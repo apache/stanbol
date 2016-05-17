@@ -15,7 +15,7 @@
  */
 package org.apache.stanbol.commons.web.rdfviewable.writer;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 
 /**
  * Used ontologicaal terms from recipes ontology
@@ -29,13 +29,13 @@ public final class RECIPES {
      */
     private RECIPES() {}
 
-    public static final UriRef Recipe = new UriRef("http://vocab.netlabs.org/recipe#Recipe");
+    public static final IRI Recipe = new IRI("http://vocab.netlabs.org/recipe#Recipe");
     
-    public static final UriRef recipeDomain = new UriRef("http://vocab.netlabs.org/recipe#recipeDomain");
+    public static final IRI recipeDomain = new IRI("http://vocab.netlabs.org/recipe#recipeDomain");
     
-    public static final UriRef ingredient = new UriRef("http://vocab.netlabs.org/recipe#ingredient");
+    public static final IRI ingredient = new IRI("http://vocab.netlabs.org/recipe#ingredient");
     
-    public static final UriRef ingredientProperty = new UriRef("http://vocab.netlabs.org/recipe#ingredientProperty");
+    public static final IRI ingredientProperty = new IRI("http://vocab.netlabs.org/recipe#ingredientProperty");
     
-    public static final UriRef ingredientInverseProperty = new UriRef("http://vocab.netlabs.org/recipe#ingredientInverseProperty");
+    public static final IRI ingredientInverseProperty = new IRI("http://vocab.netlabs.org/recipe#ingredientInverseProperty");
 }

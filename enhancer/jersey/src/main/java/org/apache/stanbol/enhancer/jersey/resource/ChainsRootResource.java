@@ -45,8 +45,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -180,7 +180,7 @@ public class ChainsRootResource extends BaseStanbolResource {
     @Produces(value={JSON_LD, APPLICATION_JSON,N3,N_TRIPLE,RDF_JSON,RDF_XML,TURTLE,X_TURTLE})
     public Response getEngines(@Context HttpHeaders headers){
         String rootUrl = uriInfo.getBaseUriBuilder().path(getRootUrl()).build().toString();
-        MGraph graph = new SimpleMGraph();
+        Graph graph = new SimpleGraph();
         addActiveChains(getActiveChains(), chainTracker.getDefault(),graph,rootUrl);
         ResponseBuilder res = Response.ok(graph);
         //addCORSOrigin(servletContext,res, headers);

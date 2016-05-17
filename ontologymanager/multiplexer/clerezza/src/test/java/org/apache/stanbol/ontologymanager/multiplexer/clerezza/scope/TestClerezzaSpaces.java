@@ -30,8 +30,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Hashtable;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.ontologymanager.core.OfflineConfigurationImpl;
@@ -70,13 +70,13 @@ public class TestClerezzaSpaces {
 
     private static OntologySpaceFactory factory;
 
-    private static OntologyInputSource<TripleCollection> minorSrc, dropSrc, nonexSrc;
+    private static OntologyInputSource<Graph> minorSrc, dropSrc, nonexSrc;
 
     private static OntologyInputSource<OWLOntology> inMemorySrc;
 
     private static OfflineConfiguration offline;
 
-    private static OntologyInputSource<TripleCollection> getLocalSource(String resourcePath) {
+    private static OntologyInputSource<Graph> getLocalSource(String resourcePath) {
         InputStream is = TestOntologySpaces.class.getResourceAsStream(resourcePath);
         return new GraphSource(parser.parse(is, SupportedFormat.RDF_XML));
     }
@@ -87,8 +87,8 @@ public class TestClerezzaSpaces {
         ScopeRegistry reg = new ScopeRegistryImpl();
 
         // This one is created from scratch
-        MGraph ont2 = ClerezzaOWLUtils.createOntology(baseIri2.toString());
-        minorSrc = new GraphSource(ont2.getGraph());
+        Graph ont2 = ClerezzaOWLUtils.createOntology(baseIri2.toString());
+        minorSrc = new GraphSource(ont2.getImmutableGraph());
         dropSrc = getLocalSource("/ontologies/droppedcharacters.owl");
         nonexSrc = getLocalSource("/ontologies/nonexistentcharacters.owl");
         inMemorySrc = new ParentPathInputSource(new File(TestClerezzaSpaces.class.getResource(
@@ -145,7 +145,7 @@ public class TestClerezzaSpaces {
         OntologySpace space = factory.createCustomOntologySpace(scopeId, dropSrc);
         OWLOntologyID logicalId = null;
         Object o = dropSrc.getRootOntology();
-        if (o instanceof TripleCollection) logicalId = OWLUtils.extractOntologyID((TripleCollection) o);
+        if (o instanceof Graph) logicalId = OWLUtils.extractOntologyID((Graph) o);
         else if (o instanceof OWLOntology) logicalId = OWLUtils.extractOntologyID((OWLOntology) o);
         assertNotNull(logicalId);
         assertTrue(space.hasOntology(logicalId));

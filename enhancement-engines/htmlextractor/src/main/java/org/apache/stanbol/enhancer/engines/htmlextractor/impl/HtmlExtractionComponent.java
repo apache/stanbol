@@ -18,7 +18,7 @@ package org.apache.stanbol.enhancer.engines.htmlextractor.impl;
 
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.w3c.dom.Document;
 
 /**
@@ -29,7 +29,7 @@ import org.w3c.dom.Document;
  */
 public interface HtmlExtractionComponent {
 
-    void extract(String id, Document doc, Map<String, Object> params, MGraph result)
+    void extract(String id, Document doc, Map<String, Object> params, Graph result)
             throws ExtractorException;
 
 }

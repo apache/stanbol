@@ -23,11 +23,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.tika.metadata.Metadata;
 
 public final class PropertyMapping extends Mapping {
@@ -37,24 +37,24 @@ public final class PropertyMapping extends Mapping {
      */
     protected final Set<String> tikaProperties;
 
-    public PropertyMapping(String ontProperty, UriRef ontType,String...tikaProperties) {
-        this(ontProperty == null? null : new UriRef(ontProperty), ontType,tikaProperties);
+    public PropertyMapping(String ontProperty, IRI ontType,String...tikaProperties) {
+        this(ontProperty == null? null : new IRI(ontProperty), ontType,tikaProperties);
     }
-    public PropertyMapping(String ontProperty, UriRef ontType,Converter converter,String...tikaProperties) {
-        this(ontProperty == null? null : new UriRef(ontProperty), ontType,converter,tikaProperties);
+    public PropertyMapping(String ontProperty, IRI ontType,Converter converter,String...tikaProperties) {
+        this(ontProperty == null? null : new IRI(ontProperty), ontType,converter,tikaProperties);
     }
 
     public PropertyMapping(String ontProperty,String...tikaProperties) {
-        this(ontProperty == null? null : new UriRef(ontProperty),null,tikaProperties);
+        this(ontProperty == null? null : new IRI(ontProperty),null,tikaProperties);
     }
 
-    public PropertyMapping(UriRef ontProperty,String...tikaProperties) {
+    public PropertyMapping(IRI ontProperty,String...tikaProperties) {
         this(ontProperty,null,tikaProperties);
     }
-    public PropertyMapping(UriRef ontProperty, UriRef ontType,String...tikaProperties) {
+    public PropertyMapping(IRI ontProperty, IRI ontType,String...tikaProperties) {
         this(ontProperty,ontType,null,tikaProperties);
     }
-    public PropertyMapping(UriRef ontProperty, UriRef ontType,Converter converter,String...tikaProperties) {
+    public PropertyMapping(IRI ontProperty, IRI ontType,Converter converter,String...tikaProperties) {
         super(ontProperty, ontType,converter);
         if(tikaProperties == null || tikaProperties.length < 1){
             throw new IllegalArgumentException("The list of parsed Tika properties MUST NOT be NULL nor empty!");
@@ -68,13 +68,13 @@ public final class PropertyMapping extends Mapping {
     }
 
     @Override
-    public boolean apply(MGraph graph, NonLiteral subject, Metadata metadata) {
-        Set<Resource> values = new HashSet<Resource>();
+    public boolean apply(Graph graph, BlankNodeOrIRI subject, Metadata metadata) {
+        Set<RDFTerm> values = new HashSet<RDFTerm>();
         for(String tikaProperty : tikaProperties){
             String[] tikaPropValues = metadata.getValues(tikaProperty);
             if(tikaPropValues != null && tikaPropValues.length > 0){
                 for(String tikaPropValue : tikaPropValues){
-                    Resource resource = toResource(tikaPropValue, true);
+                    RDFTerm resource = toResource(tikaPropValue, true);
                     if(resource != null){
                         values.add(resource);
                         mappingLogger.log(subject, ontProperty, tikaProperty, resource);
@@ -87,7 +87,7 @@ public final class PropertyMapping extends Mapping {
         if(values.isEmpty()){
             return false;
         } else {
-            for(Resource resource : values){
+            for(RDFTerm resource : values){
                 graph.add(new TripleImpl(subject, ontProperty, resource));
             }
             return true;

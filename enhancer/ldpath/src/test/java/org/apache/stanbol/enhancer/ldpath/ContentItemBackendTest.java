@@ -34,23 +34,21 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.ParsingProvider;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.apache.commons.io.IOUtils;
 import org.apache.marmotta.ldpath.LDPath;
 import org.apache.marmotta.ldpath.exception.LDPathParseException;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.ldpath.backend.ContentItemBackend;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -88,20 +86,20 @@ public class ContentItemBackendTest {
     private static String htmlContent;
     private static ContentItem ci;
     private ContentItemBackend backend;
-    private LDPath<Resource> ldpath;
+    private LDPath<RDFTerm> ldpath;
     @BeforeClass
     public static void readTestData() throws IOException {
         //add the metadata
         ParsingProvider parser = new JenaParserProvider();
         //create the content Item with the HTML content
-        MGraph rdfData = parseRdfData(parser,"metadata.rdf.zip");
-        UriRef contentItemId = null;
+        Graph rdfData = parseRdfData(parser,"metadata.rdf.zip");
+        IRI contentItemId = null;
         Iterator<Triple> it = rdfData.filter(null, Properties.ENHANCER_EXTRACTED_FROM, null);
         while(it.hasNext()){
-            Resource r = it.next().getObject();
+            RDFTerm r = it.next().getObject();
             if(contentItemId == null){
-                if(r instanceof UriRef){
-                    contentItemId = (UriRef)r;
+                if(r instanceof IRI){
+                    contentItemId = (IRI)r;
                 }
             } else {
                 assertEquals("multiple ContentItems IDs contained in the RDF test data", 
@@ -123,7 +121,7 @@ public class ContentItemBackendTest {
         byte[] textData = IOUtils.toByteArray(in);
         IOUtils.closeQuietly(in);
         assertNotNull("Plain text content not found",in);
-        ci.addPart(new UriRef(ci.getUri().getUnicodeString()+"_text"),
+        ci.addPart(new IRI(ci.getUri().getUnicodeString()+"_text"),
             ciFactory.createBlob(new ByteArraySource(textData, "text/plain; charset=UTF-8")));
         textContent = new String(textData, UTF8);
         //add the metadata
@@ -135,8 +133,8 @@ public class ContentItemBackendTest {
      * @return
      * @throws IOException
      */
-    protected static MGraph parseRdfData(ParsingProvider parser,String name) throws IOException {
-        MGraph rdfData = new IndexedMGraph();
+    protected static Graph parseRdfData(ParsingProvider parser,String name) throws IOException {
+        Graph rdfData = new IndexedGraph();
         InputStream in = getTestResource(name);
         assertNotNull("File '"+name+"' not found",in);
         ZipInputStream zipIn = new ZipInputStream(new BufferedInputStream(in));
@@ -166,17 +164,17 @@ public class ContentItemBackendTest {
             backend = new ContentItemBackend(ci);
         }
         if(ldpath == null){
-            ldpath = new LDPath<Resource>(backend, EnhancerLDPath.getConfig());
+            ldpath = new LDPath<RDFTerm>(backend, EnhancerLDPath.getConfig());
         }
     }
     
     @Test
     public void testContent() throws LDPathParseException {
-        Collection<Resource> result = ldpath.pathQuery(ci.getUri(), "fn:content(\"text/plain\")", null);
+        Collection<RDFTerm> result = ldpath.pathQuery(ci.getUri(), "fn:content(\"text/plain\")", null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 1);
-        Resource r = result.iterator().next();
+        RDFTerm r = result.iterator().next();
         assertTrue(r instanceof Literal);
         String content = ((Literal)r).getLexicalForm();
         assertEquals(content, textContent);
@@ -194,20 +192,20 @@ public class ContentItemBackendTest {
     @Test
     public void testContentWithAdditionalMetadata() throws IOException, LDPathParseException {
         byte[] content = "text content".getBytes();
-        UriRef uri = ContentItemHelper.makeDefaultUrn(content);
+        IRI uri = ContentItemHelper.makeDefaultUrn(content);
 
         ContentItem contentItem = ciFactory.createContentItem(uri, new ByteArraySource(content,
                 "text/plain; charset=UTF-8"));
 
-        TripleCollection tc = new SimpleMGraph();
-        TypedLiteral literal = LiteralFactory.getInstance().createTypedLiteral("Michael Jackson");
-        UriRef subject = new UriRef("dummyUri");
-        tc.add(new TripleImpl(subject, new UriRef("http://xmlns.com/foaf/0.1/givenName"), literal));
-        contentItem.addPart(new UriRef(uri.getUnicodeString() + "_additionalMetadata"), tc);
+        Graph tc = new SimpleGraph();
+        Literal literal = LiteralFactory.getInstance().createTypedLiteral("Michael Jackson");
+        IRI subject = new IRI("dummyUri");
+        tc.add(new TripleImpl(subject, new IRI("http://xmlns.com/foaf/0.1/givenName"), literal));
+        contentItem.addPart(new IRI(uri.getUnicodeString() + "_additionalMetadata"), tc);
 
         ContentItemBackend ciBackend = new ContentItemBackend(contentItem, true);
-        LDPath<Resource> ldPath = new LDPath<Resource>(ciBackend, EnhancerLDPath.getConfig());
-        Collection<Resource> result = ldPath.pathQuery(subject, "foaf:givenName", null);
+        LDPath<RDFTerm> ldPath = new LDPath<RDFTerm>(ciBackend, EnhancerLDPath.getConfig());
+        Collection<RDFTerm> result = ldPath.pathQuery(subject, "foaf:givenName", null);
 
         assertTrue("Additional metadata cannot be found", result.contains(literal));
     }
@@ -215,13 +213,13 @@ public class ContentItemBackendTest {
     @Test
     public void testTextAnnotationFunction() throws LDPathParseException {
         String path = "fn:textAnnotation(.)/fise:selected-text";
-        Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
+        Collection<RDFTerm> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 2);
         Set<String> expectedValues = new HashSet<String>(
                 Arrays.asList("Bob Marley","Paris"));
-        for(Resource r : result){
+        for(RDFTerm r : result){
             assertTrue(r instanceof Literal);
             assertTrue(expectedValues.remove(((Literal)r).getLexicalForm()));
         }
@@ -235,7 +233,7 @@ public class ContentItemBackendTest {
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 1);
-        Resource r = result.iterator().next();
+        RDFTerm r = result.iterator().next();
         assertTrue(r instanceof Literal);
         assertEquals(((Literal)r).getLexicalForm(), "Bob Marley");
 
@@ -243,13 +241,13 @@ public class ContentItemBackendTest {
     @Test
     public void testTextAnnotationFunctionWithoutParsedContext() throws LDPathParseException {
         String path = "fn:textAnnotation()/fise:selected-text";
-        Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
+        Collection<RDFTerm> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 2);
         Set<String> expectedValues = new HashSet<String>(
                 Arrays.asList("Bob Marley","Paris"));
-        for(Resource r : result){
+        for(RDFTerm r : result){
             assertTrue(r instanceof Literal);
             assertTrue(expectedValues.remove(((Literal)r).getLexicalForm()));
         }
@@ -263,7 +261,7 @@ public class ContentItemBackendTest {
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 1);
-        Resource r = result.iterator().next();
+        RDFTerm r = result.iterator().next();
         assertTrue(r instanceof Literal);
         assertEquals(((Literal)r).getLexicalForm(), "Bob Marley");
 
@@ -271,18 +269,18 @@ public class ContentItemBackendTest {
     @Test
     public void testEntityAnnotation() throws LDPathParseException {
         String path = "fn:entityAnnotation(.)/fise:entity-reference";
-        Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
+        Collection<RDFTerm> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 4);
-        Set<UriRef> expectedValues = new HashSet<UriRef>(
+        Set<IRI> expectedValues = new HashSet<IRI>(
                 Arrays.asList(
-                    new UriRef("http://dbpedia.org/resource/Paris"),
-                    new UriRef("http://dbpedia.org/resource/Bob_Marley"),
-                    new UriRef("http://dbpedia.org/resource/Centre_Georges_Pompidou"),
-                    new UriRef("http://dbpedia.org/resource/Paris,_Texas")));
-        for(Resource r : result){
-            assertTrue(r instanceof UriRef);
+                    new IRI("http://dbpedia.org/resource/Paris"),
+                    new IRI("http://dbpedia.org/resource/Bob_Marley"),
+                    new IRI("http://dbpedia.org/resource/Centre_Georges_Pompidou"),
+                    new IRI("http://dbpedia.org/resource/Paris,_Texas")));
+        for(RDFTerm r : result){
+            assertTrue(r instanceof IRI);
             log.info("Entity: {}",r);
             assertTrue(expectedValues.remove(r));
         }
@@ -293,23 +291,23 @@ public class ContentItemBackendTest {
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 1);
-        assertTrue(result.contains(new UriRef("http://dbpedia.org/resource/Bob_Marley")));
+        assertTrue(result.contains(new IRI("http://dbpedia.org/resource/Bob_Marley")));
     }
     @Test
     public void testEntityAnnotationWithoutParsedContext() throws LDPathParseException {
         String path = "fn:entityAnnotation()/fise:entity-reference";
-        Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
+        Collection<RDFTerm> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 4);
-        Set<UriRef> expectedValues = new HashSet<UriRef>(
+        Set<IRI> expectedValues = new HashSet<IRI>(
                 Arrays.asList(
-                    new UriRef("http://dbpedia.org/resource/Paris"),
-                    new UriRef("http://dbpedia.org/resource/Bob_Marley"),
-                    new UriRef("http://dbpedia.org/resource/Centre_Georges_Pompidou"),
-                    new UriRef("http://dbpedia.org/resource/Paris,_Texas")));
-        for(Resource r : result){
-            assertTrue(r instanceof UriRef);
+                    new IRI("http://dbpedia.org/resource/Paris"),
+                    new IRI("http://dbpedia.org/resource/Bob_Marley"),
+                    new IRI("http://dbpedia.org/resource/Centre_Georges_Pompidou"),
+                    new IRI("http://dbpedia.org/resource/Paris,_Texas")));
+        for(RDFTerm r : result){
+            assertTrue(r instanceof IRI);
             log.info("Entity: {}",r);
             assertTrue(expectedValues.remove(r));
         }
@@ -320,17 +318,17 @@ public class ContentItemBackendTest {
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 1);
-        assertTrue(result.contains(new UriRef("http://dbpedia.org/resource/Bob_Marley")));
+        assertTrue(result.contains(new IRI("http://dbpedia.org/resource/Bob_Marley")));
     }
     @Test
     public void testEnhancements() throws LDPathParseException {
         String path = "fn:enhancement(.)";
-        Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
+        Collection<RDFTerm> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 7);
-        for(Resource r : result){
-            assertTrue(r instanceof UriRef);
+        for(RDFTerm r : result){
+            assertTrue(r instanceof IRI);
             log.info("Entity: {}",r);
         }
         //and with a filter
@@ -339,25 +337,25 @@ public class ContentItemBackendTest {
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 3);
-//        assertTrue(result.contains(new UriRef("http://dbpedia.org/resource/Bob_Marley")));
+//        assertTrue(result.contains(new IRI("http://dbpedia.org/resource/Bob_Marley")));
         path = "fn:enhancement(.)/dc:language";
         result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 1);
-        Resource r = result.iterator().next();
+        RDFTerm r = result.iterator().next();
         assertTrue(r instanceof Literal);
         assertEquals("en",((Literal)r).getLexicalForm());
     }
     @Test
     public void testEnhancementsWithoutParsedContext() throws LDPathParseException {
         String path = "fn:enhancement()";
-        Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
+        Collection<RDFTerm> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 7);
-        for(Resource r : result){
-            assertTrue(r instanceof UriRef);
+        for(RDFTerm r : result){
+            assertTrue(r instanceof IRI);
             log.info("Entity: {}",r);
         }
         //and with a filter
@@ -366,13 +364,13 @@ public class ContentItemBackendTest {
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 3);
-//        assertTrue(result.contains(new UriRef("http://dbpedia.org/resource/Bob_Marley")));
+//        assertTrue(result.contains(new IRI("http://dbpedia.org/resource/Bob_Marley")));
         path = "fn:enhancement()/dc:language";
         result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 1);
-        Resource r = result.iterator().next();
+        RDFTerm r = result.iterator().next();
         assertTrue(r instanceof Literal);
         assertEquals("en",((Literal)r).getLexicalForm());
     }
@@ -386,27 +384,27 @@ public class ContentItemBackendTest {
         // are returned and later that a limit of 2 only returns the two top
         // most.
         String path = "fn:textAnnotation(.)[dc:type is dbpedia-ont:Place]/fn:suggestion(.)";
-        Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
+        Collection<RDFTerm> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 3);
         Double lowestConfidence = null;
         //stores the lowest confidence suggestion for the 2nd part of this test
-        UriRef lowestConfidenceSuggestion = null;
+        IRI lowestConfidenceSuggestion = null;
         path = "fise:confidence :: xsd:double";
-        for(Resource r : result){
-            assertTrue(r instanceof UriRef);
+        for(RDFTerm r : result){
+            assertTrue(r instanceof IRI);
             log.info("confidence: {}",r);
             Double current = (Double)ldpath.pathTransform(r, path, null).iterator().next();
             assertNotNull(current);
             if(lowestConfidence == null || lowestConfidence > current){
                 lowestConfidence = current;
-                lowestConfidenceSuggestion = (UriRef) r;
+                lowestConfidenceSuggestion = (IRI) r;
             }
         }
         assertNotNull(lowestConfidenceSuggestion);
         path = "fn:textAnnotation(.)[dc:type is dbpedia-ont:Place]/fn:suggestion(.,\"2\")";
-        Collection<Resource> result2 = ldpath.pathQuery(ci.getUri(), path, null);
+        Collection<RDFTerm> result2 = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result2);
         assertFalse(result2.isEmpty());
         assertTrue(result2.size() == 2);
@@ -425,27 +423,27 @@ public class ContentItemBackendTest {
         // are returned and later that a limit of 2 only returns the two top
         // most.
         String path = "fn:textAnnotation()[dc:type is dbpedia-ont:Place]/fn:suggestion()";
-        Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
+        Collection<RDFTerm> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 3);
         Double lowestConfidence = null;
         //stores the lowest confidence suggestion for the 2nd part of this test
-        UriRef lowestConfidenceSuggestion = null;
+        IRI lowestConfidenceSuggestion = null;
         path = "fise:confidence :: xsd:double";
-        for(Resource r : result){
-            assertTrue(r instanceof UriRef);
+        for(RDFTerm r : result){
+            assertTrue(r instanceof IRI);
             log.info("confidence: {}",r);
             Double current = (Double)ldpath.pathTransform(r, path, null).iterator().next();
             assertNotNull(current);
             if(lowestConfidence == null || lowestConfidence > current){
                 lowestConfidence = current;
-                lowestConfidenceSuggestion = (UriRef) r;
+                lowestConfidenceSuggestion = (IRI) r;
             }
         }
         assertNotNull(lowestConfidenceSuggestion);
         path = "fn:textAnnotation()[dc:type is dbpedia-ont:Place]/fn:suggestion(\"2\")";
-        Collection<Resource> result2 = ldpath.pathQuery(ci.getUri(), path, null);
+        Collection<RDFTerm> result2 = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result2);
         assertFalse(result2.isEmpty());
         assertTrue(result2.size() == 2);
@@ -461,16 +459,16 @@ public class ContentItemBackendTest {
         //    In this example we parse all TextAnnotations
         //NOTE: '.' MUST BE used as first argument in this case
         String path = "fn:textAnnotation(.)/fn:suggestedEntity(.,\"1\")";
-        Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
+        Collection<RDFTerm> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 2);
-        Set<UriRef> expectedValues = new HashSet<UriRef>(
+        Set<IRI> expectedValues = new HashSet<IRI>(
                 Arrays.asList(
-                    new UriRef("http://dbpedia.org/resource/Paris"),
-                    new UriRef("http://dbpedia.org/resource/Bob_Marley")));
-        for(Resource r : result){
-            assertTrue(r instanceof UriRef);
+                    new IRI("http://dbpedia.org/resource/Paris"),
+                    new IRI("http://dbpedia.org/resource/Bob_Marley")));
+        for(RDFTerm r : result){
+            assertTrue(r instanceof IRI);
             log.info("Entity: {}",r);
             assertTrue(expectedValues.remove(r));
         }
@@ -485,7 +483,7 @@ public class ContentItemBackendTest {
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 1);
-        assertEquals(new UriRef("http://dbpedia.org/resource/Paris"),
+        assertEquals(new IRI("http://dbpedia.org/resource/Paris"),
             result.iterator().next());
         
     }
@@ -496,16 +494,16 @@ public class ContentItemBackendTest {
         //    In this example we parse all TextAnnotations
         //NOTE: '.' MUST BE used as first argument in this case
         String path = "fn:textAnnotation()/fn:suggestedEntity(\"1\")";
-        Collection<Resource> result = ldpath.pathQuery(ci.getUri(), path, null);
+        Collection<RDFTerm> result = ldpath.pathQuery(ci.getUri(), path, null);
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 2);
-        Set<UriRef> expectedValues = new HashSet<UriRef>(
+        Set<IRI> expectedValues = new HashSet<IRI>(
                 Arrays.asList(
-                    new UriRef("http://dbpedia.org/resource/Paris"),
-                    new UriRef("http://dbpedia.org/resource/Bob_Marley")));
-        for(Resource r : result){
-            assertTrue(r instanceof UriRef);
+                    new IRI("http://dbpedia.org/resource/Paris"),
+                    new IRI("http://dbpedia.org/resource/Bob_Marley")));
+        for(RDFTerm r : result){
+            assertTrue(r instanceof IRI);
             log.info("Entity: {}",r);
             assertTrue(expectedValues.remove(r));
         }
@@ -520,7 +518,7 @@ public class ContentItemBackendTest {
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.size() == 1);
-        assertEquals(new UriRef("http://dbpedia.org/resource/Paris"),
+        assertEquals(new IRI("http://dbpedia.org/resource/Paris"),
             result.iterator().next());
         
     }

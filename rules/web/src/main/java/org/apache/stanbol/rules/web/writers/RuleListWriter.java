@@ -31,7 +31,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.rdfjson.serializer.RdfJsonSerializingProvider;
@@ -239,7 +239,7 @@ public class RuleListWriter implements MessageBodyWriter<RuleList> {
                 }
             } else if (mediaType.toString().equals(KRFormat.RDF_JSON)) {
 
-                TripleCollection mGraph = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(ontology);
+                Graph mGraph = OWLAPIToClerezzaConverter.owlOntologyToClerezzaGraph(ontology);
 
                 RdfJsonSerializingProvider provider = new RdfJsonSerializingProvider();
                 provider.serialize(out, mGraph, SupportedFormat.RDF_JSON);

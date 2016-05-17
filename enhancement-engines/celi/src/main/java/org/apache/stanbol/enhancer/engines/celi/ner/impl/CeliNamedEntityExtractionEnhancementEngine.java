@@ -39,15 +39,15 @@ import java.util.Set;
 
 import javax.xml.soap.SOAPException;
 
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.clerezza.rdf.core.NoConvertorException;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -98,7 +98,7 @@ public class CeliNamedEntityExtractionEnhancementEngine extends AbstractEnhancem
 	 */
 	public static final Literal LANG_ID_ENGINE_NAME = LiteralFactory.getInstance().createTypedLiteral("org.apache.stanbol.enhancer.engines.celi.langid.impl.CeliLanguageIdentifierEnhancementEngine");
 
-	private static Map<String, UriRef> entityTypes = new HashMap<String, UriRef>();
+	private static Map<String, IRI> entityTypes = new HashMap<String, IRI>();
 	static {
 		entityTypes.put("pers", OntologicalClasses.DBPEDIA_PERSON);
 		entityTypes.put("PER", OntologicalClasses.DBPEDIA_PERSON);
@@ -248,7 +248,7 @@ public class CeliNamedEntityExtractionEnhancementEngine extends AbstractEnhancem
 
 	@Override
 	public void computeEnhancements(ContentItem ci) throws EngineException {
-		Entry<UriRef, Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMTYPES);
+		Entry<IRI, Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMTYPES);
 		if (contentPart == null) {
 			throw new IllegalStateException("No ContentPart with Mimetype '" + TEXT_PLAIN_MIMETYPE + "' found for ContentItem " + ci.getUri() + ": This is also checked in the canEnhance method! -> This "
 					+ "indicated an Bug in the implementation of the " + "EnhancementJobManager!");
@@ -272,11 +272,11 @@ public class CeliNamedEntityExtractionEnhancementEngine extends AbstractEnhancem
 			List<NamedEntity> lista = this.client.extractEntities(text, language);
 			LiteralFactory literalFactory = LiteralFactory.getInstance();
 
-			MGraph g = ci.getMetadata();
+			Graph g = ci.getMetadata();
 
 			for (NamedEntity ne : lista) {
 				try {
-					UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
+					IRI textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
 					//add selected text as PlainLiteral in the language extracted from the text
 					g.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT, 
 					    new PlainLiteralImpl(ne.getFormKind(),lang)));
@@ -307,7 +307,7 @@ public class CeliNamedEntityExtractionEnhancementEngine extends AbstractEnhancem
 		return supportedLangs.contains(language);
 	}
 
-	private Resource getEntityRefForType(String type) {
+	private RDFTerm getEntityRefForType(String type) {
 		if (!entityTypes.containsKey(type))
 			return OntologicalClasses.SKOS_CONCEPT;
 		else

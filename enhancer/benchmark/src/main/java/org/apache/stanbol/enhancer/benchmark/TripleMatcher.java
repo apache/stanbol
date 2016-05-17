@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.enhancer.benchmark;
 
-import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.commons.rdf.Triple;
 
 /** TripleMatcher is used to count how many Triples
  *  match a given statement in the benchmark tool.

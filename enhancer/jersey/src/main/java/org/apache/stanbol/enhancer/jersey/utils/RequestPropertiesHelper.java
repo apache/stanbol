@@ -23,8 +23,8 @@ import java.util.Set;
 
 import javax.ws.rs.QueryParam;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
@@ -43,7 +43,7 @@ public final class RequestPropertiesHelper {
     /**
      * @see ContentItemHelper#REQUEST_PROPERTIES_URI
      */
-    public static final UriRef REQUEST_PROPERTIES_URI =
+    public static final IRI REQUEST_PROPERTIES_URI =
             ContentItemHelper.REQUEST_PROPERTIES_URI;
     /**
      * Boolean switch parsed as {@link QueryParam} tha allows to deactivate the
@@ -52,8 +52,8 @@ public final class RequestPropertiesHelper {
     public static final String OMIT_METADATA = "stanbol.enhancer.web.omitMetadata";
     /**
      * {@link Set Set&lt;String&gt;} containing all the URIs of the
-     * {@link ContentItem#getPart(UriRef, Class) ContentParts} representing 
-     * RDF data (compatible to Clerezza {@link TripleCollection}). If the 
+     * {@link ContentItem#getPart(IRI, Class) ContentParts} representing 
+     * RDF data (compatible to Clerezza {@link Graph}). If the 
      * returned set contains '*' than all such content parts need to be returned.<p>
      * NOTE: This can also be used to include the Request Properties
      * as "applciation/json" in the Response by adding this
@@ -74,7 +74,7 @@ public final class RequestPropertiesHelper {
     public static final String OUTPUT_CONTENT = "stanbol.enhancer.web.outputContent";
     /**
      * This allows to copy the {@link ExecutionMetadata} and {@link ExecutionPlan}
-     * data stored in a {@link ContentItem#getPart(UriRef, Class) contentPart} with
+     * data stored in a {@link ContentItem#getPart(IRI, Class) contentPart} with
      * the URI {@link ExecutionMetadata#CHAIN_EXECUTION} over to the
      * {@link ContentItem#getMetadata() metadata} of the content item.<p>
      * This feature is intended to allow users to retrieve such meta information
@@ -88,7 +88,7 @@ public final class RequestPropertiesHelper {
      */
     public static final String RDF_FORMAT = "stanbol.enhancer.web.rdfFormat";
     /**
-     * {@link Set Set&lt;String&gt;} containing all the {@link UriRef}s of 
+     * {@link Set Set&lt;String&gt;} containing all the {@link IRI}s of 
      * {@link ContentItem#getPart(int, Class) ContentItem.getPart}(uri,{@link Blob})
      * that where parsed with the request.
      */

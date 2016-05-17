@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.rules.manager;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.util.AtomList;
@@ -30,7 +30,7 @@ import org.apache.stanbol.rules.base.api.util.AtomList;
  */
 public class RecipeRule extends RuleImpl {
 
-    public RecipeRule(Recipe recipe, UriRef ruleID, String ruleName, AtomList body, AtomList head) {
+    public RecipeRule(Recipe recipe, IRI ruleID, String ruleName, AtomList body, AtomList head) {
         super(ruleID, ruleName, body, head);
 
         bindToRecipe(recipe);

@@ -20,8 +20,8 @@ import java.util.ConcurrentModificationException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 
@@ -54,7 +54,7 @@ public interface EntityDereferencer {
     ExecutorService getExecutor();
 
     /**
-     * Dereferences the Entity with the parsed {@link UriRef} by copying the
+     * Dereferences the Entity with the parsed {@link IRI} by copying the
      * data to the parsed graph
      * @param graph the graph to add the dereferenced entity 
      * @param entity the uri of the Entity to dereference
@@ -72,7 +72,7 @@ public interface EntityDereferencer {
      * @throws DereferenceException on any error while dereferencing the
      * requested Entity
      */
-    boolean dereference(UriRef entity, MGraph graph, Lock writeLock, 
+    boolean dereference(IRI entity, Graph graph, Lock writeLock, 
             DereferenceContext dereferenceContext) throws DereferenceException;
         
 }

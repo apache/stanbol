@@ -217,7 +217,7 @@ public class BundleInstaller implements BundleListener {
                 while (resources.hasMoreElements()) {
                     URL url = resources.nextElement();
                     if(url != null){
-                        log.debug("  > installable Resource {}",url);
+                        log.debug("  > installable RDFTerm {}",url);
                         InstallableResource resource = createInstallableResource(bundle, path, url);
                         if (resource != null) {
                             updated.add(resource);

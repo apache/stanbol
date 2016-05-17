@@ -30,13 +30,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.clerezza.rdf.core.BNode;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.BlankNode;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.ontologies.RDF;
@@ -379,7 +379,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
     
     @Test
     public void testContentBeforeMetadata() throws IOException{
-        final UriRef contentItemId = new UriRef("http://www.example.com/test.html");
+        final IRI contentItemId = new IRI("http://www.example.com/test.html");
         String rdfContentType = SupportedFormat.RDF_XML;
         String rdfContent = getDummyRdfMetadata(contentItemId, rdfContentType);
         MultipartEntityBuilder ciBuilder = MultipartEntityBuilder.create();
@@ -399,7 +399,7 @@ public class MultipartRequestTest extends EnhancerTestBase {
     }
     @Test
     public void testMissingContent() throws IOException{
-        final UriRef contentItemId = new UriRef("http://www.example.com/test.html");
+        final IRI contentItemId = new IRI("http://www.example.com/test.html");
         String rdfContentType = SupportedFormat.RDF_XML;
         String rdfContent = getDummyRdfMetadata(contentItemId, rdfContentType);
         MultipartEntityBuilder ciBuilder = MultipartEntityBuilder.create();
@@ -422,9 +422,9 @@ public class MultipartRequestTest extends EnhancerTestBase {
      * @param rdfContentType
      * @return
      */
-    private String getDummyRdfMetadata(final UriRef contentItemId, String rdfContentType) {
-        MGraph metadata = new SimpleMGraph();
-        metadata.add(new TripleImpl(new BNode(), Properties.ENHANCER_EXTRACTED_FROM, contentItemId));
+    private String getDummyRdfMetadata(final IRI contentItemId, String rdfContentType) {
+        Graph metadata = new SimpleGraph();
+        metadata.add(new TripleImpl(new BlankNode(), Properties.ENHANCER_EXTRACTED_FROM, contentItemId));
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         serializer.serialize(out, metadata, rdfContentType);
         String rdfContent = new String(out.toByteArray(),UTF8);
@@ -440,9 +440,9 @@ public class MultipartRequestTest extends EnhancerTestBase {
     @Test
     public void testUploadWithMetadata() throws IOException {
         //create the metadata
-        Resource user = new PlainLiteralImpl("Rupert Westenthaler");
-        final UriRef contentItemId = new UriRef("http://www.example.com/test.html");
-        MGraph metadata = new SimpleMGraph();
+        RDFTerm user = new PlainLiteralImpl("Rupert Westenthaler");
+        final IRI contentItemId = new IRI("http://www.example.com/test.html");
+        Graph metadata = new SimpleGraph();
         addTagAsTextAnnotation(metadata, contentItemId, 
             "Germany",DBPEDIA_PLACE, user);
         addTagAsTextAnnotation(metadata, contentItemId, 
@@ -515,9 +515,9 @@ public class MultipartRequestTest extends EnhancerTestBase {
      * @param user the user that created the tag
      * @return the uri of the created annotation
      */
-    private static final UriRef addTagAsTextAnnotation(MGraph graph, UriRef contentItem, 
-                                                       String tag, UriRef tagType, Resource user){
-        UriRef ta = new UriRef("urn:user-annotation:"+EnhancementEngineHelper.randomUUID());
+    private static final IRI addTagAsTextAnnotation(Graph graph, IRI contentItem, 
+                                                       String tag, IRI tagType, RDFTerm user){
+        IRI ta = new IRI("urn:user-annotation:"+EnhancementEngineHelper.randomUUID());
         graph.add(new TripleImpl(ta, RDF.type, TechnicalClasses.ENHANCER_TEXTANNOTATION));
         graph.add(new TripleImpl(ta, Properties.ENHANCER_EXTRACTED_FROM,contentItem));
         if(tagType != null){

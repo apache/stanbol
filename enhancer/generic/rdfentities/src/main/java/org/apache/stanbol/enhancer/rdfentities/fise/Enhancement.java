@@ -19,7 +19,7 @@ package org.apache.stanbol.enhancer.rdfentities.fise;
 import java.util.Collection;
 import java.util.Date;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.rdfentities.Rdf;
 import org.apache.stanbol.enhancer.rdfentities.RdfEntity;
 
@@ -30,10 +30,10 @@ import org.apache.stanbol.enhancer.rdfentities.RdfEntity;
  * To create an instance of this interface use the following code
  * <code><pre>
  *  ContentItem ci;
- *     MGraph graph = ci.getMetadata();
+ *     Graph graph = ci.getMetadata();
  *  RdfEntityFactory factory = RdfEntityFactory.createInstance(graph);
  *    String enhancementId = "http://wwww.example.com/iks-project/enhancer/example-enhancement";
- *    UriRef enhancementNode = new UriRef(enhancementId);
+ *    IRI enhancementNode = new IRI(enhancementId);
  *    Enhancement enhancement = factory.getProxy(enhancementNode, Enhancement.class);
  *    enhancement.setCreator("Rupert Westenthaler");
  *  enhancement.setCreated(new Date());
@@ -46,9 +46,9 @@ import org.apache.stanbol.enhancer.rdfentities.RdfEntity;
 public interface Enhancement extends RdfEntity{
 
     @Rdf(id="http://purl.org/dc/terms/creator")
-    UriRef getCreator();
+    IRI getCreator();
     @Rdf(id="http://purl.org/dc/terms/creator")
-    void setCreator(UriRef creator);
+    void setCreator(IRI creator);
 
     @Rdf(id="http://purl.org/dc/terms/created")
     void setCreated(Date date);
@@ -58,7 +58,7 @@ public interface Enhancement extends RdfEntity{
 //    @Rdf(id="http://purl.org/dc/terms/type")
 //    void setDcType(Collection<URI> types);
     @Rdf(id="http://purl.org/dc/terms/type")
-    Collection<UriRef> getDcType();
+    Collection<IRI> getDcType();
 
     @Rdf(id="http://fise.iks-project.eu/ontology/confidence")
     Double getConfidence();
@@ -66,9 +66,9 @@ public interface Enhancement extends RdfEntity{
     void setConfidence(Double value);
 
     @Rdf(id="http://fise.iks-project.eu/ontology/extracted-from")
-    UriRef getExtractedFrom();
+    IRI getExtractedFrom();
     @Rdf(id="http://fise.iks-project.eu/ontology/extracted-from")
-    void setExtractedFrom(UriRef contentItem);
+    void setExtractedFrom(IRI contentItem);
 
     @Rdf(id="http://purl.org/dc/terms/requires")
     Collection<Enhancement> getRequires();

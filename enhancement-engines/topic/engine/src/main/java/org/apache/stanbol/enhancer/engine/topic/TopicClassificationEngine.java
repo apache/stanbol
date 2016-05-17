@@ -35,14 +35,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -479,7 +479,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
 
     @Override
     public void computeEnhancements(ContentItem ci) throws EngineException {
-        Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
+        Entry<IRI,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
         if (contentPart == null) {
             throw new IllegalStateException(
                     "No ContentPart with a supported Mime Type" + "found for ContentItem " + ci.getUri()
@@ -507,7 +507,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 contentPart.getKey(), ci.getUri());
             return;
         }
-        MGraph metadata = ci.getMetadata();
+        Graph metadata = ci.getMetadata();
         List<TopicSuggestion> topics;
         try {
             topics = suggestTopics(text);
@@ -517,20 +517,20 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
         } catch (ClassifierException e) {
             throw new EngineException(e);
         }
-        UriRef precision = new UriRef(NamespaceEnum.fise + "classifier/precision");
-        UriRef recall = new UriRef(NamespaceEnum.fise + "classifier/recall");
-        UriRef f1 = new UriRef(NamespaceEnum.fise + "classifier/f1");
+        IRI precision = new IRI(NamespaceEnum.fise + "classifier/precision");
+        IRI recall = new IRI(NamespaceEnum.fise + "classifier/recall");
+        IRI f1 = new IRI(NamespaceEnum.fise + "classifier/f1");
 
         LiteralFactory lf = LiteralFactory.getInstance();
         ci.getLock().writeLock().lock();
         try {
             // Global text annotation to attach all the topic annotation to it.
-            UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
+            IRI textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
             metadata.add(new TripleImpl(textAnnotation,
                     org.apache.stanbol.enhancer.servicesapi.rdf.Properties.DC_TYPE,
                     OntologicalClasses.SKOS_CONCEPT));
             for (TopicSuggestion topic : topics) {
-                UriRef enhancement = EnhancementEngineHelper.createEntityEnhancement(ci, this);
+                IRI enhancement = EnhancementEngineHelper.createEntityEnhancement(ci, this);
                 metadata.add(new TripleImpl(enhancement,
                         org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE,
                         TechnicalClasses.ENHANCER_TOPICANNOTATION));
@@ -540,7 +540,7 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
                 // add link to entity
                 metadata.add(new TripleImpl(enhancement,
                         org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE,
-                        new UriRef(topic.conceptUri)));
+                        new IRI(topic.conceptUri)));
                 metadata.add(new TripleImpl(enhancement,
                         org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_TYPE,
                         OntologicalClasses.SKOS_CONCEPT));
@@ -1509,25 +1509,25 @@ public class TopicClassificationEngine extends ConfiguredSolrCoreTracker impleme
     }
 
     @Override
-    public int importConceptsFromGraph(Graph graph, UriRef conceptClass, UriRef broaderProperty) throws ClassifierException {
+    public int importConceptsFromGraph(ImmutableGraph graph, IRI conceptClass, IRI broaderProperty) throws ClassifierException {
         int importedCount = 0;
         Iterator<Triple> conceptIterator = graph.filter(null,
             org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE, conceptClass);
         while (conceptIterator.hasNext()) {
             Triple conceptTriple = conceptIterator.next();
-            if (!(conceptTriple.getSubject() instanceof UriRef)) {
+            if (!(conceptTriple.getSubject() instanceof IRI)) {
                 continue;
             }
-            UriRef conceptUri = (UriRef) conceptTriple.getSubject();
+            IRI conceptUri = (IRI) conceptTriple.getSubject();
             GraphNode node = new GraphNode(conceptUri, graph);
             List<String> broaderConcepts = new ArrayList<String>();
             // TODO: use OWL property inference on sub-properties here instead of explicit
             // property filter
             Iterator<GraphNode> broaderIterator = node.getObjectNodes(broaderProperty);
             while (broaderIterator.hasNext()) {
-                Resource node2 = broaderIterator.next().getNode();
-                if (node2 instanceof UriRef) {
-                    broaderConcepts.add(((UriRef) node2).getUnicodeString());
+                RDFTerm node2 = broaderIterator.next().getNode();
+                if (node2 instanceof IRI) {
+                    broaderConcepts.add(((IRI) node2).getUnicodeString());
                 }
             }
             addConcept(conceptUri.getUnicodeString(), broaderConcepts);

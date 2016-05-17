@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.felix.scr.annotations.Property;
 
 /**
@@ -60,17 +60,17 @@ public interface Constants {
 	 * Definition of some Spotlight specific properties added to
 	 * fise:EntityAnnotations created by this Engine
 	 */
-	UriRef PROPERTY_CONTEXTUAL_SCORE = new UriRef(
+	IRI PROPERTY_CONTEXTUAL_SCORE = new IRI(
 			SPOTLIGHT_NAME_SPACE + "contextualScore");
-	UriRef PROPERTY_PERCENTAGE_OF_SECOND_RANK = new UriRef(
+	IRI PROPERTY_PERCENTAGE_OF_SECOND_RANK = new IRI(
 			SPOTLIGHT_NAME_SPACE + "percentageOfSecondRank");
-	UriRef PROPERTY_SUPPORT = new UriRef(
+	IRI PROPERTY_SUPPORT = new IRI(
 			SPOTLIGHT_NAME_SPACE + "support");
-	UriRef PROPERTY_PRIOR_SCORE = new UriRef(
+	IRI PROPERTY_PRIOR_SCORE = new IRI(
 			SPOTLIGHT_NAME_SPACE + "priorScore");
-	UriRef PROPERTY_FINAL_SCORE = new UriRef(
+	IRI PROPERTY_FINAL_SCORE = new IRI(
 			SPOTLIGHT_NAME_SPACE + "finalScore");
-	UriRef PROPERTY_SIMILARITY_SCORE = new UriRef(
+	IRI PROPERTY_SIMILARITY_SCORE = new IRI(
 			SPOTLIGHT_NAME_SPACE + "similarityScore");
 	
 	Charset UTF8 = Charset.forName("UTF-8");

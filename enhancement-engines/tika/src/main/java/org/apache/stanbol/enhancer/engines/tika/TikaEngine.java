@@ -43,10 +43,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -298,10 +298,10 @@ public class TikaEngine
                 }
             }
             String random = randomUUID().toString();
-            UriRef textBlobUri = new UriRef("urn:tika:text:"+random);
+            IRI textBlobUri = new IRI("urn:tika:text:"+random);
             ci.addPart(textBlobUri, plainTextSink.getBlob());
             if(xhtmlHandler != null){
-                UriRef xhtmlBlobUri = new UriRef("urn:tika:xhtml:"+random);
+                IRI xhtmlBlobUri = new IRI("urn:tika:xhtml:"+random);
                 ci.addPart(xhtmlBlobUri,  xhtmlSink.getBlob());
             }
             //add the extracted metadata
@@ -312,15 +312,15 @@ public class TikaEngine
             }
             ci.getLock().writeLock().lock();
             try {
-                MGraph graph = ci.getMetadata();
-                UriRef id = ci.getUri();
+                Graph graph = ci.getMetadata();
+                IRI id = ci.getUri();
                 Set<String> mapped = ontologyMappings.apply(graph, id, metadata);
                 if(includeUnmappedProperties){
                     Set<String> unmapped = new HashSet<String>(Arrays.asList(metadata.names()));
                     unmapped.removeAll(mapped);
                     for(String name : unmapped){
                         if(name.indexOf(':') >=0 || includeAllUnmappedProperties){ //only mapped
-                            UriRef prop = new UriRef(new StringBuilder(TIKA_URN_PREFIX).append(name).toString());
+                            IRI prop = new IRI(new StringBuilder(TIKA_URN_PREFIX).append(name).toString());
                             for(String value : metadata.getValues(name)){
                                 //TODO: without the Property for the name we have no datatype
                                 //      information ... so we add PlainLiterals for now

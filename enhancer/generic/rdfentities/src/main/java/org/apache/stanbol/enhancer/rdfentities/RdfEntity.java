@@ -16,9 +16,9 @@
 */
 package org.apache.stanbol.enhancer.rdfentities;
 
-import org.apache.clerezza.rdf.core.BNode;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.BlankNode;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.IRI;
 
 /**
  * Super interface for all interfaces using the {@link RdfEntityFactory} to
@@ -31,9 +31,9 @@ public interface RdfEntity {
     /**
      * Getter for the RDF node represented by the Proxy.
      *
-     * @return the node representing the proxy. Typically an {@link UriRef} but
-     * could be also a {@link BNode}
+     * @return the node representing the proxy. Typically an {@link IRI} but
+     * could be also a {@link BlankNode}
      */
-    NonLiteral getId();
+    BlankNodeOrIRI getId();
 
 }

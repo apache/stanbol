@@ -16,7 +16,7 @@
 */
 package org.apache.stanbol.enhancer.nlp.pos.olia;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.nlp.model.tag.TagSet;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.Pos;
@@ -37,10 +37,10 @@ public final class Spanish {
     static {
         //TODO: define constants for annotation model and linking model
         PAROLE.getProperties().put("olia.annotationModel", 
-            new UriRef("http://purl.org/olia/parole_es_cat.owl"));
+            new IRI("http://purl.org/olia/parole_es_cat.owl"));
 // NO linking model
 //        PAROLE.getProperties().put("olia.linkingModel", 
-//            new UriRef("http://purl.org/olia/???"));
+//            new IRI("http://purl.org/olia/???"));
         PAROLE.addTag(new PosTag("AO", LexicalCategory.Adjective));
         PAROLE.addTag(new PosTag("AQ", Pos.QualifierAdjective));
         PAROLE.addTag(new PosTag("CC", Pos.CoordinatingConjunction));

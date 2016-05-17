@@ -36,9 +36,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.sparql.QueryEngine;
 import org.apache.felix.scr.annotations.Component;
@@ -181,7 +181,7 @@ public class GenericEnhancerUiResource extends AbstractEnhancerResource {
      */
     public Set<ExecutionNode> getExecutionNodes() {
         if (_executionNodes == null) {
-            Graph ep;
+            ImmutableGraph ep;
             try {
                 ep = chain.getExecutionPlan();
             } catch (ChainException e) {
@@ -189,11 +189,11 @@ public class GenericEnhancerUiResource extends AbstractEnhancerResource {
             }
             if (ep != null) {
                 _executionNodes = new LinkedHashSet<ExecutionNode>();
-                Set<NonLiteral> processed = new HashSet<NonLiteral>();
-                Set<NonLiteral> next;
+                Set<BlankNodeOrIRI> processed = new HashSet<BlankNodeOrIRI>();
+                Set<BlankNodeOrIRI> next;
                 do {
                     next = ExecutionPlanHelper.getExecutable(ep, processed);
-                    for (NonLiteral node : next) {
+                    for (BlankNodeOrIRI node : next) {
                         _executionNodes.add(new ExecutionNode(ep, node));
                     }
                     processed.addAll(next);
@@ -236,12 +236,12 @@ public class GenericEnhancerUiResource extends AbstractEnhancerResource {
     }
     public class ExecutionNode {
 
-        private final NonLiteral node;
-        private final TripleCollection ep;
+        private final BlankNodeOrIRI node;
+        private final Graph ep;
         private final boolean optional;
         private final String engineName;
 
-        public ExecutionNode(TripleCollection executionPlan, NonLiteral node) {
+        public ExecutionNode(Graph executionPlan, BlankNodeOrIRI node) {
             this.node = node;
             this.ep = executionPlan;
             this.optional = ExecutionPlanHelper.isOptional(ep, node);

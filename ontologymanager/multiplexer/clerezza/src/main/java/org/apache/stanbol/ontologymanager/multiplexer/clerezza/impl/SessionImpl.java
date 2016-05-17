@@ -22,10 +22,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.stanbol.ontologymanager.core.scope.ScopeManagerImpl;
 import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider;
@@ -38,7 +37,6 @@ import org.apache.stanbol.ontologymanager.servicesapi.session.SessionEvent.Opera
 import org.apache.stanbol.ontologymanager.servicesapi.session.SessionListener;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
@@ -74,7 +72,7 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
      * @param sessionID
      *            the IRI to be set as unique identifier for this session
      */
-    public SessionImpl(String sessionID, IRI namespace, OntologyProvider<?> ontologyProvider) {
+    public SessionImpl(String sessionID, org.semanticweb.owlapi.model.IRI namespace, OntologyProvider<?> ontologyProvider) {
         super(sessionID, namespace, ontologyProvider);
         backwardPathLength = 0;
         // setNamespace(namespace);
@@ -93,17 +91,17 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
         fireScopeAppended(scopeId);
     }
 
-    private void attachScopeImportsClerezza(TripleCollection target, IRI prefix) {
-        UriRef iri = new UriRef(prefix + _id);
+    private void attachScopeImportsClerezza(Graph target, org.semanticweb.owlapi.model.IRI prefix) {
+        IRI iri = new IRI(prefix + _id);
         String scopePrefix = prefix.toString();
         scopePrefix = scopePrefix.substring(0, scopePrefix.lastIndexOf("/" + shortName + "/")) + "/ontology/";
         for (String scopeID : attachedScopes) {
-            UriRef physIRI = new UriRef(scopePrefix + scopeID);
+            IRI physIRI = new IRI(scopePrefix + scopeID);
             target.add(new TripleImpl(iri, OWL.imports, physIRI));
         }
     }
 
-    private void attachScopeImportsOwlApi(OWLOntology target, IRI prefix) {
+    private void attachScopeImportsOwlApi(OWLOntology target, org.semanticweb.owlapi.model.IRI prefix) {
         if (!attachedScopes.isEmpty()) {
             String scopePrefix = prefix.toString();
             scopePrefix = scopePrefix.substring(0, scopePrefix.lastIndexOf("/" + shortName + "/"))
@@ -113,7 +111,7 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
             OWLDataFactory df = ontologyManager.getOWLDataFactory();
             // Add import declarations for attached scopes.
             for (String scopeID : attachedScopes) {
-                IRI physIRI = IRI.create(scopePrefix + scopeID);
+                org.semanticweb.owlapi.model.IRI physIRI = org.semanticweb.owlapi.model.IRI.create(scopePrefix + scopeID);
                 changes.add(new AddImport(target, df.getOWLImportsDeclaration(physIRI)));
             }
             // Commit
@@ -161,8 +159,8 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
     }
 
     @Override
-    protected MGraph exportToMGraph(boolean merge, IRI universalPrefix) {
-        MGraph mg = super.exportToMGraph(merge, universalPrefix);
+    protected Graph exportToGraph(boolean merge, org.semanticweb.owlapi.model.IRI universalPrefix) {
+        Graph mg = super.exportToGraph(merge, universalPrefix);
         attachScopeImportsClerezza(mg, universalPrefix);
         return mg;
     }
@@ -171,10 +169,10 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
      * TODO support merging for attached scopes as well?
      */
     @Override
-    protected OWLOntology exportToOWLOntology(boolean merge, IRI universalPrefix) {
+    protected OWLOntology exportToOWLOntology(boolean merge, org.semanticweb.owlapi.model.IRI universalPrefix) {
         OWLOntology o = super.exportToOWLOntology(merge, universalPrefix);
 
-        IRI iri = o.getOntologyID().getOntologyIRI();
+        org.semanticweb.owlapi.model.IRI iri = o.getOntologyID().getOntologyIRI();
 
         if (merge) { // Re-merge
             ScopeManager onm = ScopeManagerImpl.get(); // FIXME try to avoid this.
@@ -242,8 +240,8 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
     }
 
     @Override
-    protected MGraph getOntologyAsMGraph(OWLOntologyID ontologyId, boolean merge, IRI universalPrefix) {
-        MGraph o = super.getOntologyAsMGraph(ontologyId, merge, universalPrefix);
+    protected Graph getOntologyAsGraph(OWLOntologyID ontologyId, boolean merge, org.semanticweb.owlapi.model.IRI universalPrefix) {
+        Graph o = super.getOntologyAsGraph(ontologyId, merge, universalPrefix);
         switch (getConnectivityPolicy()) {
             case LOOSE:
                 break;
@@ -259,7 +257,7 @@ public class SessionImpl extends AbstractOntologyCollectorImpl implements Sessio
     @Override
     protected OWLOntology getOntologyAsOWLOntology(OWLOntologyID ontologyId,
                                                    boolean merge,
-                                                   IRI universalPrefix) {
+                                                   org.semanticweb.owlapi.model.IRI universalPrefix) {
         OWLOntology o = super.getOntologyAsOWLOntology(ontologyId, merge, universalPrefix);
         switch (getConnectivityPolicy()) {
             case LOOSE:

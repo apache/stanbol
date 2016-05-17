@@ -28,7 +28,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 
-//import org.apache.clerezza.rdf.core.Resource;
+//import org.apache.clerezza.commons.rdf.RDFTerm;
 
 /**
  * Stores the surface forms given by DBPedia Spotlight Candidates.

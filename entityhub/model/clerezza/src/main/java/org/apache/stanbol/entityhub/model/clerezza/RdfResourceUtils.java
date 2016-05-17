@@ -27,19 +27,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Literal;
+
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.SimpleLiteralFactory;
 import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
 
 /**
- * Utilities to create {@link Resource} instances for Java Objects.
+ * Utilities to create {@link RDFTerm} instances for Java Objects.
  * @author Rupert Westenthaler
  *
  */
@@ -106,21 +104,21 @@ public final class RdfResourceUtils {
      * by the {@link XsdDataTypeEnum}.
      */
 
-    public static final Map<UriRef, XsdDataTypeEnum> XSD_DATATYPE_VALUE_MAPPING;
+    public static final Map<IRI, XsdDataTypeEnum> XSD_DATATYPE_VALUE_MAPPING;
     /**
      * Unmodifiable containing all xsd data types that can be converted to
      * {@link Text} (without language).
      */
-    public static final Set<UriRef> STRING_DATATYPES;
+    public static final Set<IRI> STRING_DATATYPES;
 
     public static final Map<Class<?>, XsdDataTypeEnum> JAVA_OBJECT_XSD_DATATYPE_MAPPING;
     static {
-        Map<UriRef,XsdDataTypeEnum> dataTypeMappings = new HashMap<UriRef, XsdDataTypeEnum>();
+        Map<IRI,XsdDataTypeEnum> dataTypeMappings = new HashMap<IRI, XsdDataTypeEnum>();
         Map<Class<?>,XsdDataTypeEnum> objectMappings = new HashMap<Class<?>, XsdDataTypeEnum>();
-        Set<UriRef> stringDataTypes = new HashSet<UriRef>();
+        Set<IRI> stringDataTypes = new HashSet<IRI>();
         stringDataTypes.add(null);//map missing dataTypes to String
         for(XsdDataTypeEnum mapping : XsdDataTypeEnum.values()){
-            UriRef uri = new UriRef(mapping.getUri());
+            IRI uri = new IRI(mapping.getUri());
             dataTypeMappings.put(uri,mapping);
             if(mapping.getMappedClass() != null && String.class.isAssignableFrom(mapping.getMappedClass())){
                 stringDataTypes.add(uri);
@@ -195,10 +193,9 @@ public final class RdfResourceUtils {
         List<String> results = new ArrayList<String>();
         while (literals.hasNext()) {
             Literal act = literals.next();
-            if (act instanceof PlainLiteral) {
-                PlainLiteral pl = (PlainLiteral) act;
-                if (languageSet.contains(pl.getLanguage())) {
-                    results.add(0, pl.getLexicalForm()); //add to front
+            if (act.getLanguage() != null) {
+                if (languageSet.contains(act.getLanguage())) {
+                    results.add(0, act.getLexicalForm()); //add to front
                 }
             } else if (containsNull) { //add also all types Literals, because the do not define an language!
                 results.add(act.getLexicalForm()); //append to the end
@@ -213,7 +210,7 @@ public final class RdfResourceUtils {
      * @param uriRefObjects iterator over URIs
      * @return the unicode representation
      */
-    public static Collection<String> getUriRefValues(Iterator<UriRef> uriRefObjects) {
+    public static Collection<String> getIRIValues(Iterator<IRI> uriRefObjects) {
         Collection<String> results = new ArrayList<String>();
         while (uriRefObjects.hasNext()) {
             results.add(uriRefObjects.next().getUnicodeString());
@@ -232,12 +229,12 @@ public final class RdfResourceUtils {
      * @param lang the language of the literal
      * @return the Literal
      */
-    public static PlainLiteral createLiteral(String literalValue, String lang) {
+    public static Literal createLiteral(String literalValue, String lang) {
         Language language = (lang != null && lang.length() > 0) ? new Language(lang) : null;
         return new PlainLiteralImpl(literalValue, language);
     }
 
-    public static TypedLiteral createLiteral(Object object) {
+    public static Literal createLiteral(Object object) {
         return literalFactory.createTypedLiteral(object);
     }
 

@@ -16,7 +16,7 @@
 */
 package org.apache.stanbol.enhancer.nlp.json.valuetype.impl;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Property;
@@ -49,7 +49,7 @@ public class NerTagSupport implements ValueTypeParser<NerTag>, ValueTypeSerializ
         }
         JsonNode uri = jValue.path("uri");
         if(uri.isTextual()){
-            return new NerTag(tag.getTextValue(), new UriRef(uri.getTextValue()));
+            return new NerTag(tag.getTextValue(), new IRI(uri.getTextValue()));
         } else {
             return new NerTag(tag.getTextValue());
         }

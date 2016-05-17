@@ -21,11 +21,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.apache.clerezza.rdf.core.Language;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
@@ -67,9 +67,9 @@ public class EnhancementEngineHelperTest {
         Language lang = new Language("en");
         int start = content.indexOf("Stanbol");
         int end = start+"Stanbol Enhancer".length();
-        UriRef ciUri = new UriRef("http://www.example.org/contentItem#1");
-        MGraph metadata = new IndexedMGraph();
-        UriRef ta = EnhancementEngineHelper.createTextEnhancement(metadata, dummyEngine, ciUri);
+        IRI ciUri = new IRI("http://www.example.org/contentItem#1");
+        Graph metadata = new IndexedGraph();
+        IRI ta = EnhancementEngineHelper.createTextEnhancement(metadata, dummyEngine, ciUri);
         EnhancementEngineHelper.setOccurrence(metadata, ta, content, start, end, lang, -1, true);
         Assert.assertEquals("The ", EnhancementEngineHelper.getString(
             metadata, ta,Properties.ENHANCER_SELECTION_PREFIX));

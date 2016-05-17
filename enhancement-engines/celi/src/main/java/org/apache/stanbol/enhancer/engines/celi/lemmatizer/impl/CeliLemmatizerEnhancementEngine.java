@@ -34,13 +34,13 @@ import java.util.Vector;
 
 import javax.xml.soap.SOAPException;
 
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -86,7 +86,7 @@ import org.slf4j.LoggerFactory;
 })
 public class CeliLemmatizerEnhancementEngine extends AbstractEnhancementEngine<IOException, RuntimeException> implements EnhancementEngine, ServiceProperties {
 	// TODO: check if it is OK to define new properties in the FISE namespace
-	public static final UriRef hasLemmaForm = new UriRef("http://fise.iks-project.eu/ontology/hasLemmaForm");
+	public static final IRI hasLemmaForm = new IRI("http://fise.iks-project.eu/ontology/hasLemmaForm");
 
     /**
      * This ensures that no connections to external services are made if Stanbol is started in offline mode as the OnlineMode service will only be available if OfflineMode is deactivated.
@@ -185,7 +185,7 @@ public class CeliLemmatizerEnhancementEngine extends AbstractEnhancementEngine<I
 					+ "implementation of the " + "EnhancementJobManager!");
 		}
 
-		Entry<UriRef, Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMTYPES);
+		Entry<IRI, Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMTYPES);
 		if (contentPart == null) {
 			throw new IllegalStateException("No ContentPart with Mimetype '" + TEXT_PLAIN_MIMETYPE + "' found for ContentItem " + ci.getUri() + ": This is also checked in the canEnhance method! -> This "
 					+ "indicated an Bug in the implementation of the " + "EnhancementJobManager!");
@@ -201,7 +201,7 @@ public class CeliLemmatizerEnhancementEngine extends AbstractEnhancementEngine<I
 			return;
 		}
 
-		MGraph graph = ci.getMetadata();
+		Graph graph = ci.getMetadata();
 
 		if (this.completeMorphoAnalysis) {
 			this.addMorphoAnalysisEnhancement(ci, text, language, graph);
@@ -210,7 +210,7 @@ public class CeliLemmatizerEnhancementEngine extends AbstractEnhancementEngine<I
 		}
 	}
 
-	private void addMorphoAnalysisEnhancement(ContentItem ci, String text, String language, MGraph g) throws EngineException {
+	private void addMorphoAnalysisEnhancement(ContentItem ci, String text, String language, Graph g) throws EngineException {
 		Language lang = new Language(language); // clerezza language for PlainLiterals
 		List<LexicalEntry> terms;
 		try {
@@ -229,7 +229,7 @@ public class CeliLemmatizerEnhancementEngine extends AbstractEnhancementEngine<I
 				List<CeliMorphoFeatures> mFeatures = this.convertLexicalEntryToMorphFeatures(le, language);
 				for (CeliMorphoFeatures feat : mFeatures) {
 					// Create a text annotation for each interpretation produced by the morphological analyzer
-					UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
+					IRI textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
 					g.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT, new PlainLiteralImpl(le.getWordForm(), lang)));
 					if (le.from >= 0 && le.to > 0) {
 						g.add(new TripleImpl(textAnnotation, ENHANCER_START, literalFactory.createTypedLiteral(le.from)));
@@ -244,7 +244,7 @@ public class CeliLemmatizerEnhancementEngine extends AbstractEnhancementEngine<I
 		}
 	}
 
-	private void addLemmatizationEnhancement(ContentItem ci, String text, String language, MGraph g) throws EngineException {
+	private void addLemmatizationEnhancement(ContentItem ci, String text, String language, Graph g) throws EngineException {
 		Language lang = new Language(language); // clerezza language for PlainLiterals
 		String lemmatizedContents;
 		try {
@@ -257,7 +257,7 @@ public class CeliLemmatizerEnhancementEngine extends AbstractEnhancementEngine<I
 		// get a write lock before writing the enhancements
 		ci.getLock().writeLock().lock();
 		try {
-			UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
+			IRI textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
 			g.add(new TripleImpl(textEnhancement, CeliLemmatizerEnhancementEngine.hasLemmaForm, new PlainLiteralImpl(lemmatizedContents, lang)));
 		} finally {
 			ci.getLock().writeLock().unlock();

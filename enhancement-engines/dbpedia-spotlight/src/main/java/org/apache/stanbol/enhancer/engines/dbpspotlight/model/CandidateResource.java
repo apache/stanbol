@@ -21,13 +21,13 @@ import static org.apache.stanbol.enhancer.engines.dbpspotlight.utils.XMLParser.g
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-//import org.apache.clerezza.rdf.core.Resource;
+//import org.apache.clerezza.commons.rdf.RDFTerm;
 
 /**
  * Stores the candidate ressources given by DBPedia Spotlight Candidates.
@@ -52,8 +52,8 @@ public class CandidateResource {
 						support, priorScore, finalScore);
 	}
 	
-	public UriRef getUri(){
-	    return new UriRef(new StringBuilder("http://dbpedia.org/resource/")
+	public IRI getUri(){
+	    return new IRI(new StringBuilder("http://dbpedia.org/resource/")
 	    .append(localName).toString());
 	}
 	

@@ -388,7 +388,17 @@
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>jaxrs.rdf.providers</artifactId>
-      <version>0.15</version>
+      <version>1.0.0</version>
+    </bundle>
+    <bundle>
+      <groupId>com.googlecode.json-simple</groupId>
+      <artifactId>json-simple</artifactId>
+      <version>1.1.1</version>
+    </bundle>
+    <bundle>
+      <groupId>org.apache.clerezza</groupId>
+      <artifactId>rdf.rdfjson</artifactId>
+      <version>1.0.0</version>
     </bundle>
   </startLevel>
 

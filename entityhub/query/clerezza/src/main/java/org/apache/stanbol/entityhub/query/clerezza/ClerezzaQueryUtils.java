@@ -18,10 +18,10 @@ package org.apache.stanbol.entityhub.query.clerezza;
 
 import java.util.Iterator;
 
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.query.sparql.SparqlQueryUtils;
@@ -47,24 +47,24 @@ public final class ClerezzaQueryUtils {
 
     private static final RdfValueFactory valueFavtory = RdfValueFactory.getInstance();
     /**
-     * {@link UriRef} constant for {@link RdfResourceEnum#queryResult}
+     * {@link IRI} constant for {@link RdfResourceEnum#queryResult}
      * 
      * @see RdfResourceEnum.fieldQueryResult
      */
-    public static final UriRef FIELD_QUERY_RESULT = new UriRef(RdfResourceEnum.queryResult.getUri());
+    public static final IRI FIELD_QUERY_RESULT = new IRI(RdfResourceEnum.queryResult.getUri());
     /**
-     * {@link UriRef} constant for {@link RdfResourceEnum#QueryResultSet}
+     * {@link IRI} constant for {@link RdfResourceEnum#QueryResultSet}
      * 
      * @see RdfResourceEnum.FieldQueryResultSet
      */
-    public static final UriRef FIELD_QUERY_RESULT_SET = new UriRef(RdfResourceEnum.QueryResultSet.getUri());
+    public static final IRI FIELD_QUERY_RESULT_SET = new IRI(RdfResourceEnum.QueryResultSet.getUri());
 
     /**
      * @param query
      * @param resultGraph
      * @return
      */
-    public static Iterator<RdfRepresentation> parseQueryResultsFromMGraph(final TripleCollection resultGraph) {
+    public static Iterator<RdfRepresentation> parseQueryResultsFromGraph(final Graph resultGraph) {
         Iterator<Triple> resultTripleIterator = resultGraph.filter(FIELD_QUERY_RESULT_SET,
             FIELD_QUERY_RESULT, null);
         Iterator<RdfRepresentation> resultIterator = new AdaptingIterator<Triple,RdfRepresentation>(
@@ -75,14 +75,14 @@ public final class ClerezzaQueryUtils {
                      */
                     @Override
                     public RdfRepresentation adapt(Triple value, Class<RdfRepresentation> type) {
-                        Resource object = value.getObject();
+                        RDFTerm object = value.getObject();
                         if (object == null) {
                             return null;
-                        } else if (object instanceof UriRef) {
-                            return valueFavtory.createRdfRepresentation((UriRef) object, resultGraph);
+                        } else if (object instanceof IRI) {
+                            return valueFavtory.createRdfRepresentation((IRI) object, resultGraph);
                         } else {
                             log.warn("Unable to create representation for FieldQueryResult " + object
-                                     + " because this Resource is not of Type UriRef (type: "
+                                     + " because this RDFTerm is not of Type IRI (type: "
                                      + object.getClass() + ") -> result gets ignored");
                             return null;
                         }

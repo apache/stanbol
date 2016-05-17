@@ -25,9 +25,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.access.LockableMGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.NoSuchEntityException;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.commons.jobs.api.Job;
@@ -234,16 +233,16 @@ public class ReasoningServiceExecutor implements Job {
         log.debug("Attempt saving in target graph {}", targetGraphID);
 
         final long startSave = System.currentTimeMillis();
-        LockableMGraph mGraph;
-        UriRef graphUriRef = new UriRef(targetGraphID);
+        Graph mGraph;
+        IRI graphIRI = new IRI(targetGraphID);
 
         // tcManager must be synchronized
         synchronized (tcManager) {
             try {
                 // Check whether the graph already exists
-                mGraph = tcManager.getMGraph(graphUriRef);
+                mGraph = tcManager.getGraph(graphIRI);
             } catch (NoSuchEntityException e) {
-                mGraph = tcManager.createMGraph(graphUriRef);
+                mGraph = tcManager.createGraph(graphIRI);
             }
         }
 
@@ -251,12 +250,12 @@ public class ReasoningServiceExecutor implements Job {
         Lock writeLock = mGraph.getLock().writeLock();
         boolean saved = false;
         if (data instanceof Model) {
-            MGraph m = JenaToClerezzaConverter.jenaModelToClerezzaMGraph((Model) data);
+            Graph m = JenaToClerezzaConverter.jenaModelToClerezzaGraph((Model) data);
             writeLock.lock();
             saved = mGraph.addAll(m);
             writeLock.unlock();
         } else if (data instanceof OWLOntology) {
-            MGraph m = (MGraph) OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph((OWLOntology) data);
+            Graph m = (Graph) OWLAPIToClerezzaConverter.owlOntologyToClerezzaGraph((OWLOntology) data);
             writeLock.lock();
             saved = mGraph.addAll(m);
             writeLock.unlock();

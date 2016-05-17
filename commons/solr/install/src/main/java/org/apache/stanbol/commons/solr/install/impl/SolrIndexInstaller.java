@@ -262,7 +262,7 @@ public class SolrIndexInstaller implements InstallTaskFactory, ResourceTransform
         String extension = FilenameUtils.getExtension(filePath);
         String archiveFormat = SUPPORTED_SOLR_ARCHIVE_FORMAT.get(extension);
         if (archiveFormat == null) {
-            log.error("Unable to process Solr Index Archive from Resource " + registeredResource.getURL()
+            log.error("Unable to process Solr Index Archive from RDFTerm " + registeredResource.getURL()
                       + "because of unsupported archive format \"" + extension + "\" (supported are "
                       + SUPPORTED_SOLR_ARCHIVE_FORMAT.keySet() + ")");
             return null;

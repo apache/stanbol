@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.rules.base.api;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.rules.base.api.util.AtomList;
 
 /**
@@ -30,9 +30,9 @@ public interface Rule extends Adaptable {
     /**
      * Gets the ID of the rule.
      * 
-     * @return the {@link UriRef} representing the name of the rule.
+     * @return the {@link IRI} representing the name of the rule.
      */
-    UriRef getRuleID();
+    IRI getRuleID();
 
     /**
      * Gets the name of the rule.

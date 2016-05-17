@@ -16,15 +16,15 @@
  */
 package org.apache.stanbol.enhancer.engines.celi.classification.impl;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 
 public class Concept {
 	
 	private final String label;
-	private final UriRef uri;
+	private final IRI uri;
 	private final Double confidence;
 	
-	public Concept(String label, UriRef uri,Double confidence) {
+	public Concept(String label, IRI uri,Double confidence) {
 		super();
 		this.label = label;
 		this.uri = uri;
@@ -42,7 +42,7 @@ public class Concept {
     }
 
 
-    public UriRef getUri() {
+    public IRI getUri() {
         return uri;
     }
 	

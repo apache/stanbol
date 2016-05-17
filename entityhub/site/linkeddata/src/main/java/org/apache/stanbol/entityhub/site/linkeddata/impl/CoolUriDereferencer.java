@@ -21,13 +21,13 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.entityhub.core.site.AbstractEntityDereferencer;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
@@ -72,10 +72,10 @@ public class CoolUriDereferencer extends AbstractEntityDereferencer implements E
         long queryEnd = System.currentTimeMillis();
         log.debug("  > DereferenceTime: "+(queryEnd-start));
         if(in != null){
-            MGraph rdfData = new IndexedMGraph(parser.parse(in, format,new UriRef(getBaseUri())));
+            Graph rdfData = new IndexedGraph(parser.parse(in, format,new IRI(getBaseUri())));
             long parseEnd = System.currentTimeMillis();
             log.debug("  > ParseTime: "+(parseEnd-queryEnd));
-            return valueFactory.createRdfRepresentation(new UriRef(uri), rdfData);
+            return valueFactory.createRdfRepresentation(new IRI(uri), rdfData);
         } else {
             return null;
         }

@@ -19,9 +19,9 @@ package org.apache.stanbol.enhancer.engines.entityhublinking;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
@@ -33,10 +33,10 @@ import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
 public class EntityhubEntity extends Entity {
     
     private static RdfValueFactory vf = RdfValueFactory.getInstance();
-    private static UriRef entityRanking = new UriRef(RdfResourceEnum.entityRank.getUri());
+    private static IRI entityRanking = new IRI(RdfResourceEnum.entityRank.getUri());
     
-    public EntityhubEntity(Representation rep, Set<UriRef> fields, Set<String> languages) {
-        super(new UriRef(rep.getId()), 
+    public EntityhubEntity(Representation rep, Set<IRI> fields, Set<String> languages) {
+        super(new IRI(rep.getId()), 
             toGraph(rep, fields, languages));
     }
     @Override
@@ -44,13 +44,13 @@ public class EntityhubEntity extends Entity {
         return EnhancementEngineHelper.get(data, uri, entityRanking, Float.class, lf);
     }
     /**
-     * Converts {@link Representation}s to RDF ({@link TripleCollection}) and
+     * Converts {@link Representation}s to RDF ({@link Graph}) and
      * also filter literals with languages other than the parsed one
      * @param rep
      * @param languages
      * @return
      */
-    private static TripleCollection toGraph(Representation rep, Set<UriRef> includeFields, Set<String> languages){
+    private static Graph toGraph(Representation rep, Set<IRI> includeFields, Set<String> languages){
         if (rep instanceof RdfRepresentation) {
             return ((RdfRepresentation) rep).getRdfGraph();
         } else {

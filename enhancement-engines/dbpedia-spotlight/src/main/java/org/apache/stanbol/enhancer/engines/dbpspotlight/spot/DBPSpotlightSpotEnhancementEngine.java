@@ -37,10 +37,10 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -201,11 +201,11 @@ public class DBPSpotlightSpotEnhancementEngine extends
 	protected void createEnhancements(Collection<SurfaceForm> occs,
 			ContentItem ci,  String content, Language lang) {
 
-		HashMap<String, UriRef> entityAnnotationMap = new HashMap<String, UriRef>();
+		HashMap<String, IRI> entityAnnotationMap = new HashMap<String, IRI>();
 
-		MGraph model = ci.getMetadata();
+		Graph model = ci.getMetadata();
 		for (SurfaceForm occ : occs) {
-			UriRef textAnnotation = SpotlightEngineUtils.createTextEnhancement(
+			IRI textAnnotation = SpotlightEngineUtils.createTextEnhancement(
 					occ, this, ci, content, lang);
 			if (entityAnnotationMap.containsKey(occ.name)) {
 				model.add(new TripleImpl(entityAnnotationMap.get(occ.name),
@@ -228,7 +228,7 @@ public class DBPSpotlightSpotEnhancementEngine extends
 	 * @throws EngineException
 	 *             if the request cannot be sent
 	 */
-	protected Collection<SurfaceForm> doPostRequest(String text,UriRef contentItemUri)
+	protected Collection<SurfaceForm> doPostRequest(String text,IRI contentItemUri)
 			throws EngineException {
 		//rwesten: reimplemented this so that the request
 		//         is directly written to the request instead

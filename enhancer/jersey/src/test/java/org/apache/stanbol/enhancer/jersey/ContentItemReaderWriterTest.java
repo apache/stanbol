@@ -51,11 +51,11 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.RuntimeDelegate;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.ontologies.RDF;
@@ -91,7 +91,7 @@ public class ContentItemReaderWriterTest {
      */
     @BeforeClass
     public static void createTestContentItem() throws IOException {
-        contentItem = ciFactory.createContentItem(new UriRef("urn:test"),
+        contentItem = ciFactory.createContentItem(new IRI("urn:test"),
             new StringSource(
                 "<html>\n" +
                 "  <body>\n" +
@@ -99,11 +99,11 @@ public class ContentItemReaderWriterTest {
                 "  </body>\n" +
                 "</html>","text/html"));
         RuntimeDelegate.setInstance(new RuntimeDelegateImpl());
-        contentItem.addPart(new UriRef("run:text:text"), 
+        contentItem.addPart(new IRI("run:text:text"), 
             ciFactory.createBlob(new StringSource(
             "This is a ContentItem to Mime Multipart test!")));
         contentItem.getMetadata().add(new TripleImpl(
-            new UriRef("urn:test"), RDF.type, new UriRef("urn:types:Document")));
+            new IRI("urn:test"), RDF.type, new IRI("urn:types:Document")));
         //mark the main content as parsed and also that all 
         //contents and contentparts should be included
         Map<String,Object> properties = initRequestPropertiesContentPart(contentItem);
@@ -111,8 +111,8 @@ public class ContentItemReaderWriterTest {
         properties.put(OUTPUT_CONTENT, Collections.singleton("*/*"));
         properties.put(OUTPUT_CONTENT_PART, Collections.singleton("*"));
         properties.put(RDF_FORMAT, "application/rdf+xml");
-        MGraph em = initExecutionMetadataContentPart(contentItem);
-        NonLiteral ep = createExecutionPlan(em, "testChain",null);
+        Graph em = initExecutionMetadataContentPart(contentItem);
+        BlankNodeOrIRI ep = createExecutionPlan(em, "testChain",null);
         writeExecutionNode(em, ep, "testEngine", true, null,null);
         initExecutionMetadata(em, em, contentItem.getUri(), "testChain", false);
 
@@ -201,7 +201,7 @@ public class ContentItemReaderWriterTest {
         //assert ID
         assertEquals(contentItem.getUri(), ci.getUri());
         //assert metadata
-        MGraph copy = new SimpleMGraph();
+        Graph copy = new SimpleGraph();
         copy.addAll(contentItem.getMetadata());
         assertTrue(copy.removeAll(ci.getMetadata()));
         assertTrue(copy.isEmpty());
@@ -210,12 +210,12 @@ public class ContentItemReaderWriterTest {
         String content = IOUtils.toString(contentItem.getStream(),"UTF-8");
         String readContent = IOUtils.toString(ci.getStream(), "UTF-8");
         assertEquals(content, readContent);
-        Iterator<Entry<UriRef,Blob>> contentItemBlobsIt = ContentItemHelper.getContentParts(contentItem, Blob.class).entrySet().iterator();
-        Iterator<Entry<UriRef,Blob>> ciBlobsIt = ContentItemHelper.getContentParts(ci, Blob.class).entrySet().iterator();
+        Iterator<Entry<IRI,Blob>> contentItemBlobsIt = ContentItemHelper.getContentParts(contentItem, Blob.class).entrySet().iterator();
+        Iterator<Entry<IRI,Blob>> ciBlobsIt = ContentItemHelper.getContentParts(ci, Blob.class).entrySet().iterator();
         Set<String> expectedParsedContentIds = new HashSet<String>(); //later used to validate enhancementMetadata
         while(contentItemBlobsIt.hasNext() && ciBlobsIt.hasNext()){
-            Entry<UriRef,Blob> contentItemBlobPart = contentItemBlobsIt.next();
-            Entry<UriRef,Blob> ciBlobPart = ciBlobsIt.next();
+            Entry<IRI,Blob> contentItemBlobPart = contentItemBlobsIt.next();
+            Entry<IRI,Blob> ciBlobPart = ciBlobsIt.next();
             expectedParsedContentIds.add(ciBlobPart.getKey().getUnicodeString());
             assertEquals(contentItemBlobPart.getKey(), ciBlobPart.getKey());
             String partContentType = contentItemBlobPart.getValue().getMimeType();
@@ -226,8 +226,8 @@ public class ContentItemReaderWriterTest {
             assertEquals(partContent, readPartContent);
         }
         //validate ExecutionMetadata
-        MGraph executionMetadata = contentItem.getPart(ExecutionMetadata.CHAIN_EXECUTION, MGraph.class);
-        MGraph readExecutionMetadata = ci.getPart(ExecutionMetadata.CHAIN_EXECUTION, MGraph.class);
+        Graph executionMetadata = contentItem.getPart(ExecutionMetadata.CHAIN_EXECUTION, Graph.class);
+        Graph readExecutionMetadata = ci.getPart(ExecutionMetadata.CHAIN_EXECUTION, Graph.class);
         assertNotNull(executionMetadata);
         assertNotNull(readExecutionMetadata);
         assertEquals(executionMetadata.size(), readExecutionMetadata.size());

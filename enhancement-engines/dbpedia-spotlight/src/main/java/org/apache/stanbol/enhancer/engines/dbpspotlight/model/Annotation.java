@@ -25,8 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -72,7 +72,7 @@ public class Annotation {
 		IGNORED_DBP_TYPES = Collections.unmodifiableSet(ignored);
 	}
 	
-	public Resource uri;
+	public RDFTerm uri;
 	//TODO: change this to a list with the parsed types
 	//      Processing of XML results should be done during parsing
 	public String types;
@@ -134,13 +134,13 @@ public class Annotation {
 	 * @return a Collection<DBPSLAnnotation> with all annotations
 	 */
 	public static Collection<Annotation> parseAnnotations(Document xmlDoc) {
-		NodeList nList = getElementsByTagName(xmlDoc, "Resource");
+		NodeList nList = getElementsByTagName(xmlDoc, "RDFTerm");
 		Collection<Annotation> dbpslAnnos = new HashSet<Annotation>();
 
 		for (int temp = 0; temp < nList.getLength(); temp++) {
 			Annotation dbpslann = new Annotation();
 			Element node = (Element) nList.item(temp);
-			dbpslann.uri = new UriRef(node.getAttribute("URI"));
+			dbpslann.uri = new IRI(node.getAttribute("URI"));
 			dbpslann.support = (new Integer(node.getAttribute("support")))
 					.intValue();
 			dbpslann.types = node.getAttribute("types");

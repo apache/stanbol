@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.rules.adapters.clerezza.atoms;
 
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.sparql.query.Expression;
 import org.apache.clerezza.rdf.core.sparql.query.LiteralExpression;
 import org.apache.clerezza.rdf.core.sparql.query.Variable;

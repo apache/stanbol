@@ -18,7 +18,7 @@ package org.apache.stanbol.entityhub.yard.clerezza.impl;
 
 import java.util.Dictionary;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.entityhub.core.yard.AbstractYard.YardConfig;
 import org.osgi.service.cm.ConfigurationException;
 
@@ -38,12 +38,12 @@ public class ClerezzaYardConfig extends YardConfig {
      * Getter for the {@link ClerezzaYard#GRAPH_URI} property
      * @return the graph URI or <code>null</code> if non is configured
      */
-    public UriRef getGraphUri(){
+    public IRI getGraphUri(){
         Object value = config.get(ClerezzaYard.GRAPH_URI);
-        if(value instanceof UriRef){
-            return (UriRef)value;
+        if(value instanceof IRI){
+            return (IRI)value;
         } else if (value != null){
-            return new UriRef(value.toString());
+            return new IRI(value.toString());
         } else {
             return null;
         }
@@ -52,7 +52,7 @@ public class ClerezzaYardConfig extends YardConfig {
      * Setter for the {@link ClerezzaYard#GRAPH_URI} property
      * @param uri the uri or <code>null</code> to remove this configuration
      */
-    public void setGraphUri(UriRef uri){
+    public void setGraphUri(IRI uri){
         if(uri == null){
             config.remove(ClerezzaYard.GRAPH_URI);
         } else {

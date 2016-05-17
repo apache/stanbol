@@ -29,10 +29,10 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.clerezza.rdf.ontologies.SKOS;
@@ -63,7 +63,7 @@ public class OntologyMappings implements Iterable<Mapping>{
     
     private static OntologyMappings defaultMappings;
     
-    private final Map<UriRef,Collection<Mapping>> mappings = new HashMap<UriRef,Collection<Mapping>>();
+    private final Map<IRI,Collection<Mapping>> mappings = new HashMap<IRI,Collection<Mapping>>();
     /**
      * Used to protect the default mappings from modifications
      */
@@ -334,11 +334,11 @@ public class OntologyMappings implements Iterable<Mapping>{
             new PropertyMapping(ma+"averageBitRate",XSD.double_,
                 new Mapping.Converter(){//we need to convert from MByte/min to kByte/sec
                     @Override
-                    public Resource convert(Resource value) {
-                        if(value instanceof TypedLiteral &&
-                                XSD.double_.equals(((TypedLiteral)value).getDataType())){
+                    public RDFTerm convert(RDFTerm value) {
+                        if(value instanceof Literal &&
+                                XSD.double_.equals(((Literal)value).getDataType())){
                             LiteralFactory lf = LiteralFactory.getInstance();
-                            double mm = lf.createObject(Double.class, (TypedLiteral)value);
+                            double mm = lf.createObject(Double.class, (Literal)value);
                             return lf.createTypedLiteral(Double.valueOf(
                                 mm*1024/60));
                         } else {
@@ -348,7 +348,7 @@ public class OntologyMappings implements Iterable<Mapping>{
                 
             },XMPDM.FILE_DATA_RATE.getName()));
 
-        //GEO -> Media Resource Ontology
+        //GEO -> Media RDFTerm Ontology
         mappings.addMapping(new ResourceMapping(ma+"hasLocation", 
             new Mapping[]{ //required
                 new PropertyMapping(ma+"locationLatitude", XSD.double_,Geographic.LATITUDE.getName()),
@@ -466,7 +466,7 @@ public class OntologyMappings implements Iterable<Mapping>{
         }
         propMappings.add(mapping);
     }
-    public void removePropertyMappings(UriRef property){
+    public void removePropertyMappings(IRI property){
         if(readonly){
             throw new IllegalStateException("This "+getClass().getSimpleName()+" instance is read only!");
         }
@@ -475,13 +475,13 @@ public class OntologyMappings implements Iterable<Mapping>{
     
     /**
      * Applies the registered Ontology Mappings to the parsed metadata and
-     * context. Mappings are added to the parsed Graph
+     * context. Mappings are added to the parsed ImmutableGraph
      * @param graph
      * @param context
      * @param metadata
      * @return Set containing the names of mapped keys
      */
-    public Set<String> apply(MGraph graph, UriRef context, Metadata metadata){
+    public Set<String> apply(Graph graph, IRI context, Metadata metadata){
         Set<String> keys = new HashSet<String>(Arrays.asList(metadata.names()));
         Set<String> mappedKeys = new HashSet<String>();
         for(Mapping mapping : this){

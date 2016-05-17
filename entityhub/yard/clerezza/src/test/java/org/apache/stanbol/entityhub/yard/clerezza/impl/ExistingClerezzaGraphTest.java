@@ -17,11 +17,9 @@
 package org.apache.stanbol.entityhub.yard.clerezza.impl;
 
 import static java.util.Collections.singletonMap;
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -29,20 +27,17 @@ import java.util.Map.Entry;
 
 import junit.framework.Assert;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.clerezza.rdf.core.impl.graphmatching.GraphMatcher;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.clerezza.rdf.ontologies.SKOS;
-import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
@@ -54,7 +49,7 @@ import org.junit.Test;
 /**
  * Unit tests for testing {@link ClerezzaYard} initialisation and usage in 
  * cases the configured {@link ClerezzaYardConfig#getGraphUri()} points to
- * already existing Clerezza {@link MGraph}s and {@link Graph} instances.<p>
+ * already existing Clerezza {@link Graph}s and {@link ImmutableGraph} instances.<p>
  * This basically tests features added with STANBOL-662 and STANBOL-663
  * @author Rupert Westenthaler
  *
@@ -64,10 +59,10 @@ public class ExistingClerezzaGraphTest {
     private static TcManager tcManager;
     private static Language EN = new Language("en");
     private static Language DE = new Language("de");
-    private static final Map<UriRef,TripleCollection> entityData = new HashMap<UriRef,TripleCollection>();
+    private static final Map<IRI,Graph> entityData = new HashMap<IRI,Graph>();
     
-    private static UriRef READ_ONLY_GRAPH_URI = new UriRef("http://www.test.org/read-only-grpah");
-    private static UriRef READ_WRITEGRAPH_URI = new UriRef("http://www.test.org/read-write-grpah");
+    private static IRI READ_ONLY_GRAPH_URI = new IRI("http://www.test.org/read-only-grpah");
+    private static IRI READ_WRITEGRAPH_URI = new IRI("http://www.test.org/read-write-grpah");
     
     private static ClerezzaYard readwriteYard;
     private static ClerezzaYard readonlyYard;
@@ -77,24 +72,24 @@ public class ExistingClerezzaGraphTest {
         initTestData();
         //create the graphs in Clerezza
         tcManager = TcManager.getInstance();
-        MGraph graph = tcManager.createMGraph(READ_WRITEGRAPH_URI);
+        Graph graph = tcManager.createGraph(READ_WRITEGRAPH_URI);
         //add the test data to the MGrpah
-        for(TripleCollection tc :entityData.values()){ 
+        for(Graph tc :entityData.values()){ 
             graph.addAll(tc);
         }
         //create the read only graph
-        tcManager.createGraph(READ_ONLY_GRAPH_URI, graph);
+        tcManager.createImmutableGraph(READ_ONLY_GRAPH_URI, graph);
         
         //init the ClerezzaYards for the created Clerezza graphs
         ClerezzaYardConfig readWriteConfig = new ClerezzaYardConfig("readWriteYardId");
         readWriteConfig.setName("Clerezza read/write Yard");
-        readWriteConfig.setDescription("Tests config with pre-existing MGraph");
+        readWriteConfig.setDescription("Tests config with pre-existing Graph");
         readWriteConfig.setGraphUri(READ_WRITEGRAPH_URI);
         readwriteYard = new ClerezzaYard(readWriteConfig);
 
         ClerezzaYardConfig readOnlyYardConfig = new ClerezzaYardConfig("readOnlyYardId");
         readOnlyYardConfig.setName("Clerezza read-only Yard");
-        readOnlyYardConfig.setDescription("Tests config with pre-existing Graph");
+        readOnlyYardConfig.setDescription("Tests config with pre-existing ImmutableGraph");
         readOnlyYardConfig.setGraphUri(READ_ONLY_GRAPH_URI);
         readonlyYard = new ClerezzaYard(readOnlyYardConfig);
 
@@ -106,7 +101,7 @@ public class ExistingClerezzaGraphTest {
      */
     @Test
     public void testRetrival(){
-        for(Entry<UriRef,TripleCollection> entity : entityData.entrySet()){
+        for(Entry<IRI,Graph> entity : entityData.entrySet()){
             validateEntity(readonlyYard,entity);
             validateEntity(readwriteYard,entity);
         }
@@ -148,12 +143,12 @@ public class ExistingClerezzaGraphTest {
      * retrieved by the tested {@link ClerezzaYard}s.
      * @param entity key - URI; value - expected RDF data
      */
-    private void validateEntity(ClerezzaYard yard, Entry<UriRef,TripleCollection> entity) {
+    private void validateEntity(ClerezzaYard yard, Entry<IRI,Graph> entity) {
         Representation rep = yard.getRepresentation(entity.getKey().getUnicodeString());
         assertNotNull("The Representation for "+entity.getKey()
             + "is missing in the "+yard.getId(), rep);
         assertTrue("RdfRepresentation expected", rep instanceof RdfRepresentation);
-        TripleCollection repGraph = ((RdfRepresentation)rep).getRdfGraph();
+        Graph repGraph = ((RdfRepresentation)rep).getRdfGraph();
         for(Iterator<Triple> triples = entity.getValue().iterator();triples.hasNext();){
             Triple triple = triples.next();
             assertTrue("Data of Representation "+entity.getKey()
@@ -168,15 +163,15 @@ public class ExistingClerezzaGraphTest {
      * Initialises the {@link #entityData} used for this test (called in BeforeClass)
      */
     private static void initTestData() {
-        UriRef entity1 = new UriRef("http://www.test.org/entity1");
-        MGraph entity1Data = new SimpleMGraph();
+        IRI entity1 = new IRI("http://www.test.org/entity1");
+        Graph entity1Data = new SimpleGraph();
         entity1Data.add(new TripleImpl(entity1,RDF.type, SKOS.Concept));
         entity1Data.add(new TripleImpl(entity1,SKOS.prefLabel, new PlainLiteralImpl("test", EN)));
         entity1Data.add(new TripleImpl(entity1,SKOS.prefLabel, new PlainLiteralImpl("Test", DE)));
         entityData.put(entity1, entity1Data);
         
-        MGraph entity2Data = new SimpleMGraph();
-        UriRef entity2 = new UriRef("http://www.test.org/entity2");
+        Graph entity2Data = new SimpleGraph();
+        IRI entity2 = new IRI("http://www.test.org/entity2");
         entity2Data.add(new TripleImpl(entity2, RDF.type, SKOS.Concept));
         entity2Data.add(new TripleImpl(entity2,SKOS.prefLabel, new PlainLiteralImpl("sub-test", EN)));
         entity2Data.add(new TripleImpl(entity2,SKOS.prefLabel, new PlainLiteralImpl("Untertest", DE)));
@@ -186,7 +181,7 @@ public class ExistingClerezzaGraphTest {
 
     @AfterClass
     public static void cleanup(){
-        tcManager.deleteTripleCollection(READ_ONLY_GRAPH_URI);
-        tcManager.deleteTripleCollection(READ_WRITEGRAPH_URI);
+        tcManager.deleteGraph(READ_ONLY_GRAPH_URI);
+        tcManager.deleteGraph(READ_WRITEGRAPH_URI);
     }
 }

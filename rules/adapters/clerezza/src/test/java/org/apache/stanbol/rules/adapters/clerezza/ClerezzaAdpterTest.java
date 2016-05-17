@@ -23,7 +23,7 @@ import java.util.List;
 
 import junit.framework.Assert;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
@@ -109,7 +109,7 @@ public class ClerezzaAdpterTest {
             recipeString);
 
         recipeGood = new RecipeImpl(
-                new UriRef("http://incubator.apache.com/stanbol/rules/adapters/jena/test"), "A recipe.",
+                new IRI("http://incubator.apache.com/stanbol/rules/adapters/jena/test"), "A recipe.",
                 kb.getRuleList());
 
         recipeString = "kres = <http://kres.iks-project.eu/ontology.owl#> . "
@@ -122,7 +122,7 @@ public class ClerezzaAdpterTest {
         kb = RuleParserImpl.parse("http://incubator.apache.com/stanbol/rules/adapters/jena/test/",
             recipeString);
 
-        recipeWrong = new RecipeImpl(new UriRef(
+        recipeWrong = new RecipeImpl(new IRI(
                 "http://incubator.apache.com/stanbol/rules/adapters/jena/test"), "A recipe.",
                 kb.getRuleList());
     }

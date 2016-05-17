@@ -21,10 +21,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Language;
 import org.apache.stanbol.entityhub.servicesapi.util.AdaptingIterator.Adapter;
 import org.apache.stanbol.entityhub.model.clerezza.RdfResourceUtils;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
@@ -56,11 +55,11 @@ public class Literal2TextAdapter<T extends Literal> implements Adapter<T,Text> {
      * The xsd:string data type constant used for TypedLiterals to check if the
      * represent an string value!
      */
-    private static UriRef xsdString = new UriRef(DataTypeEnum.String.getUri());
+    private static IRI xsdString = new IRI(DataTypeEnum.String.getUri());
     /**
      * Unmodifiable set of the active languages
      */
-    private final Set<String> languages;
+    private final Set<Language> languages;
     private final boolean containsNull;
     private final RdfValueFactory valueFactory = RdfValueFactory.getInstance();
 
@@ -74,7 +73,15 @@ public class Literal2TextAdapter<T extends Literal> implements Adapter<T,Text> {
      */
     public Literal2TextAdapter(String...lang){
         if(lang != null && lang.length>0){
-            this.languages = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(lang)));
+            Set<Language> languagesConverted = new HashSet<Language>();
+            for (String lang1 : lang) {
+                if (lang1 == null) {
+                    languagesConverted.add(null);
+                } else {
+                    languagesConverted.add(new Language(lang1));
+                }
+            }
+            this.languages = Collections.unmodifiableSet(languagesConverted);
             this.containsNull = languages.contains(null);
         } else{
             this.languages = null;
@@ -85,14 +92,13 @@ public class Literal2TextAdapter<T extends Literal> implements Adapter<T,Text> {
 
     @Override
     public final Text adapt(T value, Class<Text> type) {
-        if(value instanceof PlainLiteral){
-            String literalLang = ((PlainLiteral) value).getLanguage() == null ? 
-                    null : ((PlainLiteral) value).getLanguage().toString();
+        if(value.getLanguage() != null) {
+            Language literalLang =  value.getLanguage();
             if(languages == null || languages.contains(literalLang)){
                 return valueFactory.createText(value);
             } //else wrong language -> filter
-        } else if(value instanceof TypedLiteral) {
-            if(containsNull && ((TypedLiteral)value).getDataType().equals(xsdString)){
+        } else {
+            if(containsNull && value.getDataType().equals(xsdString)){
                 /*
                  * if the null language is active, than we can also return
                  * "normal" literals (with no known language).
@@ -100,10 +106,7 @@ public class Literal2TextAdapter<T extends Literal> implements Adapter<T,Text> {
                  */
                 return valueFactory.createText(value);
             } // else no xsd:string dataType and therefore not a text with default lang!
-        } else {// unknown Literal type -> filter + warning
-            log.warn(String.format("Unknown LiteralType %s (lexicalForm=\"%s\") -> ignored! Pleas adapt this implementation to support this type!",
-                value.getClass(),value.getLexicalForm()));
-        }
+        } 
         return null;
     }
 

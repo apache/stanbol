@@ -24,8 +24,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Date;
 
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentSource;
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 public abstract class ContentItemTest {
     
     private final Logger log = LoggerFactory.getLogger(ContentItemTest.class);
-    //private static final UriRef ciUri = new UriRef("http://example.org/");
+    //private static final IRI ciUri = new IRI("http://example.org/");
     private static final ContentSource contentSource = new StringSource("This is a Test!"); 
     /**
      * Used to create ContentItems used by this Test. Each call MUST return a
@@ -60,21 +60,21 @@ public abstract class ContentItemTest {
 		ContentItem ci = createContentItem(contentSource);
 		assertNotNull(ci);
 		assertNotNull(ci.getUri());
-		UriRef partUri = new UriRef("http://foo/");
+		IRI partUri = new IRI("http://foo/");
 		Date someObject = new Date();
 		ci.addPart(partUri, someObject);
-		ci.getMetadata().add(new TripleImpl(ci.getUri(), new UriRef("http://example.org/ontology#hasPart"), partUri));
-        ci.getMetadata().add(new TripleImpl(partUri, new UriRef("http://example.org/ontology#isPartOf"),ci.getUri()));
+		ci.getMetadata().add(new TripleImpl(ci.getUri(), new IRI("http://example.org/ontology#hasPart"), partUri));
+        ci.getMetadata().add(new TripleImpl(partUri, new IRI("http://example.org/ontology#isPartOf"),ci.getUri()));
 		assertEquals(someObject, ci.getPart(partUri, Date.class));
 		assertEquals(someObject, ci.getPart(1, Date.class));
 		assertEquals(partUri, ci.getPartUri(1));
-		assertEquals(new UriRef(ci.getUri().getUnicodeString()+"_main"), ci.getPartUri(0));
+		assertEquals(new IRI(ci.getUri().getUnicodeString()+"_main"), ci.getPartUri(0));
 		try {
 		    ci.getPart(2, Object.class);
 		    assertTrue("Requesting non existance part MUST throw an NoSuchPartException", false);
 		} catch (NoSuchPartException e) {/* expected*/}
         try {
-            ci.getPart(new UriRef("http://foo/nonexisting"), Object.class);
+            ci.getPart(new IRI("http://foo/nonexisting"), Object.class);
             assertTrue("Requesting non existance part MUST throw an NoSuchPartException", false);
         } catch (NoSuchPartException e) {/* expected*/}
         try {
@@ -92,7 +92,7 @@ public abstract class ContentItemTest {
     @Test(expected=IllegalArgumentException.class)
     public void addPartWithoutPartContent() throws IOException{
         ContentItem ci = createContentItem(contentSource);
-        ci.addPart(new UriRef("http://foo/"), null);
+        ci.addPart(new IRI("http://foo/"), null);
     }
     /**
      * The ContentItem MUST NOT allow to replace the main content part (the
@@ -101,7 +101,7 @@ public abstract class ContentItemTest {
     @Test(expected=IllegalArgumentException.class)
     public void replaceMainPart() throws IOException{
         ContentItem ci = createContentItem(contentSource);
-        UriRef mainPart = ci.getPartUri(0);
+        IRI mainPart = ci.getPartUri(0);
         ci.addPart(mainPart, new Date());
     }
     @Test(expected=IllegalArgumentException.class)
@@ -127,7 +127,7 @@ public abstract class ContentItemTest {
     @Test(expected=NoSuchPartException.class)
     public void removeNonExistentPartByUri() throws IOException {
         ContentItem ci = createContentItem(contentSource);
-        ci.removePart(new UriRef("urn:does.not.exist:and.can.not.be.removed"));
+        ci.removePart(new IRI("urn:does.not.exist:and.can.not.be.removed"));
     }
     @Test(expected=NoSuchPartException.class)
     public void removeNonExistentPartByIndex() throws IOException {
@@ -137,7 +137,7 @@ public abstract class ContentItemTest {
     @Test
     public void removeRemoveByUri() throws IOException {
         ContentItem ci = createContentItem(contentSource);
-        UriRef uri = new UriRef("urn:content.part:remove.test");
+        IRI uri = new IRI("urn:content.part:remove.test");
         ci.addPart(uri, new Date());
         try {
             ci.getPart(uri, Date.class);
@@ -157,12 +157,12 @@ public abstract class ContentItemTest {
     @Test
     public void removeRemoveByIndex() throws IOException {
         ContentItem ci = createContentItem(contentSource);
-        UriRef uri = new UriRef("urn:content.part:remove.test");
+        IRI uri = new IRI("urn:content.part:remove.test");
         ci.addPart(uri, new Date());
         int index = -1;
         try {
             for(int i=0; index < 0; i++){
-                UriRef partUri = ci.getPartUri(i);
+                IRI partUri = ci.getPartUri(i);
                 if(partUri.equals(uri)){
                     index = i;
                 }

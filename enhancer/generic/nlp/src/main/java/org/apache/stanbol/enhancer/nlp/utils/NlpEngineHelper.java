@@ -23,7 +23,7 @@ import java.util.Dictionary;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.nlp.NlpProcessingRole;
 import org.apache.stanbol.enhancer.nlp.NlpServiceProperties;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
@@ -179,7 +179,7 @@ public final class NlpEngineHelper {
                 throw new IllegalStateException("Unable to initialise AnalysedText"
                     + "ContentPart because the parsed AnalysedTextFactory is NULL");
             }
-            Entry<UriRef,Blob> textBlob = getPlainText(engine, ci, true);
+            Entry<IRI,Blob> textBlob = getPlainText(engine, ci, true);
             //we need to create
             ci.getLock().writeLock().lock();
             try {
@@ -211,8 +211,8 @@ public final class NlpEngineHelper {
      * @throws IllegalStateException if exception is <code>true</code> and the
      * language could not be retrieved from the parsed {@link ContentItem}.
      */
-    public static Entry<UriRef,Blob> getPlainText(EnhancementEngine engine, ContentItem ci, boolean exception) {
-        Entry<UriRef,Blob> textBlob = ContentItemHelper.getBlob(
+    public static Entry<IRI,Blob> getPlainText(EnhancementEngine engine, ContentItem ci, boolean exception) {
+        Entry<IRI,Blob> textBlob = ContentItemHelper.getBlob(
             ci, singleton("text/plain"));
         if(textBlob != null) {
             return textBlob;

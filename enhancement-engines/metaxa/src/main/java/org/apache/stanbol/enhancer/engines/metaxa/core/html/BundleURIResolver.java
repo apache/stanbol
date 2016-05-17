@@ -55,7 +55,7 @@ public class BundleURIResolver implements URIResolver {
                 String path = baseURI.getPath();
                 resource = path.substring(1, path.lastIndexOf('/') + 1) + href;
                 newUrl = BUNDLE.getEntry(resource);
-                LOG.debug("Resource: " + resource);
+                LOG.debug("RDFTerm: " + resource);
                 if (newUrl != null) {
                     return new StreamSource(newUrl.openStream(), newUrl.toString());
                 } else {

@@ -50,7 +50,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SerializingProvider;
 import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
@@ -134,7 +134,7 @@ public class OWLOntologyWriter implements MessageBodyWriter<OWLOntology> {
             // Non-native formats that require a conversion to Clerezza
             if (RDF_JSON_TYPE.equals(mediaType) || N3_TYPE.equals(mediaType)
                 || TEXT_PLAIN.equals(mediaType.toString()) || N_TRIPLE_TYPE.equals(mediaType)) {
-                TripleCollection mGraph = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(ontology);
+                Graph mGraph = OWLAPIToClerezzaConverter.owlOntologyToClerezzaGraph(ontology);
                 SerializingProvider serializer = null;
                 if (RDF_JSON_TYPE.equals(mediaType)) serializer = new RdfJsonSerializingProvider();
                 else if (N3_TYPE.equals(mediaType) || N_TRIPLE_TYPE.equals(mediaType)

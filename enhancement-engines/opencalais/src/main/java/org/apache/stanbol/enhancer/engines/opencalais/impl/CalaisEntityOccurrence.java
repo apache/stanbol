@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.enhancer.engines.opencalais.impl;
 
-import org.apache.clerezza.rdf.core.Resource;
+import org.apache.clerezza.commons.rdf.RDFTerm;
 
 /**
  * Stores the values extracted from the Calais entity data.
@@ -25,8 +25,8 @@ import org.apache.clerezza.rdf.core.Resource;
  */
 public class CalaisEntityOccurrence {
 
-    public Resource id;
-    public Resource type;
+    public RDFTerm id;
+    public RDFTerm type;
     public String name;
     public Integer offset;
     public Integer length;

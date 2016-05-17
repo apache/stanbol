@@ -20,8 +20,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -62,12 +62,12 @@ public class InMemoryContentItemFactory extends AbstractContentItemFactory imple
     }
 
     @Override
-    protected ContentItem createContentItem(UriRef id, Blob blob, MGraph metadata) {
+    protected ContentItem createContentItem(IRI id, Blob blob, Graph metadata) {
         return new InMemoryContentItem(id, blob, metadata);
     }
     
     @Override
-    protected ContentItem createContentItem(String prefix, Blob blob, MGraph metadata) {
+    protected ContentItem createContentItem(String prefix, Blob blob, Graph metadata) {
         return new InMemoryContentItem(ContentItemHelper.makeDefaultUri(prefix, blob), blob, metadata);
     }
 

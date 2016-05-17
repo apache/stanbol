@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
@@ -120,7 +120,7 @@ public class WeightedChain extends AbstractChain implements Chain, ServiceTracke
      */
     private Object epLock = new Object();
     
-    private Graph executionPlan = null;
+    private ImmutableGraph executionPlan = null;
     
     @Override
     protected void activate(ComponentContext ctx) throws ConfigurationException {
@@ -177,7 +177,7 @@ public class WeightedChain extends AbstractChain implements Chain, ServiceTracke
         super.deactivate(ctx);
     }
     @Override
-    public Graph getExecutionPlan() throws ChainException {
+    public ImmutableGraph getExecutionPlan() throws ChainException {
         synchronized (epLock) {
             if(executionPlan == null){
                 executionPlan = createExecutionPlan();
@@ -199,7 +199,7 @@ public class WeightedChain extends AbstractChain implements Chain, ServiceTracke
      * @throws ChainException if a required {@link EnhancementEngine} of the
      * configured {@link #chain} is not active.
      */
-    private Graph createExecutionPlan() throws ChainException {
+    private ImmutableGraph createExecutionPlan() throws ChainException {
         List<EnhancementEngine> availableEngines = new ArrayList<EnhancementEngine>(chain.size());
         Set<String> optionalEngines = new HashSet<String>();
         Set<String> missingEngines = new HashSet<String>();

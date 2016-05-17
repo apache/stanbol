@@ -73,8 +73,8 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.clerezza.jaxrs.utils.form.FormFile;
 import org.apache.clerezza.jaxrs.utils.form.MultiPartBody;
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
@@ -178,8 +178,8 @@ public class ScopeResource extends AbstractOntologyAccessResource {
 
         if (scope == null) return Response.status(NOT_FOUND).build();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
-        // Export to Clerezza Graph, which can be rendered as JSON-LD.
-        ResponseBuilder rb = Response.ok(scope.export(Graph.class, merge, prefix));
+        // Export to Clerezza ImmutableGraph, which can be rendered as JSON-LD.
+        ResponseBuilder rb = Response.ok(scope.export(ImmutableGraph.class, merge, prefix));
         // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
@@ -195,7 +195,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         // Export smaller graphs to OWLOntology due to the more human-readable rendering.
         ResponseBuilder rb;
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
-        if (merge) rb = Response.ok(scope.export(Graph.class, merge, prefix));
+        if (merge) rb = Response.ok(scope.export(ImmutableGraph.class, merge, prefix));
         else rb = Response.ok(scope.export(OWLOntology.class, merge, prefix));
         // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
@@ -248,7 +248,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
 
         OntologySpace space = scope.getCoreSpace();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
-        Graph o = space.export(Graph.class, merge, prefix);
+        ImmutableGraph o = space.export(ImmutableGraph.class, merge, prefix);
         ResponseBuilder rb = Response.ok(o);
         // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
@@ -293,7 +293,7 @@ public class ScopeResource extends AbstractOntologyAccessResource {
 
         OntologySpace space = scope.getCustomSpace();
         IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
-        Graph o = space.export(Graph.class, merge, prefix);
+        ImmutableGraph o = space.export(ImmutableGraph.class, merge, prefix);
         ResponseBuilder rb = Response.ok(o);
         // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
@@ -414,14 +414,14 @@ public class ScopeResource extends AbstractOntologyAccessResource {
         if (scope == null) rb = Response.status(NOT_FOUND);
         else {
             IRI prefix = IRI.create(getPublicBaseUri() + "ontonet/ontology/");
-            Graph o = null;
+            ImmutableGraph o = null;
             OWLOntologyID id = OntologyUtils.decode(ontologyId);
             OntologySpace spc = scope.getCustomSpace();
             if (spc != null && spc.hasOntology(id)) {
-                o = spc.getOntology(id, Graph.class, merge, prefix);
+                o = spc.getOntology(id, ImmutableGraph.class, merge, prefix);
             } else {
                 spc = scope.getCoreSpace();
-                if (spc != null && spc.hasOntology(id)) o = spc.getOntology(id, Graph.class, merge, prefix);
+                if (spc != null && spc.hasOntology(id)) o = spc.getOntology(id, ImmutableGraph.class, merge, prefix);
             }
             if (o == null) rb = Response.status(NOT_FOUND);
             else rb = Response.ok(o);
@@ -876,8 +876,8 @@ public class ScopeResource extends AbstractOntologyAccessResource {
                         for (Object o : ((SetInputSource<?>) coreSrc).getOntologies()) {
                             OntologyInputSource<?> src = null;
                             if (o instanceof OWLOntology) src = new RootOntologySource((OWLOntology) o);
-                            else if (o instanceof TripleCollection) src = new GraphSource(
-                                    (TripleCollection) o);
+                            else if (o instanceof Graph) src = new GraphSource(
+                                    (Graph) o);
                             if (src != null) expanded.add(src);
                         }
                     } else expanded.add(coreSrc); // Must be denoting a single ontology

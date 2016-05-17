@@ -25,7 +25,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.sparql.QueryEngine;
@@ -59,7 +59,7 @@ public class RuleStoreTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        class SpecialTcManager extends TcManager {
+        /*class SpecialTcManager extends TcManager {
             public SpecialTcManager(QueryEngine qe, WeightedTcProvider wtcp) {
                 super();
                 bindQueryEngine(qe);
@@ -68,8 +68,8 @@ public class RuleStoreTest {
         }
 
         QueryEngine qe = new JenaSparqlEngine();
-        WeightedTcProvider wtcp = new SimpleTcProvider();
-        TcManager tcm = new SpecialTcManager(qe, wtcp);
+        WeightedTcProvider wtcp = new SimpleTcProvider();*/
+        TcManager tcm = TcManager.getInstance();//new SpecialTcManager(qe, wtcp);
 
         Dictionary<String,Object> configuration = new Hashtable<String,Object>();
         store = new ClerezzaRuleStore(configuration, tcm);
@@ -114,7 +114,7 @@ public class RuleStoreTest {
     }
     
     private void createRecipeTest() throws Exception {
-        Recipe recipe = store.createRecipe(new UriRef(
+        Recipe recipe = store.createRecipe(new IRI(
                 "http://incubator.apache.com/stanbol/rules/test/recipeA"), "The text recipe named A.");
 
         if (recipe == null) {
@@ -126,7 +126,7 @@ public class RuleStoreTest {
     }
 
     private void addRuleToRecipeTest() throws Exception {
-        Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
+        Recipe recipe = store.getRecipe(new IRI("http://incubator.apache.com/stanbol/rules/test/recipeA"));
 
         String separator = System.getProperty("line.separator");
         String rule = "rule1[" + separator + "	is(<http://dbpedia.org/ontology/Person>, ?x) . " + separator
@@ -149,7 +149,7 @@ public class RuleStoreTest {
     }
 
     private void getRecipeTest() throws Exception {
-        Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
+        Recipe recipe = store.getRecipe(new IRI("http://incubator.apache.com/stanbol/rules/test/recipeA"));
 
         if (recipe == null) {
             Assert.fail();
@@ -162,7 +162,7 @@ public class RuleStoreTest {
     }
 
     private void getNotExistingRuleByNameInRecipeTest() throws Exception {
-        Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
+        Recipe recipe = store.getRecipe(new IRI("http://incubator.apache.com/stanbol/rules/test/recipeA"));
 
         try {
             recipe.getRule("ruleX");
@@ -174,10 +174,10 @@ public class RuleStoreTest {
     }
 
     private void getNotExistingRuleByIdInRecipeTest() throws Exception {
-        Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
+        Recipe recipe = store.getRecipe(new IRI("http://incubator.apache.com/stanbol/rules/test/recipeA"));
 
         try {
-            recipe.getRule(new UriRef("http://foo.org/ruleX"));
+            recipe.getRule(new IRI("http://foo.org/ruleX"));
             Assert.fail();
         } catch (NoSuchRuleInRecipeException e) {
             Assert.assertTrue(true);
@@ -186,7 +186,7 @@ public class RuleStoreTest {
     }
 
     private void getExistingRuleByIdInRecipeTest() throws Exception {
-        Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
+        Recipe recipe = store.getRecipe(new IRI("http://incubator.apache.com/stanbol/rules/test/recipeA"));
 
         try {
             Rule rule = recipe.getRule(recipe.listRuleIDs().get(0));
@@ -198,7 +198,7 @@ public class RuleStoreTest {
     }
 
     private void getExistingRuleByNameInRecipeTest() throws Exception {
-        Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
+        Recipe recipe = store.getRecipe(new IRI("http://incubator.apache.com/stanbol/rules/test/recipeA"));
 
         try {
             Rule rule = recipe.getRule(recipe.listRuleNames().get(0));
@@ -239,7 +239,7 @@ public class RuleStoreTest {
     }
 
     private void removeRuleInRecipeTest() throws Exception {
-        Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
+        Recipe recipe = store.getRecipe(new IRI("http://incubator.apache.com/stanbol/rules/test/recipeA"));
 
         String tmp = recipe.toString();
         Rule rule = recipe.getRule(recipe.listRuleNames().get(0));
@@ -247,7 +247,7 @@ public class RuleStoreTest {
         store.removeRule(recipe, rule);
 
         Recipe recipe2 = store
-                .getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
+                .getRecipe(new IRI("http://incubator.apache.com/stanbol/rules/test/recipeA"));
 
         String tmp2 = recipe2.toString();
 
@@ -261,7 +261,7 @@ public class RuleStoreTest {
         Recipe[] initialRecipes = new Recipe[recipeListInitial.size()];
         initialRecipes = recipeListInitial.toArray(initialRecipes);
 
-        Recipe recipe = store.getRecipe(new UriRef("http://incubator.apache.com/stanbol/rules/test/recipeA"));
+        Recipe recipe = store.getRecipe(new IRI("http://incubator.apache.com/stanbol/rules/test/recipeA"));
         store.removeRecipe(recipe);
 
         RecipeList recipeListFinal = store.listRecipes();

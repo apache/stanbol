@@ -30,10 +30,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
@@ -101,7 +101,7 @@ public class ListChain extends AbstractChain implements Chain {
 
     private Set<String> engineNames;
     
-    private Graph executionPlan;
+    private ImmutableGraph executionPlan;
         
     
     @Override
@@ -124,9 +124,9 @@ public class ListChain extends AbstractChain implements Chain {
                         (value != null?value.getClass():"null")+")");
         }
         Set<String> engineNames = new HashSet<String>(configuredChain.size());
-        NonLiteral last = null;
-        MGraph ep = new SimpleMGraph();
-        NonLiteral epNode = createExecutionPlan(ep, getName(), getChainProperties());
+        BlankNodeOrIRI last = null;
+        Graph ep = new SimpleGraph();
+        BlankNodeOrIRI epNode = createExecutionPlan(ep, getName(), getChainProperties());
         log.debug("Parse ListChain config:");
         for(String line : configuredChain){
             try {
@@ -151,7 +151,7 @@ public class ListChain extends AbstractChain implements Chain {
                 "The configured chain MUST at least contain a single valid entry!");
         }
         this.engineNames = Collections.unmodifiableSet(engineNames);
-        this.executionPlan = ep.getGraph();
+        this.executionPlan = ep.getImmutableGraph();
     }
 
     @Override
@@ -161,7 +161,7 @@ public class ListChain extends AbstractChain implements Chain {
         super.deactivate(ctx);
     }
     @Override
-    public Graph getExecutionPlan() throws ChainException {
+    public ImmutableGraph getExecutionPlan() throws ChainException {
         return executionPlan;
     }
 

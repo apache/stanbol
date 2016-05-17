@@ -17,10 +17,10 @@
 package org.apache.stanbol.enhancer.contentitem.inmemory;
 
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentSource;
@@ -33,7 +33,7 @@ import org.apache.stanbol.enhancer.servicesapi.impl.StringSource;
 /**
  * ContentItem implementation that holds a complete copy of the data in
  * memory. Internally it uses {@link InMemoryBlob} to store the content and
- * an {@link SimpleMGraph} for the metadata.
+ * an {@link SimpleGraph} for the metadata.
  * <p>
  * This implementation can be used independently of any store implementation and
  * is suitable for stateless processing.
@@ -53,14 +53,14 @@ public class InMemoryContentItem extends ContentItemImpl {
      * with a {@link ByteArraySource}
      */
     public InMemoryContentItem(byte[] content, String mimeType) {
-        this((UriRef)null,new InMemoryBlob(content, mimeType),null);
+        this((IRI)null,new InMemoryBlob(content, mimeType),null);
     }
     /**
      * 
      * @param id
      * @param content
      * @param mimeType
-     * @deprecated use {@link InMemoryContentItemFactory#createContentItem(UriRef, ContentSource)}
+     * @deprecated use {@link InMemoryContentItemFactory#createContentItem(IRI, ContentSource)}
      * with a {@link StringSource} instead.
      */
     public InMemoryContentItem(String id, String content, String mimeType) {
@@ -71,7 +71,7 @@ public class InMemoryContentItem extends ContentItemImpl {
      * @param id
      * @param content
      * @param mimetype
-     * @deprecated use {@link InMemoryContentItemFactory#createContentItem(UriRef, ContentSource)}
+     * @deprecated use {@link InMemoryContentItemFactory#createContentItem(IRI, ContentSource)}
      * with a {@link ByteArraySource} instead.
      */
     public InMemoryContentItem(String id, byte[] content, String mimetype) {
@@ -83,12 +83,12 @@ public class InMemoryContentItem extends ContentItemImpl {
      * @param id
      * @param content
      * @param mimetype
-     * @deprecated use {@link InMemoryContentItemFactory#createContentItem(UriRef, ContentSource,MGraph)}
+     * @deprecated use {@link InMemoryContentItemFactory#createContentItem(IRI, ContentSource,Graph)}
      * with a {@link ByteArraySource} instead.
      */
     public InMemoryContentItem(String uriString, byte[] content, String mimeType,
-            MGraph metadata) {
-    	this(uriString != null? new UriRef(uriString) : null ,
+            Graph metadata) {
+    	this(uriString != null? new IRI(uriString) : null ,
     	        new InMemoryBlob(content, mimeType),
     	        metadata);
     }
@@ -97,10 +97,10 @@ public class InMemoryContentItem extends ContentItemImpl {
      * @param id
      * @param content
      * @param mimetype
-     * @deprecated use {@link InMemoryContentItemFactory#createContentItem(UriRef, ContentSource,MGraph)}
+     * @deprecated use {@link InMemoryContentItemFactory#createContentItem(IRI, ContentSource,Graph)}
      * with a {@link StringSource} instead.
      */
-    public InMemoryContentItem(UriRef uriRef, String content, String mimeType) {
+    public InMemoryContentItem(IRI uriRef, String content, String mimeType) {
 		this(uriRef, new InMemoryBlob(content, mimeType), null);
 	}
     /**
@@ -108,18 +108,18 @@ public class InMemoryContentItem extends ContentItemImpl {
      * @param id
      * @param content
      * @param mimetype
-     * @deprecated use {@link InMemoryContentItemFactory#createContentItem(UriRef, ContentSource,MGraph)}
+     * @deprecated use {@link InMemoryContentItemFactory#createContentItem(IRI, ContentSource,Graph)}
      * with a {@link ByteArraySource} instead.
      */
-    public InMemoryContentItem(UriRef uri, byte[] content, String mimeType, MGraph metadata) {
+    public InMemoryContentItem(IRI uri, byte[] content, String mimeType, Graph metadata) {
         this(uri, new InMemoryBlob(content, mimeType),metadata);
     }
-    protected InMemoryContentItem(String uriString, Blob blob, MGraph metadata) {
-        this(uriString != null ? new UriRef(uriString) : null, blob, metadata);
+    protected InMemoryContentItem(String uriString, Blob blob, Graph metadata) {
+        this(uriString != null ? new IRI(uriString) : null, blob, metadata);
     }
-    protected InMemoryContentItem(UriRef uri, Blob blob, MGraph metadata) {
+    protected InMemoryContentItem(IRI uri, Blob blob, Graph metadata) {
         super(uri == null ? ContentItemHelper.makeDefaultUrn(blob): uri,blob,
-                metadata == null ? new IndexedMGraph() : metadata);
+                metadata == null ? new IndexedGraph() : metadata);
     }
 
     /**

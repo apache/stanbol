@@ -27,11 +27,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
@@ -87,7 +87,7 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
 
     public static ContentItem wrapAsContentItem(final String id,
             final String text, String language) throws IOException {
-    	ContentItem ci =  ciFactory.createContentItem(new UriRef(id),new StringSource(text));
+    	ContentItem ci =  ciFactory.createContentItem(new IRI(id),new StringSource(text));
     	if(language != null){
     	    ci.getMetadata().add(new TripleImpl(ci.getUri(), DC_LANGUAGE, new PlainLiteralImpl(language)));
     	}
@@ -151,12 +151,12 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
             throws EngineException, IOException {
         ContentItem ci = wrapAsContentItem("urn:test:content-item:single:sentence", SINGLE_SENTENCE,"en");
         nerEngine.computeEnhancements(ci);
-        Map<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+        Map<IRI,RDFTerm> expectedValues = new HashMap<IRI,RDFTerm>();
         expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(nerEngine.getClass().getName()));
         //adding null as expected for confidence makes it a required property
         expectedValues.put(Properties.ENHANCER_CONFIDENCE, null);
-        MGraph g = ci.getMetadata();
+        Graph g = ci.getMetadata();
         int textAnnotationCount = validateAllTextAnnotations(g,SINGLE_SENTENCE,expectedValues);
         assertEquals(3, textAnnotationCount);
     }
@@ -167,16 +167,16 @@ public class TestNamedEntityExtractionEnhancementEngine extends Assert {
         nerEngine.config.getDefaultModelTypes().clear(); 
         //but instead a custom model provided by the test data
         nerEngine.config.addCustomNameFinderModel("en", "bionlp2004-DNA-en.bin");
-        nerEngine.config.setMappedType("DNA", new UriRef("http://www.bootstrep.eu/ontology/GRO#DNA"));
+        nerEngine.config.setMappedType("DNA", new IRI("http://www.bootstrep.eu/ontology/GRO#DNA"));
         nerEngine.computeEnhancements(ci);
-        Map<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+        Map<IRI,RDFTerm> expectedValues = new HashMap<IRI,RDFTerm>();
         expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(nerEngine.getClass().getName()));
         //adding null as expected for confidence makes it a required property
         expectedValues.put(Properties.ENHANCER_CONFIDENCE, null);
         //and dc:type values MUST be the URI set as mapped type
-        expectedValues.put(Properties.DC_TYPE, new UriRef("http://www.bootstrep.eu/ontology/GRO#DNA"));
-        MGraph g = ci.getMetadata();
+        expectedValues.put(Properties.DC_TYPE, new IRI("http://www.bootstrep.eu/ontology/GRO#DNA"));
+        Graph g = ci.getMetadata();
         int textAnnotationCount = validateAllTextAnnotations(g,EHEALTH,expectedValues);
         assertEquals(7, textAnnotationCount);
     }

@@ -28,11 +28,11 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.Language;
+import org.apache.clerezza.commons.rdf.Language;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -78,7 +78,7 @@ public class Nlp2RdfMetadataEngine extends AbstractEnhancementEngine<RuntimeExce
 
     private final Logger log = LoggerFactory.getLogger(Nlp2RdfMetadataEngine.class);
     //TODO: replace this with a reald ontology
-    private final static UriRef SENTIMENT_PROPERTY = new UriRef(NamespaceEnum.fise+"sentiment-value");
+    private final static IRI SENTIMENT_PROPERTY = new IRI(NamespaceEnum.fise+"sentiment-value");
     private final LiteralFactory lf = LiteralFactory.getInstance();
     
     /**
@@ -123,20 +123,20 @@ public class Nlp2RdfMetadataEngine extends AbstractEnhancementEngine<RuntimeExce
         if(words){
             activeTypes.add(SpanTypeEnum.Token);
         }
-        MGraph metadata = ci.getMetadata();
-        UriRef base = ci.getUri();
+        Graph metadata = ci.getMetadata();
+        IRI base = ci.getUri();
         ci.getLock().writeLock().lock();
         try {
             Iterator<Span> spans = at.getEnclosed(activeTypes);
-            UriRef sentence = null;
-            UriRef phrase = null;
-            UriRef word = null;
+            IRI sentence = null;
+            IRI phrase = null;
+            IRI word = null;
             boolean firstWordInSentence = true;
             while(spans.hasNext()){
                 Span span = spans.next();
                 //TODO: filter Spans based on additional requirements
                 //(1) write generic information about the span
-                UriRef current = writeSpan(metadata, base, at, language, span);
+                IRI current = writeSpan(metadata, base, at, language, span);
                 //(2) add the relations between the different spans
                 switch (span.getType()) {
                     case Sentence:

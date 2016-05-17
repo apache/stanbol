@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.enhancer.engines.zemanta;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 
 /**
  * Holds concepts, properties and instances found in the Zemanta ontology.
@@ -51,7 +51,7 @@ public enum ZemantaOntologyEnum {
     Keyword,
     name,
     schema,;
-    UriRef uri;
+    IRI uri;
 
     /**
      * Creates n new entity of this Enum by using the parsed namespace and
@@ -61,7 +61,7 @@ public enum ZemantaOntologyEnum {
      * @param local The local name or <code>null</code> to use the default
      */
     ZemantaOntologyEnum(String ns, String local) {
-        uri = new UriRef((ns == null ? "http://s.zemanta.com/ns#" : ns) + (local == null ? name() : local));
+        uri = new IRI((ns == null ? "http://s.zemanta.com/ns#" : ns) + (local == null ? name() : local));
     }
 
     /**
@@ -96,9 +96,9 @@ public enum ZemantaOntologyEnum {
     /**
      * The URI of the element of this Enum.
      *
-     * @return the URI of the element as Clerezza UriRef
+     * @return the URI of the element as Clerezza IRI
      */
-    public UriRef getUri() {
+    public IRI getUri() {
         return uri;
     }
 }

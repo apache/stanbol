@@ -22,7 +22,7 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 /**
  * Defines verb tenses as defined by the
  * <a href="">OLIA</a> Ontology.<p>
@@ -67,7 +67,7 @@ public enum Tense {
     RelativePresent(Relative),
     ;
     static final String OLIA_NAMESPACE = "http://purl.org/olia/olia.owl#";
-    UriRef uri;
+    IRI uri;
     Tense parent;
     
     Tense() {
@@ -81,7 +81,7 @@ public enum Tense {
         this(name,null);
     }
     Tense(String name,Tense parent) {
-        uri = new UriRef(OLIA_NAMESPACE + (name == null ? name() : name));
+        uri = new IRI(OLIA_NAMESPACE + (name == null ? name() : name));
         this.parent = parent;
     }
     /**
@@ -113,7 +113,7 @@ public enum Tense {
         return transitiveClosureMap.get(this);
     }
     
-    public UriRef getUri() {
+    public IRI getUri() {
         return uri;
     }
 

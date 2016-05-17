@@ -17,7 +17,7 @@
 
 package org.apache.stanbol.rules.base.api;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 
 /**
  * It provides static methods in order to represent properties, classes and the namespace used in order to
@@ -37,18 +37,18 @@ public final class Symbols {
 
     public static String variablesPrefix = "http://incubator.apache.org/stanbol/rules/variables/";
 
-    public static UriRef description = new UriRef("http://incubator.apache.org/stanbol/rules/description");
+    public static IRI description = new IRI("http://incubator.apache.org/stanbol/rules/description");
 
-    public static UriRef hasRule = new UriRef("http://incubator.apache.org/stanbol/rules/hasRule");
+    public static IRI hasRule = new IRI("http://incubator.apache.org/stanbol/rules/hasRule");
 
-    public static UriRef ruleName = new UriRef("http://incubator.apache.org/stanbol/rules/ruleName");
+    public static IRI ruleName = new IRI("http://incubator.apache.org/stanbol/rules/ruleName");
 
-    public static UriRef ruleBody = new UriRef("http://incubator.apache.org/stanbol/rules/ruleBody");
+    public static IRI ruleBody = new IRI("http://incubator.apache.org/stanbol/rules/ruleBody");
 
-    public static UriRef ruleHead = new UriRef("http://incubator.apache.org/stanbol/rules/ruleHead");
+    public static IRI ruleHead = new IRI("http://incubator.apache.org/stanbol/rules/ruleHead");
 
-    public static UriRef Recipe = new UriRef("http://incubator.apache.org/stanbol/rules/Recipe");
+    public static IRI Recipe = new IRI("http://incubator.apache.org/stanbol/rules/Recipe");
 
-    public static UriRef Rule = new UriRef("http://incubator.apache.org/stanbol/rules/Rule");
+    public static IRI Rule = new IRI("http://incubator.apache.org/stanbol/rules/Rule");
 
 }

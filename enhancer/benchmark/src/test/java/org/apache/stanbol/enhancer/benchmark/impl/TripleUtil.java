@@ -19,19 +19,19 @@ package org.apache.stanbol.enhancer.benchmark.impl;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 
 public class TripleUtil {
     static Triple uriTriple(String subject, String predicate, String object) {
-        return new TripleImpl(new UriRef(subject), new UriRef(predicate), new UriRef(object));
+        return new TripleImpl(new IRI(subject), new IRI(predicate), new IRI(object));
     }
     
-    static Set<UriRef> uriRefSet(String...uri) {
-        final Set<UriRef> result = new HashSet<UriRef>();
+    static Set<IRI> uriRefSet(String...uri) {
+        final Set<IRI> result = new HashSet<IRI>();
         for(String str : uri) {
-            result.add(new UriRef(str));
+            result.add(new IRI(str));
         }
         return result;
     }

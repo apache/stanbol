@@ -19,10 +19,9 @@ package org.apache.stanbol.enhancer.engines.dereference;
 import java.util.Collections;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
 
 /**
@@ -79,7 +78,7 @@ public interface DereferenceConstants {
      * dereferencing entities.
      * @since 0.12.1 (<a href="https://issues.apache.org/jira/browse/STANBOL-1334">STANBOL-1334</a>)
      */
-    Set<UriRef> DEFAULT_ENTITY_REFERENCES = Collections.unmodifiableSet(
+    Set<IRI> DEFAULT_ENTITY_REFERENCES = Collections.unmodifiableSet(
         Collections.singleton(Properties.ENHANCER_ENTITY_REFERENCE));
 
     /**

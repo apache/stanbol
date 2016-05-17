@@ -34,17 +34,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.clerezza.rdf.core.impl.TypedLiteralImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TypedLiteralImpl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
@@ -98,9 +97,9 @@ public class EntityLinkingEngine implements EnhancementEngine, ServiceProperties
      */
     public static final Integer DEFAULT_ORDER = ServiceProperties.ORDERING_DEFAULT - 10;
     
-    private static final UriRef XSD_DOUBLE = new UriRef("http://www.w3.org/2001/XMLSchema#double");
+    private static final IRI XSD_DOUBLE = new IRI("http://www.w3.org/2001/XMLSchema#double");
     
-    private static final UriRef ENHANCER_ENTITY_RANKING = new UriRef(NamespaceEnum.fise + "entity-ranking");
+    private static final IRI ENHANCER_ENTITY_RANKING = new IRI(NamespaceEnum.fise + "entity-ranking");
     
     /**
      * The name of this engine
@@ -293,23 +292,23 @@ public class EntityLinkingEngine implements EnhancementEngine, ServiceProperties
         if(language != null && !language.isEmpty()){
             languageObject = new Language(language);
         }
-        Set<UriRef> dereferencedEntitis = new HashSet<UriRef>();
+        Set<IRI> dereferencedEntitis = new HashSet<IRI>();
         
-        MGraph metadata = ci.getMetadata();
+        Graph metadata = ci.getMetadata();
         for(LinkedEntity linkedEntity : linkedEntities){
-            Collection<UriRef> textAnnotations = new ArrayList<UriRef>(linkedEntity.getOccurrences().size());
+            Collection<IRI> textAnnotations = new ArrayList<IRI>(linkedEntity.getOccurrences().size());
             //first create the TextAnnotations for the Occurrences
             for(Occurrence occurrence : linkedEntity.getOccurrences()){
                 Literal startLiteral = literalFactory.createTypedLiteral(occurrence.getStart());
                 Literal endLiteral = literalFactory.createTypedLiteral(occurrence.getEnd());
                 //search for existing text annotation
                 Iterator<Triple> it = metadata.filter(null, ENHANCER_START, startLiteral);
-                UriRef textAnnotation = null;
+                IRI textAnnotation = null;
                 while(it.hasNext()){
                     Triple t = it.next();
                     if(metadata.filter(t.getSubject(), ENHANCER_END, endLiteral).hasNext() &&
                             metadata.filter(t.getSubject(), RDF_TYPE, ENHANCER_TEXTANNOTATION).hasNext()){
-                        textAnnotation = (UriRef)t.getSubject();
+                        textAnnotation = (IRI)t.getSubject();
                         break;
                     }
                 }
@@ -335,7 +334,7 @@ public class EntityLinkingEngine implements EnhancementEngine, ServiceProperties
                         new PlainLiteralImpl(this.getClass().getName())));
                 }
                 //add dc:types (even to existing)
-                for(UriRef dcType : linkedEntity.getTypes()){
+                for(IRI dcType : linkedEntity.getTypes()){
                     metadata.add(new TripleImpl(
                         textAnnotation, Properties.DC_TYPE, dcType));
                 }
@@ -343,26 +342,26 @@ public class EntityLinkingEngine implements EnhancementEngine, ServiceProperties
             }
             //now the EntityAnnotations for the Suggestions
             for(Suggestion suggestion : linkedEntity.getSuggestions()){
-                UriRef entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(ci, this);
+                IRI entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(ci, this);
                 //should we use the label used for the match, or search the
                 //representation for the best label ... currently its the matched one
-                PlainLiteral label = suggestion.getBestLabel(linkerConfig.getNameField(),language);
+                Literal label = suggestion.getBestLabel(linkerConfig.getNameField(),language);
                 Entity entity = suggestion.getEntity();
                 metadata.add(new TripleImpl(entityAnnotation, Properties.ENHANCER_ENTITY_LABEL, label));
                 metadata.add(new TripleImpl(entityAnnotation,ENHANCER_ENTITY_REFERENCE, entity.getUri()));
-                Iterator<UriRef> suggestionTypes = entity.getReferences(linkerConfig.getTypeField());
+                Iterator<IRI> suggestionTypes = entity.getReferences(linkerConfig.getTypeField());
                 while(suggestionTypes.hasNext()){
                     metadata.add(new TripleImpl(entityAnnotation, 
                         Properties.ENHANCER_ENTITY_TYPE, suggestionTypes.next()));
                 }
                 metadata.add(new TripleImpl(entityAnnotation,
                     Properties.ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(suggestion.getScore())));
-                for(UriRef textAnnotation : textAnnotations){
+                for(IRI textAnnotation : textAnnotations){
                     metadata.add(new TripleImpl(entityAnnotation, Properties.DC_RELATION, textAnnotation));
                 }
                 //add origin information of the EntiySearcher
-                for(Entry<UriRef,Collection<Resource>> originInfo : entitySearcher.getOriginInformation().entrySet()){
-                    for(Resource value : originInfo.getValue()){
+                for(Entry<IRI,Collection<RDFTerm>> originInfo : entitySearcher.getOriginInformation().entrySet()){
+                    for(RDFTerm value : originInfo.getValue()){
                         metadata.add(new TripleImpl(entityAnnotation, 
                             originInfo.getKey(),value));
                     }

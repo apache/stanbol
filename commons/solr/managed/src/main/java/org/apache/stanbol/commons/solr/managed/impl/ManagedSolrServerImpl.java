@@ -985,7 +985,7 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
                                        //not available
                                         ais = null;
                                     } catch (ArchiveException e) {
-                                        log.error("Unable to open ArchiveInputStream for Resource '"+
+                                        log.error("Unable to open ArchiveInputStream for RDFTerm '"+
                                             archive+"'!",e);
                                         ais = null;
                                     }
@@ -1027,7 +1027,7 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
             try {
                 ais = ManagementUtils.getArchiveInputStream(resourceName, is);
             } catch (ArchiveException e) {
-                log.error("Unable to open ArchiveInputStream for Resource '"+
+                log.error("Unable to open ArchiveInputStream for RDFTerm '"+
                     resourceName+"'!",e);
                 ais = null;
             }

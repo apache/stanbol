@@ -48,13 +48,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.SolrCore;
@@ -158,9 +158,9 @@ public class FstLinkingEngineTest {
      * Used with the {@link EnhancementStructureHelper} to validate Enhancement 
      * results
      */
-    private static Map<UriRef,Resource> EXPECTED_ENHANCEMENT_VALUES;
+    private static Map<IRI,RDFTerm> EXPECTED_ENHANCEMENT_VALUES;
     static{
-        EXPECTED_ENHANCEMENT_VALUES = new HashMap<UriRef,Resource>();
+        EXPECTED_ENHANCEMENT_VALUES = new HashMap<IRI,RDFTerm>();
         EXPECTED_ENHANCEMENT_VALUES.put(DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(
             FstLinkingEngine.class.getName()));
         //adding null as expected for confidence makes it a required property
@@ -346,13 +346,13 @@ public class FstLinkingEngineTest {
         //iterate over all fise:TextAnnotations
         //NOTE this assumes all textAnnotations are from the FST linking engine
         log.info("  ... validated fise:TextAnnotations:");
-        Map<UriRef,Resource> expected = new HashMap<UriRef,Resource>(EXPECTED_ENHANCEMENT_VALUES);
+        Map<IRI,RDFTerm> expected = new HashMap<IRI,RDFTerm>(EXPECTED_ENHANCEMENT_VALUES);
         expected.put(ENHANCER_EXTRACTED_FROM, ci.getUri());
         int[] num = new int[]{0,0};
         Iterator<Triple> textAnnotations = ci.getMetadata().filter(
             null, Properties.RDF_TYPE, TechnicalClasses.ENHANCER_TEXTANNOTATION);
         while(textAnnotations.hasNext()){
-            UriRef textAnnotation = (UriRef)textAnnotations.next().getSubject();
+            IRI textAnnotation = (IRI)textAnnotations.next().getSubject();
             //validate this test annotation against the Stanbol EnhancementStructure
             EnhancementStructureHelper.validateTextAnnotation(
                 ci.getMetadata(), textAnnotation, content, expected);
@@ -374,11 +374,11 @@ public class FstLinkingEngineTest {
         Iterator<Triple> entityAnnotations = ci.getMetadata().filter(
             null, Properties.RDF_TYPE, TechnicalClasses.ENHANCER_ENTITYANNOTATION);
         while(entityAnnotations.hasNext()){
-            UriRef entityAnnotation = (UriRef)entityAnnotations.next().getSubject();
+            IRI entityAnnotation = (IRI)entityAnnotations.next().getSubject();
             //validate this test annotation against the Stanbol EnhancementStructure
             EnhancementStructureHelper.validateEntityAnnotation(
                 ci.getMetadata(), entityAnnotation, expected);
-            UriRef entityUri = EnhancementEngineHelper.getReference(
+            IRI entityUri = EnhancementEngineHelper.getReference(
                 ci.getMetadata(), entityAnnotation, Properties.ENHANCER_ENTITY_REFERENCE);
             log.info(" {}. {}",num[1]+1,entityUri);
             Assert.assertNotNull(entityUri);

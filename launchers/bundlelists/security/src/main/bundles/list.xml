@@ -21,12 +21,12 @@
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.file.storage</artifactId>
-      <version>0.4</version>
+      <version>1.0.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>platform.config</artifactId>
-      <version>0.4</version>
+      <version>1.0.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.clerezza</groupId>
@@ -36,7 +36,7 @@
     <bundle>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>platform</artifactId>
-      <version>0.2</version>
+      <version>1.0.0</version>
     </bundle>
     <bundle>
       <groupId>org.apache.stanbol</groupId>
@@ -71,7 +71,7 @@
                 <bundle>
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>platform.graphprovider.content</artifactId>
-			<version>0.7</version>
+			<version>1.0.0</version>
 		</bundle>
   </startLevel>
 </bundles>

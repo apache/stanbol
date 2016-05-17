@@ -41,10 +41,10 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedParsingFormatException;
@@ -52,7 +52,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.entityhub.jersey.utils.JerseyUtils;
 import org.apache.stanbol.entityhub.jersey.utils.MessageBodyReaderUtils;
 import org.apache.stanbol.entityhub.jersey.utils.MessageBodyReaderUtils.RequestData;
@@ -247,8 +247,8 @@ public class RepresentationReader implements MessageBodyReader<Map<String,Repres
        } else if(isSupported(content.getMediaType())){ //from RDF serialisation
             RdfValueFactory valueFactory = RdfValueFactory.getInstance();
             Map<String,Representation> representations = new HashMap<String,Representation>();
-            Set<NonLiteral> processed = new HashSet<NonLiteral>();
-            MGraph graph = new IndexedMGraph();
+            Set<BlankNodeOrIRI> processed = new HashSet<BlankNodeOrIRI>();
+            Graph graph = new IndexedGraph();
             try {
                 parser.parse(graph,content.getEntityStream(), content.getMediaType().toString());
             } catch (UnsupportedParsingFormatException e) {
@@ -276,11 +276,11 @@ public class RepresentationReader implements MessageBodyReader<Map<String,Repres
                     header(HttpHeaders.ACCEPT, acceptedMediaType).build());
             }
             for(Iterator<Triple> st = graph.iterator();st.hasNext();){
-                NonLiteral resource = st.next().getSubject();
-                if(resource instanceof UriRef && processed.add(resource)){
+                BlankNodeOrIRI resource = st.next().getSubject();
+                if(resource instanceof IRI && processed.add(resource)){
                     //build a new representation
-                    representations.put(((UriRef)resource).getUnicodeString(),
-                        valueFactory.createRdfRepresentation((UriRef)resource, graph));
+                    representations.put(((IRI)resource).getUnicodeString(),
+                        valueFactory.createRdfRepresentation((IRI)resource, graph));
                 }
             }
             return representations;

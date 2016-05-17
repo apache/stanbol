@@ -23,9 +23,9 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
@@ -46,7 +46,7 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
  */
 public class SingleEngineChain implements Chain {
 
-    private final Graph executionPlan;
+    private final ImmutableGraph executionPlan;
     private final EnhancementEngine engine;
     private final String name;
     
@@ -71,14 +71,14 @@ public class SingleEngineChain implements Chain {
         }
         this.engine = engine;
         this.name = engine.getName()+"Chain";
-        MGraph graph = new IndexedMGraph();
+        Graph graph = new IndexedGraph();
         writeExecutionNode(graph, createExecutionPlan(graph, name, null),
             engine.getName(), false, null, enhProps);
-        executionPlan = graph.getGraph();
+        executionPlan = graph.getImmutableGraph();
     }
     
     @Override
-    public Graph getExecutionPlan() throws ChainException {
+    public ImmutableGraph getExecutionPlan() throws ChainException {
         return executionPlan;
     }
 

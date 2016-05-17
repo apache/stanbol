@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.nlp.model.Section;
 import org.apache.stanbol.enhancer.nlp.model.Token;
 
@@ -128,7 +128,7 @@ public class LinkedEntity {
         }
     }
     private final String selectedText;
-    private final Set<UriRef> types;
+    private final Set<IRI> types;
     private final List<Suggestion> suggestions;
     private final Collection<Occurrence> occurrences = new ArrayList<Occurrence>();
     private final Collection<Occurrence> unmodOccurrences = Collections.unmodifiableCollection(occurrences);
@@ -138,7 +138,7 @@ public class LinkedEntity {
      * @param suggestions the entity suggestions
      * @param types the types of the linked entity. 
      */
-    protected LinkedEntity(String selectedText, List<Suggestion> suggestions, Set<UriRef> types) {
+    protected LinkedEntity(String selectedText, List<Suggestion> suggestions, Set<IRI> types) {
         this.suggestions = Collections.unmodifiableList(suggestions);
         this.selectedText = selectedText;
         this.types = Collections.unmodifiableSet(types);
@@ -152,7 +152,7 @@ public class LinkedEntity {
      * @param types the types of the linked entity. 
      */
     protected LinkedEntity(Section section,Token startToken,Token endToken, 
-                           List<Suggestion> suggestions, Set<UriRef> types) {
+                           List<Suggestion> suggestions, Set<IRI> types) {
         this(startToken.getSpan().substring(startToken.getStart(), endToken.getEnd()),
             suggestions,types);
         addOccurrence(section, startToken,endToken);
@@ -169,7 +169,7 @@ public class LinkedEntity {
      * Getter for read only list of types
      * @return the types
      */
-    public Set<UriRef> getTypes() {
+    public Set<IRI> getTypes() {
         return types;
     }
     /**

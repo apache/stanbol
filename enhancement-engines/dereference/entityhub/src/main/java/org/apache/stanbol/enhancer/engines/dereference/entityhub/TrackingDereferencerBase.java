@@ -32,10 +32,10 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
 import org.apache.commons.lang.StringUtils;
 import org.apache.marmotta.ldpath.api.backend.RDFBackend;
 import org.apache.marmotta.ldpath.exception.LDPathParseException;
@@ -283,7 +283,7 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
     }
     
     @Override
-    public final boolean dereference(UriRef uri, MGraph graph, Lock writeLock, DereferenceContext dc) throws DereferenceException {
+    public final boolean dereference(IRI uri, Graph graph, Lock writeLock, DereferenceContext dc) throws DereferenceException {
         T service = getService();
         if(service == null){
             throw new DereferenceException(uri, serviceClass.getClass().getSimpleName() 
@@ -321,7 +321,7 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
     }
     /**
      * Executes the {@link #ldpathProgram} using the parsed URI as context and
-     * writes the the results to the parsed Graph
+     * writes the the results to the parsed ImmutableGraph
      * @param uri the context
      * @param rdfBackend the RdfBackend the LDPath program is executed on
      * @param ldpathProgram The {@link Program} parsed via the dereference context
@@ -331,15 +331,15 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
      * @throws DereferenceException on any {@link EntityhubException} while
      * executing the LDPath program
      */
-    private void copyLdPath(UriRef uri, RDFBackend<Object> rdfBackend, Program<Object> ldpathProgram,
-            Set<String> langs, MGraph graph, Lock writeLock) throws DereferenceException {
+    private void copyLdPath(IRI uri, RDFBackend<Object> rdfBackend, Program<Object> ldpathProgram,
+            Set<String> langs, Graph graph, Lock writeLock) throws DereferenceException {
         //A RdfReference needs to be used as context
         RdfReference context = valueFactory.createReference(uri);
         //create the representation that stores results in an intermediate
         //graph (we do not want partial results on an error
-        MGraph ldPathResults = new SimpleMGraph();
+        Graph ldPathResults = new SimpleGraph();
         RdfRepresentation result = valueFactory.createRdfRepresentation(uri, ldPathResults);
-        //execute the LDPath Program and write results to the RDF Graph
+        //execute the LDPath Program and write results to the RDF ImmutableGraph
         try {
 	        for(org.apache.marmotta.ldpath.model.fields.FieldMapping<?,Object> mapping : ldpathProgram.getFields()) {
 	        	Collection<?> values;
@@ -405,8 +405,8 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
      * @param graph the graph to store the mapping results
      * @param writeLock the write lock for the graph
      */
-    private void copyMapped(UriRef uri, Representation rep, FieldMapper fieldMapper, Set<String> langs, 
-            MGraph graph, Lock writeLock) {
+    private void copyMapped(IRI uri, Representation rep, FieldMapper fieldMapper, Set<String> langs, 
+            Graph graph, Lock writeLock) {
         //NOTE: The fieldMapper parsed via the context does already have a
         //      filter for the parsed languages. Because of that the old code
         //      adding such a language filter is no longer needed
@@ -439,7 +439,7 @@ public abstract class TrackingDereferencerBase<T> implements EntityDereferencer 
      * @param graph the graph to copy the data
      * @param writeLock the write lock for the graph
      */
-    private void copyAll(UriRef uri, Representation rep, MGraph graph, Lock writeLock) {
+    private void copyAll(IRI uri, Representation rep, Graph graph, Lock writeLock) {
         writeLock.lock();
         try {
         	if(log.isTraceEnabled()){

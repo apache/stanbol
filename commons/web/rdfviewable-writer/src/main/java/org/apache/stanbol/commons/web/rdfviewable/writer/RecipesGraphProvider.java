@@ -18,8 +18,8 @@ package org.apache.stanbol.commons.web.rdfviewable.writer;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.felix.scr.annotations.Activate;
@@ -27,7 +27,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -47,15 +47,15 @@ public class RecipesGraphProvider implements BundleListener {
     private static Logger log = 
             LoggerFactory.getLogger(RecipesGraphProvider.class);
     
-    private MGraph recipesGraph = null;
+    private Graph recipesGraph = null;
     
-    public TripleCollection getRecipesGraph() {
+    public Graph getRecipesGraph() {
         return recipesGraph;
     }
     
     @Activate
     protected void activate(BundleContext context) {
-        recipesGraph = new IndexedMGraph();
+        recipesGraph = new IndexedGraph();
         context.addBundleListener(this);
         for (Bundle b : context.getBundles()) {
             if (b.getState() == Bundle.ACTIVE) {

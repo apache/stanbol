@@ -59,8 +59,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedSerializationFormatException;
 import org.apache.commons.io.IOUtils;
@@ -197,7 +197,7 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
                         + mediaType.toString(),Response.Status.NOT_ACCEPTABLE);
                 }
             } else { //  (2) return a single content part
-                Entry<UriRef,Blob> contentPart = getBlob(ci, Collections.singleton(mediaType.toString()));
+                Entry<IRI,Blob> contentPart = getBlob(ci, Collections.singleton(mediaType.toString()));
                 if(contentPart == null){ //no alternate content with the requeste media type
                     throw new WebApplicationException("The requested enhancement chain has not created an "
                             + "version of the parsed content in the reuqest media type "
@@ -267,11 +267,11 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
             }
             //(3) serialising the Content (Bloby)
             //(3.a) Filter based on parameter
-            List<Entry<UriRef,Blob>> includedBlobs = filterBlobs(ci, reqProp);
+            List<Entry<IRI,Blob>> includedBlobs = filterBlobs(ci, reqProp);
             //(3.b) Serialise the filtered
             if(!includedBlobs.isEmpty()) {
                 Map<String,ContentBody> contentParts = new LinkedHashMap<String,ContentBody>();
-                for(Entry<UriRef,Blob> entry : includedBlobs){
+                for(Entry<IRI,Blob> entry : includedBlobs){
                     Blob blob = entry.getValue();
                     ContentType ct = ContentType.create(blob.getMimeType());
                     String cs = blob.getParameter().get("charset");
@@ -304,7 +304,7 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
                          ContentType.APPLICATION_JSON.withCharset(UTF8));
                 }
                 //(5) additional RDF metadata stored in contentParts
-                for(Entry<UriRef,TripleCollection> entry : getContentParts(ci, TripleCollection.class).entrySet()){
+                for(Entry<IRI,Graph> entry : getContentParts(ci, Graph.class).entrySet()){
                     if(includeContentParts.isEmpty() || includeContentParts.contains(
                         entry.getKey())){
                         entityBuilder.addPart(entry.getKey().getUnicodeString(), 
@@ -372,16 +372,16 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
      * @param properties
      * @return
      */
-    private List<Entry<UriRef,Blob>> filterBlobs(ContentItem ci, Map<String,Object> properties) {
-        final List<Entry<UriRef,Blob>> includedContentPartList;
+    private List<Entry<IRI,Blob>> filterBlobs(ContentItem ci, Map<String,Object> properties) {
+        final List<Entry<IRI,Blob>> includedContentPartList;
         Set<MediaType> includeMediaTypes = getIncludedMediaTypes(properties);
         if(includeMediaTypes == null){
             includedContentPartList = Collections.emptyList();
         } else {
-            includedContentPartList = new ArrayList<Map.Entry<UriRef,Blob>>();
+            includedContentPartList = new ArrayList<Map.Entry<IRI,Blob>>();
             Set<String> ignoreContentPartUris = getIgnoredContentURIs(properties);
             nextContentPartEntry: 
-            for(Entry<UriRef,Blob> entry : getContentParts(ci,Blob.class).entrySet()){
+            for(Entry<IRI,Blob> entry : getContentParts(ci,Blob.class).entrySet()){
                 if(!ignoreContentPartUris.contains(entry.getKey().getUnicodeString())){
                     Blob blob = entry.getValue();
                     MediaType blobMediaType = MediaType.valueOf(blob.getMimeType());
@@ -505,11 +505,11 @@ public class ContentItemWriter implements MessageBodyWriter<ContentItem> {
      */
     private class ClerezzaContentBody extends AbstractContentBody implements ContentBody,ContentDescriptor {
 
-        private TripleCollection graph;
+        private Graph graph;
         private String charset;
         private String name;
 
-        protected ClerezzaContentBody(String name, TripleCollection graph, MediaType mimeType){
+        protected ClerezzaContentBody(String name, Graph graph, MediaType mimeType){
             super(ContentType.create(new StringBuilder(mimeType.getType())
             .append('/').append(mimeType.getSubtype()).toString(), UTF8));
             charset = mimeType.getParameters().get("charset");

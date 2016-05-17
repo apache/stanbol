@@ -22,8 +22,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.Suggestion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,11 +77,11 @@ public class Match {
         return getValues(FieldType.label);
     }
     
-    public Collection<UriRef> getTypes(){
+    public Collection<IRI> getTypes(){
         return getValues(FieldType.type);
     }
     
-    public Collection<UriRef> getRedirects(){
+    public Collection<IRI> getRedirects(){
         return getValues(FieldType.redirect);
     }
     public Double getRanking(){
@@ -157,8 +157,8 @@ public class Match {
     static enum FieldType {
         id(String.class),
         label(Literal.class, true), 
-        type(UriRef.class,true), 
-        redirect(UriRef.class,true), 
+        type(IRI.class,true), 
+        redirect(IRI.class,true), 
         ranking(Double.class);
         
         Class<?> valueType;

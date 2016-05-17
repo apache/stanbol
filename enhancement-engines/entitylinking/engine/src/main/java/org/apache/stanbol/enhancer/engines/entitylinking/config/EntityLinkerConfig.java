@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
@@ -260,17 +260,17 @@ public class EntityLinkerConfig {
     /**
      * Default value for {@link #getNameField()} (rdfs:label)
      */
-    public static final UriRef DEFAULT_NAME_FIELD = new UriRef(
+    public static final IRI DEFAULT_NAME_FIELD = new IRI(
         "http://www.w3.org/2000/01/rdf-schema#label");
     /**
      * Default value for {@link #getTypeField()} (rdf:type)
      */
-    public static final UriRef DEFAULT_TYPE_FIELD = new UriRef(
+    public static final IRI DEFAULT_TYPE_FIELD = new IRI(
         "http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
     /**
      * Default value for {@link #getRedirectField()} (rdf:seeAlso)
      */
-    public static final UriRef DEFAULT_REDIRECT_FIELD = new UriRef(
+    public static final IRI DEFAULT_REDIRECT_FIELD = new IRI(
         "http://www.w3.org/2000/01/rdf-schema#seeAlso");
     /**
      * The default language used to search for labels regardless of the language
@@ -300,41 +300,41 @@ public class EntityLinkerConfig {
      * Default mapping for Concept types to dc:type values added for
      * TextAnnotations.
      */
-    public static final Map<UriRef,UriRef> DEFAULT_ENTITY_TYPE_MAPPINGS;
+    public static final Map<IRI,IRI> DEFAULT_ENTITY_TYPE_MAPPINGS;
     
     static { //the default mappings for the three types used by the Stanbol Enhancement Structure
-        Map<UriRef,UriRef> mappings = new HashMap<UriRef,UriRef>();
+        Map<IRI,IRI> mappings = new HashMap<IRI,IRI>();
         mappings.put(OntologicalClasses.DBPEDIA_ORGANISATION, OntologicalClasses.DBPEDIA_ORGANISATION);
-        mappings.put(new UriRef("http://dbpedia.org/ontology/Newspaper"), OntologicalClasses.DBPEDIA_ORGANISATION);
-        mappings.put(new UriRef("http://schema.org/Organization"), OntologicalClasses.DBPEDIA_ORGANISATION);
+        mappings.put(new IRI("http://dbpedia.org/ontology/Newspaper"), OntologicalClasses.DBPEDIA_ORGANISATION);
+        mappings.put(new IRI("http://schema.org/Organization"), OntologicalClasses.DBPEDIA_ORGANISATION);
 //        mappings.put(NamespaceEnum.dailymed+"organization",OntologicalClasses.DBPEDIA_ORGANISATION);
         
         mappings.put(OntologicalClasses.DBPEDIA_PERSON, OntologicalClasses.DBPEDIA_PERSON);
-        mappings.put(new UriRef("http://xmlns.com/foaf/0.1/Person"), OntologicalClasses.DBPEDIA_PERSON);
-        mappings.put(new UriRef("http://schema.org/Person"), OntologicalClasses.DBPEDIA_PERSON);
+        mappings.put(new IRI("http://xmlns.com/foaf/0.1/Person"), OntologicalClasses.DBPEDIA_PERSON);
+        mappings.put(new IRI("http://schema.org/Person"), OntologicalClasses.DBPEDIA_PERSON);
 
         mappings.put(OntologicalClasses.DBPEDIA_PLACE, OntologicalClasses.DBPEDIA_PLACE);
-        mappings.put(new UriRef("http://schema.org/Place"), OntologicalClasses.DBPEDIA_PLACE);
-        mappings.put(new UriRef("http://www.opengis.net/gml/_Feature"), OntologicalClasses.DBPEDIA_PLACE);
+        mappings.put(new IRI("http://schema.org/Place"), OntologicalClasses.DBPEDIA_PLACE);
+        mappings.put(new IRI("http://www.opengis.net/gml/_Feature"), OntologicalClasses.DBPEDIA_PLACE);
 
         mappings.put(OntologicalClasses.SKOS_CONCEPT, OntologicalClasses.SKOS_CONCEPT);
 
-//        UriRef DRUG = new UriRef(NamespaceEnum.drugbank+"drugs");
+//        IRI DRUG = new IRI(NamespaceEnum.drugbank+"drugs");
 //        mappings.put(DRUG.getUnicodeString(), DRUG);
 //        mappings.put(NamespaceEnum.dbpediaOnt+"Drug", DRUG);
 //        mappings.put(NamespaceEnum.dailymed+"drugs", DRUG);
 //        mappings.put(NamespaceEnum.sider+"drugs", DRUG);
 //        mappings.put(NamespaceEnum.tcm+"Medicine", DRUG);
 //        
-//        UriRef DISEASE = new UriRef(NamespaceEnum.diseasome+"diseases");
+//        IRI DISEASE = new IRI(NamespaceEnum.diseasome+"diseases");
 //        mappings.put(DISEASE.getUnicodeString(), DISEASE);
 //        mappings.put(NamespaceEnum.linkedct+"condition", DISEASE);
 //        mappings.put(NamespaceEnum.tcm+"Disease", DISEASE);
 //
-//        UriRef SIDE_EFFECT = new UriRef(NamespaceEnum.sider+"side_effects");
+//        IRI SIDE_EFFECT = new IRI(NamespaceEnum.sider+"side_effects");
 //        mappings.put(SIDE_EFFECT.getUnicodeString(), SIDE_EFFECT);
 //        
-//        UriRef INGREDIENT = new UriRef(NamespaceEnum.dailymed+"ingredients");
+//        IRI INGREDIENT = new IRI(NamespaceEnum.dailymed+"ingredients");
 //        mappings.put(INGREDIENT.getUnicodeString(), INGREDIENT);
                 
         DEFAULT_ENTITY_TYPE_MAPPINGS = Collections.unmodifiableMap(mappings);
@@ -403,8 +403,8 @@ public class EntityLinkerConfig {
      * Holds the mappings of rdf:type used by concepts to dc:type values used
      * by TextAnnotations. 
      */
-    private Map<UriRef,UriRef> typeMappings;
-    private Map<UriRef, UriRef> unmodTypeMappings;
+    private Map<IRI,IRI> typeMappings;
+    private Map<IRI, IRI> unmodTypeMappings;
     /**
      * The mode on how to process redirect for Entities. 
      */
@@ -412,16 +412,16 @@ public class EntityLinkerConfig {
     /**
      * the default DC Type
      */
-    private UriRef defaultDcType;
-    private UriRef nameField;
-    private UriRef redirectField;
-    private UriRef typeField;
-    private Map<UriRef,Integer> blacklistedTypes = new HashMap<UriRef,Integer>();
-    private Map<UriRef,Integer> whitelistedTypes = new HashMap<UriRef,Integer>();
+    private IRI defaultDcType;
+    private IRI nameField;
+    private IRI redirectField;
+    private IRI typeField;
+    private Map<IRI,Integer> blacklistedTypes = new HashMap<IRI,Integer>();
+    private Map<IRI,Integer> whitelistedTypes = new HashMap<IRI,Integer>();
     private Boolean defaultWhitelistTypes = null;
-    private Set<UriRef> dereferencedFields = new HashSet<UriRef>();
+    private Set<IRI> dereferencedFields = new HashSet<IRI>();
 
-    private Set<UriRef> __selectedFields;
+    private Set<IRI> __selectedFields;
     /**
      * The language always included in searches (regardless of the language
      * detected for the text.
@@ -513,7 +513,7 @@ public class EntityLinkerConfig {
         setMaxSuggestions(DEFAULT_SUGGESTIONS);
         setMaxSearchTokens(DEFAULT_MAX_SEARCH_TOKENS);
         setRedirectProcessingMode(DEFAULT_REDIRECT_PROCESSING_MODE);
-        typeMappings = new HashMap<UriRef,UriRef>(DEFAULT_ENTITY_TYPE_MAPPINGS);
+        typeMappings = new HashMap<IRI,IRI>(DEFAULT_ENTITY_TYPE_MAPPINGS);
         unmodTypeMappings = Collections.unmodifiableMap(typeMappings);
         setDefaultDcType(typeMappings.remove(null));
         setNameField(DEFAULT_NAME_FIELD);
@@ -559,7 +559,7 @@ public class EntityLinkerConfig {
             if(value.toString().isEmpty()){
                 throw new ConfigurationException(NAME_FIELD,"The configured name field MUST NOT be empty");
             }
-            linkerConfig.setNameField(new UriRef(
+            linkerConfig.setNameField(new IRI(
                 getFullName(prefixService,NAME_FIELD,value.toString())));
         }
         
@@ -577,7 +577,7 @@ public class EntityLinkerConfig {
             if(value.toString().isEmpty()){
                 throw new ConfigurationException(TYPE_FIELD,"The configured name field MUST NOT be empty");
             }
-            linkerConfig.setTypeField(new UriRef(
+            linkerConfig.setTypeField(new IRI(
                 getFullName(prefixService, TYPE_FIELD, value.toString())));
         }
         
@@ -587,7 +587,7 @@ public class EntityLinkerConfig {
             if(value.toString().isEmpty()){
                 throw new ConfigurationException(NAME_FIELD,"The configured name field MUST NOT be empty");
             }
-            linkerConfig.setRedirectField(new UriRef(
+            linkerConfig.setRedirectField(new IRI(
                 getFullName(prefixService,REDIRECT_FIELD,value.toString())));
         }
         
@@ -846,13 +846,13 @@ public class EntityLinkerConfig {
                             sourceTypes[0],o);
                         continue configs;
                     }
-                    UriRef targetUri = new UriRef(targetType);
+                    IRI targetUri = new IRI(targetType);
                     for(String sourceType : sourceTypes){
                         if(!sourceType.isEmpty()){
                             sourceType = getFullName(prefixService,TYPE_MAPPINGS,sourceType.trim()); //support for ns:localName
                             try { //validate
                                 new URI(sourceType);
-                                UriRef old = linkerConfig.setTypeMapping(sourceType, targetUri);
+                                IRI old = linkerConfig.setTypeMapping(sourceType, targetUri);
                                 if(old == null){
                                     log.info(" > add type mapping {} > {}", sourceType,targetType);
                                 } else {
@@ -887,20 +887,20 @@ public class EntityLinkerConfig {
                 for(String field : (String[])value){
                     if(field != null && !field.isEmpty()){
                         linkerConfig.getDereferencedFields().add(
-                            new UriRef(getFullName(prefixService,DEREFERENCE_ENTITIES_FIELDS,field)));
+                            new IRI(getFullName(prefixService,DEREFERENCE_ENTITIES_FIELDS,field)));
                     }
                 }
             } else if(value instanceof Collection<?>){
                 for(Object field : (Collection<?>)value){
                     if(field != null && !field.toString().isEmpty()){
                         linkerConfig.getDereferencedFields().add(
-                            new UriRef(getFullName(prefixService,DEREFERENCE_ENTITIES_FIELDS,field.toString())));
+                            new IRI(getFullName(prefixService,DEREFERENCE_ENTITIES_FIELDS,field.toString())));
                     }
                 }
             } else if(value instanceof String){
                 if(!value.toString().isEmpty()){
                     linkerConfig.getDereferencedFields().add(
-                        new UriRef(getFullName(prefixService,DEREFERENCE_ENTITIES_FIELDS,value.toString())));
+                        new IRI(getFullName(prefixService,DEREFERENCE_ENTITIES_FIELDS,value.toString())));
                 }
             } else if(value != null){
                 throw new ConfigurationException(DEREFERENCE_ENTITIES_FIELDS, 
@@ -980,7 +980,7 @@ public class EntityLinkerConfig {
                     throw new ConfigurationException(ENTITY_TYPES, "The list of whitelisted/blacklisted "
                         + "MUST NOT contain '!' (configured: "+entityTypesConfig+")!");
                 }
-                UriRef uri = new UriRef(getFullName(prefixService, ENTITY_TYPES, 
+                IRI uri = new IRI(getFullName(prefixService, ENTITY_TYPES, 
                     blacklisted ? type.substring(1) : type));
                 if(blacklisted){
                     linkerConfig.addBlacklistType(uri, Integer.valueOf(i));
@@ -1026,7 +1026,7 @@ public class EntityLinkerConfig {
      * (e.g. rdfs:label, skos:prefLabel). Needs to return the full URI
      * @return the field used for the names of in the Taxonomy.
      */
-    public final UriRef getNameField() {
+    public final IRI getNameField() {
         return nameField;
     }
     /**
@@ -1034,7 +1034,7 @@ public class EntityLinkerConfig {
      * (e.g. rdfs:label, skos:prefLabel).
      * @param nameField the nameField to set
      */
-    public final void setNameField(UriRef nameField) {
+    public final void setNameField(IRI nameField) {
         this.nameField = nameField;
         __selectedFields = null;
     }
@@ -1043,21 +1043,21 @@ public class EntityLinkerConfig {
      * set that allows to configure the fields that should be dereferenced
      * @return
      */
-    public final Set<UriRef> getDereferencedFields(){
+    public final Set<IRI> getDereferencedFields(){
         return dereferencedFields;
     }
     /**
      * The field used to follow redirects (typically rdf:seeAlso)
      * @return the redirect field
      */
-    public final UriRef getRedirectField() {
+    public final IRI getRedirectField() {
         return redirectField;
     }
     /**
      * The field used to follow redirects (typically rdf:seeAlso)
      * @param redirectField the redirectField to set
      */
-    public final void setRedirectField(UriRef redirectField) {
+    public final void setRedirectField(IRI redirectField) {
         this.redirectField = redirectField;
         __selectedFields = null;
     }
@@ -1065,14 +1065,14 @@ public class EntityLinkerConfig {
      * The field used to lookup the types (typically rdf:type)
      * @return the field name used to lookup types
      */
-    public final UriRef getTypeField() {
+    public final IRI getTypeField() {
         return typeField;
     }
     /**
      * The field used to lookup the types (typically rdf:type)
      * @param typeField the typeField to set
      */
-    public final void setTypeField(UriRef typeField) {
+    public final void setTypeField(IRI typeField) {
         this.typeField = typeField;
         __selectedFields = null;
     }
@@ -1175,28 +1175,28 @@ public class EntityLinkerConfig {
      * @param conceptType the concept type to remove the mapping
      * @return the previously mapped dc:type value or <code>null</code> if
      * no mapping for the parsed concept type was present
-    public UriRef removeTypeMapping(UriRef conceptType){
+    public IRI removeTypeMapping(IRI conceptType){
         return typeMappings.remove(conceptType);
     }
      */
     /**
      * 
      * @param conceptType the type of the concept or <code>null</code> to
-     * add the default dc:type mapping. See also {@link #setDefaultDcType(UriRef)}
+     * add the default dc:type mapping. See also {@link #setDefaultDcType(IRI)}
      * @param dcType the dc:type for the parsed concept type
      * @return the previously mapped dc:type value if an existing mapping
      * was updated or <code>null</code> if a new mapping was added.
      */
-    public UriRef setTypeMapping(String conceptType, UriRef dcType){
+    public IRI setTypeMapping(String conceptType, IRI dcType){
         if(dcType == null) {
-            return typeMappings.remove(conceptType == null ? null : new UriRef(conceptType));
+            return typeMappings.remove(conceptType == null ? null : new IRI(conceptType));
         } else {
             if(conceptType == null){ //handle setting of the default dc:type value
-                UriRef oldDefault = getDefaultDcType();
+                IRI oldDefault = getDefaultDcType();
                 setDefaultDcType(dcType);
                 return oldDefault;
             }
-            return typeMappings.put(new UriRef(conceptType), dcType);
+            return typeMappings.put(new IRI(conceptType), dcType);
         }
     }
     
@@ -1207,7 +1207,7 @@ public class EntityLinkerConfig {
      * cases.
      * @param defaultDcType the defaultDcType to set
      */
-    public void setDefaultDcType(UriRef defaultDcType) {
+    public void setDefaultDcType(IRI defaultDcType) {
         this.defaultDcType = defaultDcType;
     }
     /**
@@ -1216,7 +1216,7 @@ public class EntityLinkerConfig {
      * explicit mapping exists
      * @return the defaultDcType
      */
-    public UriRef getDefaultDcType() {
+    public IRI getDefaultDcType() {
         return defaultDcType;
     }
     /**
@@ -1238,7 +1238,7 @@ public class EntityLinkerConfig {
      * Getter for the read only mappings of type mappings
      * @return the type mappings (read only)
      */
-    public Map<UriRef,UriRef> getTypeMappings() {
+    public Map<IRI,IRI> getTypeMappings() {
         return unmodTypeMappings;
     }
     /**
@@ -1502,9 +1502,9 @@ public class EntityLinkerConfig {
      * @return the selected fields for queries against the linked vocabulary.
      * @deprecated Use a Dereference Engine instead (STANBOL-336)
      */
-    public Set<UriRef> getSelectedFields() {
+    public Set<IRI> getSelectedFields() {
         if(__selectedFields == null){
-            Set<UriRef> fields = new HashSet<UriRef>();
+            Set<IRI> fields = new HashSet<IRI>();
             fields.add(nameField);
             fields.add(typeField);
             if(redirectProcessingMode != RedirectProcessingMode.IGNORE){
@@ -1568,7 +1568,7 @@ public class EntityLinkerConfig {
     /**
      * Adds an type to the blacklist
      */
-    public final void addBlacklistType(UriRef type, Integer order) {
+    public final void addBlacklistType(IRI type, Integer order) {
         if(type != null && order != null){
             blacklistedTypes.put(type, order);
         }
@@ -1576,7 +1576,7 @@ public class EntityLinkerConfig {
     /**
      * Adds an type to the blacklist
      */
-    public final void addWhitelistType(UriRef type, Integer order) {
+    public final void addWhitelistType(IRI type, Integer order) {
         if(type != null && order != null){
             whitelistedTypes.put(type, order);
         }
@@ -1600,7 +1600,7 @@ public class EntityLinkerConfig {
     /**
      * @param ignoredTypes the ignoredTypes to set
      */
-    public final Map<UriRef, Integer> getBlacklistedTypes() {
+    public final Map<IRI, Integer> getBlacklistedTypes() {
         return blacklistedTypes;
     }
     
@@ -1608,7 +1608,7 @@ public class EntityLinkerConfig {
     /**
      * @param ignoredTypes the ignoredTypes to set
      */
-    public final Map<UriRef, Integer> getWhitelistedTypes() {
+    public final Map<IRI, Integer> getWhitelistedTypes() {
         return whitelistedTypes;
     }
     /**

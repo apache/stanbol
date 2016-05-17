@@ -40,4 +40,15 @@
                 <allowSnapshots>true</allowSnapshots>
             </properties>
         </action>
+        <action>
+            <actionName>CUSTOM-use-latests-zz-versions</actionName>
+            <displayName>use-latests-clerezza-versions</displayName>
+            <goals>
+                <goal>versions:use-latest-versions</goal>
+            </goals>
+            <properties>
+                <includes>org.apache.clerezza</includes>
+                <allowSnapshots>false</allowSnapshots>
+            </properties>
+        </action>
     </actions>

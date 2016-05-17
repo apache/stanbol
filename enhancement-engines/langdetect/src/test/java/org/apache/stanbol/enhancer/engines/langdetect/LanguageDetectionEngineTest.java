@@ -30,8 +30,8 @@ import java.util.HashMap;
 
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -119,7 +119,7 @@ public class LanguageDetectionEngineTest {
         langIdEngine.activate(context);
         ContentItem ci = ciFactory.createContentItem(new StringSource(text));
         langIdEngine.computeEnhancements(ci);
-        HashMap<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+        HashMap<IRI,RDFTerm> expectedValues = new HashMap<IRI,RDFTerm>();
         expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(
             langIdEngine.getClass().getName()));

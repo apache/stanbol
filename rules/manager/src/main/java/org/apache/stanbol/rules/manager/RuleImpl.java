@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.rules.manager;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.RuleAtom;
@@ -31,7 +31,7 @@ import org.apache.stanbol.rules.base.api.util.AtomList;
  */
 public class RuleImpl implements Rule {
 
-    private UriRef ruleID;
+    private IRI ruleID;
 
     private String ruleName;
     private String rule;
@@ -42,7 +42,7 @@ public class RuleImpl implements Rule {
     protected Recipe recipe;
     protected String description;
 
-    public RuleImpl(UriRef ruleID, String ruleName, AtomList body, AtomList head) {
+    public RuleImpl(IRI ruleID, String ruleName, AtomList body, AtomList head) {
         this.ruleID = ruleID;
         this.ruleName = ruleName;
         this.head = head;
@@ -154,7 +154,7 @@ public class RuleImpl implements Rule {
     }
 
     @Override
-    public UriRef getRuleID() {
+    public IRI getRuleID() {
         return ruleID;
     }
 

@@ -32,11 +32,11 @@ import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.locks.Lock;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.utils.UnionMGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.rdf.utils.UnionGraph;
 import org.apache.marmotta.ldpath.api.backend.RDFBackend;
 import org.apache.stanbol.commons.ldpath.clerezza.ClerezzaBackend;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -49,16 +49,16 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  *
  */
-public class ContentItemBackend implements RDFBackend<Resource>{
+public class ContentItemBackend implements RDFBackend<RDFTerm>{
 
     private final Logger log = LoggerFactory.getLogger(ContentItemBackend.class);
     
-    private static final Map<UriRef,TripleCollection> EMPTY_INCLUDED = emptyMap();
+    private static final Map<IRI,Graph> EMPTY_INCLUDED = emptyMap();
     
     private final ContentItem ci;
     private final Lock readLock;
     private final ClerezzaBackend backend;
-    private final Map<UriRef,TripleCollection> included;
+    private final Map<IRI,Graph> included;
     
     /**
      * Creates a {@link RDFBackend} over the {@link ContentItem#getMetadata()
@@ -71,23 +71,23 @@ public class ContentItemBackend implements RDFBackend<Resource>{
     /**
      * Creates a {@link RDFBackend} over the {@link ContentItem#getMetadata()
      * metadata} and all {@link ContentItem#getPart(int, Class) content parts}
-     * compatible to {@link TripleCollection} 
+     * compatible to {@link Graph} 
      * @param ci the content item
      * @param includeAdditionalMetadata if <code>true</code> the {@link RDFBackend}
      * will also include RDF data stored in content parts
      */
     public ContentItemBackend(ContentItem ci, boolean includeAdditionalMetadata){
         included = includeAdditionalMetadata ?
-                unmodifiableMap(getContentParts(ci, TripleCollection.class)) :
+                unmodifiableMap(getContentParts(ci, Graph.class)) :
                     EMPTY_INCLUDED;
-        MGraph graph;
+        Graph graph;
         if(included.isEmpty()){
             graph = ci.getMetadata();
         } else {
-            TripleCollection[] tcs = new TripleCollection[included.size()+1];
+            Graph[] tcs = new Graph[included.size()+1];
             tcs[0] = ci.getMetadata();
             System.arraycopy(included.values().toArray(), 0, tcs, 1, included.size());
-            graph = new UnionMGraph(tcs);
+            graph = new UnionGraph(tcs);
         }
         backend = new ClerezzaBackend(graph);
         this.ci = ci;
@@ -97,15 +97,15 @@ public class ContentItemBackend implements RDFBackend<Resource>{
      * Creates a {@link RDFBackend} over the {@link ContentItem#getMetadata()
      * metadata} and RDF data stored in content parts with the parsed URIs.
      * If no content part for a parsed URI exists or its type is not compatible
-     * to {@link TripleCollection} it will be not included.
+     * to {@link Graph} it will be not included.
      * @param ci the content item
      * @param includedMetadata the URIs for the content parts to include
      */
-    public ContentItemBackend(ContentItem ci, Set<UriRef> includedMetadata){
-        Map<UriRef,TripleCollection> included = new LinkedHashMap<UriRef,TripleCollection>();
-        for(UriRef ref : includedMetadata){
+    public ContentItemBackend(ContentItem ci, Set<IRI> includedMetadata){
+        Map<IRI,Graph> included = new LinkedHashMap<IRI,Graph>();
+        for(IRI ref : includedMetadata){
             try {
-                TripleCollection metadata = ci.getPart(ref, TripleCollection.class);
+                Graph metadata = ci.getPart(ref, Graph.class);
                 included.put(ref, metadata);
             } catch (RuntimeException e) {
                 log.warn("Unable to add requested Metadata-ContentPart "+ref+" to" +
@@ -113,14 +113,14 @@ public class ContentItemBackend implements RDFBackend<Resource>{
             }
         }
         this.included = unmodifiableMap(included);
-        MGraph graph;
+        Graph graph;
         if(!included.isEmpty()){
             graph = ci.getMetadata();
         } else {
-            TripleCollection[] tcs = new TripleCollection[included.size()+1];
+            Graph[] tcs = new Graph[included.size()+1];
             tcs[0] = ci.getMetadata();
             System.arraycopy(tcs, 1, included.values().toArray(), 0, included.size());
-            graph = new UnionMGraph(tcs);
+            graph = new UnionGraph(tcs);
         }
         backend = new ClerezzaBackend(graph);
         this.ci = ci;
@@ -129,7 +129,7 @@ public class ContentItemBackend implements RDFBackend<Resource>{
     
 
     @Override
-    public Collection<Resource> listObjects(Resource subject, Resource property) {
+    public Collection<RDFTerm> listObjects(RDFTerm subject, RDFTerm property) {
         readLock.lock();
         try {
             return backend.listObjects(subject, property);
@@ -139,7 +139,7 @@ public class ContentItemBackend implements RDFBackend<Resource>{
     }
 
     @Override
-    public Collection<Resource> listSubjects(Resource property, Resource object) {
+    public Collection<RDFTerm> listSubjects(RDFTerm property, RDFTerm object) {
         readLock.lock();
         try {
             return backend.listSubjects(property, object);
@@ -159,84 +159,84 @@ public class ContentItemBackend implements RDFBackend<Resource>{
      * RDF backend
      * @return the content parts included in this {@link RDFBackend}
      */
-    public Map<UriRef,TripleCollection> getIncludedMetadata(){
+    public Map<IRI,Graph> getIncludedMetadata(){
         return included;
     }
     
     @Override
-    public boolean isLiteral(Resource n) {
+    public boolean isLiteral(RDFTerm n) {
         return backend.isLiteral(n);
     }
     @Override
-    public boolean isURI(Resource n) {
+    public boolean isURI(RDFTerm n) {
         return backend.isURI(n);
     }
     @Override
-    public boolean isBlank(Resource n) {
+    public boolean isBlank(RDFTerm n) {
         return backend.isBlank(n);
     }
     @Override
-    public Locale getLiteralLanguage(Resource n) {
+    public Locale getLiteralLanguage(RDFTerm n) {
         return backend.getLiteralLanguage(n);
     }
     @Override
-    public URI getLiteralType(Resource n) {
+    public URI getLiteralType(RDFTerm n) {
         return backend.getLiteralType(n);
     }
     @Override
-    public Resource createLiteral(String content) {
+    public RDFTerm createLiteral(String content) {
         return backend.createLiteral(content);
     }
     @Override
-    public Resource createLiteral(String content, Locale language, URI type) {
+    public RDFTerm createLiteral(String content, Locale language, URI type) {
         return backend.createLiteral(content, language, type);
     }
     @Override
-    public Resource createURI(String uri) {
+    public RDFTerm createURI(String uri) {
         return backend.createURI(uri);
     }
     @Override
-    public String stringValue(Resource node) {
+    public String stringValue(RDFTerm node) {
         return backend.stringValue(node);
     }
     @Override
-    public Double doubleValue(Resource node) {
+    public Double doubleValue(RDFTerm node) {
         return backend.doubleValue(node);
     }
     @Override
-    public Long longValue(Resource node) {
+    public Long longValue(RDFTerm node) {
         return backend.longValue(node);
     }
     @Override
-    public Boolean booleanValue(Resource node) {
+    public Boolean booleanValue(RDFTerm node) {
         return backend.booleanValue(node);
     }
     @Override
-    public Date dateTimeValue(Resource node) {
+    public Date dateTimeValue(RDFTerm node) {
         return backend.dateTimeValue(node);
     }
     @Override
-    public Date dateValue(Resource node) {
+    public Date dateValue(RDFTerm node) {
         return backend.dateValue(node);
     }
     @Override
-    public Date timeValue(Resource node) {
+    public Date timeValue(RDFTerm node) {
         return backend.timeValue(node);
     }
     @Override
-    public Float floatValue(Resource node) {
+    public Float floatValue(RDFTerm node) {
         return backend.floatValue(node);
     }
     @Override
-    public Integer intValue(Resource node) {
+    public Integer intValue(RDFTerm node) {
         return backend.intValue(node);
     }
     @Override
-    public BigInteger integerValue(Resource node) {
+    public BigInteger integerValue(RDFTerm node) {
         return backend.integerValue(node);
     }
     @Override
-    public BigDecimal decimalValue(Resource node) {
+    public BigDecimal decimalValue(RDFTerm node) {
         return backend.decimalValue(node);
     }
     

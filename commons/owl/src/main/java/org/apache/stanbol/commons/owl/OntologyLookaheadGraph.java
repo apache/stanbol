@@ -18,11 +18,11 @@ package org.apache.stanbol.commons.owl;
 
 import java.util.Iterator;
 
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.stanbol.commons.owl.util.OWL2Constants;
@@ -35,27 +35,27 @@ import org.slf4j.LoggerFactory;
  * @author alexdma
  * 
  */
-public class OntologyLookaheadMGraph extends SimpleMGraph {
+public class OntologyLookaheadGraph extends SimpleGraph {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    private UriRef ontologyIRI = null, versionIRI = null;
+    private IRI ontologyIRI = null, versionIRI = null;
 
     private int tripleCount = 0, foundIndex = -1;
 
     private int maxTriples, offset = 10;
 
-    private UriRef versionIriProperty = new UriRef(OWL2Constants.OWL_VERSION_IRI);
+    private IRI versionIriProperty = new IRI(OWL2Constants.OWL_VERSION_IRI);
 
-    public OntologyLookaheadMGraph() {
+    public OntologyLookaheadGraph() {
         this(-1, -1);
     }
 
-    public OntologyLookaheadMGraph(int maxTriples) {
+    public OntologyLookaheadGraph(int maxTriples) {
         this(maxTriples, Math.max(10, maxTriples / 10));
     }
 
-    public OntologyLookaheadMGraph(int maxTriples, int offset) {
+    public OntologyLookaheadGraph(int maxTriples, int offset) {
         if (maxTriples > 0 && offset > maxTriples) throw new IllegalArgumentException(
                 "Offset cannot be greater than the maximum triples to scan.");
         this.maxTriples = maxTriples;
@@ -64,9 +64,9 @@ public class OntologyLookaheadMGraph extends SimpleMGraph {
 
     protected void checkOntologyId() {
         for (Iterator<Triple> it = this.filter(null, RDF.type, OWL.Ontology); it.hasNext();) {
-            NonLiteral s = it.next().getSubject();
-            if (s instanceof UriRef) {
-                ontologyIRI = (UriRef) s;
+            BlankNodeOrIRI s = it.next().getSubject();
+            if (s instanceof IRI) {
+                ontologyIRI = (IRI) s;
                 if (foundIndex <= 0) foundIndex = tripleCount;
                 break;
             }
@@ -75,9 +75,9 @@ public class OntologyLookaheadMGraph extends SimpleMGraph {
          * TODO be more tolerant with versionIRI triples with no owl:Ontology typing?
          */
         for (Iterator<Triple> it = this.filter(null, versionIriProperty, null); it.hasNext();) {
-            Resource o = it.next().getObject();
-            if (o instanceof UriRef) {
-                versionIRI = (UriRef) o;
+            RDFTerm o = it.next().getObject();
+            if (o instanceof IRI) {
+                versionIRI = (IRI) o;
                 if (foundIndex <= 0) foundIndex = tripleCount;
                 break;
             }
@@ -94,7 +94,7 @@ public class OntologyLookaheadMGraph extends SimpleMGraph {
         return offset;
     }
 
-    public UriRef getOntologyIRI() {
+    public IRI getOntologyIRI() {
         return ontologyIRI;
     }
 
@@ -102,7 +102,7 @@ public class OntologyLookaheadMGraph extends SimpleMGraph {
         return tripleCount;
     }
 
-    public UriRef getVersionIRI() {
+    public IRI getVersionIRI() {
         return versionIRI;
     }
 

@@ -16,7 +16,7 @@
 */
 package org.apache.stanbol.enhancer.servicesapi.rdf;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 
 /**
  * Common entity types, a.k.a. ontological classes to be used as valuation of
@@ -30,19 +30,19 @@ import org.apache.clerezza.rdf.core.UriRef;
  */
 public final class OntologicalClasses {
 
-    public static final UriRef DBPEDIA_PERSON = new UriRef(
+    public static final IRI DBPEDIA_PERSON = new IRI(
             NamespaceEnum.dbpedia_ont+"Person");
 
-    public static final UriRef DBPEDIA_PLACE = new UriRef(
+    public static final IRI DBPEDIA_PLACE = new IRI(
             NamespaceEnum.dbpedia_ont+"Place");
 
-    public static final UriRef DBPEDIA_ORGANISATION = new UriRef(
+    public static final IRI DBPEDIA_ORGANISATION = new IRI(
             NamespaceEnum.dbpedia_ont+"Organisation");
 
-    public static final UriRef SKOS_CONCEPT = new UriRef(
+    public static final IRI SKOS_CONCEPT = new IRI(
         NamespaceEnum.skos+"Concept");
     
-    public static final UriRef DC_LINGUISTIC_SYSTEM = new UriRef(
+    public static final IRI DC_LINGUISTIC_SYSTEM = new IRI(
         NamespaceEnum.dc+"LinguisticSystem");
 
     private OntologicalClasses() {

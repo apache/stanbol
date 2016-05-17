@@ -30,13 +30,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -350,7 +350,7 @@ public class KeywordLinkingEngine
         if(isOfflineMode() && !entitySearcher.supportsOfflineMode()){
             throw new EngineException("Offline mode is not supported by the Component used to lookup Entities");
         }
-        Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
+        Entry<IRI,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
         if(contentPart == null){
             throw new IllegalStateException("No ContentPart with a supported Mime Type"
                     + "found for ContentItem "+ci.getUri()+"(supported: '"
@@ -416,12 +416,12 @@ public class KeywordLinkingEngine
         if(language != null && !language.isEmpty()){
             languageObject = new Language(language);
         }
-        MGraph metadata = ci.getMetadata();
+        Graph metadata = ci.getMetadata();
         for(LinkedEntity linkedEntity : linkedEntities){
-            Collection<UriRef> textAnnotations = new ArrayList<UriRef>(linkedEntity.getOccurrences().size());
+            Collection<IRI> textAnnotations = new ArrayList<IRI>(linkedEntity.getOccurrences().size());
             //first create the TextAnnotations for the Occurrences
             for(Occurrence occurrence : linkedEntity.getOccurrences()){
-                UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
+                IRI textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
                 textAnnotations.add(textAnnotation);
                 metadata.add(new TripleImpl(textAnnotation, 
                     Properties.ENHANCER_START, 
@@ -438,14 +438,14 @@ public class KeywordLinkingEngine
                 metadata.add(new TripleImpl(textAnnotation, 
                     Properties.ENHANCER_CONFIDENCE, 
                     literalFactory.createTypedLiteral(linkedEntity.getScore())));
-                for(UriRef dcType : linkedEntity.getTypes()){
+                for(IRI dcType : linkedEntity.getTypes()){
                     metadata.add(new TripleImpl(
                         textAnnotation, Properties.DC_TYPE, dcType));
                 }
             }
             //now the EntityAnnotations for the Suggestions
             for(Suggestion suggestion : linkedEntity.getSuggestions()){
-                UriRef entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(ci, this);
+                IRI entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(ci, this);
                 //should we use the label used for the match, or search the
                 //representation for the best label ... currently its the matched one
                 Text label = suggestion.getBestLabel(linkerConfig.getNameField(),language);
@@ -457,21 +457,21 @@ public class KeywordLinkingEngine
                                     new Language(label.getLanguage()))));
                 metadata.add(new TripleImpl(entityAnnotation, 
                     Properties.ENHANCER_ENTITY_REFERENCE, 
-                    new UriRef(suggestion.getRepresentation().getId())));
+                    new IRI(suggestion.getRepresentation().getId())));
                 Iterator<Reference> suggestionTypes = suggestion.getRepresentation().getReferences(linkerConfig.getTypeField());
                 while(suggestionTypes.hasNext()){
                     metadata.add(new TripleImpl(entityAnnotation, 
-                        Properties.ENHANCER_ENTITY_TYPE, new UriRef(suggestionTypes.next().getReference())));
+                        Properties.ENHANCER_ENTITY_TYPE, new IRI(suggestionTypes.next().getReference())));
                 }
                 metadata.add(new TripleImpl(entityAnnotation,
                     Properties.ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(suggestion.getScore())));
-                for(UriRef textAnnotation : textAnnotations){
+                for(IRI textAnnotation : textAnnotations){
                     metadata.add(new TripleImpl(entityAnnotation, 
                         Properties.DC_RELATION, textAnnotation));
                 }
                 //add the name of the ReferencedSite providing this suggestion
                 metadata.add(new TripleImpl(entityAnnotation, 
-                    new UriRef(RdfResourceEnum.site.getUri()), 
+                    new IRI(RdfResourceEnum.site.getUri()), 
                     new PlainLiteralImpl(referencedSiteName)));
                 //in case dereferencing of Entities is enabled we need also to
                 //add the RDF data for entities
@@ -493,7 +493,7 @@ public class KeywordLinkingEngine
     private String extractLanguage(ContentItem ci) {
         String lang = EnhancementEngineHelper.getLanguage(ci);
 //        if(lang != null){
-//        MGraph metadata = ci.getMetadata();
+//        Graph metadata = ci.getMetadata();
 //        Iterator<Triple> langaugeEnhancementCreatorTriples = 
 //            metadata.filter(null, Properties.DC_CREATOR, LANG_ID_ENGINE_NAME);
 //        if(langaugeEnhancementCreatorTriples.hasNext()){
@@ -867,14 +867,14 @@ public class KeywordLinkingEngine
                             sourceTypes[0],o);
                         continue configs;
                     }
-                    UriRef targetUri = new UriRef(targetType);
+                    IRI targetUri = new IRI(targetType);
                     for(String sourceType : sourceTypes){
                         if(!sourceType.isEmpty()){
                             sourceType = NamespaceMappingUtils.getConfiguredUri(
                                 nsPrefixService,TYPE_MAPPINGS,sourceType.trim()); //support for ns:localName
                             try { //validate
                                 new URI(sourceType);
-                                UriRef old = linkerConfig.setTypeMapping(sourceType, targetUri);
+                                IRI old = linkerConfig.setTypeMapping(sourceType, targetUri);
                                 if(old == null){
                                     log.info(" > add type mapping {} > {}", sourceType,targetType);
                                 } else {

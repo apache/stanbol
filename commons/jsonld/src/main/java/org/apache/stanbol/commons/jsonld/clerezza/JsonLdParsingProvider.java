@@ -19,8 +19,8 @@ package org.apache.stanbol.commons.jsonld.clerezza;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.serializedform.ParsingProvider;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.felix.scr.annotations.Component;
@@ -29,7 +29,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.jsonldjava.clerezza.ClerezzaTripleCallback;
 import com.github.jsonldjava.core.JsonLdError;
 import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.utils.JsonUtils;
@@ -49,10 +48,10 @@ public class JsonLdParsingProvider implements ParsingProvider {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
-    public void parse(MGraph target, InputStream serializedGraph, String formatIdentifier, UriRef baseUri) {
-        //The callback will add parsed triples to the target MGraph
+    public void parse(Graph target, InputStream serializedGraph, String formatIdentifier, IRI baseUri) {
+        //The callback will add parsed triples to the target Graph
         ClerezzaTripleCallback ctc = new ClerezzaTripleCallback();
-        ctc.setMGraph(target);
+        ctc.setGraph(target);
         Object input;
         int startSize = 0;
         if(logger.isDebugEnabled()){

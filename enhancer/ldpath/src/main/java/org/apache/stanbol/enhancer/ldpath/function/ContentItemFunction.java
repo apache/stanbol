@@ -18,7 +18,7 @@ package org.apache.stanbol.enhancer.ldpath.function;
 
 import java.util.Collection;
 
-import org.apache.clerezza.rdf.core.Resource;
+import org.apache.clerezza.commons.rdf.RDFTerm;
 import org.apache.stanbol.enhancer.ldpath.backend.ContentItemBackend;
 import org.apache.marmotta.ldpath.api.backend.RDFBackend;
 import org.apache.marmotta.ldpath.api.functions.SelectorFunction;
@@ -33,7 +33,7 @@ import org.apache.marmotta.ldpath.api.functions.SelectorFunction;
  * @author Rupert Westenthaler
  *
  */
-public abstract class ContentItemFunction extends SelectorFunction<Resource> {
+public abstract class ContentItemFunction extends SelectorFunction<RDFTerm> {
     
     private final String name;
 
@@ -44,7 +44,7 @@ public abstract class ContentItemFunction extends SelectorFunction<Resource> {
         this.name = name;
     }
     
-    public final Collection<Resource> apply(RDFBackend<Resource> backend, Resource context, Collection<Resource>... args) throws IllegalArgumentException {
+    public final Collection<RDFTerm> apply(RDFBackend<RDFTerm> backend, RDFTerm context, Collection<RDFTerm>... args) throws IllegalArgumentException {
         if(backend instanceof ContentItemBackend){
             return apply((ContentItemBackend)backend, context, args);
         } else {
@@ -55,7 +55,7 @@ public abstract class ContentItemFunction extends SelectorFunction<Resource> {
         }
     };
 
-    public abstract Collection<Resource> apply(ContentItemBackend backend,Resource context, Collection<Resource>... args);
+    public abstract Collection<RDFTerm> apply(ContentItemBackend backend,RDFTerm context, Collection<RDFTerm>... args);
     
     @Override
     protected String getLocalName() {

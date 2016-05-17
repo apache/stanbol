@@ -19,12 +19,11 @@ package org.apache.stanbol.enhancer.engines.entitylinking;
 import java.util.Iterator;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
+
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.collections.PredicateUtils;
 import org.apache.commons.collections.Transformer;
@@ -46,44 +45,44 @@ public class Entity implements Comparable<Entity>{
             return ((Triple)input).getObject();
         }
     };
-    protected static final Predicate PLAIN_LITERALS = PredicateUtils.instanceofPredicate(PlainLiteral.class);
-    protected static final Predicate TYPED_LITERALS = PredicateUtils.instanceofPredicate(TypedLiteral.class);
-    protected static final Predicate REFERENCES = PredicateUtils.instanceofPredicate(UriRef.class);
+    protected static final Predicate PLAIN_LITERALS = PredicateUtils.instanceofPredicate(Literal.class);
+    //protected static final Predicate TYPED_LITERALS = PredicateUtils.instanceofPredicate(TypedLiteral.class);
+    protected static final Predicate REFERENCES = PredicateUtils.instanceofPredicate(IRI.class);
     /**
      * The URI of the Entity
      */
-     protected final UriRef uri;
+     protected final IRI uri;
     /**
      * The data of the Entity. The graph is expected to contain all information
      * of the entity by containing {@link Triple}s that use the {@link #uri} as
      * {@link Triple#getSubject() subject}
      */
-    protected final TripleCollection data;
+    protected final Graph data;
     
     /**
      * Constructs a new Entity
      * @param uri
      * @param data
      */
-    public Entity(UriRef uri, TripleCollection data) {
+    public Entity(IRI uri, Graph data) {
         this.uri = uri;
         this.data = data;
     }
-    public final UriRef getUri() {
+    public final IRI getUri() {
         return uri;
     }
     public final String getId(){
         return uri.getUnicodeString();
     }
-    public final TripleCollection getData() {
+    public final Graph getData() {
         return data;
     }
     @SuppressWarnings("unchecked")
-    public Iterator<PlainLiteral> getText(UriRef field) {
+    public Iterator<Literal> getText(IRI field) {
         return new FilterIterator(new TransformIterator(data.filter(uri, field, null), TRIPLE2OBJECT), PLAIN_LITERALS);
     }
     @SuppressWarnings("unchecked")
-    public Iterator<UriRef> getReferences(UriRef field){
+    public Iterator<IRI> getReferences(IRI field){
         return new FilterIterator(new TransformIterator(data.filter(uri, field, null), TRIPLE2OBJECT), REFERENCES);
     }
     

@@ -27,19 +27,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDF;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.commons.owl.util.URIUtils;
 import org.apache.stanbol.ontologymanager.servicesapi.collector.Lockable;
 import org.apache.stanbol.ontologymanager.servicesapi.collector.MissingOntologyException;
@@ -57,7 +57,6 @@ import org.apache.stanbol.ontologymanager.sources.clerezza.GraphSource;
 import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologySource;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -109,17 +108,17 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
      */
     protected Set<OWLOntologyID> managedOntologies;
 
-    protected IRI namespace = null;
+    protected org.semanticweb.owlapi.model.IRI namespace = null;
 
     protected OntologyProvider<?> ontologyProvider;
 
     protected Set<Class<?>> supportedTypes;
 
-    public AbstractOntologyCollectorImpl(String id, IRI namespace, OntologyProvider<?> ontologyProvider) {
+    public AbstractOntologyCollectorImpl(String id, org.semanticweb.owlapi.model.IRI namespace, OntologyProvider<?> ontologyProvider) {
         // Supports OWL API and Clerezza
         supportedTypes = new HashSet<Class<?>>();
         supportedTypes.add(OWLOntology.class);
-        supportedTypes.add(TripleCollection.class);
+        supportedTypes.add(Graph.class);
         setID(id);
         setDefaultNamespace(namespace);
         this.ontologyProvider = ontologyProvider;
@@ -140,8 +139,8 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
             long before = System.currentTimeMillis();
             Object o = ontologySource.getRootOntology();
             // // FIXME restore ownership management, but maybe not by directly setting the versionIRI
-            // if (ontologyProvider.hasOntology(id.getOntologyIRI())) if (o instanceof MGraph)
-            // claimOwnership((MGraph) o);
+            // if (ontologyProvider.hasOntology(id.getOntologyIRI())) if (o instanceof Graph)
+            // claimOwnership((Graph) o);
             // else if (o instanceof OWLOntology) claimOwnership((OWLOntology) o);
 
             // Check the origin anyhow, as it may be useful for setting aliases with physical locations etc.
@@ -161,15 +160,15 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
             Origin<?> origin = ontologySource.getOrigin();
             Object ref = origin.getReference();
             log.debug("Origin wraps a {}", ref.getClass().getCanonicalName());
-            if (ref instanceof IRI) try {
+            if (ref instanceof org.semanticweb.owlapi.model.IRI) try {
                 log.debug("Deferring addition to physical IRI {} (if available).", ref);
-                key = addOntology(new RootOntologySource((IRI) ref));
+                key = addOntology(new RootOntologySource((org.semanticweb.owlapi.model.IRI) ref));
             } catch (OWLOntologyCreationException e) {
                 throw new RuntimeException(e);
             }
-            else if (ref instanceof UriRef) {
+            else if (ref instanceof IRI) {
                 log.debug("Deferring addition to stored Clerezza graph {} (if available).", ref);
-                key = addOntology(new GraphSource((UriRef) ref));
+                key = addOntology(new GraphSource((IRI) ref));
             } else if (ref instanceof OWLOntologyID) {
                 OWLOntologyID idref = (OWLOntologyID) ref;
                 log.debug("Deferring addition to stored ontology with public key {} (if available).", ref);
@@ -219,15 +218,15 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
 
     @SuppressWarnings("unchecked")
     @Override
-    public <O> O export(Class<O> returnType, boolean merge, IRI universalPrefix) {
+    public <O> O export(Class<O> returnType, boolean merge, org.semanticweb.owlapi.model.IRI universalPrefix) {
         if (OWLOntology.class.isAssignableFrom(returnType)) {
             return (O) exportToOWLOntology(merge, universalPrefix);
         }
-        if (TripleCollection.class.isAssignableFrom(returnType)) {
-            TripleCollection root = exportToMGraph(merge, universalPrefix);
+        if (Graph.class.isAssignableFrom(returnType)) {
+            Graph root = exportToGraph(merge, universalPrefix);
             // A Clerezza graph has to be cast properly.
-            if (returnType == Graph.class) root = ((MGraph) root).getGraph();
-            else if (returnType == MGraph.class) {}
+            if (returnType == ImmutableGraph.class) root = ((Graph) root).getImmutableGraph();
+            else if (returnType == Graph.class) {}
             return (O) root;
         }
         throw new UnsupportedOperationException("Cannot export ontology collector " + getID() + " to a "
@@ -241,15 +240,15 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
      * @param merge
      * @return
      */
-    protected MGraph exportToMGraph(boolean merge, IRI prefix) {
+    protected Graph exportToGraph(boolean merge, org.semanticweb.owlapi.model.IRI prefix) {
         // if (merge) throw new UnsupportedOperationException(
         // "Merge not implemented yet for Clerezza triple collections.");
 
         long before = System.currentTimeMillis();
 
         // No need to store, give it a name, or anything.
-        MGraph root = new SimpleMGraph();
-        UriRef iri = new UriRef(prefix + _id);
+        Graph root = new SimpleGraph();
+        IRI iri = new IRI(prefix + _id);
         // Add the import declarations for directly managed ontologies.
         if (root != null) {
             // Set the ontology ID
@@ -258,21 +257,21 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
             if (merge) {
                 log.warn("Merging of Clerezza triple collections is only implemented one level down. Import statements will be preserved for further levels.");
                 Iterator<Triple> it;
-                Set<Resource> importTargets = new HashSet<Resource>();
+                Set<RDFTerm> importTargets = new HashSet<RDFTerm>();
                 for (OWLOntologyID ontologyId : managedOntologies) {
-                    Graph g = getOntology(ontologyId, Graph.class, false);
+                    ImmutableGraph g = getOntology(ontologyId, ImmutableGraph.class, false);
                     root.addAll(g);
 
                     it = g.filter(null, OWL.imports, null);
                     while (it.hasNext()) {
-                        IRI tgt;
-                        Resource r = it.next().getObject();
+                        org.semanticweb.owlapi.model.IRI tgt;
+                        RDFTerm r = it.next().getObject();
                         try {
-                            if (r instanceof UriRef) tgt = IRI.create(((UriRef) r).getUnicodeString());
-                            else if (r instanceof Literal) tgt = IRI.create(((Literal) r).getLexicalForm());
-                            else tgt = IRI.create(r.toString());
+                            if (r instanceof IRI) tgt = org.semanticweb.owlapi.model.IRI.create(((IRI) r).getUnicodeString());
+                            else if (r instanceof Literal) tgt = org.semanticweb.owlapi.model.IRI.create(((Literal) r).getLexicalForm());
+                            else tgt = org.semanticweb.owlapi.model.IRI.create(r.toString());
                             tgt = URIUtils.sanitize(tgt);
-                            importTargets.add(new UriRef(tgt.toString()));
+                            importTargets.add(new IRI(tgt.toString()));
                         } catch (Exception ex) {
                             log.error("FAILED to obtain import target from resource {}", r);
                             continue;
@@ -282,7 +281,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
 
                     it = g.filter(null, RDF.type, OWL.Ontology);
                     while (it.hasNext()) {
-                        NonLiteral ontology = it.next().getSubject();
+                        BlankNodeOrIRI ontology = it.next().getSubject();
                         log.debug("Removing all triples related to {} from {}", ontology, iri);
                         Iterator<Triple> it2 = g.filter(ontology, null, null);
                         while (it2.hasNext())
@@ -293,7 +292,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
                      * Reinstate import statements, though. If imported ontologies were not merged earlier, we
                      * are not doing it now anyway.
                      */
-                    for (Resource target : importTargets)
+                    for (RDFTerm target : importTargets)
                         root.add(new TripleImpl(iri, OWL.imports, target));
                 }
 
@@ -306,12 +305,12 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
 
                 // The key set of managedOntologies contains the ontology IRIs, not their storage keys.
                 for (OWLOntologyID ontologyId : managedOntologies) {
-                    IRI physIRI =
+                    org.semanticweb.owlapi.model.IRI physIRI =
                     // ontologyId.getVersionIRI() == null ? URIUtils.sanitize(IRI
                     // .create(base + ontologyId.getOntologyIRI())) : URIUtils.sanitize(IRI
                     // .create(base + ontologyId.getVersionIRI()));
-                    IRI.create(base + OntologyUtils.encode(ontologyId));
-                    root.add(new TripleImpl(iri, OWL.imports, new UriRef(physIRI.toString())));
+                    org.semanticweb.owlapi.model.IRI.create(base + OntologyUtils.encode(ontologyId));
+                    root.add(new TripleImpl(iri, OWL.imports, new IRI(physIRI.toString())));
                 }
             }
 
@@ -322,13 +321,13 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
         return root;
     }
 
-    private TripleCollection getMergedTc() {
-        TripleCollection result = new SimpleMGraph(); // Takes less memory than the Indexed one
+    private Graph getMergedTc() {
+        Graph result = new SimpleGraph(); // Takes less memory than the Indexed one
 
         for (OWLOntologyID key : listManagedOntologies()) {
             // TODO when implemented, switch to true.
-            TripleCollection managed = getOntology(key, TripleCollection.class, false);
-            Set<Resource> exclusions = new HashSet<Resource>();
+            Graph managed = getOntology(key, Graph.class, false);
+            Set<RDFTerm> exclusions = new HashSet<RDFTerm>();
             Iterator<Triple> it = managed.filter(null, RDF.type, OWL.Ontology);
             while (it.hasNext())
                 exclusions.add(it.next().getSubject());
@@ -350,14 +349,14 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
      * @param merge
      * @return
      */
-    protected OWLOntology exportToOWLOntology(boolean merge, IRI prefix) {
+    protected OWLOntology exportToOWLOntology(boolean merge, org.semanticweb.owlapi.model.IRI prefix) {
 
         long before = System.currentTimeMillis();
 
         // Create a new ontology
         OWLOntology root;
         OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
-        IRI iri = IRI.create(prefix + _id);
+        org.semanticweb.owlapi.model.IRI iri = org.semanticweb.owlapi.model.IRI.create(prefix + _id);
         try {
             root = ontologyManager.createOntology(iri);
         } catch (OWLOntologyAlreadyExistsException e) {
@@ -418,7 +417,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
                 // The key set of managedOntologies contains the ontology IRIs, not their storage keys.
                 for (OWLOntologyID ontologyId : managedOntologies) {
                     // XXX some day the versionIRI will be the only physical reference for the ontology
-                    IRI physIRI = IRI.create(base + OntologyUtils.encode(ontologyId));
+                    org.semanticweb.owlapi.model.IRI physIRI = org.semanticweb.owlapi.model.IRI.create(base + OntologyUtils.encode(ontologyId));
                     changes.add(new AddImport(root, df.getOWLImportsDeclaration(physIRI)));
                 }
                 ontologyManager.applyChanges(changes);
@@ -458,7 +457,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     }
 
     @Override
-    public IRI getDefaultNamespace() {
+    public org.semanticweb.owlapi.model.IRI getDefaultNamespace() {
         return this.namespace;
     }
 
@@ -478,27 +477,27 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     }
 
     @Override
-    public IRI getNamespace() {
+    public org.semanticweb.owlapi.model.IRI getNamespace() {
         return getDefaultNamespace();
     }
 
     @Override
-    public <O> O getOntology(IRI ontologyIri, Class<O> returnType) {
+    public <O> O getOntology(org.semanticweb.owlapi.model.IRI ontologyIri, Class<O> returnType) {
         return getOntology(new OWLOntologyID(ontologyIri), returnType);
     }
 
     @Override
-    public <O> O getOntology(IRI ontologyIri, Class<O> returnType, boolean merge) {
+    public <O> O getOntology(org.semanticweb.owlapi.model.IRI ontologyIri, Class<O> returnType, boolean merge) {
         return getOntology(new OWLOntologyID(ontologyIri), returnType, merge);
     }
 
     @Override
-    public <O> O getOntology(IRI ontologyIri, Class<O> returnType, boolean merge, IRI universalPrefix) {
+    public <O> O getOntology(org.semanticweb.owlapi.model.IRI ontologyIri, Class<O> returnType, boolean merge, org.semanticweb.owlapi.model.IRI universalPrefix) {
         return getOntology(new OWLOntologyID(ontologyIri), returnType, merge, universalPrefix);
     }
 
     @Override
-    public <O> O getOntology(IRI ontologyIri, Class<O> returnType, IRI universalPrefix) {
+    public <O> O getOntology(org.semanticweb.owlapi.model.IRI ontologyIri, Class<O> returnType, org.semanticweb.owlapi.model.IRI universalPrefix) {
         return getOntology(new OWLOntologyID(ontologyIri), returnType, universalPrefix);
     }
 
@@ -514,15 +513,15 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
 
     @SuppressWarnings("unchecked")
     @Override
-    public <O> O getOntology(OWLOntologyID ontologyId, Class<O> returnType, boolean merge, IRI universalPrefix) {
+    public <O> O getOntology(OWLOntologyID ontologyId, Class<O> returnType, boolean merge, org.semanticweb.owlapi.model.IRI universalPrefix) {
         if (OWLOntology.class.isAssignableFrom(returnType)) return (O) getOntologyAsOWLOntology(ontologyId,
             merge, universalPrefix);
-        if (TripleCollection.class.isAssignableFrom(returnType)) {
-            TripleCollection root = getOntologyAsMGraph(ontologyId, merge, universalPrefix);
+        if (Graph.class.isAssignableFrom(returnType)) {
+            Graph root = getOntologyAsGraph(ontologyId, merge, universalPrefix);
             // A Clerezza graph has to be cast properly.
-            if (returnType == Graph.class) root = ((MGraph) root).getGraph();
-            else if (returnType == MGraph.class) {}
-            // We don't know of other TripleCollection subclasses: just try to cast the MGraph.
+            if (returnType == ImmutableGraph.class) root = ((Graph) root).getImmutableGraph();
+            else if (returnType == Graph.class) {}
+            // We don't know of other Graph subclasses: just try to cast the Graph.
             return (O) root;
         }
         throw new UnsupportedOperationException("Cannot export ontology collector " + getID() + " to a "
@@ -530,11 +529,11 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     }
 
     @Override
-    public <O> O getOntology(OWLOntologyID ontologyId, Class<O> returnType, IRI universalPrefix) {
+    public <O> O getOntology(OWLOntologyID ontologyId, Class<O> returnType, org.semanticweb.owlapi.model.IRI universalPrefix) {
         return getOntology(ontologyId, returnType, false, universalPrefix);
     }
 
-    protected MGraph getOntologyAsMGraph(OWLOntologyID ontologyId, boolean merge, IRI universalPrefix) {
+    protected Graph getOntologyAsGraph(OWLOntologyID ontologyId, boolean merge, org.semanticweb.owlapi.model.IRI universalPrefix) {
         if (merge) throw new UnsupportedOperationException(
                 "Merge not implemented yet for Clerezza triple collections.");
         /*
@@ -543,7 +542,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
          * imported ontologies as *not* managed.
          */
         // if (!merge) { // TODO
-        MGraph o = new IndexedMGraph(ontologyProvider.getStoredOntology(ontologyId, MGraph.class, merge));
+        Graph o = new IndexedGraph(ontologyProvider.getStoredOntology(ontologyId, Graph.class, merge));
 
         // Now rewrite import statements
 
@@ -563,11 +562,11 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
                 replaceUs.add(it.next());
 
             for (Triple t : replaceUs) {
-                String s = ((UriRef) (t.getObject())).getUnicodeString();
+                String s = ((IRI) (t.getObject())).getUnicodeString();
                 // FIXME note the different import targets in the OWLOntology and TripleColllection objects!
                 // s = s.substring(s.indexOf("::") + 2, s.length());
-                boolean managed = managedOntologies.contains(IRI.create(s));
-                UriRef target = new UriRef((managed ? universalPrefix + "/" + tid + "/"
+                boolean managed = managedOntologies.contains(org.semanticweb.owlapi.model.IRI.create(s));
+                IRI target = new IRI((managed ? universalPrefix + "/" + tid + "/"
                         : URIUtils.upOne(universalPrefix) + "/")
                                            + s);
                 o.remove(t);
@@ -585,7 +584,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
 
     protected OWLOntology getOntologyAsOWLOntology(OWLOntologyID ontologyId,
                                                    boolean merge,
-                                                   IRI universalPrefix) {
+                                                   org.semanticweb.owlapi.model.IRI universalPrefix) {
         // if (merge) throw new UnsupportedOperationException("Merge not implemented yet for OWLOntology.");
 
         // Remove the check below. It might be an unmanaged dependency (TODO remove from collector and
@@ -638,7 +637,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
                 String tid = getID();
                 if (backwardPathLength > 0) tid = tid.split("/")[0];
 
-                IRI target = IRI.create((managed ? universalPrefix + "/" + tid + "/" : URIUtils
+                org.semanticweb.owlapi.model.IRI target = org.semanticweb.owlapi.model.IRI.create((managed ? universalPrefix + "/" + tid + "/" : URIUtils
                         .upOne(universalPrefix) + "/")
                                         + s);
                 changes.add(new AddImport(o, df.getOWLImportsDeclaration(target)));
@@ -660,7 +659,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     }
 
     @Override
-    public boolean hasOntology(IRI ontologyIri) {
+    public boolean hasOntology(org.semanticweb.owlapi.model.IRI ontologyIri) {
         return hasOntology(new OWLOntologyID(ontologyIri));
     }
 
@@ -684,7 +683,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     }
 
     @Override
-    public void removeOntology(IRI ontologyId) throws OntologyCollectorModificationException {
+    public void removeOntology(org.semanticweb.owlapi.model.IRI ontologyId) throws OntologyCollectorModificationException {
         removeOntology(new OWLOntologyID(ontologyId));
     }
 
@@ -724,7 +723,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
      *            will be logged.
      */
     @Override
-    public void setDefaultNamespace(IRI namespace) {
+    public void setDefaultNamespace(org.semanticweb.owlapi.model.IRI namespace) {
         if (namespace == null) throw new IllegalArgumentException(
                 "Stanbol ontology namespace cannot be null.");
         if (namespace.toURI().getQuery() != null) throw new IllegalArgumentException(
@@ -736,7 +735,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
         if (!namespace.toString().endsWith("/")) {
             log.warn("Namespace {} does not end with a slash ('/') character. It be added automatically.",
                 namespace);
-            namespace = IRI.create(namespace + "/");
+            namespace = org.semanticweb.owlapi.model.IRI.create(namespace + "/");
         }
         this.namespace = namespace;
     }
@@ -744,7 +743,7 @@ public abstract class AbstractOntologyCollectorImpl implements OntologyCollector
     protected abstract void setID(String id);
 
     @Override
-    public void setNamespace(IRI namespace) {
+    public void setNamespace(org.semanticweb.owlapi.model.IRI namespace) {
         setDefaultNamespace(namespace);
     }
 

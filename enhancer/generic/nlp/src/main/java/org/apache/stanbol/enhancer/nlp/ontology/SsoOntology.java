@@ -16,7 +16,7 @@
 */
 package org.apache.stanbol.enhancer.nlp.ontology;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 
 public enum SsoOntology {
     /**
@@ -73,17 +73,17 @@ public enum SsoOntology {
     ;
     public final static String NAMESPACE = "http://nlp2rdf.lod2.eu/schema/sso/";
 
-    UriRef uri;
+    IRI uri;
     
     private SsoOntology() {
-        uri = new UriRef(NAMESPACE+name());
+        uri = new IRI(NAMESPACE+name());
     }
     
     public String getLocalName(){
         return name();
     }
     
-    public UriRef getUri(){
+    public IRI getUri(){
         return uri;
     }
     

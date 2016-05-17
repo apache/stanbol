@@ -17,14 +17,14 @@
 
 package org.apache.stanbol.rules.adapters.clerezza.atoms;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.rules.adapters.AbstractAdaptableAtom;
 import org.apache.stanbol.rules.adapters.clerezza.ClerezzaSparqlObject;
 import org.apache.stanbol.rules.base.api.RuleAtom;
 import org.apache.stanbol.rules.base.api.RuleAtomCallExeption;
 
 /**
- * It adapts any ResourceAtom to UriRef resource in Clerezza.
+ * It adapts any ResourceAtom to IRI resource in Clerezza.
  * 
  * @author anuzzolese
  * 
@@ -38,7 +38,7 @@ public class ResourceAtom extends AbstractAdaptableAtom {
         org.apache.stanbol.rules.manager.atoms.ResourceAtom tmp = (org.apache.stanbol.rules.manager.atoms.ResourceAtom) ruleAtom;
 
         String unquotedURI = tmp.toUnquotedString();
-        UriRef uriRef = new UriRef(unquotedURI);
+        IRI uriRef = new IRI(unquotedURI);
 
         return (T) new ClerezzaSparqlObject(uriRef);
     }

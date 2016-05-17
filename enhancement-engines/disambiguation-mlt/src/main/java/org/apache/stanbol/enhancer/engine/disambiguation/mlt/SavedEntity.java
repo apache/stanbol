@@ -35,12 +35,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
@@ -58,8 +57,8 @@ public final class SavedEntity {
      */
     private final static LiteralFactory literalFactory = LiteralFactory.getInstance();
     private String name;
-    private UriRef type;
-    private UriRef uri;
+    private IRI type;
+    private IRI uri;
     private String context;
     private Integer start;
     private Integer end;
@@ -68,7 +67,7 @@ public final class SavedEntity {
      * Map with the suggestion. The key is the URI of the fise:EntityAnnotation and the value is the Triple
      * with the confidence value
      */
-    private Map<UriRef,Suggestion> suggestions = new LinkedHashMap<UriRef,Suggestion>();
+    private Map<IRI,Suggestion> suggestions = new LinkedHashMap<IRI,Suggestion>();
 
     /**
      * The name of the Entityhub {@link Site} managing the suggestions of this fise:TextAnnotation
@@ -76,7 +75,7 @@ public final class SavedEntity {
     private String site;
 
     /**
-     * private constructor only used by {@link #createFromTextAnnotation(TripleCollection, NonLiteral)}
+     * private constructor only used by {@link #createFromTextAnnotation(Graph, BlankNodeOrIRI)}
      */
     private SavedEntity() {}
 
@@ -90,7 +89,7 @@ public final class SavedEntity {
      * @return the {@link SavedEntity} or <code>null</code> if the parsed text annotation is missing required
      *         information.
      */
-    public static SavedEntity createFromTextAnnotation(TripleCollection graph, UriRef textAnnotation) {
+    public static SavedEntity createFromTextAnnotation(Graph graph, IRI textAnnotation) {
         SavedEntity entity = new SavedEntity();
         entity.uri = textAnnotation;
         entity.name = EnhancementEngineHelper.getString(graph, textAnnotation, ENHANCER_SELECTED_TEXT);
@@ -140,7 +139,7 @@ public final class SavedEntity {
         // NOTE: this iterator will also include dc:relation between fise:TextAnnotation's
         // but in those cases NULL will be returned as suggestion
         while (suggestions.hasNext()) {
-            UriRef entityAnnotation = (UriRef) suggestions.next().getSubject();
+            IRI entityAnnotation = (IRI) suggestions.next().getSubject();
             Suggestion suggestion = Suggestion.createFromEntityAnnotation(graph, entityAnnotation);
             if (suggestion != null) {
                 suggestionList.add(suggestion);
@@ -199,7 +198,7 @@ public final class SavedEntity {
      * 
      * @return the type
      */
-    public final UriRef getType() {
+    public final IRI getType() {
         return type;
     }
 
@@ -218,7 +217,7 @@ public final class SavedEntity {
         return String.format("SavedEntity %s (name=%s | type=%s)", uri, name, type);
     }
 
-    public UriRef getUri() {
+    public IRI getUri() {
         return this.uri;
     }
 
@@ -238,7 +237,7 @@ public final class SavedEntity {
         return suggestions.values();
     }
 
-    public Suggestion getSuggestion(UriRef uri) {
+    public Suggestion getSuggestion(IRI uri) {
         return suggestions.get(uri);
     }
 

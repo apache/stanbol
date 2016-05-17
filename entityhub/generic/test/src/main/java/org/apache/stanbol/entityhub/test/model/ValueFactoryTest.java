@@ -100,7 +100,7 @@ public abstract class ValueFactoryTest {
     }
 
     @Test
-    public void testUriReference() throws URISyntaxException {
+    public void testIRIerence() throws URISyntaxException {
         URI refObject = new URI("http://www.test.org/uriTest");
         Reference ref = testRef(refObject);
         assertEquals(ref.getReference(), refObject.toString());

@@ -35,9 +35,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
@@ -189,7 +188,7 @@ public class EnhancementJobHandler implements EventHandler {
     @Override
     public void handleEvent(Event event) {
         EnhancementJob job = (EnhancementJob)event.getProperty(PROPERTY_JOB_MANAGER);
-        NonLiteral execution = (NonLiteral)event.getProperty(PROPERTY_EXECUTION);
+        BlankNodeOrIRI execution = (BlankNodeOrIRI)event.getProperty(PROPERTY_EXECUTION);
         if(job == null || execution == null){
             log.warn("Unable to process EnhancementEvent where EnhancementJob " +
             		"{} or Execution node {} is null -> ignore",job,execution);
@@ -222,7 +221,7 @@ public class EnhancementJobHandler implements EventHandler {
             } else {
                 if(log.isInfoEnabled()){
                     Collection<String> running = new ArrayList<String>(3);
-                    for(NonLiteral runningNode : job.getRunning()){
+                    for(BlankNodeOrIRI runningNode : job.getRunning()){
                         running.add(getEngine(job.getExecutionPlan(), job.getExecutionNode(runningNode)));
                     }
                     log.info("Job {} failed, but {} still running!",
@@ -238,7 +237,7 @@ public class EnhancementJobHandler implements EventHandler {
      * @param job
      * @param execution
      */
-    private void processEvent(EnhancementJob job, NonLiteral execution) {
+    private void processEvent(EnhancementJob job, BlankNodeOrIRI execution) {
         String engineName = getEngine(job.getExecutionPlan(), 
             job.getExecutionNode(execution));
         //(1) execute the parsed ExecutionNode
@@ -340,7 +339,7 @@ public class EnhancementJobHandler implements EventHandler {
     protected boolean executeNextNodes(EnhancementJob job) {
         //getExecutable returns an snapshot so we do not need to lock
         boolean startedExecution = false;
-        for(NonLiteral executable : job.getExecutable()){
+        for(BlankNodeOrIRI executable : job.getExecutable()){
             if(log.isTraceEnabled()){
                 log.trace("PREPARE execution of Engine {}",
                     getEngine(job.getExecutionPlan(), job.getExecutionNode(executable)));
@@ -425,15 +424,15 @@ public class EnhancementJobHandler implements EventHandler {
         log.info("   content-item: {}", job.getContentItem().getUri());
         if(logExecutions){
             log.info("  executions:");
-            for(NonLiteral completedExec : job.getCompleted()){
+            for(BlankNodeOrIRI completedExec : job.getCompleted()){
                 log.info("    - {} completed",getEngine(job.getExecutionMetadata(), 
                     job.getExecutionNode(completedExec)));
             }
-            for(NonLiteral runningExec : job.getRunning()){
+            for(BlankNodeOrIRI runningExec : job.getRunning()){
                 log.info("    - {} running",getEngine(job.getExecutionMetadata(), 
                     job.getExecutionNode(runningExec)));
             }
-            for(NonLiteral executeable : job.getExecutable()){
+            for(BlankNodeOrIRI executeable : job.getExecutable()){
                 log.info("    - {} executeable",getEngine(job.getExecutionMetadata(), 
                     job.getExecutionNode(executeable)));
             }

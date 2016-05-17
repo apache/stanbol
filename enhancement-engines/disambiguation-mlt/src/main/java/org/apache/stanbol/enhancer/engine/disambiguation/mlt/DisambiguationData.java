@@ -31,9 +31,9 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.NamespaceEnum;
@@ -60,7 +60,7 @@ public final class DisambiguationData {
      * This is needed during writing the disambiguation results to the EnhancementStructure to know if one
      * needs to clone an fise:EntityAnnotation or not.
      */
-    public Map<UriRef,Set<UriRef>> suggestionMap = new HashMap<UriRef,Set<UriRef>>();
+    public Map<IRI,Set<IRI>> suggestionMap = new HashMap<IRI,Set<IRI>>();
 
     /**
      * Holds the center position of the fise:TextAnnotation fise:selected-text as key and the SavedEntity
@@ -79,7 +79,7 @@ public final class DisambiguationData {
      * List of all fise:textAnnotations that can be used for disambiguation. the key is the URI and the value
      * is the {@link SavedEntity} with the extracted information.
      */
-    public Map<UriRef,SavedEntity> textAnnotations = new HashMap<UriRef,SavedEntity>();
+    public Map<IRI,SavedEntity> textAnnotations = new HashMap<IRI,SavedEntity>();
 
     // List to contain old confidence values that are to removed
     // List<Triple> loseConfidence = new ArrayList<Triple>();
@@ -92,14 +92,14 @@ public final class DisambiguationData {
      * ambiguations for all entities (which will be removed eventually)
      */
     public static DisambiguationData createFromContentItem(ContentItem ci) {
-        MGraph graph = ci.getMetadata();
+        Graph graph = ci.getMetadata();
         DisambiguationData data = new DisambiguationData();
         Iterator<Triple> it = graph.filter(null, RDF_TYPE, TechnicalClasses.ENHANCER_TEXTANNOTATION);
         while (it.hasNext()) {
-            UriRef uri = (UriRef) it.next().getSubject();
+            IRI uri = (IRI) it.next().getSubject();
             // TODO: rwesten: do we really want to ignore fise:TextAnnotations that link to
             // to an other one (typically two TextAnnotations that select the exact same text)
-            // if (graph.filter(uri, new UriRef(NamespaceEnum.dc + "relation"), null).hasNext()) {
+            // if (graph.filter(uri, new IRI(NamespaceEnum.dc + "relation"), null).hasNext()) {
             // continue;
             // }
 
@@ -110,9 +110,9 @@ public final class DisambiguationData {
                     Integer.valueOf((savedEntity.getStart() + savedEntity.getEnd()) / 2), savedEntity);
                 // add information to the #suggestionMap
                 for (Suggestion s : savedEntity.getSuggestions()) {
-                    Set<UriRef> textAnnotations = data.suggestionMap.get(s.getEntityAnnotation());
+                    Set<IRI> textAnnotations = data.suggestionMap.get(s.getEntityAnnotation());
                     if (textAnnotations == null) {
-                        textAnnotations = new HashSet<UriRef>();
+                        textAnnotations = new HashSet<IRI>();
                         data.suggestionMap.put(s.getEntityAnnotation(), textAnnotations);
                     }
                     textAnnotations.add(savedEntity.getUri());

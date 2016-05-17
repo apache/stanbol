@@ -26,8 +26,8 @@ import java.util.HashMap;
 import java.util.Hashtable;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.engines.celi.CeliConstants;
 import org.apache.stanbol.enhancer.engines.celi.testutils.MockComponentContext;
@@ -84,7 +84,7 @@ public class CeliLanguageIdentifierEnhancementEngineTest {
 
 	        TestUtils.logEnhancements(ci);
 			
-			HashMap<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+			HashMap<IRI,RDFTerm> expectedValues = new HashMap<IRI,RDFTerm>();
 	        expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
 	        expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(
 	            langIdentifier.getClass().getName()));

@@ -26,9 +26,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -72,7 +72,7 @@ public class HtmlExtractor {
 
     public void extract(String id,
             InputStream input, Charset charset, String mimeType,
-            MGraph result)
+            Graph result)
             throws ExtractorException {
         if (registry == null)
             return;
@@ -121,8 +121,8 @@ public class HtmlExtractor {
             InputStream input = new FileInputStream(file);
             Charset charset = Charset.forName("UTF-8");
             String mimeType = "text/html";
-            UriRef uri = new UriRef(file.toURI().toString());
-            MGraph container = new SimpleMGraph();
+            IRI uri = new IRI(file.toURI().toString());
+            Graph container = new SimpleGraph();
             inst.extract(uri.getUnicodeString(), input, charset, mimeType, container);
             System.out.println("Model for " + args[i]);
             //TODO

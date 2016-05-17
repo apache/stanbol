@@ -22,7 +22,7 @@ import freemarker.template.TemplateException;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.apache.clerezza.rdf.core.Resource;
+import org.apache.clerezza.commons.rdf.RDFTerm;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -60,9 +60,9 @@ public class LdRenderer {
 	public void render(GraphNode node, final String templatePath, Writer out) {	
 		//A GraphNode backend could be graph unspecific, so the same engine could be
 		//reused, possibly being signifantly more performant (caching, etc.)
-		RDFBackend<Resource> backend = new ClerezzaBackend(node.getGraph());
-		Resource context = node.getNode();
-		TemplateEngine<Resource> engine = new TemplateEngine<Resource>(backend);
+		RDFBackend<RDFTerm> backend = new ClerezzaBackend(node.getGraph());
+		RDFTerm context = node.getNode();
+		TemplateEngine<RDFTerm> engine = new TemplateEngine<RDFTerm>(backend);
 		engine.setTemplateLoader(templateLoader);
 		try {
 			engine.processFileTemplate(context, templatePath, null, out);

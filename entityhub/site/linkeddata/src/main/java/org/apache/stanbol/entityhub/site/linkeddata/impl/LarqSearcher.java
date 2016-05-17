@@ -23,13 +23,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.entityhub.core.query.QueryResultListImpl;
 import org.apache.stanbol.entityhub.core.site.AbstractEntitySearcher;
 import org.apache.stanbol.entityhub.query.clerezza.RdfQueryResultList;
@@ -69,13 +69,13 @@ public class LarqSearcher extends AbstractEntitySearcher implements EntitySearch
         long queryEnd = System.currentTimeMillis();
         log.debug("  > QueryTime: "+(queryEnd-initEnd));
         if(in != null){
-            MGraph graph;
-            TripleCollection rdfData = parser.parse(in, SparqlSearcher.DEFAULT_RDF_CONTENT_TYPE,
-                new UriRef(getBaseUri()));
-            if(rdfData instanceof MGraph){
-                graph = (MGraph) rdfData;
+            Graph graph;
+            Graph rdfData = parser.parse(in, SparqlSearcher.DEFAULT_RDF_CONTENT_TYPE,
+                new IRI(getBaseUri()));
+            if(rdfData instanceof Graph){
+                graph = (Graph) rdfData;
             } else {
-                graph = new IndexedMGraph(rdfData);
+                graph = new IndexedGraph(rdfData);
             }
             long parseEnd = System.currentTimeMillis();
             log.debug("  > ParseTime: "+(parseEnd-queryEnd));

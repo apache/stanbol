@@ -21,14 +21,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDF;
-import org.apache.stanbol.commons.owl.OntologyLookaheadMGraph;
+import org.apache.stanbol.commons.owl.OntologyLookaheadGraph;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyID;
@@ -83,20 +82,20 @@ public final class OWLUtils {
      *            the RDF graph
      * @return the OWL ontology ID of the supplied graph, or null if it denotes an anonymous ontology.
      */
-    public static OWLOntologyID extractOntologyID(TripleCollection graph) {
+    public static OWLOntologyID extractOntologyID(Graph graph) {
         IRI ontologyIri = null, versionIri = null;
         Iterator<Triple> it = graph.filter(null, RDF.type, OWL.Ontology);
         if (it.hasNext()) {
-            NonLiteral subj = it.next().getSubject();
+            BlankNodeOrIRI subj = it.next().getSubject();
             if (it.hasNext()) {
                 log.warn("Multiple OWL ontology definitions found.");
                 log.warn("Ignoring all but {}", subj);
             }
-            if (subj instanceof UriRef) {
-                ontologyIri = IRI.create(((UriRef) subj).getUnicodeString());
-                Iterator<Triple> it2 = graph.filter(subj, new UriRef(OWL2Constants.OWL_VERSION_IRI),
+            if (subj instanceof org.apache.clerezza.commons.rdf.IRI) {
+                ontologyIri = IRI.create(((org.apache.clerezza.commons.rdf.IRI) subj).getUnicodeString());
+                Iterator<Triple> it2 = graph.filter(subj, new org.apache.clerezza.commons.rdf.IRI(OWL2Constants.OWL_VERSION_IRI),
                     null);
-                if (it2.hasNext()) versionIri = IRI.create(((UriRef) it2.next().getObject())
+                if (it2.hasNext()) versionIri = IRI.create(((org.apache.clerezza.commons.rdf.IRI) it2.next().getObject())
                         .getUnicodeString());
             }
         }
@@ -136,7 +135,7 @@ public final class OWLUtils {
             versionIriOffset);
         BufferedInputStream bIn = new BufferedInputStream(content);
         bIn.mark(limit * 512); // set an appropriate limit
-        OntologyLookaheadMGraph graph = new OntologyLookaheadMGraph(limit, versionIriOffset);
+        OntologyLookaheadGraph graph = new OntologyLookaheadGraph(limit, versionIriOffset);
         try {
             parser.parse(graph, bIn, format);
         } catch (RuntimeException e) {

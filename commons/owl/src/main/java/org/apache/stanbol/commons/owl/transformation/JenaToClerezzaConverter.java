@@ -22,9 +22,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
 import org.apache.clerezza.rdf.core.serializedform.ParsingProvider;
 import org.apache.clerezza.rdf.core.serializedform.SerializingProvider;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
@@ -40,9 +39,9 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
  * 
  * <ul>
  * <li> a Jena Model (see {@link Model}) to a list of Clerezza triples (see {@link Triple})
- * <li> a Jena Model to a Clerezza MGraph (see {@link MGraph})
- * <li> a Clerezza MGraph a Jena Model
- * <li> a Clerezza MGraph a Jena Graph (see {@link Graph}}
+ * <li> a Jena Model to a Clerezza Graph (see {@link Graph})
+ * <li> a Clerezza Graph a Jena Model
+ * <li> a Clerezza Graph a Jena ImmutableGraph (see {@link ImmutableGraph}}
  * </ul>
  * 
  * 
@@ -68,7 +67,7 @@ public final class JenaToClerezzaConverter {
 		
 		ArrayList<Triple> clerezzaTriples = new ArrayList<Triple>();
 		
-		MGraph mGraph = jenaModelToClerezzaMGraph(model);
+		org.apache.clerezza.commons.rdf.Graph mGraph = jenaModelToClerezzaGraph(model);
 		
 		Iterator<Triple> tripleIterator = mGraph.iterator();
 		while(tripleIterator.hasNext()){
@@ -82,13 +81,13 @@ public final class JenaToClerezzaConverter {
 	
 	/**
 	 * 
-	 * Converts a Jena {@link Model} to Clerezza {@link MGraph}.
+	 * Converts a Jena {@link Model} to Clerezza {@link Graph}.
 	 * 
 	 * @param model {@link Model}
-	 * @return the equivalent Clerezza {@link MGraph}.
+	 * @return the equivalent Clerezza {@link Graph}.
 	 */
 	
-	public static MGraph jenaModelToClerezzaMGraph(Model model){
+	public static org.apache.clerezza.commons.rdf.Graph jenaModelToClerezzaGraph(Model model){
 		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		model.write(out);
@@ -97,7 +96,7 @@ public final class JenaToClerezzaConverter {
 		
 		ParsingProvider parser = new JenaParserProvider();		
 		
-		MGraph mGraph = new SimpleMGraph();
+		org.apache.clerezza.commons.rdf.Graph mGraph = new SimpleGraph();
 		parser.parse(mGraph,in, SupportedFormat.RDF_XML, null);
 		
 		return mGraph;
@@ -106,12 +105,12 @@ public final class JenaToClerezzaConverter {
 	
 	
 	/**
-	 * Converts a Clerezza {@link MGraph} to a Jena {@link Model}.
+	 * Converts a Clerezza {@link Graph} to a Jena {@link Model}.
 	 * 
-	 * @param mGraph {@link MGraph}
+	 * @param mGraph {@link Graph}
 	 * @return the equivalent Jena {@link Model}.
 	 */
-	public static Model clerezzaMGraphToJenaModel(MGraph mGraph){
+	public static Model clerezzaGraphToJenaModel(org.apache.clerezza.commons.rdf.Graph mGraph){
 		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		
@@ -131,14 +130,14 @@ public final class JenaToClerezzaConverter {
 	
 	
 	/**
-	 * Converts a Clerezza {@link MGraph} to a Jena {@link Graph}.
+	 * Converts a Clerezza {@link Graph} to a Jena {@link ImmutableGraph}.
 	 * 
-	 * @param mGraph {@link MGraph}
-	 * @return the equivalent Jena {@link Graph}.
+	 * @param mGraph {@link Graph}
+	 * @return the equivalent Jena {@link ImmutableGraph}.
 	 */
-	public static com.hp.hpl.jena.graph.Graph clerezzaMGraphToJenaGraph(MGraph mGraph){
+	public static com.hp.hpl.jena.graph.Graph clerezzaGraphToJenaGraph(org.apache.clerezza.commons.rdf.Graph mGraph){
 		
-		Model jenaModel = clerezzaMGraphToJenaModel(mGraph);
+		Model jenaModel = clerezzaGraphToJenaModel(mGraph);
 		if(jenaModel != null){
 			return jenaModel.getGraph();
 		}

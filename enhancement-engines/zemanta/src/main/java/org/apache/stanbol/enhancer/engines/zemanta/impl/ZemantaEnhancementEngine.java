@@ -46,17 +46,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -189,7 +189,7 @@ public class ZemantaEnhancementEngine
 
 
     public void computeEnhancements(ContentItem ci) throws EngineException {
-        Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
+        Entry<IRI,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
         if(contentPart == null){
             throw new IllegalStateException("No ContentPart with a supported Mime Type"
                 + "found for ContentItem "+ci.getUri()+"(supported: '"
@@ -207,10 +207,10 @@ public class ZemantaEnhancementEngine
                 contentPart.getKey(),ci.getUri());
             return;
         }
-        MGraph graph = ci.getMetadata();
-        UriRef ciId = ci.getUri();
+        Graph graph = ci.getMetadata();
+        IRI ciId = ci.getUri();
         //we need to store the results of Zemanta in an temp graph
-        MGraph results = new SimpleMGraph();
+        Graph results = new SimpleGraph();
         ZemantaAPIWrapper zemanta = new ZemantaAPIWrapper(key);
         try {
             results.addAll(zemanta.enhance(text));
@@ -234,20 +234,20 @@ public class ZemantaEnhancementEngine
                 (Object) defaultOrder));
     }
     
-    protected void processCategories(MGraph results, MGraph enhancements, UriRef ciId) {
+    protected void processCategories(Graph results, Graph enhancements, IRI ciId) {
         Iterator<Triple> categories = results.filter(null, RDF_TYPE, ZemantaOntologyEnum.Category.getUri());
         //add the root Text annotation as soon as the first TopicAnnotation is added.
-        UriRef textAnnotation = null;
+        IRI textAnnotation = null;
         while (categories.hasNext()) {
-            NonLiteral category = categories.next().getSubject();
+            BlankNodeOrIRI category = categories.next().getSubject();
             log.debug("process category " + category);
             Double confidence = parseConfidence(results, category);
             log.debug(" > confidence :" + confidence);
             //now we need to follow the Target link
-            UriRef target = EnhancementEngineHelper.getReference(results, category, ZemantaOntologyEnum.target.getUri());
+            IRI target = EnhancementEngineHelper.getReference(results, category, ZemantaOntologyEnum.target.getUri());
             if (target != null) {
                 //first check the used categorisation
-                UriRef categorisationScheme = EnhancementEngineHelper.getReference(results, target, ZemantaOntologyEnum.categorization.getUri());
+                IRI categorisationScheme = EnhancementEngineHelper.getReference(results, target, ZemantaOntologyEnum.categorization.getUri());
                 if (categorisationScheme != null && categorisationScheme.equals(ZemantaOntologyEnum.categorization_DMOZ.getUri())) {
                     String categoryTitle = EnhancementEngineHelper.getString(results, target, ZemantaOntologyEnum.title.getUri());
                     if (categoryTitle != null) {
@@ -258,7 +258,7 @@ public class ZemantaEnhancementEngine
                             enhancements.add(new TripleImpl(textAnnotation,DC_TYPE,SKOS_CONCEPT));
                         }
                         //now write the TopicAnnotation
-                        UriRef categoryEnhancement = createTopicEnhancement(enhancements, this, ciId);
+                        IRI categoryEnhancement = createTopicEnhancement(enhancements, this, ciId);
                         //make related to the EntityAnnotation
                         enhancements.add(new TripleImpl(categoryEnhancement, DC_RELATION, textAnnotation));
                         //write the title
@@ -266,7 +266,7 @@ public class ZemantaEnhancementEngine
                         //write the reference
                         if (categoryTitle.startsWith(ZEMANTA_DMOZ_PREFIX)) {
                             enhancements.add(
-                                    new TripleImpl(categoryEnhancement, ENHANCER_ENTITY_REFERENCE, new UriRef(DMOZ_BASE_URL + categoryTitle.substring(ZEMANTA_DMOZ_PREFIX.length()))));
+                                    new TripleImpl(categoryEnhancement, ENHANCER_ENTITY_REFERENCE, new IRI(DMOZ_BASE_URL + categoryTitle.substring(ZEMANTA_DMOZ_PREFIX.length()))));
                         }
                         //write the confidence
                         if (confidence != null) {
@@ -302,40 +302,40 @@ public class ZemantaEnhancementEngine
      *                     enhancements
      * @param text         the content of the content item as string
      */
-    protected void processRecognition(MGraph results, MGraph enhancements, String text, UriRef ciId) {
+    protected void processRecognition(Graph results, Graph enhancements, String text, IRI ciId) {
         Iterator<Triple> recognitions = results.filter(null, RDF_TYPE, ZemantaOntologyEnum.Recognition.getUri());
         while (recognitions.hasNext()) {
-            NonLiteral recognition = recognitions.next().getSubject();
+            BlankNodeOrIRI recognition = recognitions.next().getSubject();
             log.debug("process recognition " + recognition);
             //first get everything we need for the textAnnotations
             Double confidence = parseConfidence(results, recognition);
             log.debug(" > confidence :" + confidence);
             String anchor = EnhancementEngineHelper.getString(results, recognition, ZemantaOntologyEnum.anchor.getUri());
             log.debug(" > anchor :" + anchor);
-            Collection<NonLiteral> textAnnotations = processTextAnnotation(enhancements, text, ciId, anchor, confidence);
+            Collection<BlankNodeOrIRI> textAnnotations = processTextAnnotation(enhancements, text, ciId, anchor, confidence);
             log.debug(" > number of textAnnotations :" + textAnnotations.size());
 
             //second we need to create the EntityAnnotation that represent the
             //recognition
-            NonLiteral object = EnhancementEngineHelper.getReference(results, recognition, ZemantaOntologyEnum.object.getUri());
+            BlankNodeOrIRI object = EnhancementEngineHelper.getReference(results, recognition, ZemantaOntologyEnum.object.getUri());
             log.debug(" > object :" + object);
             //The targets represent the linked entities
             //  ... and yes there can be more of them!
             //TODO: can we create an EntityAnnotation with several referred entities?
             //      Should we use the owl:sameAs to decide that!
-            Set<UriRef> sameAsSet = new HashSet<UriRef>();
-            for (Iterator<UriRef> sameAs = getReferences(results, object, ZemantaOntologyEnum.owlSameAs.getUri()); sameAs.hasNext(); sameAsSet.add(sameAs.next()))
+            Set<IRI> sameAsSet = new HashSet<IRI>();
+            for (Iterator<IRI> sameAs = getReferences(results, object, ZemantaOntologyEnum.owlSameAs.getUri()); sameAs.hasNext(); sameAsSet.add(sameAs.next()))
                 ;
             log.debug(" > sameAs :" + sameAsSet);
             //now parse the targets and look if there are others than the one
             //merged by using sameAs
-            Iterator<UriRef> targets = EnhancementEngineHelper.getReferences(results, object, ZemantaOntologyEnum.target.getUri());
+            Iterator<IRI> targets = EnhancementEngineHelper.getReferences(results, object, ZemantaOntologyEnum.target.getUri());
             String title = null;
             while (targets.hasNext()) {
                 //the entityRef is the URL of the target
-                UriRef entity = targets.next();
+                IRI entity = targets.next();
                 log.debug("    -  target :" + entity);
-                UriRef targetType = EnhancementEngineHelper.getReference(results, entity, ZemantaOntologyEnum.targetType.getUri());
+                IRI targetType = EnhancementEngineHelper.getReference(results, entity, ZemantaOntologyEnum.targetType.getUri());
                 log.debug("       o type :" + targetType);
                 if (ZemantaOntologyEnum.targetType_RDF.getUri().equals(targetType)) {
                     String targetTitle = EnhancementEngineHelper.getString(results, entity, ZemantaOntologyEnum.title.getUri());
@@ -357,16 +357,16 @@ public class ZemantaEnhancementEngine
                 //      any entity types!
             }
             //create the entityEnhancement
-            UriRef entityEnhancement = EnhancementEngineHelper.createEntityEnhancement(enhancements, this, ciId);
+            IRI entityEnhancement = EnhancementEngineHelper.createEntityEnhancement(enhancements, this, ciId);
             if (confidence != null) {
                 enhancements.add(
                         new TripleImpl(entityEnhancement, ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(confidence)));
             }
-            for (NonLiteral relatedTextAnnotation : textAnnotations) {
+            for (BlankNodeOrIRI relatedTextAnnotation : textAnnotations) {
                 enhancements.add(
                         new TripleImpl(entityEnhancement, DC_RELATION, relatedTextAnnotation));
             }
-            for (UriRef entity : sameAsSet) {
+            for (IRI entity : sameAsSet) {
                 enhancements.add(
                         new TripleImpl(entityEnhancement, ENHANCER_ENTITY_REFERENCE, entity));
             }
@@ -388,7 +388,7 @@ public class ZemantaEnhancementEngine
      *         double value.
      * @see ZemantaOntologyEnum#confidence
      */
-    private static Double parseConfidence(TripleCollection tc, NonLiteral resource) {
+    private static Double parseConfidence(Graph tc, BlankNodeOrIRI resource) {
         String confidenceString = EnhancementEngineHelper.getString(tc, resource, ZemantaOntologyEnum.confidence.getUri());
         Double confidence;
         if (confidenceString != null) {
@@ -421,21 +421,21 @@ public class ZemantaEnhancementEngine
      *
      * @return a collection of all existing/created text annotations for the parsed anchor
      */
-    private Collection<NonLiteral> processTextAnnotation(MGraph enhancements, String text, UriRef ciId, String anchor, Double confidence) {
-        Collection<NonLiteral> textAnnotations = new ArrayList<NonLiteral>();
+    private Collection<BlankNodeOrIRI> processTextAnnotation(Graph enhancements, String text, IRI ciId, String anchor, Double confidence) {
+        Collection<BlankNodeOrIRI> textAnnotations = new ArrayList<BlankNodeOrIRI>();
         int anchorLength = anchor.length();
         Literal anchorLiteral = new PlainLiteralImpl(anchor);
         //first search for existing TextAnnotations for the anchor
-        Map<Integer, Collection<NonLiteral>> existingTextAnnotationsMap = searchExistingTextAnnotations(enhancements, anchorLiteral);
+        Map<Integer, Collection<BlankNodeOrIRI>> existingTextAnnotationsMap = searchExistingTextAnnotations(enhancements, anchorLiteral);
 
         for (int current = text.indexOf(anchor); current >= 0; current = text.indexOf(anchor, current + 1)) {
-            Collection<NonLiteral> existingTextAnnotations = existingTextAnnotationsMap.get(current);
+            Collection<BlankNodeOrIRI> existingTextAnnotations = existingTextAnnotationsMap.get(current);
             if (existingTextAnnotations != null) {
                 //use the existing once
                 textAnnotations.addAll(existingTextAnnotations);
             } else {
                 //we need to create an new one!
-                UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(enhancements, this, ciId);
+                IRI textAnnotation = EnhancementEngineHelper.createTextEnhancement(enhancements, this, ciId);
                 textAnnotations.add(textAnnotation);
                 //write the selection
                 enhancements.add(
@@ -490,18 +490,18 @@ public class ZemantaEnhancementEngine
      * @return Map that uses the start position as an key and a list of
      *         text annotations as an value.
      */
-    private Map<Integer, Collection<NonLiteral>> searchExistingTextAnnotations(MGraph enhancements, Literal anchorLiteral) {
+    private Map<Integer, Collection<BlankNodeOrIRI>> searchExistingTextAnnotations(Graph enhancements, Literal anchorLiteral) {
         Iterator<Triple> textAnnotationsIterator = enhancements.filter(null, ENHANCER_SELECTED_TEXT, anchorLiteral);
-        Map<Integer, Collection<NonLiteral>> existingTextAnnotationsMap = new HashMap<Integer, Collection<NonLiteral>>();
+        Map<Integer, Collection<BlankNodeOrIRI>> existingTextAnnotationsMap = new HashMap<Integer, Collection<BlankNodeOrIRI>>();
         while (textAnnotationsIterator.hasNext()) {
-            NonLiteral subject = textAnnotationsIterator.next().getSubject();
+            BlankNodeOrIRI subject = textAnnotationsIterator.next().getSubject();
             //test rdfType
             if (enhancements.contains(new TripleImpl(subject, RDF_TYPE, ENHANCER_TEXTANNOTATION))) {
                 Integer start = EnhancementEngineHelper.get(enhancements, subject, ENHANCER_START, Integer.class, literalFactory);
                 if (start != null) {
-                    Collection<NonLiteral> textAnnotationList = existingTextAnnotationsMap.get(start);
+                    Collection<BlankNodeOrIRI> textAnnotationList = existingTextAnnotationsMap.get(start);
                     if (textAnnotationList == null) {
-                        textAnnotationList = new ArrayList<NonLiteral>();
+                        textAnnotationList = new ArrayList<BlankNodeOrIRI>();
                         existingTextAnnotationsMap.put(start, textAnnotationList);
                     }
                     textAnnotationList.add(subject);

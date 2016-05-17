@@ -35,12 +35,12 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-import org.apache.clerezza.rdf.core.Language;
+import org.apache.clerezza.commons.rdf.Language;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -123,23 +123,23 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
     /**
      * The property used to write the sum of all positive classified words
      */
-    public static final UriRef POSITIVE_SENTIMENT_PROPERTY = new UriRef(NamespaceEnum.fise+"positive-sentiment");
+    public static final IRI POSITIVE_SENTIMENT_PROPERTY = new IRI(NamespaceEnum.fise+"positive-sentiment");
     /**
      * The property used to write the sum of all negative classified words
      */
-    public static final UriRef NEGATIVE_SENTIMENT_PROPERTY = new UriRef(NamespaceEnum.fise+"negative-sentiment");
+    public static final IRI NEGATIVE_SENTIMENT_PROPERTY = new IRI(NamespaceEnum.fise+"negative-sentiment");
     /**
      * The sentiment of the section (sum of positive and negative classifications)
      */
-    public static final UriRef SENTIMENT_PROPERTY = new UriRef(NamespaceEnum.fise+"sentiment");
+    public static final IRI SENTIMENT_PROPERTY = new IRI(NamespaceEnum.fise+"sentiment");
     /**
      * The dc:type value used for fise:TextAnnotations indicating a Sentiment
      */
-    public static final UriRef SENTIMENT_TYPE = new UriRef(NamespaceEnum.fise+"Sentiment");
+    public static final IRI SENTIMENT_TYPE = new IRI(NamespaceEnum.fise+"Sentiment");
     /**
      * The dc:Type value sued for the sentiment annotation of the whole document
      */
-    public static final UriRef DOCUMENT_SENTIMENT_TYPE = new UriRef(NamespaceEnum.fise+"DocumentSentiment");
+    public static final IRI DOCUMENT_SENTIMENT_TYPE = new IRI(NamespaceEnum.fise+"DocumentSentiment");
 
 
     private static final int DEFAULT_NEGATION_CONTEXT = 2;
@@ -590,7 +590,7 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
     
     private void writeSentimentEnhancements(ContentItem ci, List<SentimentPhrase> sentimentPhrases, AnalysedText at, Language lang) {
         // TODO Auto-generated method stub
-        MGraph metadata = ci.getMetadata();
+        Graph metadata = ci.getMetadata();
         Sentence currentSentence = null;
         final List<SentimentPhrase> sentencePhrases = new ArrayList<SentimentPhrase>();
         for(SentimentPhrase sentPhrase : sentimentPhrases){
@@ -606,7 +606,7 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
                 }
             }
             if(writeSentimentPhrases){
-                UriRef enh = createTextEnhancement(ci, this);
+                IRI enh = createTextEnhancement(ci, this);
                 String phraseText = at.getSpan().substring(sentPhrase.getStartIndex(), sentPhrase.getEndIndex());
                 metadata.add(new TripleImpl(enh, ENHANCER_SELECTED_TEXT, 
                     new PlainLiteralImpl(phraseText, lang)));
@@ -634,7 +634,7 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
                     lf.createTypedLiteral(sentPhrase.getSentiment())));               
                 //add the Sentiment type as well as the type of the SSO Ontology
                 metadata.add(new TripleImpl(enh, DC_TYPE, SENTIMENT_TYPE));
-                UriRef ssoType = NIFHelper.SPAN_TYPE_TO_SSO_TYPE.get(SpanTypeEnum.Chunk);
+                IRI ssoType = NIFHelper.SPAN_TYPE_TO_SSO_TYPE.get(SpanTypeEnum.Chunk);
                 if(ssoType != null){
                     metadata.add(new TripleImpl(enh, DC_TYPE, ssoType));
                 }
@@ -665,8 +665,8 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
         if(section == null || sectionPhrases == null || sectionPhrases.isEmpty()){
             return; //nothing to do
         }
-        UriRef enh = createTextEnhancement(ci, this);
-        MGraph metadata = ci.getMetadata();
+        IRI enh = createTextEnhancement(ci, this);
+        Graph metadata = ci.getMetadata();
         if(section.getType() == SpanTypeEnum.Sentence){
             //TODO use the fise:TextAnnotation new model for 
             //add start/end positions
@@ -708,7 +708,7 @@ public class SentimentSummarizationEngine extends AbstractEnhancementEngine<Runt
 
         //add the Sentiment type as well as the type of the SSO Ontology
         metadata.add(new TripleImpl(enh, DC_TYPE, SENTIMENT_TYPE));
-        UriRef ssoType = NIFHelper.SPAN_TYPE_TO_SSO_TYPE.get(section.getType());
+        IRI ssoType = NIFHelper.SPAN_TYPE_TO_SSO_TYPE.get(section.getType());
         if(ssoType != null){
             metadata.add(new TripleImpl(enh, DC_TYPE, ssoType));
         }

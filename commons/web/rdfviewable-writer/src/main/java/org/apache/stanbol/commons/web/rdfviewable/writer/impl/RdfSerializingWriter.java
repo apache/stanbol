@@ -34,13 +34,12 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
-import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.utils.GraphNode;
@@ -113,17 +112,17 @@ public class RdfSerializingWriter implements MessageBodyWriter<RdfViewable> {
         this.uriInfo = uriInfo;
     }
 
-    private TripleCollection getExpandedContext(GraphNode node, GraphNode recipe) {
-        final TripleCollection result = new SimpleMGraph(node.getNodeContext());
-        final Set<Resource> expandedResources = new HashSet<Resource>();
+    private Graph getExpandedContext(GraphNode node, GraphNode recipe) {
+        final Graph result = new SimpleGraph(node.getNodeContext());
+        final Set<RDFTerm> expandedResources = new HashSet<RDFTerm>();
         expandedResources.add(node.getNode());
         while (true) {
-            Set<Resource> additionalExpansionRes = getAdditionalExpansionResources(result, recipe);
+            Set<RDFTerm> additionalExpansionRes = getAdditionalExpansionResources(result, recipe);
             additionalExpansionRes.removeAll(expandedResources);
             if (additionalExpansionRes.size() == 0) {
                 return result;
             }
-            for (Resource resource : additionalExpansionRes) {
+            for (RDFTerm resource : additionalExpansionRes) {
                 final GraphNode additionalNode = new GraphNode(resource, node.getGraph());
                 result.addAll(additionalNode.getNodeContext());
                 expandedResources.add(resource);
@@ -131,14 +130,14 @@ public class RdfSerializingWriter implements MessageBodyWriter<RdfViewable> {
         }
     }
 
-    private Set<Resource> getAdditionalExpansionResources(TripleCollection tc, GraphNode recipe) {
-        final Set<UriRef> subjectExpansionProperties = getSubjectExpansionProperties(recipe);
-        final Set<UriRef> objectExpansionProperties = getObjectExpansionProperties(recipe);
-        final Set<Resource> result = new HashSet<Resource>();
+    private Set<RDFTerm> getAdditionalExpansionResources(Graph tc, GraphNode recipe) {
+        final Set<IRI> subjectExpansionProperties = getSubjectExpansionProperties(recipe);
+        final Set<IRI> objectExpansionProperties = getObjectExpansionProperties(recipe);
+        final Set<RDFTerm> result = new HashSet<RDFTerm>();
         if ((subjectExpansionProperties.size() > 0)
                 || (objectExpansionProperties.size() > 0)) {
             for (Triple triple : tc) {
-                final UriRef predicate = triple.getPredicate();
+                final IRI predicate = triple.getPredicate();
                 if (subjectExpansionProperties.contains(predicate)) {
                     result.add(triple.getSubject());
                 }
@@ -150,44 +149,44 @@ public class RdfSerializingWriter implements MessageBodyWriter<RdfViewable> {
         return result;
     }
 
-    private Set<UriRef> getSubjectExpansionProperties(GraphNode recipe) {
+    private Set<IRI> getSubjectExpansionProperties(GraphNode recipe) {
         final MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters(true);
         final List<String> paramValues = queryParams.get(SUBJ_EXP_PARAM);
-        final Set<UriRef> result = new HashSet<UriRef>();
+        final Set<IRI> result = new HashSet<IRI>();
         if (paramValues != null) {
             for (String uriString : paramValues) {
-                result.add(new UriRef(uriString));
+                result.add(new IRI(uriString));
             }
         }
         if (recipe != null) {
             Iterator<GraphNode> ingredients = recipe.getObjectNodes(RECIPES.ingredient);
             while (ingredients.hasNext()) {
-                Iterator<Resource> properties = 
+                Iterator<RDFTerm> properties = 
                         ingredients.next().getObjects(RECIPES.ingredientInverseProperty);
                 while (properties.hasNext()) {
-                    result.add((UriRef)properties.next());
+                    result.add((IRI)properties.next());
                 }
             }
         }
         return result;
     }
 
-    private Set<UriRef> getObjectExpansionProperties(GraphNode recipe) {
+    private Set<IRI> getObjectExpansionProperties(GraphNode recipe) {
         final MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters(true);
         final List<String> paramValues = queryParams.get(OBJ_EXP_PARAM);
-        final Set<UriRef> result = new HashSet<UriRef>();
+        final Set<IRI> result = new HashSet<IRI>();
         if (paramValues != null) {
             for (String uriString : paramValues) {
-                result.add(new UriRef(uriString));
+                result.add(new IRI(uriString));
             }
         }
         if (recipe != null) {
             Iterator<GraphNode> ingredients = recipe.getObjectNodes(RECIPES.ingredient);
             while (ingredients.hasNext()) {
-                Iterator<Resource> properties = 
+                Iterator<RDFTerm> properties = 
                         ingredients.next().getObjects(RECIPES.ingredientProperty);
                 while (properties.hasNext()) {
-                    result.add((UriRef)properties.next());
+                    result.add((IRI)properties.next());
                 }
             }
         }
@@ -196,7 +195,7 @@ public class RdfSerializingWriter implements MessageBodyWriter<RdfViewable> {
     }
 
     private GraphNode getRecipe(String templatePath) {
-        TripleCollection rg = recipesGraphProvider.getRecipesGraph();
+        Graph rg = recipesGraphProvider.getRecipesGraph();
         GraphNode literalNode = new GraphNode(new PlainLiteralImpl(templatePath), rg);
         Iterator<GraphNode> recipes = literalNode.getSubjectNodes(RECIPES.recipeDomain);
         if (recipes.hasNext()) {

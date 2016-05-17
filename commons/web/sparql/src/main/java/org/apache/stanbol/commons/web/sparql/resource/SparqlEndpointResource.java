@@ -34,8 +34,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
 import org.apache.felix.scr.annotations.Activate;
@@ -53,7 +53,7 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * This is the SPARQL endpoint which is used throughout the Stanbol. It uses {@link BundleContext} to retrive
- * {@link TripleCollection} s registered to OSGi environment. To be able to execute SPARQL queries on triple
+ * {@link Graph} s registered to OSGi environment. To be able to execute SPARQL queries on triple
  * collections, they should be registered to the OSGi environment with the following parameters:
  * 
  * <p>
@@ -97,7 +97,7 @@ public class SparqlEndpointResource extends BaseStanbolResource {
     }*/
 
     /**
-     * HTTP GET service to execute SPARQL queries on {@link TripleCollection}s registered to OSGi environment.
+     * HTTP GET service to execute SPARQL queries on {@link Graph}s registered to OSGi environment.
      * If a <code>null</code>, it is assumed that the request is coming from the HTML interface of SPARQL
      * endpoint. Otherwise the query is executed on the triple collection specified by <code>graphUri</code>.
      * But, if no graph uri is passed, then the triple collection having highest service.ranking value is
@@ -120,19 +120,19 @@ public class SparqlEndpointResource extends BaseStanbolResource {
                            @QueryParam(value = "query") String sparqlQuery,
                            @Context HttpHeaders headers) throws InvalidSyntaxException {
         if (sparqlQuery == null) {
-            populateTripleCollectionList(getServices(null));
+            populateGraphList(getServices(null));
             return Response.ok(new Viewable("index", this), TEXT_HTML).build();
         }
         
         String mediaType = "application/sparql-results+xml";
 
-        TripleCollection tripleCollection = getTripleCollection(graphUri);
+        Graph tripleCollection = getGraph(graphUri);
         ResponseBuilder rb;
         if (tripleCollection != null) {
             Object result;
 			try {
 				result = tcManager.executeSparqlQuery(sparqlQuery, tripleCollection);
-		        if (result instanceof TripleCollection) {
+		        if (result instanceof Graph) {
 		            mediaType = "application/rdf+xml";
 		        }
 	            rb = Response.ok(result, mediaType);
@@ -148,7 +148,7 @@ public class SparqlEndpointResource extends BaseStanbolResource {
     }
 
     /**
-     * HTTP GET service to execute SPARQL queries on {@link TripleCollection}s registered to OSGi environment.
+     * HTTP GET service to execute SPARQL queries on {@link Graph}s registered to OSGi environment.
      * For details, see {@link #sparql(String, String, HttpHeaders)}
      */
     @POST
@@ -160,42 +160,42 @@ public class SparqlEndpointResource extends BaseStanbolResource {
         return sparql(graphUri, sparqlQuery, headers);
     }
 
-    private TripleCollection getTripleCollection(String graphUri) throws InvalidSyntaxException {
-        Map<ServiceReference,TripleCollection> services = getServices(graphUri);
+    private Graph getGraph(String graphUri) throws InvalidSyntaxException {
+        Map<ServiceReference,Graph> services = getServices(graphUri);
         if (services != null && services.size() > 0) {
             return services.get(services.keySet().iterator().next());
         }
         return null;
     }
 
-    private void populateTripleCollectionList(Map<ServiceReference,TripleCollection> services) {
+    private void populateGraphList(Map<ServiceReference,Graph> services) {
         if (services != null) {
             for (ServiceReference service : services.keySet()) {
                 Object graphUri = service.getProperty(GRAPH_URI);
-                if (service.getProperty(GRAPH_URI) instanceof UriRef) {
-                    graphUri = ((UriRef) graphUri).getUnicodeString();
+                if (service.getProperty(GRAPH_URI) instanceof IRI) {
+                    graphUri = ((IRI) graphUri).getUnicodeString();
                 }
                 Object graphName = service.getProperty("graph.name");
                 Object graphDescription = service.getProperty("graph.description");
                 if (graphUri instanceof String && graphName instanceof String
                     && graphDescription instanceof String) {
-                    tripleCollections.add(new TripleCollectionInfo((String) graphUri, (String) graphName,
+                    tripleCollections.add(new GraphInfo((String) graphUri, (String) graphName,
                             (String) graphDescription));
                 }
             }
         }
     }
 
-    private Map<ServiceReference,TripleCollection> getServices(String graphUri) throws InvalidSyntaxException {
-        Map<ServiceReference,TripleCollection> registeredGraphs = new LinkedHashMap<ServiceReference,TripleCollection>();
-        ServiceReference[] refs = bundleContext.getServiceReferences(TripleCollection.class.getName(),
+    private Map<ServiceReference,Graph> getServices(String graphUri) throws InvalidSyntaxException {
+        Map<ServiceReference,Graph> registeredGraphs = new LinkedHashMap<ServiceReference,Graph>();
+        ServiceReference[] refs = bundleContext.getServiceReferences(Graph.class.getName(),
             getFilter(graphUri));
         if (refs != null) {
             if (refs.length > 1) {
                 Arrays.sort(refs);
             }
             for (ServiceReference ref : refs) {
-                registeredGraphs.put(ref, (TripleCollection) bundleContext.getService(ref));
+                registeredGraphs.put(ref, (Graph) bundleContext.getService(ref));
             }
         }
         return registeredGraphs;
@@ -211,7 +211,7 @@ public class SparqlEndpointResource extends BaseStanbolResource {
             filterString = new StringBuilder();
         }
         filterString
-                .append(String.format(constraint, Constants.OBJECTCLASS, TripleCollection.class.getName()));
+                .append(String.format(constraint, Constants.OBJECTCLASS, Graph.class.getName()));
         if (graphUri != null) {
             filterString.append(')');
         }
@@ -222,18 +222,18 @@ public class SparqlEndpointResource extends BaseStanbolResource {
      * HTML View
      */
 
-    private List<TripleCollectionInfo> tripleCollections = new ArrayList<SparqlEndpointResource.TripleCollectionInfo>();
+    private List<GraphInfo> tripleCollections = new ArrayList<SparqlEndpointResource.GraphInfo>();
 
-    public List<TripleCollectionInfo> getTripleCollectionList() {
+    public List<GraphInfo> getGraphList() {
         return this.tripleCollections;
     }
 
-    public class TripleCollectionInfo {
+    public class GraphInfo {
         private String graphUri;
         private String graphName;
         private String graphDescription;
 
-        public TripleCollectionInfo(String graphUri, String graphName, String graphDescription) {
+        public GraphInfo(String graphUri, String graphName, String graphDescription) {
             this.graphUri = graphUri;
             this.graphName = graphName != null ? graphName : "";
             this.graphDescription = graphDescription != null ? graphDescription : "";

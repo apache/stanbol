@@ -42,8 +42,8 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -195,7 +195,7 @@ public class DBPSpotlightAnnotateEnhancementEngine extends
 		String text = SpotlightEngineUtils.getPlainContent(ci);
 
 		Collection<Annotation> dbpslGraph = doPostRequest(text,ci.getUri());
-		Map<SurfaceForm,UriRef> surfaceForm2TextAnnotation = new HashMap<SurfaceForm,UriRef>();
+		Map<SurfaceForm,IRI> surfaceForm2TextAnnotation = new HashMap<SurfaceForm,IRI>();
 		if (dbpslGraph != null) {
 			// Acquire a write lock on the ContentItem when adding the
 			// enhancements
@@ -235,9 +235,9 @@ public class DBPSpotlightAnnotateEnhancementEngine extends
 	 */
 	protected void createEnhancements(Collection<Annotation> occs,
 			ContentItem ci, String text, Language language,
-			Map<SurfaceForm,UriRef> surfaceForm2TextAnnotation) {
+			Map<SurfaceForm,IRI> surfaceForm2TextAnnotation) {
 		for (Annotation occ : occs) {
-			UriRef textAnnotation = surfaceForm2TextAnnotation.get(occ.surfaceForm);
+			IRI textAnnotation = surfaceForm2TextAnnotation.get(occ.surfaceForm);
 			if(textAnnotation == null){ //not yet written ... create a new
     			textAnnotation = SpotlightEngineUtils.createTextEnhancement(
     					occ.surfaceForm, this, ci, text, language);
@@ -260,7 +260,7 @@ public class DBPSpotlightAnnotateEnhancementEngine extends
 	 * @throws EngineException
 	 *             if the request cannot be sent
 	 */
-	protected Collection<Annotation> doPostRequest(String text, UriRef contentItemUri)
+	protected Collection<Annotation> doPostRequest(String text, IRI contentItemUri)
 			throws EngineException {
 		HttpURLConnection connection = null;
 		BufferedWriter wr = null;

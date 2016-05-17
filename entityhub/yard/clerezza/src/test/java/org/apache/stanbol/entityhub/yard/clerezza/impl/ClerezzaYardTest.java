@@ -52,7 +52,7 @@ public class ClerezzaYardTest extends YardTest {
     /**
      * The Clerezza Yard uses the Statement<br>
      * <code>representationId -> rdf:type -> Representation</code><br>
-     * to identify that an UriRef in the RDF graph (MGraph) represents a
+     * to identify that an IRI in the RDF graph (Graph) represents a
      * Representation. This Triple is added when a Representation is stored and
      * removed if retrieved from the Yard.<p>
      * This tests if this functions as expected

@@ -26,14 +26,14 @@ import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
@@ -59,7 +59,7 @@ public final class EnhancementRDFUtils {
      * @param literalFactory
      *            the LiteralFactory to use
      * @param graph
-     *            the MGraph to use
+     *            the Graph to use
      * @param contentItemId
      *            the contentItemId the enhancement is extracted from
      * @param relatedEnhancements
@@ -69,11 +69,11 @@ public final class EnhancementRDFUtils {
      * @param nameField the field used to extract the name
      * @param lang the preferred language to include or <code>null</code> if none
      */
-    public static UriRef writeEntityAnnotation(EnhancementEngine engine,
+    public static IRI writeEntityAnnotation(EnhancementEngine engine,
                                                LiteralFactory literalFactory,
-                                               MGraph graph,
-                                               UriRef contentItemId,
-                                               Collection<NonLiteral> relatedEnhancements,
+                                               Graph graph,
+                                               IRI contentItemId,
+                                               Collection<BlankNodeOrIRI> relatedEnhancements,
                                                Suggestion suggestion,
                                                String nameField, 
                                                String lang) {
@@ -104,13 +104,13 @@ public final class EnhancementRDFUtils {
             literal = new PlainLiteralImpl(label.getText(), new Language(label.getLanguage()));
         }
         // Now create the entityAnnotation
-        UriRef entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(graph, engine,
+        IRI entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(graph, engine,
             contentItemId);
         // first relate this entity annotation to the text annotation(s)
-        for (NonLiteral enhancement : relatedEnhancements) {
+        for (BlankNodeOrIRI enhancement : relatedEnhancements) {
             graph.add(new TripleImpl(entityAnnotation, DC_RELATION, enhancement));
         }
-        UriRef entityUri = new UriRef(rep.getId());
+        IRI entityUri = new IRI(rep.getId());
         // add the link to the referred entity
         graph.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_REFERENCE, entityUri));
         // add the label parsed above
@@ -122,13 +122,13 @@ public final class EnhancementRDFUtils {
 
         Iterator<Reference> types = rep.getReferences(RDF_TYPE.getUnicodeString());
         while (types.hasNext()) {
-            graph.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_TYPE, new UriRef(types.next()
+            graph.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_TYPE, new IRI(types.next()
                     .getReference())));
         }
         //add the name of the ReferencedSite that manages the Entity
         if(suggestion.getEntity().getSite() != null){
             graph.add(new TripleImpl(entityAnnotation, 
-                new UriRef(RdfResourceEnum.site.getUri()), 
+                new IRI(RdfResourceEnum.site.getUri()), 
                 new PlainLiteralImpl(suggestion.getEntity().getSite())));
         }
         

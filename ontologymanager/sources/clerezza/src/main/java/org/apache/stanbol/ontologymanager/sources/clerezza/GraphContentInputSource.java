@@ -22,14 +22,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.ontologymanager.servicesapi.io.Origin;
 import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyLoadingException;
 import org.apache.stanbol.ontologymanager.servicesapi.util.OntologyUtils;
@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An ontology input source that returns a Clerezza {@link TripleCollection} ({@link Graph} or {@link MGraph})
+ * An ontology input source that returns a Clerezza {@link Graph} ({@link ImmutableGraph} or {@link Graph})
  * after parsing its serialized content from an input stream.
  * 
  * @author alexdma
@@ -128,18 +128,18 @@ public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
         else formats = Collections.singleton(formatIdentifier);
 
         // TODO guess/lookahead the ontology ID and use it in the graph name.
-        UriRef name = new UriRef( /* "ontonet" + "::" + */
+        IRI name = new IRI( /* "ontonet" + "::" + */
         getClass().getCanonicalName() + "-time:" + System.currentTimeMillis());
 
-        TripleCollection graph = null;
+        Graph graph = null;
         if (tcProvider != null && tcProvider != null) {
-            // Graph directly stored in the TcProvider prior to using the source
-            graph = tcProvider.createMGraph(name);
+            // ImmutableGraph directly stored in the TcProvider prior to using the source
+            graph = tcProvider.createGraph(name);
             bindPhysicalOrigin(Origin.create(name));
             // XXX if addition fails, should rollback procedures also delete the graph?
         } else {
             // In memory graph, will most likely have to be copied afterwards.
-            graph = new IndexedMGraph();
+            graph = new IndexedGraph();
             bindPhysicalOrigin(null);
         }
 
@@ -149,9 +149,9 @@ public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
             String f = itf.next();
             log.debug("Parsing with format {}", f);
             try {
-                parser.parse((MGraph) graph, content, f);
+                parser.parse((Graph) graph, content, f);
                 loaded = true;
-                log.info("Graph parsed, has {} triples", graph.size());
+                log.info("ImmutableGraph parsed, has {} triples", graph.size());
             } catch (UnsupportedFormatException e) {
                 log.debug("Parsing format {} failed.", f);
             } catch (Exception e) {
@@ -173,7 +173,7 @@ public class GraphContentInputSource extends AbstractClerezzaGraphInputSource {
         } else {
             // Rollback graph creation, if any
             if (tcProvider != null && tcProvider != null) {
-                tcProvider.deleteTripleCollection(name);
+                tcProvider.deleteGraph(name);
                 log.error("Parsing failed. Deleting triple collection {}", name);
             }
             throw new OntologyLoadingException("Parsing failed. Giving up.");

@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 
 /**
  * Defines verb tenses as defined by the <a href="">OLIA</a> Ontology.
@@ -481,17 +481,17 @@ public enum Case {
 
     ;
     static final String OLIA_NAMESPACE = "http://purl.org/olia/olia.owl#";
-    UriRef uri;
+    IRI uri;
 
     Case() {
         this(null);
     }
 
     Case(String name) {
-        uri = new UriRef(OLIA_NAMESPACE + (name == null ? name() : (name + "Case")));
+        uri = new IRI(OLIA_NAMESPACE + (name == null ? name() : (name + "Case")));
     }
 
-    public UriRef getUri() {
+    public IRI getUri() {
         return uri;
     }
 

@@ -16,17 +16,17 @@
  */
 package org.apache.stanbol.ontologymanager.sources.clerezza;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
 import org.apache.stanbol.ontologymanager.servicesapi.io.Origin;
 
 /**
- * An {@link OntologyInputSource} that gets ontologies from either a stored {@link TripleCollection}, or its
+ * An {@link OntologyInputSource} that gets ontologies from either a stored {@link Graph}, or its
  * identifier and an optionally supplied triple collection manager.
  * 
  * @author alexdma
@@ -36,7 +36,7 @@ public class GraphSource extends AbstractClerezzaGraphInputSource {
 
     /**
      * Creates a new input source by querying the default triple collection manager for a graph named with the
-     * supplied <code>graphId</code>. A {@link UriRef} that represents the graph name will also be set as the
+     * supplied <code>graphId</code>. A {@link IRI} that represents the graph name will also be set as the
      * graph origin.
      * 
      * @param graphId
@@ -47,7 +47,7 @@ public class GraphSource extends AbstractClerezzaGraphInputSource {
      *             if no such graph can be found.
      */
     public GraphSource(String graphId) {
-        this(new UriRef(graphId));
+        this(new IRI(graphId));
     }
 
     /**
@@ -56,12 +56,12 @@ public class GraphSource extends AbstractClerezzaGraphInputSource {
      * @param graph
      *            the RDF graph
      * @throws IllegalArgumentException
-     *             if <code>graph</code> is neither a {@link Graph} nor a {@link MGraph}.
+     *             if <code>graph</code> is neither a {@link ImmutableGraph} nor a {@link Graph}.
      */
-    public GraphSource(TripleCollection graph) {
-        if (graph instanceof Graph) bindRootOntology(graph);
-        else if (graph instanceof MGraph) bindRootOntology(((MGraph) graph).getGraph());
-        else throw new IllegalArgumentException("GraphSource supports only Graph and MGraph types. "
+    public GraphSource(Graph graph) {
+        if (graph instanceof ImmutableGraph) bindRootOntology(graph);
+        else if (graph instanceof Graph) bindRootOntology(((Graph) graph).getImmutableGraph());
+        else throw new IllegalArgumentException("GraphSource supports only ImmutableGraph and Graph types. "
                                                 + graph.getClass() + " is not supported.");
         bindPhysicalOrigin(null);
     }
@@ -77,7 +77,7 @@ public class GraphSource extends AbstractClerezzaGraphInputSource {
      * @throws org.apache.clerezza.rdf.core.access.NoSuchEntityException
      *             if no such graph can be found.
      */
-    public GraphSource(UriRef graphId) {
+    public GraphSource(IRI graphId) {
         this(graphId, TcManager.getInstance());
     }
 
@@ -92,8 +92,8 @@ public class GraphSource extends AbstractClerezzaGraphInputSource {
      * @throws org.apache.clerezza.rdf.core.access.NoSuchEntityException
      *             if no such graph can be found in <code>tcProvider</code>.
      */
-    public GraphSource(UriRef graphId, TcProvider tcProvider) {
-        this(tcProvider.getTriples(graphId));
+    public GraphSource(IRI graphId, TcProvider tcProvider) {
+        this(tcProvider.getGraph(graphId));
         bindPhysicalOrigin(Origin.create(graphId));
     }
 

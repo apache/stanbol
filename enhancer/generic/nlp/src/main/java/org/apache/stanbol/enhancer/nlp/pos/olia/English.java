@@ -16,7 +16,7 @@
 */
 package org.apache.stanbol.enhancer.nlp.pos.olia;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.nlp.model.tag.TagSet;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.Pos;
@@ -40,9 +40,9 @@ public final class English {
     static {
         //TODO: define constants for annotation model and linking model
         PENN_TREEBANK.getProperties().put("olia.annotationModel", 
-            new UriRef("http://purl.org/olia/penn.owl"));
+            new IRI("http://purl.org/olia/penn.owl"));
         PENN_TREEBANK.getProperties().put("olia.linkingModel", 
-            new UriRef("http://purl.org/olia/penn-link.rdf"));
+            new IRI("http://purl.org/olia/penn-link.rdf"));
 
         PENN_TREEBANK.addTag(new PosTag("CC", Pos.CoordinatingConjunction));
         PENN_TREEBANK.addTag(new PosTag("CD",Pos.CardinalNumber));

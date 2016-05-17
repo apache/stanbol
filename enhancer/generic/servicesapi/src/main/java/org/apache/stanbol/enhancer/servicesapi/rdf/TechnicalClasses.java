@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 
 /**
  * Classes to be used as types for resources that are not real life entities but
@@ -34,21 +34,21 @@ public final class TechnicalClasses {
     /**
      * Type used for all enhancement created by Stanbol Enhancer
      */
-    public static final UriRef ENHANCER_ENHANCEMENT = new UriRef(
+    public static final IRI ENHANCER_ENHANCEMENT = new IRI(
             NamespaceEnum.fise+"Enhancement");
 
     /**
      * Type used for annotations on Text created by Stanbol Enhancer. This type is intended
      * to be used in combination with ENHANCER_ENHANCEMENT
      */
-    public static final UriRef ENHANCER_TEXTANNOTATION = new UriRef(
+    public static final IRI ENHANCER_TEXTANNOTATION = new IRI(
             NamespaceEnum.fise+"TextAnnotation");
 
     /**
      * Type used for annotations of named entities. This type is intended
      * to be used in combination with ENHANCER_ENHANCEMENT
      */
-    public static final UriRef ENHANCER_ENTITYANNOTATION = new UriRef(
+    public static final IRI ENHANCER_ENTITYANNOTATION = new IRI(
             NamespaceEnum.fise+"EntityAnnotation");
     
     /**
@@ -62,14 +62,14 @@ public final class TechnicalClasses {
      * The entity or concept is not necessarily explicitly mentioned
      * in the document (like a traditional entity occurrence would).
      */
-    public static final UriRef ENHANCER_TOPICANNOTATION = new UriRef(
+    public static final IRI ENHANCER_TOPICANNOTATION = new IRI(
             NamespaceEnum.fise+"TopicAnnotation");
 
     /**
      * To be used as a type pour any semantic knowledge extraction
      */
     @Deprecated
-    public static final UriRef ENHANCER_EXTRACTION = new UriRef(
+    public static final IRI ENHANCER_EXTRACTION = new IRI(
             "http://iks-project.eu/ns/enhancer/extraction/Extraction");
 
     /**
@@ -79,13 +79,13 @@ public final class TechnicalClasses {
      * @deprecated
      */
     @Deprecated
-    public static final UriRef ANNOTEA_ANNOTATION = new UriRef(
+    public static final IRI ANNOTEA_ANNOTATION = new IRI(
             "http://www.w3.org/2000/10/annotation-ns#Annotation");
 
     /**
      * To be used to type the URI of the content item being annotated by Stanbol Enhancer
      */
-    public static final UriRef FOAF_DOCUMENT = new UriRef(
+    public static final IRI FOAF_DOCUMENT = new IRI(
             NamespaceEnum.foaf + "Document");
 
     /**
@@ -96,7 +96,7 @@ public final class TechnicalClasses {
      * {@link OntologicalClasses#SKOS_CONCEPT} (see 
      * <a href="https://issues.apache.org/jira/browse/STANBOL-617">STANBOL-617</a>)
      */
-    public static final UriRef ENHANCER_CATEGORY = new UriRef(
+    public static final IRI ENHANCER_CATEGORY = new IRI(
             NamespaceEnum.fise + "Category");
 
     /**
@@ -107,13 +107,13 @@ public final class TechnicalClasses {
      * (see 
      * <a href="https://issues.apache.org/jira/browse/STANBOL-613">STANBOL-613</a>)
      */
-    public static final UriRef DCTERMS_LINGUISTIC_SYSTEM = new UriRef(
+    public static final IRI DCTERMS_LINGUISTIC_SYSTEM = new IRI(
             NamespaceEnum.dc + "LinguisticSystem");
     
     /**
      * The confidence level of {@link #ENHANCER_ENHANCEMENT}s
      */
-    public static final UriRef FNHANCER_CONFIDENCE_LEVEL = new UriRef(
+    public static final IRI FNHANCER_CONFIDENCE_LEVEL = new IRI(
             NamespaceEnum.fise + "ConfidenceLevel");
     
     /**
@@ -129,12 +129,12 @@ public final class TechnicalClasses {
     public static enum CONFIDENCE_LEVEL_ENUM{
         certain,ambiguous,suggestion,uncertain;
 
-        private final UriRef uri;
+        private final IRI uri;
         private final String localName;
         
         private CONFIDENCE_LEVEL_ENUM() {
             localName = "cl-"+name();
-            uri = new UriRef(NamespaceEnum.fise+localName);
+            uri = new IRI(NamespaceEnum.fise+localName);
         }
         
         public String getLocalName(){
@@ -145,14 +145,14 @@ public final class TechnicalClasses {
             return uri.toString();
         };
         
-        public UriRef getUri(){
+        public IRI getUri(){
             return uri;
         }
         
-        private static final Map<UriRef,CONFIDENCE_LEVEL_ENUM> uriRef2enum;
+        private static final Map<IRI,CONFIDENCE_LEVEL_ENUM> uriRef2enum;
         private static final Map<String,CONFIDENCE_LEVEL_ENUM> uri2enum;
         static {
-            Map<UriRef,CONFIDENCE_LEVEL_ENUM> ur = new HashMap<UriRef,TechnicalClasses.CONFIDENCE_LEVEL_ENUM>();
+            Map<IRI,CONFIDENCE_LEVEL_ENUM> ur = new HashMap<IRI,TechnicalClasses.CONFIDENCE_LEVEL_ENUM>();
             Map<String,CONFIDENCE_LEVEL_ENUM> us = new HashMap<String,TechnicalClasses.CONFIDENCE_LEVEL_ENUM>();
             for(CONFIDENCE_LEVEL_ENUM cl : CONFIDENCE_LEVEL_ENUM.values()){
                 ur.put(cl.getUri(), cl);
@@ -162,17 +162,17 @@ public final class TechnicalClasses {
             uri2enum = Collections.unmodifiableMap(us);
         }
         /**
-         * Getter for the fise:ConfidenceLevel instance for the {@link UriRef}
+         * Getter for the fise:ConfidenceLevel instance for the {@link IRI}
          * @param uri the URI
          * @return the fise:ConfidenceLevel instance or <code>null</code> if the
          * parsed URI is not one of the four defined instances
          */
-        public static CONFIDENCE_LEVEL_ENUM getConfidenceLevel(UriRef uri){
+        public static CONFIDENCE_LEVEL_ENUM getConfidenceLevel(IRI uri){
             return uriRef2enum.get(uri);
         }
         
         /**
-         * Getter for the fise:ConfidenceLevel instance for the {@link UriRef}
+         * Getter for the fise:ConfidenceLevel instance for the {@link IRI}
          * @param uri the URI string
          * @return the fise:ConfidenceLevel instance or <code>null</code> if the
          * parsed URI is not one of the four defined instances

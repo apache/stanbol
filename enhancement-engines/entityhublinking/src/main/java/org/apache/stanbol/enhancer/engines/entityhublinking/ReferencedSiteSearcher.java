@@ -25,9 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
 import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.Statistic;
@@ -49,7 +49,7 @@ public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Site> i
     
     private final String siteId;
     private final Integer limit;
-    private Map<UriRef,Collection<Resource>> originInfo;
+    private Map<IRI,Collection<RDFTerm>> originInfo;
     Statistic queryStats = new Statistic("query", 100, log);
     Statistic resultStats = new Statistic("result", 1000, log);
     public ReferencedSiteSearcher(BundleContext context,String siteId, Integer limit){
@@ -62,13 +62,13 @@ public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Site> i
         this.siteId = siteId;
         this.limit = limit != null && limit > 0 ? limit : null;
         this.originInfo = Collections.singletonMap(
-            new UriRef(RdfResourceEnum.site.getUri()), 
-            (Collection<Resource>)Collections.singleton(
-                (Resource)new PlainLiteralImpl(siteId)));
+            new IRI(RdfResourceEnum.site.getUri()), 
+            (Collection<RDFTerm>)Collections.singleton(
+                (RDFTerm)new PlainLiteralImpl(siteId)));
     }
     
     @Override
-    public Entity get(UriRef id,Set<UriRef> fields, String ... languages) {
+    public Entity get(IRI id,Set<IRI> fields, String ... languages) {
         if(id == null || id.getUnicodeString().isEmpty()){
             return null;
         }
@@ -99,8 +99,8 @@ public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Site> i
     }
 
     @Override
-    public Collection<? extends Entity> lookup(UriRef field,
-                                           Set<UriRef> includeFields,
+    public Collection<? extends Entity> lookup(IRI field,
+                                           Set<IRI> includeFields,
                                            List<String> search,
                                            String[] languages,
                                            Integer limit, Integer offset) throws IllegalStateException {
@@ -156,7 +156,7 @@ public final class ReferencedSiteSearcher extends TrackingEntitySearcher<Site> i
     }
     
     @Override
-    public Map<UriRef,Collection<Resource>> getOriginInformation() {
+    public Map<IRI,Collection<RDFTerm>> getOriginInformation() {
         return originInfo;
     }
 }

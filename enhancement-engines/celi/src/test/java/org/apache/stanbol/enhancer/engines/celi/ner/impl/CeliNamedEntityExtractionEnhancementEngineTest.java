@@ -26,10 +26,10 @@ import java.util.HashMap;
 import java.util.Hashtable;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.engines.celi.CeliConstants;
 import org.apache.stanbol.enhancer.engines.celi.classification.impl.CeliClassificationEnhancementEngine;
@@ -103,7 +103,7 @@ public class CeliNamedEntityExtractionEnhancementEngineTest {
 
 			TestUtils.logEnhancements(ci);
 			
-			HashMap<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+			HashMap<IRI,RDFTerm> expectedValues = new HashMap<IRI,RDFTerm>();
 			expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
 			expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(
 			    nerEngine.getClass().getName()));
@@ -125,23 +125,23 @@ public class CeliNamedEntityExtractionEnhancementEngineTest {
 		//this.testInput(CeliNamedEntityExtractionEnhancementEngineTest.TEXT_fr2, "fr");
 	}
 
-//	private int checkAllEntityAnnotations(MGraph g) {
+//	private int checkAllEntityAnnotations(Graph g) {
 //		Iterator<Triple> entityAnnotationIterator = g.filter(null, RDF_TYPE, ENHANCER_ENTITYANNOTATION);
 //		int entityAnnotationCount = 0;
 //		while (entityAnnotationIterator.hasNext()) {
-//			UriRef entityAnnotation = (UriRef) entityAnnotationIterator.next().getSubject();
+//			IRI entityAnnotation = (IRI) entityAnnotationIterator.next().getSubject();
 //			entityAnnotationCount++;
 //		}
 //		return entityAnnotationCount;
 //	}
 //
-//	private int checkAllTextAnnotations(MGraph g, String content) {
+//	private int checkAllTextAnnotations(Graph g, String content) {
 //		Iterator<Triple> textAnnotationIterator = g.filter(null, RDF_TYPE, ENHANCER_TEXTANNOTATION);
 //		// test if a textAnnotation is present
 //		assertTrue(textAnnotationIterator.hasNext());
 //		int textAnnotationCount = 0;
 //		while (textAnnotationIterator.hasNext()) {
-//			UriRef textAnnotation = (UriRef) textAnnotationIterator.next().getSubject();
+//			IRI textAnnotation = (IRI) textAnnotationIterator.next().getSubject();
 //			textAnnotationCount++;
 //		}
 //		return textAnnotationCount;

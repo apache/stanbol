@@ -6,7 +6,7 @@ import java.util.EnumSet;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedTextFactory;
@@ -30,7 +30,7 @@ public class DependencyRelationTest {
     private static final AnalysedTextFactory atFactory = AnalysedTextFactory.getDefaultInstance();
 
     private static ContentItem ci;
-    private static Entry<UriRef,Blob> textBlob;
+    private static Entry<IRI,Blob> textBlob;
 
     @BeforeClass
     public static void setup() throws IOException {

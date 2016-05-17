@@ -16,27 +16,27 @@
  */
 package org.apache.stanbol.entityhub.model.clerezza.utils;
 
-import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.entityhub.servicesapi.util.AdaptingIterator.Adapter;
 
 /**
- * Needed because UriRefs and Literals use the RDF representation for the
+ * Needed because IRIs and Literals use the RDF representation for the
  * toString Method
  *
  * @author Rupert Westenthaler
  *
  * @param <T>
  */
-public class Resource2StringAdapter<T extends Resource> implements Adapter<T, String> {
+public class Resource2StringAdapter<T extends RDFTerm> implements Adapter<T, String> {
 
     @Override
     public final String adapt(T value, Class<String> type) {
         if (value == null) {
             return null;
-        } else if (value instanceof UriRef) {
-            return ((UriRef) value).getUnicodeString();
+        } else if (value instanceof IRI) {
+            return ((IRI) value).getUnicodeString();
         } else if (value instanceof Literal) {
             return ((Literal) value).getLexicalForm();
         } else {

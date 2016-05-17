@@ -29,9 +29,9 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.clerezza.jaxrs.utils.TrailingSlash;
 import org.apache.clerezza.jaxrs.utils.form.FormFile;
 import org.apache.clerezza.jaxrs.utils.form.MultiPartBody;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.clerezza.rdf.utils.GraphNode;
@@ -41,7 +41,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.commons.web.viewable.RdfViewable;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainManager;
@@ -101,9 +101,9 @@ public class MultiEnhancer {
         final String resourcePath = uriInfo.getAbsolutePath().toString();
         //The URI at which this service was accessed accessed, this will be the 
         //central serviceUri in the response
-        final UriRef serviceUri = new UriRef(resourcePath);
+        final IRI serviceUri = new IRI(resourcePath);
         //the in memory graph to which the triples for the response are added
-        final MGraph responseGraph = new IndexedMGraph();
+        final Graph responseGraph = new IndexedGraph();
         //This GraphNode represents the service within our result graph
         final GraphNode node = new GraphNode(serviceUri, responseGraph);
         //The triples will be added to the first graph of the union
@@ -137,9 +137,9 @@ public class MultiEnhancer {
             enhancementJobManager.enhanceContent(contentItem, chain);
         }
         //this contains the enhancement results
-        final MGraph resultGraph = contentItem.getMetadata();
+        final Graph resultGraph = contentItem.getMetadata();
         //this is the IRI assigned to the subitted content
-        final UriRef contentIri = contentItem.getUri();
+        final IRI contentIri = contentItem.getUri();
         //this represent the submitted Content within the resultGraph
         final GraphNode node = new GraphNode(contentIri, resultGraph);
         //node is the "root" for rendering the results 

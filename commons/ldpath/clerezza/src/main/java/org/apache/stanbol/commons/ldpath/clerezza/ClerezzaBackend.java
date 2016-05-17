@@ -27,20 +27,17 @@ import java.util.Locale;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.locks.Lock;
 
-import org.apache.clerezza.rdf.core.BNode;
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.BlankNode;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TypedLiteralImpl;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.access.LockableMGraph;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TypedLiteralImpl;
 import org.apache.commons.collections.BidiMap;
 import org.apache.commons.collections.bidimap.DualHashBidiMap;
 import org.apache.marmotta.ldpath.api.backend.RDFBackend;
@@ -50,17 +47,17 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Clerezza based implementation of {@link RDFBackend} interface. This implementation uses the
- * {@link Resource} objects of Clerezza as processing unit RDFBackend.<p>
+ * {@link RDFTerm} objects of Clerezza as processing unit RDFBackend.<p>
  * 
- * For type conversions of {@link TypedLiteral}s the {@link LiteralFactory}
- * of Clerezza is used. In case parsed nodes are not {@link TypedLiteral} the
+ * For type conversions of {@link Literal}s the {@link LiteralFactory}
+ * of Clerezza is used. In case parsed nodes are not {@link Literal} the
  * super implementations of {@link AbstractBackend} are called as such also
  * support converting values based on the string representation.
  * 
  * @author anil.sinaci
  * @author Rupert Westenthaler
  */
-public class ClerezzaBackend extends AbstractBackend<Resource> implements RDFBackend<Resource> {
+public class ClerezzaBackend extends AbstractBackend<RDFTerm> implements RDFBackend<RDFTerm> {
 
     private static final Logger logger = LoggerFactory.getLogger(ClerezzaBackend.class);
 
@@ -69,7 +66,7 @@ public class ClerezzaBackend extends AbstractBackend<Resource> implements RDFBac
      * <li> local name
      * <li> uri string
      * <li> {@link URI}
-     * <li> {@link UriRef}
+     * <li> {@link IRI}
      * </ul>
      * {@link #toString()} returns the uri.
      */
@@ -80,7 +77,7 @@ public class ClerezzaBackend extends AbstractBackend<Resource> implements RDFBac
         String localName;
         String uriString;
         URI uri;
-        UriRef uriRef;
+        IRI uriRef;
         /**
          * uses <code>{@link #name()}{@link String#toLowerCase() .toLoverCase()}
          * </code> to generate the {@link #getLocalName()}
@@ -100,7 +97,7 @@ public class ClerezzaBackend extends AbstractBackend<Resource> implements RDFBac
             this.localName = localName != null ? localName : name().toLowerCase();
             this.uriString = namespace+this.localName;
             this.uri = URI.create(uriString);
-            this.uriRef = new UriRef(uriString);
+            this.uriRef = new IRI(uriString);
         }
         public String getLocalName(){
             return localName;
@@ -111,65 +108,65 @@ public class ClerezzaBackend extends AbstractBackend<Resource> implements RDFBac
         public URI getURI(){
             return uri;
         }
-        public UriRef getUriRef(){
+        public IRI getIRI(){
             return uriRef;
         }
         @Override
         public String toString() {
             return uriString;
         }
-        private static BidiMap xsdURI2UriRef = new DualHashBidiMap();
+        private static BidiMap xsdURI2IRI = new DualHashBidiMap();
         
         static {
             for(XSD type : XSD.values()){
-                xsdURI2UriRef.put(type.getURI(), type.getUriRef());
+                xsdURI2IRI.put(type.getURI(), type.getIRI());
             }
         }
-        public static URI getXsdURI(UriRef uri){
-            return (URI)xsdURI2UriRef.getKey(uri);
+        public static URI getXsdURI(IRI uri){
+            return (URI)xsdURI2IRI.getKey(uri);
         }
-        public static UriRef getXsdUriRef(URI uri){
-            return (UriRef)xsdURI2UriRef.get(uri);
+        public static IRI getXsdIRI(URI uri){
+            return (IRI)xsdURI2IRI.get(uri);
         }
     }
     
-    private TripleCollection graph;
+    private Graph graph;
     
     private static LiteralFactory lf = LiteralFactory.getInstance();
 
     /**
      * Allows sub-classes to create a instance and setting the {@link #graph}
-     * later on by using {@link #setGraph(TripleCollection)}.
+     * later on by using {@link #setGraph(Graph)}.
      */
     protected ClerezzaBackend() {
     }
     /**
-     * Constructs a Clerezza {@link RDFBackend} by using the parsed {@link TripleCollection}
-     * @param graph the {@link TripleCollection}
+     * Constructs a Clerezza {@link RDFBackend} by using the parsed {@link Graph}
+     * @param graph the {@link Graph}
      * @throws IllegalArgumentException if <code>null</code> is parsed as graph.
      */
-    public ClerezzaBackend(TripleCollection graph) {
+    public ClerezzaBackend(Graph graph) {
         if(graph == null){
-            throw new IllegalArgumentException("The parsed Graph MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed ImmutableGraph MUST NOT be NULL!");
         }
         this.graph = graph;
     }
     
-    protected final TripleCollection getGraph(){
+    protected final Graph getGraph(){
         return this.graph;
     }
 
-    protected final void setGraph(TripleCollection graph){
+    protected final void setGraph(Graph graph){
         this.graph = graph;
     }
     
     @Override
-    public Resource createLiteral(String content) {
+    public RDFTerm createLiteral(String content) {
         return createLiteral(content,null,null);
     }
 
     @Override
-    public Resource createLiteral(String content, Locale language, URI type) {
+    public RDFTerm createLiteral(String content, Locale language, URI type) {
         logger.debug("creating literal with content \"{}\", language {}, datatype {}",
             new Object[] {content, language, type});
         if (type == null) {
@@ -179,38 +176,38 @@ public class ClerezzaBackend extends AbstractBackend<Resource> implements RDFBac
                 return new PlainLiteralImpl(content, new Language(language.getLanguage()));
             }
         } else {
-            return new TypedLiteralImpl(content, XSD.getXsdUriRef(type));
+            return new TypedLiteralImpl(content, XSD.getXsdIRI(type));
         }
     }
 
     @Override
-    public Resource createURI(String uriref) {
-        return new UriRef(uriref);
+    public RDFTerm createURI(String uriref) {
+        return new IRI(uriref);
     }
 
     @Override
-    public Double doubleValue(Resource resource) {
-        if (resource instanceof TypedLiteral) {
-            return LiteralFactory.getInstance().createObject(Double.class, (TypedLiteral) resource);
+    public Double doubleValue(RDFTerm resource) {
+        if (resource instanceof Literal) {
+            return LiteralFactory.getInstance().createObject(Double.class, (Literal) resource);
         } else {
             return super.doubleValue(resource);
         }
     }
 
     @Override
-    public Locale getLiteralLanguage(Resource resource) {
-        if (resource instanceof PlainLiteral) {
-            Language lang = ((PlainLiteral) resource).getLanguage();
+    public Locale getLiteralLanguage(RDFTerm resource) {
+        if (resource instanceof Literal) {
+            Language lang = ((Literal) resource).getLanguage();
             return lang != null ? new Locale(lang.toString()) : null;
         } else {
-            throw new IllegalArgumentException("Resource " + resource.toString() + " is not a PlainLiteral");
+            throw new IllegalArgumentException("RDFTerm " + resource.toString() + " is not a PlainLiteral");
         }
     }
 
     @Override
-    public URI getLiteralType(Resource resource) {
-        if (resource instanceof TypedLiteral) {
-            UriRef type = ((TypedLiteral) resource).getDataType();
+    public URI getLiteralType(RDFTerm resource) {
+        if (resource instanceof Literal) {
+            IRI type = ((Literal) resource).getDataType();
             return type != null ? XSD.getXsdURI(type) : null;
         } else {
             throw new IllegalArgumentException("Value " + resource.toString() + " is not a literal");
@@ -218,31 +215,31 @@ public class ClerezzaBackend extends AbstractBackend<Resource> implements RDFBac
     }
 
     @Override
-    public boolean isBlank(Resource resource) {
-        return resource instanceof BNode;
+    public boolean isBlank(RDFTerm resource) {
+        return resource instanceof BlankNode;
     }
 
     @Override
-    public boolean isLiteral(Resource resource) {
+    public boolean isLiteral(RDFTerm resource) {
         return resource instanceof Literal;
     }
 
     @Override
-    public boolean isURI(Resource resource) {
-        return resource instanceof UriRef;
+    public boolean isURI(RDFTerm resource) {
+        return resource instanceof IRI;
     }
 
     @Override
-    public Collection<Resource> listObjects(Resource subject, Resource property) {
-        if (!(property instanceof UriRef) || 
-                !(subject instanceof NonLiteral)) {
+    public Collection<RDFTerm> listObjects(RDFTerm subject, RDFTerm property) {
+        if (!(property instanceof IRI) || 
+                !(subject instanceof BlankNodeOrIRI)) {
             throw new IllegalArgumentException("Subject needs to be a URI or blank node, property a URI node");
         }
 
-        Collection<Resource> result = new ArrayList<Resource>();
+        Collection<RDFTerm> result = new ArrayList<RDFTerm>();
         Lock readLock = readLockGraph();
         try {
-            Iterator<Triple> triples = graph.filter((NonLiteral) subject, (UriRef) property, null);
+            Iterator<Triple> triples = graph.filter((BlankNodeOrIRI) subject, (IRI) property, null);
             while (triples.hasNext()) {
                 result.add(triples.next().getObject());
             }
@@ -256,15 +253,15 @@ public class ClerezzaBackend extends AbstractBackend<Resource> implements RDFBac
     }
 
     @Override
-    public Collection<Resource> listSubjects(Resource property, Resource object) {
-        if (!(property instanceof UriRef)) {
+    public Collection<RDFTerm> listSubjects(RDFTerm property, RDFTerm object) {
+        if (!(property instanceof IRI)) {
             throw new IllegalArgumentException("Property needs to be a URI node");
         }
 
-        Collection<Resource> result = new ArrayList<Resource>();
+        Collection<RDFTerm> result = new ArrayList<RDFTerm>();
         Lock readLock = readLockGraph();
         try {
-            Iterator<Triple> triples = graph.filter(null, (UriRef) property, object);
+            Iterator<Triple> triples = graph.filter(null, (IRI) property, object);
             while (triples.hasNext()) {
                 result.add(triples.next().getSubject());
             }
@@ -277,90 +274,90 @@ public class ClerezzaBackend extends AbstractBackend<Resource> implements RDFBac
     }
 
     @Override
-    public Long longValue(Resource resource) {
-        if (resource instanceof TypedLiteral) {
-            return lf.createObject(Long.class, (TypedLiteral) resource);
+    public Long longValue(RDFTerm resource) {
+        if (resource instanceof Literal) {
+            return lf.createObject(Long.class, (Literal) resource);
         } else {
             return super.longValue(resource);
         }
     }
 
     @Override
-    public String stringValue(Resource resource) {
-        if (resource instanceof UriRef) {
-            return ((UriRef) resource).getUnicodeString();
+    public String stringValue(RDFTerm resource) {
+        if (resource instanceof IRI) {
+            return ((IRI) resource).getUnicodeString();
         } else if (resource instanceof Literal) {
             return ((Literal) resource).getLexicalForm();
-        } else { //BNode
+        } else { //BlankNode
             return resource.toString();
         }
     }
 
     @Override
-    public Boolean booleanValue(Resource resource) {
-        if (resource instanceof TypedLiteral) {
-            return lf.createObject(Boolean.class, (TypedLiteral) resource);
+    public Boolean booleanValue(RDFTerm resource) {
+        if (resource instanceof Literal) {
+            return lf.createObject(Boolean.class, (Literal) resource);
         } else {
             return super.booleanValue(resource);
         }
     }
 
     @Override
-    public Date dateTimeValue(Resource resource) {
-        if (resource instanceof TypedLiteral) {
-            return lf.createObject(Date.class, (TypedLiteral) resource);
+    public Date dateTimeValue(RDFTerm resource) {
+        if (resource instanceof Literal) {
+            return lf.createObject(Date.class, (Literal) resource);
         } else {
             return super.dateTimeValue(resource);
         }
     }
 
     @Override
-    public Date dateValue(Resource resource) {
-        if (resource instanceof TypedLiteral) {
-            return lf.createObject(Date.class, (TypedLiteral) resource);
+    public Date dateValue(RDFTerm resource) {
+        if (resource instanceof Literal) {
+            return lf.createObject(Date.class, (Literal) resource);
         } else {
             return super.dateValue(resource);
         }
     }
 
     @Override
-    public Date timeValue(Resource resource) {
-        if (resource instanceof TypedLiteral) {
-            return lf.createObject(Date.class, (TypedLiteral) resource);
+    public Date timeValue(RDFTerm resource) {
+        if (resource instanceof Literal) {
+            return lf.createObject(Date.class, (Literal) resource);
         } else {
             return super.timeValue(resource);
         }
     }
 
     @Override
-    public Float floatValue(Resource resource) {
-        if (resource instanceof TypedLiteral) {
-            return lf.createObject(Float.class, (TypedLiteral) resource);
+    public Float floatValue(RDFTerm resource) {
+        if (resource instanceof Literal) {
+            return lf.createObject(Float.class, (Literal) resource);
         } else {
             return super.floatValue(resource);
         }
     }
 
     @Override
-    public Integer intValue(Resource resource) {
-        if (resource instanceof TypedLiteral) {
-            return lf.createObject(Integer.class, (TypedLiteral) resource);
+    public Integer intValue(RDFTerm resource) {
+        if (resource instanceof Literal) {
+            return lf.createObject(Integer.class, (Literal) resource);
         } else {
             return super.intValue(resource);
         }
     }
 
     @Override
-    public BigInteger integerValue(Resource resource) {
-        if (resource instanceof TypedLiteral) {
-            return lf.createObject(BigInteger.class, (TypedLiteral) resource);
+    public BigInteger integerValue(RDFTerm resource) {
+        if (resource instanceof Literal) {
+            return lf.createObject(BigInteger.class, (Literal) resource);
         } else {
             return super.integerValue(resource);
         }
     }
 
     @Override
-    public BigDecimal decimalValue(Resource resource) {
+    public BigDecimal decimalValue(RDFTerm resource) {
         //currently there is no converter for BigDecimal in clerezza
         //so as a workaround use the lexical form (as provided by the super
         //implementation
@@ -381,12 +378,8 @@ public class ClerezzaBackend extends AbstractBackend<Resource> implements RDFBac
      */
     private Lock readLockGraph() {
         final Lock readLock;
-        if(graph instanceof LockableMGraph){
-            readLock = ((LockableMGraph)graph).getLock().readLock();
-            readLock.lock();
-        } else {
-            readLock = null;
-        }
+        readLock = graph.getLock().readLock();
+        readLock.lock();
         return readLock;
     }
 

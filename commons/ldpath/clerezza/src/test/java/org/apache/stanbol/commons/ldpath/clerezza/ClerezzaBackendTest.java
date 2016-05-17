@@ -39,16 +39,16 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.serializedform.ParsingProvider;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.apache.marmotta.ldpath.LDPath;
 import org.apache.marmotta.ldpath.exception.LDPathParseException;
 import org.apache.marmotta.ldpath.parser.Configuration;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -74,17 +74,17 @@ public class ClerezzaBackendTest {
     private static final String NS_SKOS = "http://www.w3.org/2004/02/skos/core#";
     private static final String NS_DBP = "http://dbpedia.org/property/";
     private static final String NS_DBO = "http://dbpedia.org/ontology/";
-    //private static final UriRef SKOS_CONCEPT = new UriRef(NS_SKOS+"Concept");
+    //private static final IRI SKOS_CONCEPT = new IRI(NS_SKOS+"Concept");
     
-    private static MGraph graph;
+    private static Graph graph;
     
     private ClerezzaBackend backend;
-    private LDPath<Resource> ldpath;
+    private LDPath<RDFTerm> ldpath;
     @BeforeClass
     public static void readTestData() throws IOException {
         ParsingProvider parser = new JenaParserProvider();
         //NOTE(rw): the new third parameter is the base URI used to resolve relative paths
-        graph = new IndexedMGraph();
+        graph = new IndexedGraph();
         InputStream in = ClerezzaBackendTest.class.getClassLoader().getResourceAsStream("testdata.rdf.zip");
         assertNotNull(in);
         ZipInputStream zipIn = new ZipInputStream(new BufferedInputStream(in));
@@ -106,36 +106,36 @@ public class ClerezzaBackendTest {
             backend = new ClerezzaBackend(graph);
         }
         if(ldpath == null){
-            Configuration<Resource> config = new Configuration<Resource>();
+            Configuration<RDFTerm> config = new Configuration<RDFTerm>();
             config.addNamespace("dbp-prop", NS_DBP);
             config.addNamespace("dbp-ont", NS_DBO);
-            ldpath = new LDPath<Resource>(backend);
+            ldpath = new LDPath<RDFTerm>(backend);
         }
     }
     
     @Test
     public void testUriAndListImplemetnation() throws LDPathParseException {
-        UriRef nationalChampionship = new UriRef("http://cv.iptc.org/newscodes/subjectcode/15073031");
+        IRI nationalChampionship = new IRI("http://cv.iptc.org/newscodes/subjectcode/15073031");
         //this program tests:
-        // * UriRef transformers
+        // * IRI transformers
         // * #listSubjects(..) implementation
         // * #listObjects(..)  implementation
         Map<String,Collection<?>> results = ldpath.programQuery(nationalChampionship, 
             getReader("skos:broaderTransitive = (skos:broaderTransitive | ^skos:narrowerTransitive)+;"));
-        Set<Resource> expected = new HashSet<Resource>(Arrays.asList(
-            new UriRef("http://cv.iptc.org/newscodes/subjectcode/15000000"),
-            new UriRef("http://cv.iptc.org/newscodes/subjectcode/15073000")));
+        Set<RDFTerm> expected = new HashSet<RDFTerm>(Arrays.asList(
+            new IRI("http://cv.iptc.org/newscodes/subjectcode/15000000"),
+            new IRI("http://cv.iptc.org/newscodes/subjectcode/15073000")));
         Collection<?> broaderTransitive = results.get(NS_SKOS+"broaderTransitive");
         for(Object concept : broaderTransitive){
             assertNotNull(concept);
-            assertTrue(concept instanceof UriRef);
+            assertTrue(concept instanceof IRI);
             assertTrue(expected.remove(concept));
         }
         assertTrue("missing: "+expected,expected.isEmpty());
     }
     @Test
     public void testStringTransformer() throws LDPathParseException {
-        UriRef nationalChampionship = new UriRef("http://cv.iptc.org/newscodes/subjectcode/15073031");
+        IRI nationalChampionship = new IRI("http://cv.iptc.org/newscodes/subjectcode/15073031");
         Map<String,Collection<?>> results = ldpath.programQuery(nationalChampionship, 
             getReader("label = skos:prefLabel[@en-GB] :: xsd:string;"));
         Set<String> expected = new HashSet<String>(Arrays.asList(
@@ -151,7 +151,7 @@ public class ClerezzaBackendTest {
     }
     @Test
     public void testDataTypes() throws LDPathParseException {
-        UriRef hallein = new UriRef("http://dbpedia.org/resource/Hallein");        
+        IRI hallein = new IRI("http://dbpedia.org/resource/Hallein");        
 
         StringBuilder program = new StringBuilder();
         program.append("@prefix dbp-prop : <").append(NS_DBP).append(">;");

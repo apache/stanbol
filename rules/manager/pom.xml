@@ -129,14 +129,17 @@
     <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.serializer</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.jena.sparql</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.clerezza</groupId>
       <artifactId>rdf.simple.storage</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.clerezza</groupId>

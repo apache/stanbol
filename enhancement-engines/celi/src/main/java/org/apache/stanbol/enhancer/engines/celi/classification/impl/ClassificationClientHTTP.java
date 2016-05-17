@@ -36,7 +36,7 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPPart;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.impl.util.Base64;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.stanbol.enhancer.engines.celi.utils.Utils;
@@ -148,7 +148,7 @@ public class ClassificationClientHTTP {
 			//      to the most specific dbpedia ontology class is best suited.
 			String model = result.getElementsByTagNameNS("*","label").item(0).getTextContent();
 			model=model.substring(1, model.length()-1);
-			UriRef modelConcept = selectClassificationClass(model);
+			IRI modelConcept = selectClassificationClass(model);
 			String conf=result.getElementsByTagNameNS("*","score").item(0).getTextContent();
 			Double confidence= new Double(conf);
 			extractedConcepts.add(new Concept(model,modelConcept,confidence));
@@ -168,7 +168,7 @@ public class ClassificationClientHTTP {
      * @param classificationLabels the label string
      * @return the selected label
      */
-    private UriRef selectClassificationClass(String classificationLabels) {
+    private IRI selectClassificationClass(String classificationLabels) {
         //NOTE: (rwesten) In general it would be better if CELI could provide
         //      de-referenceable URLs for those suggestions.
         //      If that is possible one would no longer need to link to the
@@ -184,7 +184,7 @@ public class ClassificationClientHTTP {
         int end = classificationLabels.charAt(classificationLabels.length()-1) == ']' ?
                 classificationLabels.length() - 1 : classificationLabels.length();
         String[] tmps = classificationLabels.substring(start, end).split(" ");
-        return new UriRef(NamespaceEnum.dbpedia_ont.getNamespace()+ //the namespace
+        return new IRI(NamespaceEnum.dbpedia_ont.getNamespace()+ //the namespace
             (tmps.length > 1 ? tmps[1] : tmps[0])); //the Class for the label
     }	
 	

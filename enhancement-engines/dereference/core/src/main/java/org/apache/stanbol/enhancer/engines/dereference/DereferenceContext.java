@@ -13,7 +13,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
@@ -48,7 +48,7 @@ public class DereferenceContext {
     private Set<String> languages;
     private List<String> fields;
     private String program;
-    private HashSet<UriRef> entityReferences;
+    private HashSet<IRI> entityReferences;
     
     
     
@@ -84,13 +84,13 @@ public class DereferenceContext {
                 DereferenceConstants.ENTITY_REFERENCES);
         }
         //start with the references present in the config
-        this.entityReferences = new HashSet<UriRef>(getConfig().getEntityReferences());
+        this.entityReferences = new HashSet<IRI>(getConfig().getEntityReferences());
         if(entityRefProps != null && !entityRefProps.isEmpty()){
             NamespacePrefixService nps = engine.getConfig().getNsPrefixService();
             for(String prop : entityRefProps){
                 if(!StringUtils.isBlank(prop)){
                     try {
-                        entityReferences.add(new UriRef(
+                        entityReferences.add(new IRI(
                             NamespaceMappingUtils.getConfiguredUri(nps, prop)));
                     } catch(IllegalArgumentException e){
                         throw new DereferenceConfigurationException(e, 
@@ -287,7 +287,7 @@ public class DereferenceContext {
      * @return the entity reference properties
      * @see DereferenceEngineConfig#getEntityReferences()
      */
-    public HashSet<UriRef> getEntityReferences() {
+    public HashSet<IRI> getEntityReferences() {
         return entityReferences;
     }
     

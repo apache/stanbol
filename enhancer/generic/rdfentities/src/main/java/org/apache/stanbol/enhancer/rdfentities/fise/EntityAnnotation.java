@@ -18,7 +18,7 @@ package org.apache.stanbol.enhancer.rdfentities.fise;
 
 import java.util.Collection;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.rdfentities.Rdf;
 
 
@@ -26,9 +26,9 @@ import org.apache.stanbol.enhancer.rdfentities.Rdf;
 public interface EntityAnnotation extends Enhancement {
 
     @Rdf(id="http://fise.iks-project.eu/ontology/entity-reference")
-    UriRef getEntityReference();
+    IRI getEntityReference();
     @Rdf(id="http://fise.iks-project.eu/ontology/entity-reference")
-    void setEntityReference(UriRef reference);
+    void setEntityReference(IRI reference);
 
     @Rdf(id="http://fise.iks-project.eu/ontology/entity-label")
     String getEntityLabel();
@@ -36,5 +36,5 @@ public interface EntityAnnotation extends Enhancement {
     void setEntityLabel(String label);
 
     @Rdf(id="http://fise.iks-project.eu/ontology/entity-type")
-    Collection<UriRef> getEntityTypes();
+    Collection<IRI> getEntityTypes();
 }

@@ -21,9 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
 
 /**
  * Interface used to search for Entities (e.g. as defined by a Controlled
@@ -52,7 +51,7 @@ public interface EntitySearcher {
      * @throws IllegalArgumentException if the parsed field is <code>null</code>;
      * the list with the search terms is <code>null</code> or empty;
      */
-    Collection<? extends Entity> lookup(UriRef field, Set<UriRef> selectedFields, 
+    Collection<? extends Entity> lookup(IRI field, Set<IRI> selectedFields, 
         List<String> search, String[] languages, Integer limit, Integer offset) 
                 throws EntitySearcherException;
     /**
@@ -67,7 +66,7 @@ public interface EntitySearcher {
      * Entity with the parsed Id
      * @throws IllegalArgumentException if the parsed id is <code>null</code>
      */
-    Entity get(UriRef id,Set<UriRef> selectedFields, String...languages) throws EntitySearcherException;
+    Entity get(IRI id,Set<IRI> selectedFields, String...languages) throws EntitySearcherException;
     /**
      * Returns <code>true</code> if this EntitySearcher can operate without
      * dependencies to remote services. This is important because Stanbol can
@@ -90,5 +89,5 @@ public interface EntitySearcher {
      * @return the predicate[1..1] -> predicate[1..*] tuples added to any 
      * 'fise:EntityAnnotation'.
      */
-    Map<UriRef,Collection<Resource>> getOriginInformation();
+    Map<IRI,Collection<RDFTerm>> getOriginInformation();
 }

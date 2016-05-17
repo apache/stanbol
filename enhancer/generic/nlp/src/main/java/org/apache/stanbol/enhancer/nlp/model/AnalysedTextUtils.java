@@ -29,7 +29,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Map.Entry;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.nlp.model.impl.SectionImpl;
 import org.apache.stanbol.enhancer.nlp.model.impl.SpanImpl;
 import org.apache.stanbol.enhancer.servicesapi.Blob;

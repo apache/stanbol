@@ -48,18 +48,17 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.BNode;
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.BlankNode;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
@@ -82,9 +81,9 @@ public final class ExecutionMetadataHelper {
 
     private static final LiteralFactory lf = LiteralFactory.getInstance();
     
-    public static NonLiteral createChainExecutionNode(MGraph graph, NonLiteral executionPlan, 
-                                        UriRef ciUri, boolean defaultChain){
-        NonLiteral node = new BNode();
+    public static BlankNodeOrIRI createChainExecutionNode(Graph graph, BlankNodeOrIRI executionPlan, 
+                                        IRI ciUri, boolean defaultChain){
+        BlankNodeOrIRI node = new BlankNode();
         graph.add(new TripleImpl(node, RDF_TYPE, EXECUTION));
         graph.add(new TripleImpl(node, RDF_TYPE, CHAIN_EXECUTION));
         graph.add(new TripleImpl(node, ENHANCES, ciUri));
@@ -96,10 +95,10 @@ public final class ExecutionMetadataHelper {
         return node;
     }
     
-    public static NonLiteral createEngineExecution(MGraph graph, NonLiteral chainExecution,
-                                     NonLiteral executionNode){
+    public static BlankNodeOrIRI createEngineExecution(Graph graph, BlankNodeOrIRI chainExecution,
+                                     BlankNodeOrIRI executionNode){
         
-        NonLiteral node = new BNode();
+        BlankNodeOrIRI node = new BlankNode();
         graph.add(new TripleImpl(node, RDF_TYPE, EXECUTION));
         graph.add(new TripleImpl(node, RDF_TYPE, ENGINE_EXECUTION));
         graph.add(new TripleImpl(node, EXECUTION_PART, chainExecution));
@@ -113,7 +112,7 @@ public final class ExecutionMetadataHelper {
      * @param execution
      * @param message An optional message
      */
-    public static void setExecutionCompleted(MGraph graph,NonLiteral execution,String message){
+    public static void setExecutionCompleted(Graph graph,BlankNodeOrIRI execution,String message){
         Literal dateTime = lf.createTypedLiteral(new Date());
         setStatus(graph, execution,STATUS_COMPLETED);
         graph.add(new TripleImpl(execution, COMPLETED, dateTime));
@@ -127,7 +126,7 @@ public final class ExecutionMetadataHelper {
      * @param graph the graph holding the execution metadata
      * @param execution the execution node
      */
-    public static void setExecutionScheduled(MGraph graph,NonLiteral execution){
+    public static void setExecutionScheduled(Graph graph,BlankNodeOrIRI execution){
         setStatus(graph, execution,STATUS_SCHEDULED);
         Iterator<Triple> it = graph.filter(execution, STARTED, null);
         while(it.hasNext()){
@@ -146,7 +145,7 @@ public final class ExecutionMetadataHelper {
      * @param execution
      * @param message An message describing why the execution failed
      */
-    public static void setExecutionFaild(MGraph graph,NonLiteral execution,String message){
+    public static void setExecutionFaild(Graph graph,BlankNodeOrIRI execution,String message){
         Literal dateTime = lf.createTypedLiteral(new Date());
         setStatus(graph, execution,STATUS_FAILED);
         graph.add(new TripleImpl(execution, COMPLETED, dateTime));
@@ -163,7 +162,7 @@ public final class ExecutionMetadataHelper {
      * @param execution
      * @param message An optional message why this execution was skipped
      */
-    public static void setExecutionSkipped(MGraph graph,NonLiteral execution,String message){
+    public static void setExecutionSkipped(Graph graph,BlankNodeOrIRI execution,String message){
         Literal dateTime = lf.createTypedLiteral(new Date());
         setStatus(graph, execution,STATUS_SKIPPED);
         graph.add(new TripleImpl(execution, STARTED, dateTime));
@@ -178,7 +177,7 @@ public final class ExecutionMetadataHelper {
      * @param graph
      * @param execution
      */
-    public static void setExecutionInProgress(MGraph graph,NonLiteral execution){
+    public static void setExecutionInProgress(Graph graph,BlankNodeOrIRI execution){
         Literal dateTime = lf.createTypedLiteral(new Date());
         setStatus(graph, execution,STATUS_IN_PROGRESS);
         graph.add(new TripleImpl(execution, STARTED, dateTime));
@@ -190,7 +189,7 @@ public final class ExecutionMetadataHelper {
      * @param graph
      * @param execution
      */
-    private static void setStatus(MGraph graph, NonLiteral execution, UriRef status) {
+    private static void setStatus(Graph graph, BlankNodeOrIRI execution, IRI status) {
         Iterator<Triple> it = graph.filter(execution, STATUS, null);
         while(it.hasNext()){
             it.next();
@@ -212,8 +211,8 @@ public final class ExecutionMetadataHelper {
      * @param chainName the name of the executed chain
      * @return the node or <code>null</code> if not found.
      */
-    public static final NonLiteral getChainExecutionForChainName(TripleCollection em, TripleCollection ep, String chainName){
-        final NonLiteral executionPlanNode = ExecutionPlanHelper.getExecutionPlan(ep, chainName);
+    public static final BlankNodeOrIRI getChainExecutionForChainName(Graph em, Graph ep, String chainName){
+        final BlankNodeOrIRI executionPlanNode = ExecutionPlanHelper.getExecutionPlan(ep, chainName);
         if(executionPlanNode == null){
             return null;
         } else {
@@ -229,7 +228,7 @@ public final class ExecutionMetadataHelper {
      * @param executionPlanNode the {@link ExecutionPlan#EXECUTION_PLAN} node
      * @return the {@link ExecutionMetadata#CHAIN_EXECUTION} node
      */
-    public static NonLiteral getChainExecutionForExecutionPlan(TripleCollection graph, final NonLiteral executionPlanNode) {
+    public static BlankNodeOrIRI getChainExecutionForExecutionPlan(Graph graph, final BlankNodeOrIRI executionPlanNode) {
         if(graph == null){
             throw new IllegalArgumentException("The parsed graph with the execution metadata MUST NOT be NULL!");
         }
@@ -251,13 +250,13 @@ public final class ExecutionMetadataHelper {
      * content part
      * @since 0.12.1
      */
-    public static MGraph getExecutionMetadata(ContentItem contentItem) {
+    public static Graph getExecutionMetadata(ContentItem contentItem) {
         if(contentItem == null) {
             throw new IllegalArgumentException("The parsed ContentItme MUST NOT be NULL!");
         }
         contentItem.getLock().readLock().lock();
         try{
-            return contentItem.getPart(CHAIN_EXECUTION, MGraph.class);
+            return contentItem.getPart(CHAIN_EXECUTION, Graph.class);
         }finally{
             contentItem.getLock().readLock().unlock();
         }
@@ -271,32 +270,32 @@ public final class ExecutionMetadataHelper {
      * content item otherwise it returns the existing part registered under that
      * URI.<p>
      * Typically users will also want to use 
-     * {@link #initExecutionMetadata(MGraph, TripleCollection, UriRef, String, boolean)}
+     * {@link #initExecutionMetadata(Graph, Graph, IRI, String, boolean)}
      * to initialise the state based on the grpah returned by this method.
      * NOTES:<ul>
      * <li> If a content part is registered under the URI 
      * {@link ExecutionMetadata#CHAIN_EXECUTION} that is not of type
-     * {@link MGraph} this method will replace it with an empty {@link MGraph}.
+     * {@link Graph} this method will replace it with an empty {@link Graph}.
      * <li> This method acquires a write lock on the content item while checking
      * for the content part.
      * </ul>
      * @param contentItem the contentItem
-     * @return the {@link MGraph} with the execution metadata as registered as
+     * @return the {@link Graph} with the execution metadata as registered as
      * content part with the URI {@link ExecutionMetadata#CHAIN_EXECUTION} to 
      * the {@link ContentItem}
      * @throws IllegalArgumentException if the parsed content itme is <code>null</code>.
      */
-    public static MGraph initExecutionMetadataContentPart(ContentItem contentItem) {
+    public static Graph initExecutionMetadataContentPart(ContentItem contentItem) {
         if(contentItem == null){
           throw new IllegalArgumentException("The parsed ContentItme MUST NOT be NULL!");  
         }
-        MGraph executionMetadata;
+        Graph executionMetadata;
         contentItem.getLock().writeLock().lock();
         try {
             try {
-                executionMetadata = contentItem.getPart(CHAIN_EXECUTION, MGraph.class);
+                executionMetadata = contentItem.getPart(CHAIN_EXECUTION, Graph.class);
             } catch (NoSuchPartException e) {
-                executionMetadata = new IndexedMGraph();
+                executionMetadata = new IndexedGraph();
                 contentItem.addPart(CHAIN_EXECUTION, executionMetadata);
             }
         } finally {
@@ -334,7 +333,7 @@ public final class ExecutionMetadataHelper {
      * @throws IllegalArgumentException if any of the requirements stated in the
      * documentation for the parameters is not fulfilled.
      */
-    public static final Map<NonLiteral,NonLiteral> initExecutionMetadata(MGraph em, TripleCollection ep, UriRef ciUri, String chainName, Boolean isDefaultChain){
+    public static final Map<BlankNodeOrIRI,BlankNodeOrIRI> initExecutionMetadata(Graph em, Graph ep, IRI ciUri, String chainName, Boolean isDefaultChain){
         if(em == null){
             throw new IllegalArgumentException("The parsed ExecutionMetadata graph MUST NOT be NULL!");
         }
@@ -342,8 +341,8 @@ public final class ExecutionMetadataHelper {
             throw new IllegalArgumentException("The parsed URI of the contentItem MUST NOT be NULL!");
         }
         //1. check for the ChainExecution node for the parsed content item
-        final NonLiteral executionPlanNode;
-        NonLiteral chainExecutionNode = getChainExecutionForExecutionPlan(em, ciUri);
+        final BlankNodeOrIRI executionPlanNode;
+        BlankNodeOrIRI chainExecutionNode = getChainExecutionForExecutionPlan(em, ciUri);
         if(chainExecutionNode != null){ //init from existing executin metadata
             // -> chainName and isDefaultChain may be null
             //init from existing
@@ -386,12 +385,12 @@ public final class ExecutionMetadataHelper {
             chainExecutionNode = createChainExecutionNode(em, executionPlanNode, ciUri, isDefaultChain);
         }
         //2. check/init the EngineExecution nodes for for the ExecutionNodes of the ExecutionPlan
-        Map<NonLiteral,NonLiteral> executionsMap = new HashMap<NonLiteral,NonLiteral>();
-        Set<NonLiteral> executionNodes = getExecutionNodes(ep, executionPlanNode);
-        Set<NonLiteral> executions = getExecutions(em, chainExecutionNode);
-        for(NonLiteral en : executionNodes) {
+        Map<BlankNodeOrIRI,BlankNodeOrIRI> executionsMap = new HashMap<BlankNodeOrIRI,BlankNodeOrIRI>();
+        Set<BlankNodeOrIRI> executionNodes = getExecutionNodes(ep, executionPlanNode);
+        Set<BlankNodeOrIRI> executions = getExecutions(em, chainExecutionNode);
+        for(BlankNodeOrIRI en : executionNodes) {
             Iterator<Triple> it = em.filter(null, EXECUTION_NODE, en);
-            NonLiteral execution;
+            BlankNodeOrIRI execution;
             if(it.hasNext()){
                 execution = it.next().getSubject();
                 if(!executions.contains(execution)){
@@ -408,9 +407,9 @@ public final class ExecutionMetadataHelper {
         }
         //3. check that there are no executions that are not part of the
         //   parsed ExecutionPlan
-        for(NonLiteral e : executions){
+        for(BlankNodeOrIRI e : executions){
             if(!executionsMap.containsKey(e)){
-                NonLiteral en = getExecutionNode(em, e);
+                BlankNodeOrIRI en = getExecutionNode(em, e);
                 throw new IllegalStateException("ChainExecution '"
                         + chainExecutionNode +"' (chain: '"+chainName+") contains"
                         + "Execution '"+e+"' for ExecutionNode '" + en
@@ -427,16 +426,16 @@ public final class ExecutionMetadataHelper {
      * @param execution the em:Execution node
      * @return the ep:ExecutionNode node
      */
-    public static NonLiteral getExecutionNode(TripleCollection graph, NonLiteral execution){
+    public static BlankNodeOrIRI getExecutionNode(Graph graph, BlankNodeOrIRI execution){
         Iterator<Triple> it = graph.filter(execution, EXECUTION_NODE, null);
         if(it.hasNext()){
             Triple t = it.next();
-            Resource o = t.getObject();
-            if(o instanceof NonLiteral){
-                return (NonLiteral)o;
+            RDFTerm o = t.getObject();
+            if(o instanceof BlankNodeOrIRI){
+                return (BlankNodeOrIRI)o;
             } else {
                 throw new IllegalStateException("Value of property "+ EXECUTION_NODE
-                    + "MUST BE of type NonLiteral (triple: '"+t+"')!");
+                    + "MUST BE of type BlankNodeOrIRI (triple: '"+t+"')!");
             }
         } else {
             //maybe an em:ChainExecution
@@ -452,14 +451,14 @@ public final class ExecutionMetadataHelper {
      * @param chainExecutionNode the chain execution node
      * @return the Set with all execution part of the chain execution
      */
-    public static Set<NonLiteral> getExecutions(TripleCollection em, NonLiteral chainExecutionNode) {
+    public static Set<BlankNodeOrIRI> getExecutions(Graph em, BlankNodeOrIRI chainExecutionNode) {
         if(em == null){
             throw new IllegalArgumentException("The parsed graph with the Execution metadata MUST NOT be NULL!");
         }
         if(chainExecutionNode == null){
             throw new IllegalArgumentException("The parsed chain execution plan node MUST NOT be NULL!");
         }
-        Set<NonLiteral> executionNodes = new HashSet<NonLiteral>();
+        Set<BlankNodeOrIRI> executionNodes = new HashSet<BlankNodeOrIRI>();
         Iterator<Triple> it = em.filter(null, ExecutionMetadata.EXECUTION_PART, chainExecutionNode);
         while(it.hasNext()){
             executionNodes.add(it.next().getSubject());
@@ -473,16 +472,16 @@ public final class ExecutionMetadataHelper {
      * @param chainExecutionNode the chain execution node
      * @return the execution plan node
      */
-    public static NonLiteral getExecutionPlanNode(TripleCollection em, NonLiteral chainExecutionNode){
+    public static BlankNodeOrIRI getExecutionPlanNode(Graph em, BlankNodeOrIRI chainExecutionNode){
         Iterator<Triple> it = em.filter(chainExecutionNode, EXECUTION_PLAN, null);
         if(it.hasNext()){
             Triple t = it.next();
-            Resource r = t.getObject();
-            if(r instanceof NonLiteral){
-                return (NonLiteral)r;
+            RDFTerm r = t.getObject();
+            if(r instanceof BlankNodeOrIRI){
+                return (BlankNodeOrIRI)r;
             } else {
                 throw new IllegalStateException("Value of the property "+EXECUTION_PLAN
-                    + " MUST BE a NonLiteral (triple: '"+t+"')!");
+                    + " MUST BE a BlankNodeOrIRI (triple: '"+t+"')!");
             }
         } else {
             return null;
@@ -495,7 +494,7 @@ public final class ExecutionMetadataHelper {
      * @param ciUri the ID of the content item
      * @return the node that {@link ExecutionMetadata#ENHANCES} the {@link ContentItem}
      */
-    public static NonLiteral getChainExecution(TripleCollection em, UriRef ciUri){
+    public static BlankNodeOrIRI getChainExecution(Graph em, IRI ciUri){
         Iterator<Triple> it = em.filter(null, ENHANCES, ciUri);
         if(it.hasNext()){
             return it.next().getSubject();
@@ -511,7 +510,7 @@ public final class ExecutionMetadataHelper {
      * @param execution the execution node
      * @return <code>true</code> if the status is faild. Otherwise <code>false</code>.
      */
-    public static boolean isExecutionFailed(TripleCollection graph, NonLiteral execution){
+    public static boolean isExecutionFailed(Graph graph, BlankNodeOrIRI execution){
         return STATUS_FAILED.equals(getReference(graph,execution,STATUS));
     }
     /**
@@ -523,8 +522,8 @@ public final class ExecutionMetadataHelper {
      * @param execution the execution node
      * @return <code>true</code> if the execution has already finished
      */
-    public static boolean isExecutionFinished(TripleCollection graph, NonLiteral execution){
-        UriRef status = getReference(graph,execution,STATUS);
+    public static boolean isExecutionFinished(Graph graph, BlankNodeOrIRI execution){
+        IRI status = getReference(graph,execution,STATUS);
         return STATUS_FAILED.equals(status) || STATUS_COMPLETED.equals(status);
     }
     /**
@@ -533,7 +532,7 @@ public final class ExecutionMetadataHelper {
      * @param execution the execution instance
      * @return the time or <code>null</code> if not present
      */
-    public static Date getStarted(TripleCollection graph, NonLiteral execution){
+    public static Date getStarted(Graph graph, BlankNodeOrIRI execution){
         return get(graph, execution, ExecutionMetadata.STARTED, Date.class, lf);
     }
     /**
@@ -542,7 +541,7 @@ public final class ExecutionMetadataHelper {
      * @param execution the execution instance
      * @return the time or <code>null</code> if not present
      */
-    public static Date getCompleted(TripleCollection graph, NonLiteral execution){
+    public static Date getCompleted(Graph graph, BlankNodeOrIRI execution){
         return get(graph, execution, ExecutionMetadata.COMPLETED, Date.class, lf);
     }
 }

@@ -36,8 +36,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,7 +126,7 @@ public class XsltExtractor implements HtmlExtractionComponent {
     }
 
     public synchronized void extract(String id, Document doc, Map<String, Object> params,
-            MGraph result)
+            Graph result)
             throws ExtractorException {
 
         if (params == null) {
@@ -145,7 +145,7 @@ public class XsltExtractor implements HtmlExtractionComponent {
             }
             InputStream reader = new ByteArrayInputStream(writer.toByteArray());
             Parser rdfParser = Parser.getInstance();
-            Graph graph = rdfParser.parse(reader, this.syntax);
+            ImmutableGraph graph = rdfParser.parse(reader, this.syntax);
             result.addAll(graph);
         } catch (TransformerException e) {
             throw new ExtractorException(e.getMessage(), e);

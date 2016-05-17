@@ -16,7 +16,7 @@
 */
 package org.apache.stanbol.enhancer.nlp.nif;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.nlp.pos.LexicalCategory;
 import org.apache.stanbol.enhancer.nlp.pos.Pos;
 
@@ -523,17 +523,17 @@ public enum Nif20 {
 	;
     public final static String NAMESPACE = "http://persistence.uni-leipzig.org/nlp2rdf/ontologies/nif-core#";
 
-    UriRef uri;
+    IRI uri;
     
     private Nif20() {
-        uri = new UriRef(NAMESPACE+name());
+        uri = new IRI(NAMESPACE+name());
     }
     
     public String getLocalName(){
         return name();
     }
     
-    public UriRef getUri(){
+    public IRI getUri(){
         return uri;
     }
     

@@ -20,13 +20,13 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.List;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
 import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -154,9 +154,9 @@ public class RefactorerImpl implements Refactorer {
     }
 
     @Override
-    public MGraph getRefactoredDataSet(UriRef uriRef) {
+    public Graph getRefactoredDataSet(IRI uriRef) {
 
-        return weightedTcProvider.getMGraph(uriRef);
+        return weightedTcProvider.getGraph(uriRef);
     }
 
     /**
@@ -166,14 +166,14 @@ public class RefactorerImpl implements Refactorer {
      * @param datasetID
      * @return
      */
-    private Graph sparqlConstruct(ConstructQuery constructQuery, UriRef datasetID) {
+    private ImmutableGraph sparqlConstruct(ConstructQuery constructQuery, IRI datasetID) {
 
-        MGraph graph = weightedTcProvider.getMGraph(datasetID);
+        Graph graph = weightedTcProvider.getGraph(datasetID);
         return sparqlConstruct(constructQuery, graph);
 
     }
 
-    private Graph sparqlConstruct(ConstructQuery constructQuery, TripleCollection tripleCollection) {
+    private ImmutableGraph sparqlConstruct(ConstructQuery constructQuery, Graph tripleCollection) {
 
         return tcManager.executeSparqlQuery(constructQuery, tripleCollection);
 
@@ -181,7 +181,7 @@ public class RefactorerImpl implements Refactorer {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void graphRefactoring(UriRef refactoredOntologyID, UriRef datasetID, UriRef recipeID) throws RefactoringException,
+    public void graphRefactoring(IRI refactoredOntologyID, IRI datasetID, IRI recipeID) throws RefactoringException,
                                                                                                 NoSuchRecipeException {
 
         Recipe recipe;
@@ -193,7 +193,7 @@ public class RefactorerImpl implements Refactorer {
                 List<ConstructQuery> constructQueries = (List<ConstructQuery>) ruleAdapter.adaptTo(recipe,
                     ConstructQuery.class);
 
-                MGraph mGraph = tcManager.createMGraph(refactoredOntologyID);
+                Graph mGraph = tcManager.createGraph(refactoredOntologyID);
                 for (ConstructQuery constructQuery : constructQueries) {
                     mGraph.addAll(this.sparqlConstruct(constructQuery, datasetID));
                 }
@@ -219,9 +219,9 @@ public class RefactorerImpl implements Refactorer {
 
     @SuppressWarnings("unchecked")
     @Override
-    public TripleCollection graphRefactoring(UriRef graphID, UriRef recipeID) throws RefactoringException,
+    public Graph graphRefactoring(IRI graphID, IRI recipeID) throws RefactoringException,
                                                                              NoSuchRecipeException {
-        MGraph unionMGraph = null;
+        Graph unionGraph = null;
 
         // JenaToOwlConvert jenaToOwlConvert = new JenaToOwlConvert();
 
@@ -237,10 +237,10 @@ public class RefactorerImpl implements Refactorer {
             List<ConstructQuery> constructQueries = (List<ConstructQuery>) ruleAdapter.adaptTo(recipe,
                 ConstructQuery.class);
 
-            unionMGraph = new SimpleMGraph();
+            unionGraph = new SimpleGraph();
 
             for (ConstructQuery constructQuery : constructQueries) {
-                unionMGraph.addAll(this.sparqlConstruct(constructQuery, graphID));
+                unionGraph.addAll(this.sparqlConstruct(constructQuery, graphID));
             }
 
         } catch (NoSuchRecipeException e1) {
@@ -256,13 +256,13 @@ public class RefactorerImpl implements Refactorer {
             throw new RefactoringException("The cause of the refactoring excpetion is: " + e.getMessage(), e);
         }
 
-        return unionMGraph.getGraph();
+        return unionGraph.getImmutableGraph();
 
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public TripleCollection graphRefactoring(TripleCollection inputGraph, Recipe recipe) throws RefactoringException {
+    public Graph graphRefactoring(Graph inputGraph, Recipe recipe) throws RefactoringException {
 
         RuleAdapter ruleAdapter;
         try {
@@ -274,12 +274,12 @@ public class RefactorerImpl implements Refactorer {
                 System.out.println(constructQuery.toString());
             }
 
-            MGraph unionMGraph = new SimpleMGraph();
+            Graph unionGraph = new SimpleGraph();
             for (ConstructQuery constructQuery : constructQueries) {
-                unionMGraph.addAll(sparqlConstruct(constructQuery, inputGraph));
+                unionGraph.addAll(sparqlConstruct(constructQuery, inputGraph));
             }
 
-            return unionMGraph;
+            return unionGraph;
         } catch (UnavailableRuleObjectException e) {
             throw new RefactoringException("The cause of the refactoring excpetion is: " + e.getMessage(), e);
         } catch (UnsupportedTypeForExportException e) {

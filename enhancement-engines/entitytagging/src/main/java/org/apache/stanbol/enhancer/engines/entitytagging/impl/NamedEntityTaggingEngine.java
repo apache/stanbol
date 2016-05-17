@@ -30,10 +30,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -338,10 +338,10 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
         } else { // null indicates to use the Entityhub to lookup Entities
             site = null;
         }
-        MGraph graph = ci.getMetadata();
+        Graph graph = ci.getMetadata();
         LiteralFactory literalFactory = LiteralFactory.getInstance();
         // Retrieve the existing text annotations (requires read lock)
-        Map<NamedEntity,List<UriRef>> textAnnotations = new HashMap<NamedEntity,List<UriRef>>();
+        Map<NamedEntity,List<IRI>> textAnnotations = new HashMap<NamedEntity,List<IRI>>();
         // the language extracted for the parsed content or NULL if not
         // available
         String contentLangauge;
@@ -350,7 +350,7 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
             contentLangauge = EnhancementEngineHelper.getLanguage(ci);
             for (Iterator<Triple> it = graph.filter(null, RDF_TYPE, TechnicalClasses.ENHANCER_TEXTANNOTATION); it
                     .hasNext();) {
-                UriRef uri = (UriRef) it.next().getSubject();
+                IRI uri = (IRI) it.next().getSubject();
                 if (graph.filter(uri, Properties.DC_RELATION, null).hasNext()) {
                     // this is not the most specific occurrence of this name:
                     // skip
@@ -360,10 +360,10 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
                 if (namedEntity != null) {
                     // This is a first occurrence, collect any subsumed
                     // annotations
-                    List<UriRef> subsumed = new ArrayList<UriRef>();
+                    List<IRI> subsumed = new ArrayList<IRI>();
                     for (Iterator<Triple> it2 = graph.filter(null, Properties.DC_RELATION, uri); it2
                             .hasNext();) {
-                        subsumed.add((UriRef) it2.next().getSubject());
+                        subsumed.add((IRI) it2.next().getSubject());
                     }
                     textAnnotations.put(namedEntity, subsumed);
                 }
@@ -374,7 +374,7 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
         // search the suggestions
         Map<NamedEntity,List<Suggestion>> suggestions = new HashMap<NamedEntity,List<Suggestion>>(
                 textAnnotations.size());
-        for (Entry<NamedEntity,List<UriRef>> entry : textAnnotations.entrySet()) {
+        for (Entry<NamedEntity,List<IRI>> entry : textAnnotations.entrySet()) {
             try {
                 List<Suggestion> entitySuggestions = computeEntityRecommentations(site, entry.getKey(),
                     entry.getValue(), contentLangauge);
@@ -391,8 +391,8 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
             RdfValueFactory factory = RdfValueFactory.getInstance();
             Map<String,Representation> entityData = new HashMap<String,Representation>();
             for (Entry<NamedEntity,List<Suggestion>> entitySuggestions : suggestions.entrySet()) {
-                List<UriRef> subsumed = textAnnotations.get(entitySuggestions.getKey());
-                List<NonLiteral> annotationsToRelate = new ArrayList<NonLiteral>(subsumed);
+                List<IRI> subsumed = textAnnotations.get(entitySuggestions.getKey());
+                List<BlankNodeOrIRI> annotationsToRelate = new ArrayList<BlankNodeOrIRI>(subsumed);
                 annotationsToRelate.add(entitySuggestions.getKey().getEntity());
                 for (Suggestion suggestion : entitySuggestions.getValue()) {
                     log.debug("Add Suggestion {} for {}", suggestion.getEntity().getId(),
@@ -443,7 +443,7 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
      */
     protected final List<Suggestion> computeEntityRecommentations(Site site,
                                                                   NamedEntity namedEntity,
-                                                                  List<UriRef> subsumedAnnotations,
+                                                                  List<IRI> subsumedAnnotations,
                                                                   String language) throws EntityhubException {
         // First get the required properties for the parsed textAnnotation
         // ... and check the values

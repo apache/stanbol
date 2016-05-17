@@ -26,12 +26,12 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.Language;
+import org.apache.clerezza.commons.rdf.Language;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -126,7 +126,7 @@ public class Nif20MetadataEngine extends AbstractEnhancementEngine<RuntimeExcept
     
     private final Logger log = LoggerFactory.getLogger(Nif20MetadataEngine.class);
     //TODO: replace this with a reald ontology
-    private final static UriRef SENTIMENT_PROPERTY = new UriRef(NamespaceEnum.fise+"sentiment-value");
+    private final static IRI SENTIMENT_PROPERTY = new IRI(NamespaceEnum.fise+"sentiment-value");
     private final LiteralFactory lf = LiteralFactory.getInstance();
     
     /**
@@ -184,24 +184,24 @@ public class Nif20MetadataEngine extends AbstractEnhancementEngine<RuntimeExcept
         if(words){
             activeTypes.add(SpanTypeEnum.Token);
         }
-        MGraph metadata = ci.getMetadata();
-        UriRef base = ci.getUri();
+        Graph metadata = ci.getMetadata();
+        IRI base = ci.getUri();
         ci.getLock().writeLock().lock();
         try {
             //write the context
-            UriRef text = writeSpan(metadata, base, at, language, at);
+            IRI text = writeSpan(metadata, base, at, language, at);
             metadata.add(new TripleImpl(text, Nif20.sourceUrl.getUri(), ci.getUri()));
             
             Iterator<Span> spans = at.getEnclosed(activeTypes);
-            UriRef sentence = null;
-            UriRef phrase = null;
-            UriRef word = null;
+            IRI sentence = null;
+            IRI phrase = null;
+            IRI word = null;
             boolean firstWordInSentence = true;
             while(spans.hasNext()){
                 Span span = spans.next();
                 //TODO: filter Spans based on additional requirements
                 //(1) write generic information about the span
-                UriRef current = writeSpan(metadata, base, at, language, span);
+                IRI current = writeSpan(metadata, base, at, language, span);
                 //write the context
                 metadata.add(new TripleImpl(current, Nif20.referenceContext.getUri(), text));
                 //(2) add the relations between the different spans
@@ -282,11 +282,11 @@ public class Nif20MetadataEngine extends AbstractEnhancementEngine<RuntimeExcept
      * @param text the {@link AnalysedText}
      * @param language the {@link Language} or <code>null</code> if not known
      * @param span the {@link Span} to write.
-     * @return the {@link UriRef} representing the parsed {@link Span} in the
+     * @return the {@link IRI} representing the parsed {@link Span} in the
      * graph
      */
-    public UriRef writeSpan(MGraph graph, UriRef base, AnalysedText text, Language language, Span span){
-        UriRef segment = Nif20Helper.getNifRFC5147URI(base, span.getStart(), 
+    public IRI writeSpan(Graph graph, IRI base, AnalysedText text, Language language, Span span){
+        IRI segment = Nif20Helper.getNifRFC5147URI(base, span.getStart(), 
                 span.getType() == SpanTypeEnum.Text ? -1 : span.getEnd());
         if(!contextOnlyUriScheme || span.getType() == SpanTypeEnum.Text){
             graph.add(new TripleImpl(segment, RDF_TYPE, Nif20.RFC5147String.getUri()));

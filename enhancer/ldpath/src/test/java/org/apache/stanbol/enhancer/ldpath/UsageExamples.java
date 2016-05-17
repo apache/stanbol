@@ -30,10 +30,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.serializedform.ParsingProvider;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.apache.commons.io.IOUtils;
@@ -75,7 +75,7 @@ public class UsageExamples {
     
     private static ContentItem ci;
     private ContentItemBackend backend;
-    private LDPath<Resource> ldpath;
+    private LDPath<RDFTerm> ldpath;
     private static double indexingTime;
     
     @BeforeClass
@@ -83,14 +83,14 @@ public class UsageExamples {
         //add the metadata
         ParsingProvider parser = new JenaParserProvider();
         //create the content Item with the HTML content
-        MGraph rdfData = parseRdfData(parser,"example.rdf.zip");
-        UriRef contentItemId = null;
+        Graph rdfData = parseRdfData(parser,"example.rdf.zip");
+        IRI contentItemId = null;
         Iterator<Triple> it = rdfData.filter(null, Properties.ENHANCER_EXTRACTED_FROM, null);
         while(it.hasNext()){
-            Resource r = it.next().getObject();
+            RDFTerm r = it.next().getObject();
             if(contentItemId == null){
-                if(r instanceof UriRef){
-                    contentItemId = (UriRef)r;
+                if(r instanceof IRI){
+                    contentItemId = (IRI)r;
                 }
             } else {
                 assertEquals("multiple ContentItems IDs contained in the RDF test data", 
@@ -114,7 +114,7 @@ public class UsageExamples {
             backend = new ContentItemBackend(ci);
         }
         if(ldpath == null){
-            ldpath = new LDPath<Resource>(backend, EnhancerLDPath.getConfig());
+            ldpath = new LDPath<RDFTerm>(backend, EnhancerLDPath.getConfig());
         }
     }
 
@@ -138,7 +138,7 @@ public class UsageExamples {
         program.append("linkedArtists = fn:textAnnotation()" +
                 "[dc:type is dbpedia-ont:Person]/fn:suggestion()" +
                 "[fise:entity-type is dbpedia-ont:Artist]/fise:entity-reference :: xsd:anyURI;");
-        Program<Resource> personProgram = ldpath.parseProgram(new StringReader(program.toString()));
+        Program<RDFTerm> personProgram = ldpath.parseProgram(new StringReader(program.toString()));
         log.info("- - - - - - - - - - - - - ");
         log.info("Person Indexing Examples");
         Map<String,Collection<?>> result = execute(personProgram);
@@ -152,7 +152,7 @@ public class UsageExamples {
      * @param personProgram
      * @return the results
      */
-    private Map<String,Collection<?>> execute(Program<Resource> personProgram) {
+    private Map<String,Collection<?>> execute(Program<RDFTerm> personProgram) {
         long start = System.currentTimeMillis();
         Map<String,Collection<?>> result = personProgram.execute(backend, ci.getUri());
         for(int i=1;i<ITERATIONS;i++){
@@ -183,7 +183,7 @@ public class UsageExamples {
         program.append("linkedCountries = fn:textAnnotation()" +
                 "[dc:type is dbpedia-ont:Place]/fn:suggestion()" +
                 "[fise:entity-type is dbpedia-ont:Country]/fise:entity-reference :: xsd:anyURI;");
-        Program<Resource> personProgram = ldpath.parseProgram(new StringReader(program.toString()));
+        Program<RDFTerm> personProgram = ldpath.parseProgram(new StringReader(program.toString()));
         log.info("- - - - - - - - - - - - -");
         log.info("Places Indexing Examples");
         Map<String,Collection<?>> result = execute(personProgram);
@@ -212,7 +212,7 @@ public class UsageExamples {
         program.append("linkedEducationOrg = fn:textAnnotation()" +
                 "[dc:type is dbpedia-ont:Organisation]/fn:suggestion()" +
                 "[fise:entity-type is dbpedia-ont:EducationalInstitution]/fise:entity-reference :: xsd:anyURI;");
-        Program<Resource> personProgram = ldpath.parseProgram(new StringReader(program.toString()));
+        Program<RDFTerm> personProgram = ldpath.parseProgram(new StringReader(program.toString()));
         log.info("- - - - - - - - - - - - -");
         log.info("Places Indexing Examples");
         Map<String,Collection<?>> result = execute(personProgram);
@@ -234,7 +234,7 @@ public class UsageExamples {
         //but also the selected-text as fallback if no entity is suggested.
         program.append("linkedConcepts = fn:entityAnnotation()" +
                 "[fise:entity-type is skos:Concept]/fise:entity-reference :: xsd:anyURI;");
-        Program<Resource> personProgram = ldpath.parseProgram(new StringReader(program.toString()));
+        Program<RDFTerm> personProgram = ldpath.parseProgram(new StringReader(program.toString()));
         log.info("- - - - - - - - - - - - -");
         log.info("Concept Indexing Examples");
         Map<String,Collection<?>> result = execute(personProgram);

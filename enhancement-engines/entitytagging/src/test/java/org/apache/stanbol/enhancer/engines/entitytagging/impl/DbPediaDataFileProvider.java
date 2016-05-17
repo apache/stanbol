@@ -45,7 +45,7 @@ public class DbPediaDataFileProvider implements DataFileProvider {
         if(resourceUri != null){
             return resourceUri.openStream();
         } else {
-            throw new IOException("Resource '"+resource+"' not found");
+            throw new IOException("RDFTerm '"+resource+"' not found");
         }
     }
 

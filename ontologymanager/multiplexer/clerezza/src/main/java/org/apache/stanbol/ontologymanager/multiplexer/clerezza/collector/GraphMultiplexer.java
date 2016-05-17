@@ -39,15 +39,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.stanbol.ontologymanager.core.scope.ScopeManagerImpl;
@@ -62,7 +61,6 @@ import org.apache.stanbol.ontologymanager.servicesapi.session.Session;
 import org.apache.stanbol.ontologymanager.servicesapi.session.SessionEvent;
 import org.apache.stanbol.ontologymanager.servicesapi.session.SessionManager;
 import org.apache.stanbol.ontologymanager.servicesapi.util.OntologyUtils;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +71,7 @@ import org.slf4j.LoggerFactory;
  * @author alexdma
  * 
  */
-public class MGraphMultiplexer implements Multiplexer {
+public class GraphMultiplexer implements Multiplexer {
 
     private class InvalidMetaGraphStateException extends RuntimeException {
 
@@ -95,9 +93,9 @@ public class MGraphMultiplexer implements Multiplexer {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    private MGraph meta;
+    private Graph meta;
 
-    public MGraphMultiplexer(MGraph metaGraph) {
+    public GraphMultiplexer(Graph metaGraph) {
         this.meta = metaGraph;
     }
 
@@ -109,66 +107,66 @@ public class MGraphMultiplexer implements Multiplexer {
      *            the ontology
      * @return
      */
-    protected OWLOntologyID buildPublicKey(final UriRef resource) {
+    protected OWLOntologyID buildPublicKey(final IRI resource) {
         // TODO desanitize?
-        IRI oiri = null, viri = null;
+        org.semanticweb.owlapi.model.IRI oiri = null, viri = null;
         Iterator<Triple> it = meta.filter(resource, HAS_ONTOLOGY_IRI_URIREF, null);
         if (it.hasNext()) {
-            Resource obj = it.next().getObject();
-            if (obj instanceof UriRef) oiri = IRI.create(((UriRef) obj).getUnicodeString());
-            else if (obj instanceof Literal) oiri = IRI.create(((Literal) obj).getLexicalForm());
+            RDFTerm obj = it.next().getObject();
+            if (obj instanceof IRI) oiri = org.semanticweb.owlapi.model.IRI.create(((IRI) obj).getUnicodeString());
+            else if (obj instanceof Literal) oiri = org.semanticweb.owlapi.model.IRI.create(((Literal) obj).getLexicalForm());
         } else {
             // Anonymous ontology? Decode the resource itself (which is not null)
             return OntologyUtils.decode(resource.getUnicodeString());
         }
         it = meta.filter(resource, HAS_VERSION_IRI_URIREF, null);
         if (it.hasNext()) {
-            Resource obj = it.next().getObject();
-            if (obj instanceof UriRef) viri = IRI.create(((UriRef) obj).getUnicodeString());
-            else if (obj instanceof Literal) viri = IRI.create(((Literal) obj).getLexicalForm());
+            RDFTerm obj = it.next().getObject();
+            if (obj instanceof IRI) viri = org.semanticweb.owlapi.model.IRI.create(((IRI) obj).getUnicodeString());
+            else if (obj instanceof Literal) viri = org.semanticweb.owlapi.model.IRI.create(((Literal) obj).getLexicalForm());
         }
         if (viri == null) return new OWLOntologyID(oiri);
         else return new OWLOntologyID(oiri, viri);
     }
 
     /**
-     * Creates an {@link UriRef} out of an {@link OWLOntologyID}, so it can be used as an identifier. This
-     * does NOT necessarily correspond to the UriRef that identifies the stored graph. In order to obtain
+     * Creates an {@link IRI} out of an {@link OWLOntologyID}, so it can be used as an identifier. This
+     * does NOT necessarily correspond to the IRI that identifies the stored graph. In order to obtain
      * that, check the objects of any MAPS_TO_GRAPH assertions.
      * 
      * @param publicKey
      * @return
      */
-    protected UriRef buildResource(final OWLOntologyID publicKey) {
+    protected IRI buildResource(final OWLOntologyID publicKey) {
         if (publicKey == null) throw new IllegalArgumentException(
-                "Cannot build a UriRef resource on a null public key!");
-        // The UriRef is of the form ontologyIRI[:::versionIRI] (TODO use something less conventional?)
+                "Cannot build a IRI resource on a null public key!");
+        // The IRI is of the form ontologyIRI[:::versionIRI] (TODO use something less conventional?)
         // XXX should versionIRI also include the version IRI set by owners? Currently not
 
         // Remember not to sanitize logical identifiers.
-        IRI ontologyIri = publicKey.getOntologyIRI(), versionIri = publicKey.getVersionIRI();
+        org.semanticweb.owlapi.model.IRI ontologyIri = publicKey.getOntologyIRI(), versionIri = publicKey.getVersionIRI();
         if (ontologyIri == null) throw new IllegalArgumentException(
-                "Cannot build a UriRef resource on an anonymous public key!");
+                "Cannot build a IRI resource on an anonymous public key!");
         log.debug("Searching for a meta graph entry for public key:");
         log.debug(" -- {}", publicKey);
-        UriRef match = null;
+        IRI match = null;
         LiteralFactory lf = LiteralFactory.getInstance();
-        TypedLiteral oiri = lf.createTypedLiteral(new UriRef(ontologyIri.toString()));
-        TypedLiteral viri = versionIri == null ? null : lf.createTypedLiteral(new UriRef(versionIri
+        Literal oiri = lf.createTypedLiteral(new IRI(ontologyIri.toString()));
+        Literal viri = versionIri == null ? null : lf.createTypedLiteral(new IRI(versionIri
                 .toString()));
         for (Iterator<Triple> it = meta.filter(null, HAS_ONTOLOGY_IRI_URIREF, oiri); it.hasNext();) {
-            Resource subj = it.next().getSubject();
+            RDFTerm subj = it.next().getSubject();
             log.debug(" -- Ontology IRI match found. Scanning");
-            log.debug(" -- Resource : {}", subj);
-            if (!(subj instanceof UriRef)) {
+            log.debug(" -- RDFTerm : {}", subj);
+            if (!(subj instanceof IRI)) {
                 log.debug(" ---- (uncomparable: skipping...)");
                 continue;
             }
             if (viri != null) {
                 // Must find matching versionIRI
-                if (meta.contains(new TripleImpl((UriRef) subj, HAS_VERSION_IRI_URIREF, viri))) {
+                if (meta.contains(new TripleImpl((IRI) subj, HAS_VERSION_IRI_URIREF, viri))) {
                     log.debug(" ---- Version IRI match!");
-                    match = (UriRef) subj;
+                    match = (IRI) subj;
                     break; // Found
                 } else {
                     log.debug(" ---- Expected version IRI match not found.");
@@ -177,23 +175,23 @@ public class MGraphMultiplexer implements Multiplexer {
 
             } else {
                 // Must find unversioned resource
-                if (meta.filter((UriRef) subj, HAS_VERSION_IRI_URIREF, null).hasNext()) {
+                if (meta.filter((IRI) subj, HAS_VERSION_IRI_URIREF, null).hasNext()) {
                     log.debug(" ---- Unexpected version IRI found. Skipping.");
                     continue;
                 } else {
                     log.debug(" ---- Unversioned match!");
-                    match = (UriRef) subj;
+                    match = (IRI) subj;
                     break; // Found
                 }
             }
         }
-        log.debug("Matching UriRef in graph : {}", match);
-        if (match == null) return new UriRef(OntologyUtils.encode(publicKey));
+        log.debug("Matching IRI in graph : {}", match);
+        if (match == null) return new IRI(OntologyUtils.encode(publicKey));
         else return match;
 
     }
 
-    private void checkHandle(UriRef candidate, Set<OntologyCollector> handles) {
+    private void checkHandle(IRI candidate, Set<OntologyCollector> handles) {
 
         /*
          * We have to do it like this because we cannot make this class a Component and reference ONManager
@@ -208,7 +206,7 @@ public class MGraphMultiplexer implements Multiplexer {
         // TODO check when not explicitly typed.
         SpaceType spaceType;
         if (meta.contains(new TripleImpl(candidate, RDF.type, SPACE_URIREF))) {
-            Resource rScope;
+            RDFTerm rScope;
             Iterator<Triple> parentSeeker = meta.filter(candidate, IS_SPACE_CORE_OF_URIREF, null);
             if (parentSeeker.hasNext()) {
                 rScope = parentSeeker.next().getObject();
@@ -233,9 +231,9 @@ public class MGraphMultiplexer implements Multiplexer {
                     }
                 }
             }
-            if (!(rScope instanceof UriRef)) throw new InvalidMetaGraphStateException(
+            if (!(rScope instanceof IRI)) throw new InvalidMetaGraphStateException(
                     rScope + " is not a legal scope identifier.");
-            String scopeId = ((UriRef) rScope).getUnicodeString().substring(prefix_scope.length());
+            String scopeId = ((IRI) rScope).getUnicodeString().substring(prefix_scope.length());
             Scope scope = scopeManager.getScope(scopeId);
             switch (spaceType) {
                 case CORE:
@@ -261,7 +259,7 @@ public class MGraphMultiplexer implements Multiplexer {
             Set<OWLOntologyID> aliases = listAliases(dependent);
             aliases.add(dependent);
             for (OWLOntologyID depalias : aliases) {
-                UriRef dep = buildResource(depalias);
+                IRI dep = buildResource(depalias);
                 Iterator<Triple> it = meta.filter(dep, DEPENDS_ON_URIREF, null);
                 while (it.hasNext()) {
                     Triple t = it.next();
@@ -288,19 +286,19 @@ public class MGraphMultiplexer implements Multiplexer {
             Set<OWLOntologyID> aliases = listAliases(dependent);
             aliases.add(dependent);
             for (OWLOntologyID depalias : aliases) {
-                UriRef dep = buildResource(depalias);
+                IRI dep = buildResource(depalias);
                 Iterator<Triple> it = meta.filter(dep, DEPENDS_ON_URIREF, null);
                 while (it.hasNext()) {
-                    Resource obj = it.next().getObject();
+                    RDFTerm obj = it.next().getObject();
                     log.debug(" ... found {} (inverse).", obj);
-                    if (obj instanceof UriRef) dependencies.add(buildPublicKey((UriRef) obj));
+                    if (obj instanceof IRI) dependencies.add(buildPublicKey((IRI) obj));
                     else log.warn(" ... Unexpected literal value!");
                 }
                 it = meta.filter(null, HAS_DEPENDENT_URIREF, dep);
                 while (it.hasNext()) {
-                    Resource sub = it.next().getSubject();
+                    RDFTerm sub = it.next().getSubject();
                     log.debug(" ... found {} (inverse).", sub);
-                    if (sub instanceof UriRef) dependencies.add(buildPublicKey((UriRef) sub));
+                    if (sub instanceof IRI) dependencies.add(buildPublicKey((IRI) sub));
                     else log.warn(" ... Unexpected literal value!");
                 }
             }
@@ -311,21 +309,21 @@ public class MGraphMultiplexer implements Multiplexer {
     @Override
     public Set<OWLOntologyID> getDependents(OWLOntologyID dependency) {
         Set<OWLOntologyID> dependents = new HashSet<OWLOntologyID>();
-        UriRef dep = buildResource(dependency);
+        IRI dep = buildResource(dependency);
         log.debug("Getting depents for {}", dependency);
         synchronized (meta) {
             Iterator<Triple> it = meta.filter(null, DEPENDS_ON_URIREF, dep);
             while (it.hasNext()) {
-                Resource sub = it.next().getSubject();
+                RDFTerm sub = it.next().getSubject();
                 log.debug(" ... found {} (inverse).", sub);
-                if (sub instanceof UriRef) dependents.add(buildPublicKey((UriRef) sub));
+                if (sub instanceof IRI) dependents.add(buildPublicKey((IRI) sub));
                 else log.warn(" ... Unexpected literal value!");
             }
             it = meta.filter(dep, HAS_DEPENDENT_URIREF, null);
             while (it.hasNext()) {
-                Resource obj = it.next().getObject();
+                RDFTerm obj = it.next().getObject();
                 log.debug(" ... found {} (inverse).", obj);
-                if (obj instanceof UriRef) dependents.add(buildPublicKey((UriRef) obj));
+                if (obj instanceof IRI) dependents.add(buildPublicKey((IRI) obj));
                 else log.warn(" ... Unexpected literal value!");
             }
         }
@@ -338,18 +336,18 @@ public class MGraphMultiplexer implements Multiplexer {
         Set<OWLOntologyID> aliases = listAliases(publicKey);
         aliases.add(publicKey);
         for (OWLOntologyID alias : aliases) {
-            UriRef ontologyId = buildResource(alias);
+            IRI ontologyId = buildResource(alias);
 
             for (Iterator<Triple> it = meta.filter(null, MANAGES_URIREF, ontologyId); it.hasNext();) {
-                NonLiteral sub = it.next().getSubject();
-                if (sub instanceof UriRef) checkHandle((UriRef) sub, handles);
+                BlankNodeOrIRI sub = it.next().getSubject();
+                if (sub instanceof IRI) checkHandle((IRI) sub, handles);
                 else throw new InvalidMetaGraphStateException(
                         sub + " is not a valid ontology collector identifer.");
             }
 
             for (Iterator<Triple> it = meta.filter(ontologyId, IS_MANAGED_BY_URIREF, null); it.hasNext();) {
-                Resource obj = it.next().getObject();
-                if (obj instanceof UriRef) checkHandle((UriRef) obj, handles);
+                RDFTerm obj = it.next().getObject();
+                if (obj instanceof IRI) checkHandle((IRI) obj, handles);
                 else throw new InvalidMetaGraphStateException(
                         obj + " is not a valid ontology collector identifer.");
             }
@@ -358,26 +356,26 @@ public class MGraphMultiplexer implements Multiplexer {
         // throw new UnsupportedOperationException("Not implemented yet.");
     }
 
-    private UriRef getIRIforScope(String scopeId) {
+    private IRI getIRIforScope(String scopeId) {
         // Use the Stanbol-internal namespace, so that the whole configuration can be ported.
-        return new UriRef(_NS_STANBOL_INTERNAL + Scope.shortName + "/" + scopeId);
+        return new IRI(_NS_STANBOL_INTERNAL + Scope.shortName + "/" + scopeId);
     }
 
-    private UriRef getIRIforSession(Session session) {
+    private IRI getIRIforSession(Session session) {
         // Use the Stanbol-internal namespace, so that the whole configuration can be ported.
-        return new UriRef(_NS_STANBOL_INTERNAL + Session.shortName + "/" + session.getID());
+        return new IRI(_NS_STANBOL_INTERNAL + Session.shortName + "/" + session.getID());
     }
 
-    private UriRef getIRIforSpace(OntologySpace space) {
+    private IRI getIRIforSpace(OntologySpace space) {
         // Use the Stanbol-internal namespace, so that the whole configuration can be ported.
-        return new UriRef(_NS_STANBOL_INTERNAL + OntologySpace.shortName + "/" + space.getID());
+        return new IRI(_NS_STANBOL_INTERNAL + OntologySpace.shortName + "/" + space.getID());
     }
 
     @Override
     public OWLOntologyID getPublicKey(String stringForm) {
         if (stringForm == null || stringForm.trim().isEmpty()) throw new IllegalArgumentException(
                 "String form must not be null or empty.");
-        return buildPublicKey(new UriRef(stringForm));
+        return buildPublicKey(new IRI(stringForm));
     }
 
     @Override
@@ -385,18 +383,18 @@ public class MGraphMultiplexer implements Multiplexer {
         Set<OWLOntologyID> result = new HashSet<OWLOntologyID>();
         Iterator<Triple> it = meta.filter(null, RDF.type, ENTRY_URIREF);
         while (it.hasNext()) {
-            Resource obj = it.next().getSubject();
-            if (obj instanceof UriRef) result.add(buildPublicKey((UriRef) obj));
+            RDFTerm obj = it.next().getSubject();
+            if (obj instanceof IRI) result.add(buildPublicKey((IRI) obj));
         }
         return result;
     }
 
     @Override
     public int getSize(OWLOntologyID publicKey) {
-        UriRef subj = buildResource(publicKey);
+        IRI subj = buildResource(publicKey);
         Iterator<Triple> it = meta.filter(subj, SIZE_IN_TRIPLES_URIREF, null);
         if (it.hasNext()) {
-            Resource obj = it.next().getObject();
+            RDFTerm obj = it.next().getObject();
             if (obj instanceof Literal) {
                 String s = ((Literal) obj).getLexicalForm();
                 try {
@@ -417,16 +415,16 @@ public class MGraphMultiplexer implements Multiplexer {
         if (publicKey == null || publicKey.isAnonymous()) throw new IllegalArgumentException(
                 "Cannot locate aliases for null or anonymous public keys.");
         Set<OWLOntologyID> aliases = new HashSet<OWLOntologyID>();
-        UriRef ont = buildResource(publicKey);
+        IRI ont = buildResource(publicKey);
         // Forwards
         for (Iterator<Triple> it = meta.filter(ont, OWL.sameAs, null); it.hasNext();) {
-            Resource r = it.next().getObject();
-            if (r instanceof UriRef) aliases.add(buildPublicKey((UriRef) r));
+            RDFTerm r = it.next().getObject();
+            if (r instanceof IRI) aliases.add(buildPublicKey((IRI) r));
         }
         // Backwards
         for (Iterator<Triple> it = meta.filter(null, OWL.sameAs, ont); it.hasNext();) {
-            Resource r = it.next().getSubject();
-            if (r instanceof UriRef) aliases.add(buildPublicKey((UriRef) r));
+            RDFTerm r = it.next().getSubject();
+            if (r instanceof IRI) aliases.add(buildPublicKey((IRI) r));
         }
         return aliases;
     }
@@ -443,9 +441,9 @@ public class MGraphMultiplexer implements Multiplexer {
         if (collector instanceof Scope) colltype = Scope.shortName + "/"; // Cannot be
         else if (collector instanceof OntologySpace) colltype = OntologySpace.shortName + "/";
         else if (collector instanceof Session) colltype = Session.shortName + "/";
-        UriRef c = new UriRef(_NS_STANBOL_INTERNAL + colltype + collector.getID());
-        UriRef u =
-        // new UriRef(prefix + "::" + keymap.buildResource(addedOntology).getUnicodeString());
+        IRI c = new IRI(_NS_STANBOL_INTERNAL + colltype + collector.getID());
+        IRI u =
+        // new IRI(prefix + "::" + keymap.buildResource(addedOntology).getUnicodeString());
         // keymap.getMapping(addedOntology);
         buildResource(addedOntology);
 
@@ -464,7 +462,7 @@ public class MGraphMultiplexer implements Multiplexer {
         if (!hasValues) log.debug("-- <none>");
 
         // Add both inverse triples. This graph has to be traversed efficiently, no need for reasoners.
-        UriRef predicate1 = null, predicate2 = null;
+        IRI predicate1 = null, predicate2 = null;
         if (collector instanceof OntologySpace) {
             predicate1 = MANAGES_URIREF;
             predicate2 = IS_MANAGED_BY_URIREF;
@@ -503,17 +501,17 @@ public class MGraphMultiplexer implements Multiplexer {
         if (collector instanceof Scope) colltype = Scope.shortName + "/"; // Cannot be
         else if (collector instanceof OntologySpace) colltype = OntologySpace.shortName + "/";
         else if (collector instanceof Session) colltype = Session.shortName + "/";
-        UriRef c = new UriRef(_NS_STANBOL_INTERNAL + colltype + collector.getID());
+        IRI c = new IRI(_NS_STANBOL_INTERNAL + colltype + collector.getID());
         Set<OWLOntologyID> aliases = listAliases(removedOntology);
         aliases.add(removedOntology);
         boolean badState = true;
         for (OWLOntologyID alias : aliases) {
-            UriRef u = buildResource(alias);
+            IRI u = buildResource(alias);
             // XXX condense the following code
 
             log.debug("Checking ({},{}) pattern", c, u);
             for (Iterator<Triple> it = meta.filter(c, null, u); it.hasNext();) {
-                UriRef property = it.next().getPredicate();
+                IRI property = it.next().getPredicate();
                 if (collector instanceof OntologySpace || collector instanceof Session) {
                     if (property.equals(MANAGES_URIREF)) badState = false;
                 }
@@ -521,7 +519,7 @@ public class MGraphMultiplexer implements Multiplexer {
 
             log.debug("Checking ({},{}) pattern", u, c);
             for (Iterator<Triple> it = meta.filter(u, null, c); it.hasNext();) {
-                UriRef property = it.next().getPredicate();
+                IRI property = it.next().getPredicate();
                 if (collector instanceof OntologySpace || collector instanceof Session) {
                     if (property.equals(IS_MANAGED_BY_URIREF)) badState = false;
                 }
@@ -547,12 +545,12 @@ public class MGraphMultiplexer implements Multiplexer {
         log.debug("Removing dependency.");
         log.debug(" ... dependent : {}", dependent);
         log.debug(" ... dependency : {}", dependency);
-        UriRef depy = buildResource(dependency);
+        IRI depy = buildResource(dependency);
         synchronized (meta) {
             Set<OWLOntologyID> aliases = listAliases(dependent);
             aliases.add(dependent);
             for (OWLOntologyID depalias : aliases) {
-                UriRef dep = buildResource(depalias);
+                IRI dep = buildResource(depalias);
                 Triple t = new TripleImpl(dep, DEPENDS_ON_URIREF, depy);
                 boolean found = false;
                 if (meta.contains(t)) {
@@ -575,10 +573,10 @@ public class MGraphMultiplexer implements Multiplexer {
 
     @Override
     public void scopeAppended(Session session, String scopeId) {
-        final UriRef sessionur = getIRIforSession(session), scopeur = getIRIforScope(scopeId);
+        final IRI sessionur = getIRIforSession(session), scopeur = getIRIforScope(scopeId);
         if (sessionur == null || scopeur == null) throw new IllegalArgumentException(
-                "UriRefs for scope and session cannot be null.");
-        if (meta instanceof MGraph) synchronized (meta) {
+                "IRIs for scope and session cannot be null.");
+        if (meta instanceof Graph) synchronized (meta) {
             meta.add(new TripleImpl(sessionur, HAS_APPENDED_URIREF, scopeur));
             meta.add(new TripleImpl(scopeur, APPENDED_TO_URIREF, sessionur));
         }
@@ -592,10 +590,10 @@ public class MGraphMultiplexer implements Multiplexer {
 
     @Override
     public void scopeDetached(Session session, String scopeId) {
-        final UriRef sessionur = getIRIforSession(session), scopeur = getIRIforScope(scopeId);
+        final IRI sessionur = getIRIforSession(session), scopeur = getIRIforScope(scopeId);
         if (sessionur == null || scopeur == null) throw new IllegalArgumentException(
-                "UriRefs for scope and session cannot be null.");
-        if (meta instanceof MGraph) synchronized (meta) {
+                "IRIs for scope and session cannot be null.");
+        if (meta instanceof Graph) synchronized (meta) {
             // TripleImpl implements equals() and hashCode() ...
             meta.remove(new TripleImpl(sessionur, HAS_APPENDED_URIREF, scopeur));
             meta.remove(new TripleImpl(scopeur, APPENDED_TO_URIREF, sessionur));
@@ -633,7 +631,7 @@ public class MGraphMultiplexer implements Multiplexer {
         log.debug("Setting dependency.");
         log.debug(" ... dependent : {}", dependent);
         log.debug(" ... dependency : {}", dependency);
-        UriRef dep = buildResource(dependent), depy = buildResource(dependency);
+        IRI dep = buildResource(dependent), depy = buildResource(dependency);
         // TODO check for the actual resource!
         synchronized (meta) {
             meta.add(new TripleImpl(dep, DEPENDS_ON_URIREF, depy));
@@ -648,9 +646,9 @@ public class MGraphMultiplexer implements Multiplexer {
      *            the scope whose information needs to be updated.
      */
     private void updateScopeRegistration(Scope scope) {
-        final UriRef scopeur = getIRIforScope(scope.getID());
-        final UriRef coreur = getIRIforSpace(scope.getCoreSpace());
-        final UriRef custur = getIRIforSpace(scope.getCustomSpace());
+        final IRI scopeur = getIRIforScope(scope.getID());
+        final IRI coreur = getIRIforSpace(scope.getCoreSpace());
+        final IRI custur = getIRIforSpace(scope.getCustomSpace());
         // If this method was called after a scope rebuild, the following will have little to no effect.
         synchronized (meta) {
             // Spaces are created along with the scope, so it is safe to add their triples.
@@ -675,9 +673,9 @@ public class MGraphMultiplexer implements Multiplexer {
     private void updateScopeUnregistration(Scope scope) {
         long before = System.currentTimeMillis();
         boolean removable = false, conflict = false;
-        final UriRef scopeur = getIRIforScope(scope.getID());
-        final UriRef coreur = getIRIforSpace(scope.getCoreSpace());
-        final UriRef custur = getIRIforSpace(scope.getCustomSpace());
+        final IRI scopeur = getIRIforScope(scope.getID());
+        final IRI coreur = getIRIforSpace(scope.getCoreSpace());
+        final IRI custur = getIRIforSpace(scope.getCustomSpace());
         Set<Triple> removeUs = new HashSet<Triple>();
         for (Iterator<Triple> it = meta.filter(scopeur, null, null); it.hasNext();) {
             Triple t = it.next();
@@ -715,7 +713,7 @@ public class MGraphMultiplexer implements Multiplexer {
     }
 
     private void updateSessionRegistration(Session session) {
-        final UriRef sesur = getIRIforSession(session);
+        final IRI sesur = getIRIforSession(session);
         // If this method was called after a session rebuild, the following will have little to no effect.
         synchronized (meta) {
             // The only essential triple to add is typing
@@ -727,7 +725,7 @@ public class MGraphMultiplexer implements Multiplexer {
     private void updateSessionUnregistration(Session session) {
         long before = System.currentTimeMillis();
         boolean removable = false, conflict = false;
-        final UriRef sessionur = getIRIforSession(session);
+        final IRI sessionur = getIRIforSession(session);
         Set<Triple> removeUs = new HashSet<Triple>();
         for (Iterator<Triple> it = meta.filter(sessionur, null, null); it.hasNext();) {
             Triple t = it.next();

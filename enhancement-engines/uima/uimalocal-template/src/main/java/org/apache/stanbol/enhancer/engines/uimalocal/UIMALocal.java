@@ -29,7 +29,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -149,7 +149,7 @@ public class UIMALocal extends AbstractEnhancementEngine<RuntimeException, Runti
 
     @Override
     public void computeEnhancements(ContentItem ci) throws EngineException {
-        Entry<UriRef, Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
+        Entry<IRI, Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
         if (contentPart == null) {
             throw new IllegalStateException("No ContentPart with an supported Mimetype '"
                     + SUPPORTED_MIMETYPES + "' found for ContentItem " + ci.getUri()
@@ -182,16 +182,16 @@ public class UIMALocal extends AbstractEnhancementEngine<RuntimeException, Runti
 
         for (String typeName : uimaTypeNames) {
             List<FeatureStructure> featureSetList = concertToCasLight(jcas, typeName);
-            UriRef uimaUriRef = new UriRef(uimaUri);
+            IRI uimaIRI = new IRI(uimaUri);
 
             FeatureStructureListHolder holder;
             ci.getLock().writeLock().lock();
             try {
-                holder = ci.getPart(uimaUriRef, FeatureStructureListHolder.class);
+                holder = ci.getPart(uimaIRI, FeatureStructureListHolder.class);
             } catch (NoSuchPartException e) {
                 holder = new FeatureStructureListHolder();
                 logger.info("Adding FeatureSet List Holder content part with uri:" + uimaUri);
-                ci.addPart(uimaUriRef, holder);
+                ci.addPart(uimaIRI, holder);
                 logger.info(uimaUri + " content part added.");
             } finally {
                 ci.getLock().writeLock().unlock();

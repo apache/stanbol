@@ -35,19 +35,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.BNode;
+import org.apache.clerezza.commons.rdf.BlankNode;
 import org.apache.clerezza.rdf.core.InvalidLiteralTypeException;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.clerezza.rdf.core.NoConvertorException;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.clerezza.rdf.core.impl.TypedLiteralImpl;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TypedLiteralImpl;
 import org.apache.clerezza.rdf.ontologies.RDFS;
 import org.apache.clerezza.rdf.ontologies.XSD;
 import org.apache.tika.metadata.DublinCore;
@@ -58,7 +56,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Used as value for Apache Tika {@link Metadata} mappings. Holds the
- * ontology property as {@link UriRef} and optionally a Tika {@link Property}.
+ * ontology property as {@link IRI} and optionally a Tika {@link Property}.
  * Later can be used to parse the correct datatype for values contained in the
  * {@link Metadata}
  * 
@@ -74,21 +72,21 @@ public abstract class Mapping {
      * List with allowed DataTypes.<ul>
      * <li> <code>null</code> is used for {@link PlainLiteral}s
      * <li> {@link XSD} datatyoes are used for {@link TypedLiteral}s
-     * <li> {@link RDFS#Resource} is used for {@link NonLiteral} values. Note
-     * that only {@link UriRef} is supported, because for Tika {@link BNode}s
+     * <li> {@link RDFS#RDFTerm} is used for {@link BlankNodeOrIRI} values. Note
+     * that only {@link IRI} is supported, because for Tika {@link BlankNode}s
      * do not make sense.
      * </ul>
      */
-    public static final Set<UriRef> ONT_TYPES;
+    public static final Set<IRI> ONT_TYPES;
     /**
      * Map with the same keys as contained in {@link #ONT_TYPES}. The values
      * are the java types.
      */
-    protected static final Map<UriRef,Class<?>> ONT_TYPE_MAP;
+    protected static final Map<IRI,Class<?>> ONT_TYPE_MAP;
     
     static {
         //use a linked HasSetMap to have the nice ordering (mainly for logging)
-        Map<UriRef,Class<?>> map = new LinkedHashMap<UriRef,Class<?>>();
+        Map<IRI,Class<?>> map = new LinkedHashMap<IRI,Class<?>>();
         //Plain Literal values
         map.put(null,null);
         //Typed Literal values
@@ -107,7 +105,7 @@ public abstract class Mapping {
         map.put(XSD.short_,Short.class);
         map.put(XSD.string,String.class);
         map.put(XSD.time,Date.class);
-        //Data Types for NonLiteral values
+        //Data Types for BlankNodeOrIRI values
         map.put(RDFS.Resource,URI.class);
         ONT_TYPE_MAP = Collections.unmodifiableMap(map);
         ONT_TYPES = ONT_TYPE_MAP.keySet();
@@ -119,14 +117,14 @@ public abstract class Mapping {
         //XSD.token,XSD.unsignedByte,XSD.unsignedInt,XSD.unsignedLong,XSD.unsignedShort,
     }
     
-    protected final UriRef ontProperty;
+    protected final IRI ontProperty;
     
     protected final Converter converter;
     /**
      * Getter for the OntologyProperty for this mapping
      * @return the ontProperty
      */
-    public final UriRef getOntologyProperty() {
+    public final IRI getOntologyProperty() {
         return ontProperty;
     }
     /**
@@ -141,12 +139,12 @@ public abstract class Mapping {
      */
     public abstract Set<String> getMappedTikaProperties();
     
-    protected final UriRef ontType;
+    protected final IRI ontType;
     
-    protected Mapping(UriRef ontProperty,UriRef ontType){
+    protected Mapping(IRI ontProperty,IRI ontType){
         this(ontProperty,ontType,null);
     }
-    protected Mapping(UriRef ontProperty,UriRef ontType,Converter converter){
+    protected Mapping(IRI ontProperty,IRI ontType,Converter converter){
         if(ontProperty == null){
             throw new IllegalArgumentException("The parsed ontology property MUST NOT be NULL!");
         }
@@ -161,34 +159,34 @@ public abstract class Mapping {
     
     /**
      * Applies this mapping based on the parsed {@link Metadata} and stores the 
-     * results to {@link MGraph}
-     * @param graph the Graph to store the mapping results
+     * results to {@link Graph}
+     * @param graph the ImmutableGraph to store the mapping results
      * @param subject the subject (context) to add the mappings
      * @param metadata the metadata used for applying the mapping
      * @return <code>true</code> if the mapping could be applied based on the
      * parsed data. Otherwise <code>false</code>. This is intended to be used
      * by components that need to check if required mappings could be applied.
      */
-    public abstract boolean apply(MGraph graph, NonLiteral subject, Metadata metadata);
+    public abstract boolean apply(Graph graph, BlankNodeOrIRI subject, Metadata metadata);
     /**
      * Converts the parsed value based on the mapping information to an RDF
-     * {@link Resource}. Optionally supports also validation if the parsed
+     * {@link RDFTerm}. Optionally supports also validation if the parsed
      * value is valid for the {@link Mapping#ontType ontology type} specified by
      * the parsed mapping.
      * @param value the value
      * @param mapping the mapping
      * @param validate 
-     * @return the {@link Resource} or <code>null</code> if the parsed value is
+     * @return the {@link RDFTerm} or <code>null</code> if the parsed value is
      * <code>null</code> or {@link String#isEmpty() empty}.
      * @throws IllegalArgumentException if the parsed {@link Mapping} is 
      * <code>null</code>
      */
-    protected Resource toResource(String value, boolean validate){
+    protected RDFTerm toResource(String value, boolean validate){
         Metadata dummy = null;//used for date validation
         if(value == null || value.isEmpty()){
             return null; //ignore null and empty values
         }
-        Resource object;
+        RDFTerm object;
         if(ontType == null){
             object = new PlainLiteralImpl(value);
         } else if(ontType == RDFS.Resource){
@@ -196,7 +194,7 @@ public abstract class Mapping {
                 if(validate){
                     new URI(value);
                 }
-                object = new UriRef(value);
+                object = new IRI(value);
             } catch (URISyntaxException e) {
                 log.warn("Unable to create Reference for value {} (not a valid URI)" +
                         " -> create a literal instead",value);
@@ -232,7 +230,7 @@ public abstract class Mapping {
             if(validate && clazz != null && 
                     !clazz.equals(Date.class)){ //we need not to validate dates
                 try {
-                    lf.createObject(clazz,(TypedLiteral)object);
+                    lf.createObject(clazz,(Literal)object);
                 } catch (NoConvertorException e) {
                     log.info("Unable to validate typed literals of type {} because" +
                             "there is no converter for Class {} registered with Clerezza",
@@ -261,8 +259,8 @@ public abstract class Mapping {
      */
     protected static final class MappingLogger{
         
-        private List<NonLiteral> subjects = new ArrayList<NonLiteral>();
-        private UriRef predicate;
+        private List<BlankNodeOrIRI> subjects = new ArrayList<BlankNodeOrIRI>();
+        private IRI predicate;
         private final int intendSize = 2;
         private final char[] intnedArray;
         private static final int MAX_INTEND = 5;
@@ -276,7 +274,7 @@ public abstract class Mapping {
                 Math.min(MAX_INTEND, intend)*intendSize);
         }
         
-        protected void log(NonLiteral subject,UriRef predicate, String prop, Resource object){
+        protected void log(BlankNodeOrIRI subject,IRI predicate, String prop, RDFTerm object){
             if(!log.isDebugEnabled()){
                 return;
             }
@@ -305,6 +303,6 @@ public abstract class Mapping {
     }
     
     public static interface Converter {
-        Resource convert(Resource value);
+        RDFTerm convert(RDFTerm value);
     }
 }

@@ -71,7 +71,7 @@ public class ResourceLoaderTest {
             assertTrue("resourceName '"+resourceName+"' not expected",
                 expectedNames.remove(resourceName));
             IOUtils.closeQuietly(is);
-            log.debug("Import Resource {}",resourceName);
+            log.debug("Import RDFTerm {}",resourceName);
             if(resourceName.startsWith("ignore")){
                 return ResourceState.IGNORED;
             } else if(resourceName.startsWith("error")){

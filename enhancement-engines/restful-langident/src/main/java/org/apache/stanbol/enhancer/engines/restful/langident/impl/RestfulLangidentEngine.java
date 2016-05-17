@@ -40,10 +40,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -176,7 +176,7 @@ public class RestfulLangidentEngine extends AbstractEnhancementEngine<IOExceptio
     @Override
     public int canEnhance(ContentItem ci) throws EngineException {
         // check if content is present
-        Map.Entry<UriRef,Blob> entry = getPlainText(this, ci, false);
+        Map.Entry<IRI,Blob> entry = getPlainText(this, ci, false);
         if(entry == null || entry.getValue() == null) {
             return CANNOT_ENHANCE;
         }
@@ -202,7 +202,7 @@ public class RestfulLangidentEngine extends AbstractEnhancementEngine<IOExceptio
     @Override
     public void computeEnhancements(final ContentItem ci) throws EngineException {
         //get the plain text Blob
-        Map.Entry<UriRef,Blob> textBlob = getPlainText(this, ci, false);
+        Map.Entry<IRI,Blob> textBlob = getPlainText(this, ci, false);
         Blob blob = textBlob.getValue();
         //send the text to the server
         final HttpPost request = new HttpPost(serviceUrl);
@@ -230,7 +230,7 @@ public class RestfulLangidentEngine extends AbstractEnhancementEngine<IOExceptio
                 throw RuntimeException.class.cast(e);
             }
         }
-        MGraph metadata = ci.getMetadata();
+        Graph metadata = ci.getMetadata();
         log.debug("Detected Languages for ContentItem {} and Blob {}");
         ci.getLock().writeLock().lock();
         try { //write TextAnnotations for the detected languages
@@ -238,7 +238,7 @@ public class RestfulLangidentEngine extends AbstractEnhancementEngine<IOExceptio
                 // add a hypothesis
                 log.debug(" > {}@{}", suggestion.getLanguage(),
                     suggestion.hasProbability() ? suggestion.getProbability() : "-,--");
-                UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
+                IRI textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
                 metadata.add(new TripleImpl(textEnhancement, DC_LANGUAGE, new PlainLiteralImpl(suggestion.getLanguage())));
                 metadata.add(new TripleImpl(textEnhancement, DC_TYPE, DCTERMS_LINGUISTIC_SYSTEM));
                 if(suggestion.hasProbability()){
@@ -407,8 +407,8 @@ public class RestfulLangidentEngine extends AbstractEnhancementEngine<IOExceptio
      * @throws IllegalStateException if exception is <code>true</code> and the
      * language could not be retrieved from the parsed {@link ContentItem}.
      */
-    public static Entry<UriRef,Blob> getPlainText(EnhancementEngine engine, ContentItem ci, boolean exception) {
-        Entry<UriRef,Blob> textBlob = ContentItemHelper.getBlob(
+    public static Entry<IRI,Blob> getPlainText(EnhancementEngine engine, ContentItem ci, boolean exception) {
+        Entry<IRI,Blob> textBlob = ContentItemHelper.getBlob(
             ci, singleton("text/plain"));
         if(textBlob != null) {
             return textBlob;

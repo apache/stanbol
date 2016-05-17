@@ -24,10 +24,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.stanbol.commons.solr.utils.DataFileResourceLoader;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
@@ -62,7 +62,7 @@ public class TestKuromojiNlpEngine {
 
     private static ContentItemFactory contentItemFactory;
     
-    private static UriRef id = new UriRef("http://www.example.org/contentItem1");
+    private static IRI id = new IRI("http://www.example.org/contentItem1");
     /**
      * Test text taken from the <a href ="http://ja.wikipedia.org/wiki/%E3%83%AD%E3%83%B3%E3%83%89%E3%83%B3">
      * Japanese wikipedia side for London</a>.
@@ -107,7 +107,7 @@ public class TestKuromojiNlpEngine {
         Assert.assertEquals(EnhancementEngine.ENHANCE_ASYNC, engine.canEnhance(contentItem));
         engine.computeEnhancements(contentItem);
         //assert the results
-        Map<UriRef,Resource> expected = new HashMap<UriRef,Resource>();
+        Map<IRI,RDFTerm> expected = new HashMap<IRI,RDFTerm>();
         expected.put(Properties.DC_CREATOR, lf.createTypedLiteral(engine.getClass().getName()));
         expected.put(Properties.ENHANCER_EXTRACTED_FROM,contentItem.getUri());
         Assert.assertEquals(16, EnhancementStructureHelper.validateAllTextAnnotations(

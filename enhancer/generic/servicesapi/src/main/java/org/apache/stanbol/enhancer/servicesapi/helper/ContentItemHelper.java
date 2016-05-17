@@ -33,7 +33,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -72,12 +72,12 @@ public final class ContentItemHelper {
      * Check that ContentItem#getId returns a valid URI or make an urn out of
      * it.
      */
-    public static UriRef ensureUri(ContentItem ci) {
+    public static IRI ensureUri(ContentItem ci) {
         String uri = ci.getUri().getUnicodeString();
         if (!uri.startsWith("http://") && !uri.startsWith("urn:")) {
             uri = "urn:" + urlEncode(uri);
         }
-        return new UriRef(uri);
+        return new IRI(uri);
     }
 
     public static String urlEncode(String uriPart) {
@@ -145,22 +145,22 @@ public final class ContentItemHelper {
         return buf.toString();
     }
 
-    public static UriRef makeDefaultUrn(Blob blob) {
+    public static IRI makeDefaultUrn(Blob blob) {
         return makeDefaultUri(DEFAULT_CONTENT_ITEM_PREFIX, blob.getStream());
     }
-    public static UriRef makeDefaultUrn(InputStream in) {
+    public static IRI makeDefaultUrn(InputStream in) {
         return makeDefaultUri(DEFAULT_CONTENT_ITEM_PREFIX, in);
     }
-    public static UriRef makeDefaultUrn(byte[] data){
+    public static IRI makeDefaultUrn(byte[] data){
         return makeDefaultUri(DEFAULT_CONTENT_ITEM_PREFIX, new ByteArrayInputStream(data));
     }
-    public static UriRef makeDefaultUri(String baseUri, Blob blob) {
+    public static IRI makeDefaultUri(String baseUri, Blob blob) {
         return makeDefaultUri(baseUri, blob.getStream());
     }
-    public static UriRef makeDefaultUri(String baseUri, byte[] data) {
+    public static IRI makeDefaultUri(String baseUri, byte[] data) {
         return makeDefaultUri(baseUri, new ByteArrayInputStream(data));
     }
-    public static UriRef makeDefaultUri(String baseUri, InputStream in) {
+    public static IRI makeDefaultUri(String baseUri, InputStream in) {
         // calculate an ID based on the digest of the content
         if (!baseUri.startsWith("urn:") && !baseUri.endsWith("/")) {
             baseUri += "/";
@@ -174,7 +174,7 @@ public final class ContentItemHelper {
             		"of an ContentItem!",e);
         }
         IOUtils.closeQuietly(in);
-        return new UriRef(baseUri + SHA1.toLowerCase() + "-" + hexDigest);
+        return new IRI(baseUri + SHA1.toLowerCase() + "-" + hexDigest);
     }
     /**
      * This parses and validates the mime-type and parameters from the
@@ -230,7 +230,7 @@ public final class ContentItemHelper {
         return parsed;
     }
     /**
-     * Searches an {@link ContentItem#getPart(UriRef, Class) content part}
+     * Searches an {@link ContentItem#getPart(IRI, Class) content part}
      * of the type {@link Blob} with one of the the parsed mimeTypes. <p>
      * NOTE:<ul>
      * <li> MimeTypes are converted to lower case before compared with
@@ -243,20 +243,20 @@ public final class ContentItemHelper {
      * this method does NOT throw {@link NoSuchPartException}.
      * @param ci the contentITem
      * @param mimeTypes List of possible mimeTypes
-     * @return the {@link UriRef URI} and the {@link Blob content} of the content 
+     * @return the {@link IRI URI} and the {@link Blob content} of the content 
      * part or <code>null</code> if not found
      * @throws IllegalArgumentException If the parsed {@link ContentItem} is
      * <code>null</code> or the parsed Set with the mimeTypes is <code>null</code>
      * or {@link Set#isEmpty() empty}.
      */
-    public static Entry<UriRef, Blob> getBlob(ContentItem ci, Set<String> mimeTypes){
+    public static Entry<IRI, Blob> getBlob(ContentItem ci, Set<String> mimeTypes){
         if(ci == null){
             throw new IllegalArgumentException("The parsed ContentItem MUST NOT be NULL!");
         }
         if(mimeTypes == null || mimeTypes.isEmpty()){
             throw new IllegalArgumentException("The parsed Set with mime type  MUST NOT be NULL nor empty!");
         }
-        UriRef cpUri = null;
+        IRI cpUri = null;
         int index = 0;
         ci.getLock().readLock().lock();
         try {
@@ -293,14 +293,14 @@ public final class ContentItemHelper {
      * this method does NOT throw {@link NoSuchPartException}.
      * @param ci the content item
      * @param clazz the class of the content part
-     * @return the Map with the {@link UriRef id}s and the content as entries.
+     * @return the Map with the {@link IRI id}s and the content as entries.
      */
-    public static <T> Map<UriRef,T> getContentParts(ContentItem ci, Class<T> clazz){
+    public static <T> Map<IRI,T> getContentParts(ContentItem ci, Class<T> clazz){
         if(ci == null){
             throw new IllegalArgumentException("The parsed ContentItem MUST NOT be NULL!");
         }
-        LinkedHashMap<UriRef,T> blobs = new LinkedHashMap<UriRef,T>();
-        UriRef cpUri = null;
+        LinkedHashMap<IRI,T> blobs = new LinkedHashMap<IRI,T>();
+        IRI cpUri = null;
         int index = 0;
         ci.getLock().readLock().lock();
         try {
@@ -365,7 +365,7 @@ public final class ContentItemHelper {
      * EnhancementEngine properties <p>
      * @since 0.12.1
      */
-    public static final UriRef REQUEST_PROPERTIES_URI = new UriRef(
+    public static final IRI REQUEST_PROPERTIES_URI = new IRI(
         "urn:apache.org:stanbol.enhancer:request.properties");
 
     /**
@@ -373,7 +373,7 @@ public final class ContentItemHelper {
      * <code>0.12.0</code>
      */
     @Deprecated
-    private static final UriRef WEB_ENHANCEMENT_PROPERTIES_URI = new UriRef(
+    private static final IRI WEB_ENHANCEMENT_PROPERTIES_URI = new IRI(
         "urn:apache.org:stanbol.web:enhancement.properties");
     
     /**

@@ -27,13 +27,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import org.apache.clerezza.rdf.core.Language;
+import org.apache.clerezza.commons.rdf.Language;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.engines.dbpspotlight.Constants;
@@ -83,7 +83,7 @@ public class DBPSpotlightDisambiguateEnhancementTest implements TestDefaults{
 	private static ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
 	
 	private ContentItem ci;
-	private static Entry<UriRef, Blob> textContentPart;
+	private static Entry<IRI, Blob> textContentPart;
 
 	@BeforeClass
 	public static void oneTimeSetup() throws Exception {
@@ -108,9 +108,9 @@ public class DBPSpotlightDisambiguateEnhancementTest implements TestDefaults{
 		//we need also to create a fise:TextAnnotation to test disambiguation
 		String selected = "Angela Merkel";
 		Language en = new Language("en");
-		UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, 
+		IRI textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, 
 				new DBPSpotlightSpotEnhancementEngine());
-		MGraph model = ci.getMetadata();
+		Graph model = ci.getMetadata();
 		model.add(new TripleImpl(textAnnotation, Properties.ENHANCER_SELECTED_TEXT, 
 				new PlainLiteralImpl(selected,en)));
 		model.add(new TripleImpl(textAnnotation, Properties.ENHANCER_SELECTION_CONTEXT, 
@@ -159,7 +159,7 @@ public class DBPSpotlightDisambiguateEnhancementTest implements TestDefaults{
             RemoteServiceHelper.checkServiceUnavailable(e);
             return;
         }
-        HashMap<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+        HashMap<IRI,RDFTerm> expectedValues = new HashMap<IRI,RDFTerm>();
         expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(
         		dbpslight.getClass().getName()));

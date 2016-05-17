@@ -40,15 +40,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.engines.entitylinking.LabelTokenizer;
@@ -119,58 +119,58 @@ public class EntityLinkingEngineTest {
     
     static TestSearcherImpl searcher;
     
-    public static final UriRef NAME = new UriRef(NamespaceEnum.rdfs+"label");
-    public static final UriRef TYPE = new UriRef(NamespaceEnum.rdf+"type");
-    public static final UriRef REDIRECT = new UriRef(NamespaceEnum.rdfs+"seeAlso");
+    public static final IRI NAME = new IRI(NamespaceEnum.rdfs+"label");
+    public static final IRI TYPE = new IRI(NamespaceEnum.rdf+"type");
+    public static final IRI REDIRECT = new IRI(NamespaceEnum.rdfs+"seeAlso");
 
     @BeforeClass
     public static void setUpServices() throws IOException {
         searcher = new TestSearcherImpl(TEST_REFERENCED_SITE_NAME,NAME,new SimpleLabelTokenizer());
         //add some terms to the searcher
-        MGraph graph = new IndexedMGraph();
-        UriRef uri = new UriRef("urn:test:PatrickMarshall");
+        Graph graph = new IndexedGraph();
+        IRI uri = new IRI("urn:test:PatrickMarshall");
         graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("Patrick Marshall")));
         graph.add(new TripleImpl(uri, TYPE, OntologicalClasses.DBPEDIA_PERSON));
         searcher.addEntity(new Entity(uri, graph));
         
-        uri = new UriRef("urn:test:Geologist");
+        uri = new IRI("urn:test:Geologist");
         graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("Geologist")));
-        graph.add(new TripleImpl(uri, TYPE, new UriRef(NamespaceEnum.skos+"Concept")));
-        graph.add(new TripleImpl(uri, REDIRECT, new UriRef("urn:test:redirect:Geologist")));
+        graph.add(new TripleImpl(uri, TYPE, new IRI(NamespaceEnum.skos+"Concept")));
+        graph.add(new TripleImpl(uri, REDIRECT, new IRI("urn:test:redirect:Geologist")));
         searcher.addEntity(new Entity(uri, graph));
         //a redirect
-        uri = new UriRef("urn:test:redirect:Geologist");
+        uri = new IRI("urn:test:redirect:Geologist");
         graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("Geologe (redirect)")));
-        graph.add(new TripleImpl(uri, TYPE, new UriRef(NamespaceEnum.skos+"Concept")));
+        graph.add(new TripleImpl(uri, TYPE, new IRI(NamespaceEnum.skos+"Concept")));
         searcher.addEntity(new Entity(uri, graph));
 
-        uri = new UriRef("urn:test:NewZealand");
+        uri = new IRI("urn:test:NewZealand");
         graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("New Zealand")));
         graph.add(new TripleImpl(uri, TYPE, OntologicalClasses.DBPEDIA_PLACE));
         searcher.addEntity(new Entity(uri, graph));
 
-        uri = new UriRef("urn:test:UniversityOfOtago");
+        uri = new IRI("urn:test:UniversityOfOtago");
         graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("University of Otago")));
         graph.add(new TripleImpl(uri, TYPE, OntologicalClasses.DBPEDIA_ORGANISATION));
         searcher.addEntity(new Entity(uri, graph));
         
-        uri = new UriRef("urn:test:University");
+        uri = new IRI("urn:test:University");
         graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("University")));
-        graph.add(new TripleImpl(uri, TYPE, new UriRef(NamespaceEnum.skos+"Concept")));
+        graph.add(new TripleImpl(uri, TYPE, new IRI(NamespaceEnum.skos+"Concept")));
         searcher.addEntity(new Entity(uri, graph));
 
-        uri = new UriRef("urn:test:Otago");
+        uri = new IRI("urn:test:Otago");
         graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("Otago")));
         graph.add(new TripleImpl(uri, TYPE, OntologicalClasses.DBPEDIA_PLACE));
         searcher.addEntity(new Entity(uri, graph));
         //add a 2nd Otago (Place and University
-        uri = new UriRef("urn:test:Otago_Texas");
+        uri = new IRI("urn:test:Otago_Texas");
         graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("Otago (Texas)")));
         graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("Otago")));
         graph.add(new TripleImpl(uri, TYPE, OntologicalClasses.DBPEDIA_PLACE));
         searcher.addEntity(new Entity(uri, graph));
 
-        uri = new UriRef("urn:test:UniversityOfOtago_Texas");
+        uri = new IRI("urn:test:UniversityOfOtago_Texas");
         graph.add(new TripleImpl(uri, NAME, new PlainLiteralImpl("University of Otago (Texas)")));
         graph.add(new TripleImpl(uri, TYPE, OntologicalClasses.DBPEDIA_ORGANISATION));
         searcher.addEntity(new Entity(uri, graph));
@@ -254,7 +254,7 @@ public class EntityLinkingEngineTest {
     }
 
     public static ContentItem getContentItem(final String id, final String text) throws IOException {
-        return ciFactory.createContentItem(new UriRef(id),new StringSource(text));
+        return ciFactory.createContentItem(new IRI(id),new StringSource(text));
     }
     /**
      * This tests the EntityLinker functionality (if the expected Entities
@@ -396,7 +396,7 @@ public class EntityLinkingEngineTest {
         //compute the enhancements
         engine.computeEnhancements(ci);
         //validate the enhancement results
-        Map<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+        Map<IRI,RDFTerm> expectedValues = new HashMap<IRI,RDFTerm>();
         expectedValues.put(ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(DC_CREATOR,LiteralFactory.getInstance().createTypedLiteral(
             engine.getClass().getName()));
@@ -410,18 +410,18 @@ public class EntityLinkingEngineTest {
         assertEquals("Five fise:EntityAnnotations are expected by this Test", 5, numEntityAnnotations);
     }
     /**
-     * Similar to {@link EnhancementStructureHelper#validateAllEntityAnnotations(org.apache.clerezza.rdf.core.TripleCollection, Map)}
+     * Similar to {@link EnhancementStructureHelper#validateAllEntityAnnotations(org.apache.clerezza.commons.rdf.Graph, Map)}
      * but in addition checks fise:confidence [0..1] and entityhub:site properties
      * @param ci
      * @param expectedValues
      * @return
      */
-    private static int validateAllEntityAnnotations(ContentItem ci, Map<UriRef,Resource> expectedValues){
+    private static int validateAllEntityAnnotations(ContentItem ci, Map<IRI,RDFTerm> expectedValues){
         Iterator<Triple> entityAnnotationIterator = ci.getMetadata().filter(null,
                 RDF_TYPE, ENHANCER_ENTITYANNOTATION);
         int entityAnnotationCount = 0;
         while (entityAnnotationIterator.hasNext()) {
-            UriRef entityAnnotation = (UriRef) entityAnnotationIterator.next().getSubject();
+            IRI entityAnnotation = (IRI) entityAnnotationIterator.next().getSubject();
             // test if selected Text is added
             validateEntityAnnotation(ci.getMetadata(), entityAnnotation, expectedValues);
             //validate also that the confidence is between [0..1]
@@ -438,12 +438,12 @@ public class EntityLinkingEngineTest {
 //                    +"',entityAnnotation "+entityAnnotation+")",
 //                    0.0 <= confidence.doubleValue());
             //Test the entityhub:site property (STANBOL-625)
-            UriRef ENTITYHUB_SITE = new UriRef(NamespaceEnum.entityhub+"site");
+            IRI ENTITYHUB_SITE = new IRI(NamespaceEnum.entityhub+"site");
             Iterator<Triple> entitySiteIterator = ci.getMetadata().filter(entityAnnotation, 
                 ENTITYHUB_SITE, null);
             assertTrue("Expected entityhub:site value is missing (entityAnnotation "
                     +entityAnnotation+")",entitySiteIterator.hasNext());
-            Resource siteResource = entitySiteIterator.next().getObject();
+            RDFTerm siteResource = entitySiteIterator.next().getObject();
             assertTrue("entityhub:site values MUST BE Literals", siteResource instanceof Literal);
             assertEquals("'"+TEST_REFERENCED_SITE_NAME+"' is expected as "
                 + "entityhub:site value", TEST_REFERENCED_SITE_NAME, 

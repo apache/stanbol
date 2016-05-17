@@ -62,7 +62,7 @@ public interface DataFileProvider {
      * @param filename name of the file to open
      * @param comments Optional - how to get a more complete version
      *        of the data file, licensing information, etc.
-     * @return <code>true</code> if the requested Resource is available.
+     * @return <code>true</code> if the requested RDFTerm is available.
      * Otherwise <code>false</code>
      */
     boolean isAvailable(String bundleSymbolicName,

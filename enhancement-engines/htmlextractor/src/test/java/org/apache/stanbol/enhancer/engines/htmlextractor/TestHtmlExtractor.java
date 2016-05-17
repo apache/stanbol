@@ -24,11 +24,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
 import org.apache.stanbol.enhancer.engines.htmlextractor.impl.ClerezzaRDFUtils;
 import org.apache.stanbol.enhancer.engines.htmlextractor.impl.ExtractorException;
 import org.apache.stanbol.enhancer.engines.htmlextractor.impl.HtmlExtractionRegistry;
@@ -78,7 +78,7 @@ public class TestHtmlExtractor {
     @Test
     public void testRdfaExtraction() throws Exception {
         HtmlExtractor extractor = new HtmlExtractor(registry, parser);
-        MGraph model = new SimpleMGraph();
+        Graph model = new SimpleGraph();
         String testFile = "test-rdfa.html";
         // extract text from RDFa annotated html
         InputStream in = getResourceAsStream(testFile);
@@ -91,7 +91,7 @@ public class TestHtmlExtractor {
         LOG.debug("RDFa triples: {}",tripleCounter);
         printTriples(model);
         assertEquals(8, tripleCounter);
-        ClerezzaRDFUtils.makeConnected(model, new UriRef("file://" + testFile), new UriRef(NIE_NS+"contains"));
+        ClerezzaRDFUtils.makeConnected(model, new IRI("file://" + testFile), new IRI(NIE_NS+"contains"));
     }
     
     /** This tests some Microformat extraction
@@ -102,7 +102,7 @@ public class TestHtmlExtractor {
     @Test
     public void testMFExtraction() throws Exception {
         HtmlExtractor extractor = new HtmlExtractor(registry, parser);
-        MGraph model = new SimpleMGraph();
+        Graph model = new SimpleGraph();
         String testFile = "test-MF.html";
 
         // extract text from RDFa annotated html
@@ -116,7 +116,7 @@ public class TestHtmlExtractor {
         LOG.debug("Microformat triples: {}",tripleCounter);
         printTriples(model);
         assertEquals(127, tripleCounter);
-        ClerezzaRDFUtils.makeConnected(model, new UriRef("file://" + testFile), new UriRef(NIE_NS+"contains"));
+        ClerezzaRDFUtils.makeConnected(model, new IRI("file://" + testFile), new IRI(NIE_NS+"contains"));
     }
 
     /** This test some extraction of microdata from an HTML-5 document
@@ -126,7 +126,7 @@ public class TestHtmlExtractor {
     @Test
     public void testMicrodataExtraction() throws Exception {
       HtmlExtractor extractor = new HtmlExtractor(registry, parser);
-      MGraph model = new SimpleMGraph();
+      Graph model = new SimpleGraph();
       String testFile = "test-microdata.html";
 
       // extract text from RDFa annotated html
@@ -140,7 +140,7 @@ public class TestHtmlExtractor {
       LOG.debug("Microdata triples: {}",tripleCounter);
       printTriples(model);
       assertEquals(91, tripleCounter);
-      ClerezzaRDFUtils.makeConnected(model, new UriRef("file://" + testFile), new UriRef(NIE_NS+"contains"));
+      ClerezzaRDFUtils.makeConnected(model, new IRI("file://" + testFile), new IRI(NIE_NS+"contains"));
     }
     
     /** This tests the merging of disconnected graphs under a single root
@@ -150,7 +150,7 @@ public class TestHtmlExtractor {
     @Test
     public void testRootExtraction() throws Exception {
         HtmlExtractor extractor = new HtmlExtractor(registry, parser);
-        MGraph model = new SimpleMGraph();
+        Graph model = new SimpleGraph();
         String testFile = "test-MultiRoot.html";
 
         // extract text from RDFa annotated html
@@ -163,9 +163,9 @@ public class TestHtmlExtractor {
         int tripleCounter = model.size();
         LOG.debug("Triples: {}",tripleCounter);
         printTriples(model);
-        Set<NonLiteral> roots = ClerezzaRDFUtils.findRoots(model);
+        Set<BlankNodeOrIRI> roots = ClerezzaRDFUtils.findRoots(model);
         assertTrue(roots.size() > 1);
-        ClerezzaRDFUtils.makeConnected(model, new UriRef("file://" + testFile), new UriRef(NIE_NS+"contains"));
+        ClerezzaRDFUtils.makeConnected(model, new IRI("file://" + testFile), new IRI(NIE_NS+"contains"));
         roots = ClerezzaRDFUtils.findRoots(model);
         assertEquals(1,roots.size());
     }
@@ -175,7 +175,7 @@ public class TestHtmlExtractor {
                 testResultFile);
     }
 
-    private void printTriples(MGraph model) {
+    private void printTriples(Graph model) {
         for (Triple t: model) {
             LOG.debug(t.toString());
         }

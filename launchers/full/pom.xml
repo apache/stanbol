@@ -191,7 +191,7 @@
     <dependency>
       <groupId>org.apache.clerezza.provisioning</groupId>
       <artifactId>rdf</artifactId>
-      <version>0.1</version>
+      <version>1.0.0</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -200,7 +200,7 @@
     <dependency>
       <groupId>org.apache.clerezza.provisioning</groupId>
       <artifactId>rdf.tdb</artifactId>
-      <version>0.1</version>
+      <version>1.0.0</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -224,13 +224,13 @@
     </dependency> 
     
     <!-- Clerezza zz> Shell Bundle List  --> 
-    <dependency>
+    <!-- <dependency>
       <groupId>org.apache.clerezza.provisioning</groupId>
       <artifactId>shell</artifactId>
       <version>0.1</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
-    </dependency>
+    </dependency> -->
 
     <!-- Stanbol Data Bundle List -->
     <dependency>

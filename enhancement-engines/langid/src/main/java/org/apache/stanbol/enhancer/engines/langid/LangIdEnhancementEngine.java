@@ -27,10 +27,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -134,7 +134,7 @@ public class LangIdEnhancementEngine
     }
 
     public void computeEnhancements(ContentItem ci) throws EngineException {
-        Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMTYPES);
+        Entry<IRI,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMTYPES);
         if(contentPart == null){
             throw new IllegalStateException("No ContentPart with Mimetype '"
                     + TEXT_PLAIN_MIMETYPE+"' found for ContentItem "+ci.getUri()
@@ -164,10 +164,10 @@ public class LangIdEnhancementEngine
         log.info("language identified as " + language);
 
         // add language to metadata
-        MGraph g = ci.getMetadata();
+        Graph g = ci.getMetadata();
         ci.getLock().writeLock().lock();
         try {
-            UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
+            IRI textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
             g.add(new TripleImpl(textEnhancement, DC_LANGUAGE, new PlainLiteralImpl(language)));
             g.add(new TripleImpl(textEnhancement, DC_TYPE, DCTERMS_LINGUISTIC_SYSTEM));
         } finally {

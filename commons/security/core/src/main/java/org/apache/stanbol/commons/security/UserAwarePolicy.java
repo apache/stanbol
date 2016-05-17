@@ -41,12 +41,13 @@ import org.apache.clerezza.platform.config.SystemConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.clerezza.rdf.core.BNode;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.BlankNode;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
 import org.apache.clerezza.rdf.ontologies.PERMISSION;
 import org.apache.clerezza.rdf.ontologies.PLATFORM;
 import org.apache.clerezza.rdf.ontologies.RDF;
@@ -73,7 +74,7 @@ public class UserAwarePolicy extends Policy {
 	final Logger logger = LoggerFactory.getLogger(UserAwarePolicy.class);
 	
 	@Reference(target=SystemConfig.SYSTEM_GRAPH_FILTER)
-	private MGraph systemGraph;
+	private Graph systemGraph;
 	
 	/**
 	 * Stores the mapping between a String describing the permission and the
@@ -175,25 +176,25 @@ public class UserAwarePolicy extends Policy {
 	private List<String> getAllPermissionsOfAUserByName(String userName)
 			throws UserUnregisteredException {
 
-		NonLiteral user = getUserByName(userName);
+		BlankNodeOrIRI user = getUserByName(userName);
 		
 		List<String> result = getPermissionEntriesOfAUser(user, userName);
 		Iterator<Triple> roleTriples = systemGraph.filter(user,
 				SIOC.has_function, null);
 
 		while (roleTriples.hasNext()) {
-			NonLiteral anotherRole = (NonLiteral) roleTriples.next()
+			BlankNodeOrIRI anotherRole = (BlankNodeOrIRI) roleTriples.next()
 					.getObject();
 			result.addAll(getPermissionEntriesOfARole(anotherRole, userName, user));
 		}
-		Iterator<NonLiteral> baseRoles = getResourcesOfType(PERMISSION.BaseRole);
+		Iterator<BlankNodeOrIRI> baseRoles = getResourcesOfType(PERMISSION.BaseRole);
 		while(baseRoles.hasNext()) {
 			result.addAll(getPermissionEntriesOfARole(baseRoles.next(), userName, user));
 		}
 		return result;
 	}
 
-	private NonLiteral getUserByName(String userName)
+	private BlankNodeOrIRI getUserByName(String userName)
 			throws UserUnregisteredException {
 		Iterator<Triple> triples = systemGraph.filter(null, PLATFORM.userName,
 				new PlainLiteralImpl(userName));
@@ -204,29 +205,29 @@ public class UserAwarePolicy extends Policy {
 		throw new UserUnregisteredException(userName);
 	}
 
-	private List<String> getPermissionEntriesOfAUser(NonLiteral user, String userName) {
+	private List<String> getPermissionEntriesOfAUser(BlankNodeOrIRI user, String userName) {
 		List<String> result = getPermissionEntriesOfARole(user, userName, user);
-		if (user instanceof UriRef) {
+		if (user instanceof IRI) {
 			synchronized(permissionProviders) {
 				for (WebIdBasedPermissionProvider p : permissionProviders) {
-					result.addAll(p.getPermissions((UriRef)user));
+					result.addAll(p.getPermissions((IRI)user));
 				}
 			}
 		}
 		return result;
 	}
 	//note that users are roles too
-	private List<String> getPermissionEntriesOfARole(NonLiteral role, String userName, NonLiteral user) {
+	private List<String> getPermissionEntriesOfARole(BlankNodeOrIRI role, String userName, BlankNodeOrIRI user) {
 		List<String> result = new ArrayList<String>();
 		Iterator<Triple> permsForRole = systemGraph.filter(role,
 				PERMISSION.hasPermission, null);
 
 		while (permsForRole.hasNext()) {
 			Iterator<Triple> javaPermForRole = systemGraph.filter(
-					(BNode) permsForRole.next().getObject(),
+					(BlankNode) permsForRole.next().getObject(),
 					PERMISSION.javaPermissionEntry, null);
 			if (javaPermForRole.hasNext()) {
-				PlainLiteralImpl permissionEntry = (PlainLiteralImpl) javaPermForRole
+				Literal permissionEntry = (Literal) javaPermForRole
 						.next().getObject();
 				String permission = permissionEntry.getLexicalForm();
 				if(permission.contains("{username}")) {
@@ -238,10 +239,10 @@ public class UserAwarePolicy extends Policy {
 		return result;
 	}
 	
-	private Iterator<NonLiteral> getResourcesOfType(UriRef type) {
+	private Iterator<BlankNodeOrIRI> getResourcesOfType(IRI type) {
 		final Iterator<Triple> triples =
 				systemGraph.filter(null, RDF.type, type);
-		return new Iterator<NonLiteral>() {
+		return new Iterator<BlankNodeOrIRI>() {
 
 			@Override
 			public boolean hasNext() {
@@ -249,7 +250,7 @@ public class UserAwarePolicy extends Policy {
 			}
 
 			@Override
-			public NonLiteral next() {
+			public BlankNodeOrIRI next() {
 				return triples.next().getSubject();
 			}
 

@@ -16,16 +16,16 @@
  */
 package org.apache.stanbol.enhancer.engines.dereference;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 
 public class DereferenceException extends Exception {
     
     private static final long serialVersionUID = 1524436328783083428L;
 
-    public DereferenceException(UriRef entity, Throwable t){
+    public DereferenceException(IRI entity, Throwable t){
         super("Unable to dereference Entity " + entity+ "!", t);
     }
-    public DereferenceException(UriRef entity, String reason){
+    public DereferenceException(IRI entity, String reason){
         super("Unable to dereference Entity " + entity + 
             (reason != null ? ": "+ reason : "") + "!");
     }

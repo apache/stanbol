@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
 import org.apache.stanbol.enhancer.benchmark.Benchmark;
 import org.apache.stanbol.enhancer.benchmark.BenchmarkResult;
 import org.apache.stanbol.enhancer.benchmark.TripleMatcherGroup;
@@ -36,7 +36,7 @@ public class BenchmarkImpl extends LinkedList<TripleMatcherGroup> implements Ben
     
     private String name;
     private String inputText;
-    private Graph graph;
+    private ImmutableGraph graph;
     private ContentItemFactory ciFactory;
     private Chain chain;
     
@@ -94,7 +94,7 @@ public class BenchmarkImpl extends LinkedList<TripleMatcherGroup> implements Ben
     }
     
     /** @inheritDoc */
-    public Graph getGraph(EnhancementJobManager jobManager, 
+    public ImmutableGraph getGraph(EnhancementJobManager jobManager, 
                           ContentItemFactory ciFactory) throws EnhancementException {
         if(graph == null) {
             ContentItem ci;
@@ -109,7 +109,7 @@ public class BenchmarkImpl extends LinkedList<TripleMatcherGroup> implements Ben
             } else { //parsing null as chain does not work!
                 jobManager.enhanceContent(ci,chain);
             }
-            graph = ci.getMetadata().getGraph();
+            graph = ci.getMetadata().getImmutableGraph();
         }
         return graph;
     }

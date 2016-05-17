@@ -441,13 +441,13 @@ public class IndexingConfig {
     private File getResource(String path, String fileName) {
         File resourceDir = new File(getWorkingDirectory(),path);
         File resource = new File(resourceDir,fileName);
-        log.info("request for Resource {} (folder: {})",fileName,resourceDir);
+        log.info("request for RDFTerm {} (folder: {})",fileName,resourceDir);
         if(resource.getAbsoluteFile().exists()){
-            log.info(" > rquested Resource present");
+            log.info(" > rquested RDFTerm present");
         } else if(copyFromClasspath(new File(path,fileName))){
-            log.info(" > rquested Resource copied from Classpath ");
+            log.info(" > rquested RDFTerm copied from Classpath ");
         } else {
-            log.info(" > rquested Resource not found");
+            log.info(" > rquested RDFTerm not found");
         }
         return resource.getAbsoluteFile();
     }
@@ -598,7 +598,7 @@ public class IndexingConfig {
         }
         URL contextUrl = loadViaClasspath(contextResource);
         if(contextUrl == null){// if indexing.properties is not found via classpath
-            log.info("No '{}' found via classpath. Loading Resource via" +
+            log.info("No '{}' found via classpath. Loading RDFTerm via" +
             		"the classpath is deactivated.",
             		contextResource);
             return null;

@@ -44,12 +44,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.apache.clerezza.rdf.core.Language;
+import org.apache.clerezza.commons.rdf.Language;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -179,23 +179,23 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
     /**
      * The property used to write the sum of all positive classified words
      */
-    public static final UriRef POSITIVE_SENTIMENT_PROPERTY = new UriRef(NamespaceEnum.fise+"positive-sentiment");
+    public static final IRI POSITIVE_SENTIMENT_PROPERTY = new IRI(NamespaceEnum.fise+"positive-sentiment");
     /**
      * The property used to write the sum of all negative classified words
      */
-    public static final UriRef NEGATIVE_SENTIMENT_PROPERTY = new UriRef(NamespaceEnum.fise+"negative-sentiment");
+    public static final IRI NEGATIVE_SENTIMENT_PROPERTY = new IRI(NamespaceEnum.fise+"negative-sentiment");
     /**
      * The sentiment of the section (sum of positive and negative classifications)
      */
-    public static final UriRef SENTIMENT_PROPERTY = new UriRef(NamespaceEnum.fise+"sentiment");
+    public static final IRI SENTIMENT_PROPERTY = new IRI(NamespaceEnum.fise+"sentiment");
     /**
      * The dc:type value used for fise:TextAnnotations indicating a Sentiment
      */
-    public static final UriRef SENTIMENT_TYPE = new UriRef(NamespaceEnum.fise+"Sentiment");
+    public static final IRI SENTIMENT_TYPE = new IRI(NamespaceEnum.fise+"Sentiment");
     /**
      * The dc:Type value sued for the sentiment annotation of the whole document
      */
-    public static final UriRef DOCUMENT_SENTIMENT_TYPE = new UriRef(NamespaceEnum.fise+"DocumentSentiment");
+    public static final IRI DOCUMENT_SENTIMENT_TYPE = new IRI(NamespaceEnum.fise+"DocumentSentiment");
 
     private static final Map<String,Object> SERVICE_PROPERTIES;
     static {
@@ -254,7 +254,7 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
     @Override
     public int canEnhance(ContentItem ci) throws EngineException {
         // check if content is present
-        Map.Entry<UriRef,Blob> entry = NlpEngineHelper.getPlainText(this, ci, false);
+        Map.Entry<IRI,Blob> entry = NlpEngineHelper.getPlainText(this, ci, false);
         if(entry == null || entry.getValue() == null) {
             return CANNOT_ENHANCE;
         }
@@ -340,7 +340,7 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
 
             Iterator<Span> spans = at.getEnclosed(EnumSet.of(SpanTypeEnum.Sentence,SpanTypeEnum.Chunk));
             Sentence context = null;
-            MGraph metadata = ci.getMetadata();
+            Graph metadata = ci.getMetadata();
             Language lang = new Language(language);
             LiteralFactory lf = LiteralFactory.getInstance();
             ci.getLock().writeLock().lock();
@@ -354,7 +354,7 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
                         default:
                             Value<NerTag> nerAnno = span.getAnnotation(NER_ANNOTATION);
                             if(nerAnno != null){
-                                UriRef ta = EnhancementEngineHelper.createTextEnhancement(ci, this);
+                                IRI ta = EnhancementEngineHelper.createTextEnhancement(ci, this);
                                 //add span related data
                                 metadata.add(new TripleImpl(ta, ENHANCER_SELECTED_TEXT, 
                                     new PlainLiteralImpl(span.getSpan(), lang)));
@@ -382,7 +382,7 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
                                 Double sentiment = sentimentAnnotation.value();
 
 								//Create a fise:TextAnnotation for the sentiment
-                                UriRef ta = EnhancementEngineHelper.createTextEnhancement(ci, this);
+                                IRI ta = EnhancementEngineHelper.createTextEnhancement(ci, this);
                                 metadata.add(new TripleImpl(ta, ENHANCER_START,
                                         lf.createTypedLiteral(span.getStart())));
                                 metadata.add(new TripleImpl(ta, ENHANCER_END,
@@ -393,7 +393,7 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
                                 //add the generic dc:type used for all Sentiment annotation
                                 metadata.add(new TripleImpl(ta, DC_TYPE, SENTIMENT_TYPE));
 								//determine the specific dc:type for the sentiment annotation
-                                UriRef ssoType = NIFHelper.SPAN_TYPE_TO_SSO_TYPE.get(span.getType());
+                                IRI ssoType = NIFHelper.SPAN_TYPE_TO_SSO_TYPE.get(span.getType());
                                 if(ssoType != null){
                                     metadata.add(new TripleImpl(ta, DC_TYPE, ssoType));
                                 }
@@ -416,7 +416,7 @@ public class RestfulNlpAnalysisEngine extends AbstractEnhancementEngine<IOExcept
 
                 //Add the annotation for the overall sentiment of the document 
                 if ( sentimentCount > 0 ) {
-                UriRef ta = EnhancementEngineHelper.createTextEnhancement(ci, this);
+                IRI ta = EnhancementEngineHelper.createTextEnhancement(ci, this);
                     //calculate the average sentiment for a document
                     //TODO: Think on a better way to calculate a general sentiment value for a document.
                     metadata.add(new TripleImpl(ta, SENTIMENT_PROPERTY,

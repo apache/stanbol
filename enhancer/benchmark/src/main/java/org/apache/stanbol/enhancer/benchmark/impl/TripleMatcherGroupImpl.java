@@ -23,10 +23,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.benchmark.TripleMatcher;
 import org.apache.stanbol.enhancer.benchmark.TripleMatcherGroup;
 
@@ -61,25 +61,25 @@ public class TripleMatcherGroupImpl implements TripleMatcherGroup {
     }
     
     @Override
-    public Set<UriRef> getMatchingSubjects(Graph g) {
+    public Set<IRI> getMatchingSubjects(ImmutableGraph g) {
         if(matchers.isEmpty()) {
-            return new HashSet<UriRef>();
+            return new HashSet<IRI>();
         }
 
         // For all matchers, find the set of subjects that match
         // and compute the intersection of those sets
-        Set<UriRef> intersection = null;
+        Set<IRI> intersection = null;
         for(TripleMatcher m : matchers) {
-            final Set<UriRef> s = new HashSet<UriRef>();
+            final Set<IRI> s = new HashSet<IRI>();
             final Iterator<Triple> it = g.iterator();
             while(it.hasNext()) {
                 final Triple t = it.next();
                 if(m.matches(t)) {
-                    final NonLiteral n = t.getSubject();
-                    if(n instanceof UriRef) {
-                        s.add((UriRef)n);
+                    final BlankNodeOrIRI n = t.getSubject();
+                    if(n instanceof IRI) {
+                        s.add((IRI)n);
                     } else {
-                        // TODO do we need to handle non-UriRef subjects?
+                        // TODO do we need to handle non-IRI subjects?
                     }
                 }
             }

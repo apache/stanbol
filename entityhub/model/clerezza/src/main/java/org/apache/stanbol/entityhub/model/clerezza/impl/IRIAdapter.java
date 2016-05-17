@@ -21,38 +21,38 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.entityhub.servicesapi.util.AdaptingIterator.Adapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class UriRefAdapter<A> implements Adapter<UriRef, A> {
+public class IRIAdapter<A> implements Adapter<IRI, A> {
 
-    private static Logger log = LoggerFactory.getLogger(UriRefAdapter.class);
+    private static Logger log = LoggerFactory.getLogger(IRIAdapter.class);
 
     @SuppressWarnings("unchecked")
     @Override
-    public final A adapt(UriRef value, Class<A> type) {
+    public final A adapt(IRI value, Class<A> type) {
         if(type.equals(URI.class)){
             try {
                 return (A) new URI(value.getUnicodeString());
             } catch (URISyntaxException e) {
-                log.warn("Unable to parse an URI for UriRef "+value,e);
+                log.warn("Unable to parse an URI for IRI "+value,e);
                 return null;
             }
         } else if(type.equals(URL.class)){
             try {
                 return (A) new URL(value.getUnicodeString());
             } catch (MalformedURLException e) {
-                log.warn("Unable to parse an URL for UriRef "+value,e);
+                log.warn("Unable to parse an URL for IRI "+value,e);
             }
         } else if(type.equals(String.class)){
             return (A) value.getUnicodeString();
-        } else if(type.equals(UriRef.class)){ //Who converts UriRef -> UriRef ^
+        } else if(type.equals(IRI.class)){ //Who converts IRI -> IRI ^
             return (A) value;
         } else {
-            log.warn(type+" is not a supported target type for "+UriRef.class);
+            log.warn(type+" is not a supported target type for "+IRI.class);
         }
         return null;
     }

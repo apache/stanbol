@@ -26,8 +26,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.Triple;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Triple;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.felix.scr.annotations.Activate;
@@ -270,7 +270,7 @@ public class EventJobManagerImpl implements EnhancementJobManager {
             throw new IllegalStateException("Currently no enhancement chain is " +
                 "active. Please configure a Chain or enable the default chain");
         }
-        Graph ep;
+        ImmutableGraph ep;
         try {
             ep = defaultChain.getExecutionPlan();
         } catch (ChainException e) {

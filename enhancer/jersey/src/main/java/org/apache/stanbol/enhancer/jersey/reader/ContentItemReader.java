@@ -63,11 +63,11 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
@@ -80,7 +80,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
@@ -147,7 +147,7 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
                                 InputStream entityStream) throws IOException, WebApplicationException {
         //boolean withMetadata = withMetadata(httpHeaders);
         ContentItem contentItem = null;
-        UriRef contentItemId = getContentItemId();
+        IRI contentItemId = getContentItemId();
         if(log.isTraceEnabled()){
             //NOTE: enabling TRACE level logging will copy the parsed content
             //      into a BYTE array
@@ -166,7 +166,7 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
         if(mediaType.isCompatible(MULTIPART)){
             log.debug(" - parse Multipart MIME ContentItem");
             //try to read ContentItem from "multipart/from-data"
-            MGraph metadata = null;
+            Graph metadata = null;
             FileItemIterator fileItemIterator;
             try {
                 fileItemIterator = fu.getItemIterator(new MessageBodyReaderContext(entityStream, mediaType));
@@ -183,9 +183,9 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
                         //the metadata may define the ID for the contentItem
                         //only used if not parsed as query param
                         if(contentItemId == null && fis.getName() != null && !fis.getName().isEmpty()){
-                            contentItemId = new UriRef(fis.getName());
+                            contentItemId = new IRI(fis.getName());
                         }
-                        metadata = new IndexedMGraph();
+                        metadata = new IndexedGraph();
                         try {
                             getParser().parse(metadata, fis.openStream(), fis.getContentType());
                         } catch (Exception e) {
@@ -254,7 +254,7 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
                                 		"MUST define the contentParts URI as" +
                                 		"'name' of the MIME part!").build());
                         }
-                        MGraph graph = new IndexedMGraph();
+                        Graph graph = new IndexedGraph();
                         try {
                             getParser().parse(graph, fis.openStream(), fis.getContentType());
                         } catch (Exception e) {
@@ -265,7 +265,7 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
                                         fis.getName(),fis.getContentType()))
                                 .build());
                         }
-                        UriRef contentPartId = new UriRef(fis.getFieldName());
+                        IRI contentPartId = new IRI(fis.getFieldName());
                         contentItem.addPart(contentPartId, graph);
                     }
                 }
@@ -316,8 +316,8 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
      * @param lang the parsed language
      */
     private void createParsedLanguageAnnotation(ContentItem ci, String lang){
-        MGraph m = ci.getMetadata();
-        UriRef la = new UriRef("urn:enhancement-"+ EnhancementEngineHelper.randomUUID());
+        Graph m = ci.getMetadata();
+        IRI la = new IRI("urn:enhancement-"+ EnhancementEngineHelper.randomUUID());
         //add the fise:Enhancement information
         m.add(new TripleImpl(la, RDF_TYPE, ENHANCER_ENHANCEMENT));
         m.add(new TripleImpl(la, RDF_TYPE, ENHANCER_TEXTANNOTATION));
@@ -335,7 +335,7 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
      * {@link #request}.
      * @return the parsed URI or <code>null</code> if none
      */
-    private UriRef getContentItemId() {
+    private IRI getContentItemId() {
         //NOTE: check for request NULL is needed because of unit tests
         if (uriInfo == null) return null;
         URI uri = uriInfo.getRequestUri();
@@ -377,7 +377,7 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
                        + "of the " + source, Response.Status.BAD_REQUEST);
             }
         }
-        return ciUri == null ? null : new UriRef(ciUri);
+        return ciUri == null ? null : new IRI(ciUri);
     }
     /**
      * Getter for the <code>Content-Language</code> header
@@ -458,7 +458,7 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
      * @throws FileUploadException if the parsed contents are not correctly
      * encoded Multipart MIME
      */
-    private ContentItem createContentItem(UriRef id, MGraph metadata, FileItemStream content,Set<String> parsedContentParts) throws IOException, FileUploadException {
+    private ContentItem createContentItem(IRI id, Graph metadata, FileItemStream content,Set<String> parsedContentParts) throws IOException, FileUploadException {
         MediaType partContentType = MediaType.valueOf(content.getContentType());
         ContentItem contentItem = null;
         ContentItemFactory ciFactory = getContentItemFactory();
@@ -479,13 +479,13 @@ public class ContentItemReader implements MessageBodyReader<ContentItem> {
                 } else {
                     log.debug("  - create Blob for content (type:{})", fis.getContentType());
                     Blob blob = ciFactory.createBlob(new StreamSource(fis.openStream(), fis.getContentType()));
-                    UriRef contentPartId = null;
+                    IRI contentPartId = null;
                     if(fis.getFieldName() != null && !fis.getFieldName().isEmpty()){
-                        contentPartId = new UriRef(fis.getFieldName());
+                        contentPartId = new IRI(fis.getFieldName());
                     } else {
                         //generating a random ID might break metadata 
                         //TODO maybe we should throw an exception instead
-                        contentPartId = new UriRef("urn:contentpart:"+ randomUUID());
+                        contentPartId = new IRI("urn:contentpart:"+ randomUUID());
                     }
                     log.debug("    ... add Blob {} to ContentItem {} with content (type:{})",
                         new Object[]{contentPartId, id, fis.getContentType()});

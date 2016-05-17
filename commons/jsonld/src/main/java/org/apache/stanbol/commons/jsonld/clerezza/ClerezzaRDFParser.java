@@ -3,16 +3,14 @@ package org.apache.stanbol.commons.jsonld.clerezza;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.BNode;
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.BlankNode;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 
 import com.github.jsonldjava.core.JsonLdError;
 import com.github.jsonldjava.core.JsonLdProcessor;
@@ -20,7 +18,7 @@ import com.github.jsonldjava.core.RDFDataset;
 import com.github.jsonldjava.core.RDFParser;
 
 /**
- * Converts a Clerezza {@link TripleCollection} to the {@link RDFDataset} used
+ * Converts a Clerezza {@link Graph} to the {@link RDFDataset} used
  * by the {@link JsonLdProcessor}
  * 
  * @author Rupert Westenthaler
@@ -35,10 +33,10 @@ public class ClerezzaRDFParser implements RDFParser {
     @Override
     public RDFDataset parse(Object input) throws JsonLdError {
         count = 0;
-        Map<BNode,String> bNodeMap = new HashMap<BNode,String>(1024);
+        Map<BlankNode,String> bNodeMap = new HashMap<BlankNode,String>(1024);
         final RDFDataset result = new RDFDataset();
-        if(input instanceof TripleCollection){
-            for(Triple t : ((TripleCollection)input)){
+        if(input instanceof Graph){
+            for(Triple t : ((Graph)input)){
                 handleStatement(result,t, bNodeMap);
             }
         }
@@ -46,35 +44,27 @@ public class ClerezzaRDFParser implements RDFParser {
         return result;
     }
 
-    private void handleStatement(RDFDataset result, Triple t, Map<BNode,String> bNodeMap) {
+    private void handleStatement(RDFDataset result, Triple t, Map<BlankNode,String> bNodeMap) {
         final String subject = getResourceValue(t.getSubject(), bNodeMap);
         final String predicate = getResourceValue(t.getPredicate(), bNodeMap);
-        final Resource object = t.getObject();
+        final RDFTerm object = t.getObject();
         
         if (object instanceof Literal) {
             
             final String value = ((Literal)object).getLexicalForm();
             final String language;
             final String datatype;
-            if(object instanceof TypedLiteral){
+            datatype = getResourceValue(((Literal)object).getDataType(), bNodeMap);
+            Language l = ((Literal)object).getLanguage();
+            if(l == null){
                 language = null;
-                datatype = getResourceValue(((TypedLiteral)object).getDataType(), bNodeMap);
-            } else if(object instanceof PlainLiteral){
-                //we use RDF 1.1 literals so we do set the RDF_LANG_STRING datatype
-                datatype = RDF_LANG_STRING;
-                Language l = ((PlainLiteral)object).getLanguage();
-                if(l == null){
-                    language = null;
-                } else {
-                    language = l.toString();
-                }
             } else {
-                throw new IllegalStateException("Unknown Literal class " + object.getClass().getName());
+                language = l.toString();
             }
             result.addTriple(subject, predicate, value, datatype, language);
             count++;
         } else {
-            result.addTriple(subject, predicate, getResourceValue((NonLiteral) object, bNodeMap));
+            result.addTriple(subject, predicate, getResourceValue((BlankNodeOrIRI) object, bNodeMap));
             count++;
         }
         
@@ -88,20 +78,20 @@ public class ClerezzaRDFParser implements RDFParser {
         return count;
     }
     
-    private String getResourceValue(NonLiteral nl, Map<BNode, String> bNodeMap) {
+    private String getResourceValue(BlankNodeOrIRI nl, Map<BlankNode, String> bNodeMap) {
         if (nl == null) {
             return null;
-        } else if (nl instanceof UriRef) {
-            return ((UriRef) nl).getUnicodeString();
-        } else if (nl instanceof BNode) {
+        } else if (nl instanceof IRI) {
+            return ((IRI) nl).getUnicodeString();
+        } else if (nl instanceof BlankNode) {
             String bNodeId = bNodeMap.get(nl);
             if (bNodeId == null) {
                 bNodeId = Integer.toString(bNodeMap.size());
-                bNodeMap.put((BNode) nl, bNodeId);
+                bNodeMap.put((BlankNode) nl, bNodeId);
             }
             return new StringBuilder("_:b").append(bNodeId).toString();
         } else {
-            throw new IllegalStateException("Unknwon NonLiteral type " + nl.getClass().getName() + "!");
+            throw new IllegalStateException("Unknwon BlankNodeOrIRI type " + nl.getClass().getName() + "!");
         }
     }
 }

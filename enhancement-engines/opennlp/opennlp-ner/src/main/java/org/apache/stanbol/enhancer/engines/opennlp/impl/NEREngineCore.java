@@ -46,12 +46,12 @@ import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.Span;
 
-import org.apache.clerezza.rdf.core.Language;
+import org.apache.clerezza.commons.rdf.Language;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.commons.stanboltools.datafileprovider.DataFileProvider;
@@ -151,7 +151,7 @@ public abstract class NEREngineCore
             text = null;
         } else { //no AnalysedText with tokens ...
             //fallback to processing the plain text is still supported
-            Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
+            Entry<IRI,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
             if(contentPart == null){
                 throw new IllegalStateException("No ContentPart with Mimetype '"
                     + TEXT_PLAIN_MIMETYPE+"' found for ContentItem "+ci.getUri()
@@ -240,7 +240,7 @@ public abstract class NEREngineCore
                                   StringUtils.abbreviate(at != null ? at.getSpan() : text, 100) });
         }
         LiteralFactory literalFactory = LiteralFactory.getInstance();
-        MGraph g = ci.getMetadata();
+        Graph g = ci.getMetadata();
         Map<String,List<NameOccurrence>> entityNames;
         if(at != null){
             entityNames = extractNameOccurrences(nameFinderModel, at, lang);
@@ -250,16 +250,16 @@ public abstract class NEREngineCore
         //lock the ContentItem while writing the RDF data for found Named Entities
         ci.getLock().writeLock().lock();
         try {
-            Map<String,UriRef> previousAnnotations = new LinkedHashMap<String,UriRef>();
+            Map<String,IRI> previousAnnotations = new LinkedHashMap<String,IRI>();
             for (Map.Entry<String,List<NameOccurrence>> nameInContext : entityNames.entrySet()) {
     
                 String name = nameInContext.getKey();
                 List<NameOccurrence> occurrences = nameInContext.getValue();
     
-                UriRef firstOccurrenceAnnotation = null;
+                IRI firstOccurrenceAnnotation = null;
     
                 for (NameOccurrence occurrence : occurrences) {
-                    UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
+                    IRI textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, this);
                     g.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT, 
                         new PlainLiteralImpl(name, language)));
                     g.add(new TripleImpl(textAnnotation, ENHANCER_SELECTION_CONTEXT, 
@@ -283,7 +283,7 @@ public abstract class NEREngineCore
                     if (firstOccurrenceAnnotation == null) {
                         // check already extracted annotations to find a first most
                         // specific occurrence
-                        for (Map.Entry<String,UriRef> entry : previousAnnotations.entrySet()) {
+                        for (Map.Entry<String,IRI> entry : previousAnnotations.entrySet()) {
                             if (entry.getKey().contains(name)) {
                                 // we have found a most specific previous
                                 // occurrence, use it as subsumption target

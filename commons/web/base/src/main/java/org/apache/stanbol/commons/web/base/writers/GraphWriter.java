@@ -43,7 +43,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
 @Property(name="javax.ws.rs", boolValue=true)
 @Provider
 // @Produces({TEXT_PLAIN, N3, N_TRIPLE, RDF_XML, TURTLE, X_TURTLE, RDF_JSON, APPLICATION_JSON})
-public class GraphWriter implements MessageBodyWriter<TripleCollection> {
+public class GraphWriter implements MessageBodyWriter<Graph> {
 
     /**
      * The media type for JSON-LD (<code>application/ld+json</code>)
@@ -91,10 +91,10 @@ public class GraphWriter implements MessageBodyWriter<TripleCollection> {
 
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
         String mediaTypeString = mediaType.getType() + '/' + mediaType.getSubtype();
-        return TripleCollection.class.isAssignableFrom(type) && supportedMediaTypes.contains(mediaTypeString);
+        return Graph.class.isAssignableFrom(type) && supportedMediaTypes.contains(mediaTypeString);
     }
 
-    public long getSize(TripleCollection t,
+    public long getSize(Graph t,
                         Class<?> type,
                         Type genericType,
                         Annotation[] annotations,
@@ -102,7 +102,7 @@ public class GraphWriter implements MessageBodyWriter<TripleCollection> {
         return -1;
     }
 
-    public void writeTo(TripleCollection t,
+    public void writeTo(Graph t,
                         Class<?> type,
                         Type genericType,
                         Annotation[] annotations,

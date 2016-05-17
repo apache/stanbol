@@ -16,8 +16,8 @@
  */
 package org.apache.stanbol.ontologymanager.ontonet.api.io;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 
 @Deprecated
@@ -27,15 +27,15 @@ public class GraphSource extends org.apache.stanbol.ontologymanager.sources.cler
         super(graphId);
     }
 
-    public GraphSource(TripleCollection graph) {
+    public GraphSource(Graph graph) {
         super(graph);
     }
 
-    public GraphSource(UriRef graphId) {
+    public GraphSource(IRI graphId) {
         super(graphId);
     }
 
-    public GraphSource(UriRef graphId, TcProvider tcProvider) {
+    public GraphSource(IRI graphId, TcProvider tcProvider) {
         super(graphId, tcProvider);
     }
 

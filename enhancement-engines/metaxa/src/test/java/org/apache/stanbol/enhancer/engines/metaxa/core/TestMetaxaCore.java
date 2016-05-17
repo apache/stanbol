@@ -20,12 +20,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
-import org.apache.clerezza.rdf.core.BNode;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.BlankNode;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.enhancer.engines.metaxa.MetaxaEngine;
 import org.junit.BeforeClass;
@@ -187,15 +187,15 @@ public class TestMetaxaCore {
 
         int tripleCounter = 0;
 
-        HashMap<BlankNode, BNode> blankNodeMap = new HashMap<BlankNode, BNode>();
+        HashMap<BlankNode, BlankNode> blankNodeMap = new HashMap<BlankNode, BlankNode>();
 
         ClosableIterator<Statement> it = m.iterator();
         while (it.hasNext()) {
             Statement oneStmt = it.next();
 
-            NonLiteral subject = (NonLiteral) MetaxaEngine.asClerezzaResource(oneStmt.getSubject(), blankNodeMap);
-            UriRef predicate = (UriRef) MetaxaEngine.asClerezzaResource(oneStmt.getPredicate(), blankNodeMap);
-            Resource object = MetaxaEngine.asClerezzaResource(oneStmt.getObject(), blankNodeMap);
+            BlankNodeOrIRI subject = (BlankNodeOrIRI) MetaxaEngine.asClerezzaResource(oneStmt.getSubject(), blankNodeMap);
+            IRI predicate = (IRI) MetaxaEngine.asClerezzaResource(oneStmt.getPredicate(), blankNodeMap);
+            RDFTerm object = MetaxaEngine.asClerezzaResource(oneStmt.getObject(), blankNodeMap);
 
             if (null != subject
                     && null != predicate

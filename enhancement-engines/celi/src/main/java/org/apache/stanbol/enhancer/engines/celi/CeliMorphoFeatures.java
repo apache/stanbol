@@ -23,11 +23,11 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Vector;
 
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.stanbol.enhancer.engines.celi.lemmatizer.impl.CeliLemmatizerEnhancementEngine;
 import org.apache.stanbol.enhancer.engines.celi.lemmatizer.impl.Reading;
 import org.apache.stanbol.enhancer.nlp.model.Token;
@@ -61,13 +61,13 @@ public final class CeliMorphoFeatures extends MorphoFeatures{
 
     private static CeliTagSetRegistry tagRegistry = CeliTagSetRegistry.getInstance();
 
-    public static final UriRef HAS_NUMBER = new UriRef("http://purl.org/olia/olia.owl#hasNumber");
-    public static final UriRef HAS_GENDER = new UriRef("http://purl.org/olia/olia.owl#hasGender");
-    public static final UriRef HAS_PERSON = new UriRef("http://purl.org/olia/olia.owl#hasPerson");
-    public static final UriRef HAS_CASE = new UriRef("http://purl.org/olia/olia.owl#hasCase");
-    public static final UriRef HAS_DEFINITENESS = new UriRef("http://purl.org/olia/olia.owl#hasDefiniteness");
-    public static final UriRef HAS_MOOD = new UriRef("http://purl.org/olia/olia.owl#hasMood");
-    public static final UriRef HAS_TENSE = new UriRef("http://purl.org/olia/olia.owl#hasTense");
+    public static final IRI HAS_NUMBER = new IRI("http://purl.org/olia/olia.owl#hasNumber");
+    public static final IRI HAS_GENDER = new IRI("http://purl.org/olia/olia.owl#hasGender");
+    public static final IRI HAS_PERSON = new IRI("http://purl.org/olia/olia.owl#hasPerson");
+    public static final IRI HAS_CASE = new IRI("http://purl.org/olia/olia.owl#hasCase");
+    public static final IRI HAS_DEFINITENESS = new IRI("http://purl.org/olia/olia.owl#hasDefiniteness");
+    public static final IRI HAS_MOOD = new IRI("http://purl.org/olia/olia.owl#hasMood");
+    public static final IRI HAS_TENSE = new IRI("http://purl.org/olia/olia.owl#hasTense");
 
     public static CeliMorphoFeatures parseFrom(Reading reading, String lang){
         if(reading == null){
@@ -105,7 +105,7 @@ public final class CeliMorphoFeatures extends MorphoFeatures{
 	    super(lemma);
 	}
 
-	public Collection<? extends Triple> featuresAsTriples(UriRef textAnnotation, Language lang) {
+	public Collection<? extends Triple> featuresAsTriples(IRI textAnnotation, Language lang) {
 		Collection<TripleImpl> result = new Vector<TripleImpl>();
 		result.add(new TripleImpl(textAnnotation, CeliLemmatizerEnhancementEngine.hasLemmaForm, 
 		    new PlainLiteralImpl(getLemma(), lang)));

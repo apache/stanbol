@@ -285,7 +285,7 @@ public class ResourceLoader {
                     try {
                         files.put(moveToImportedFolder(new File(file)).toString(), state);
                     } catch (IOException ioe) {
-                       log.warn("Unable to move loaded Resource {} to imported Directory! "
+                       log.warn("Unable to move loaded RDFTerm {} to imported Directory! "
                            + "Please move the file manually to {}!",file,importedDir);
                        log.warn("Reason: "+ioe.getMessage(),ioe);
                        files.put(file, state);
@@ -296,7 +296,7 @@ public class ResourceLoader {
                 if(ResourceState.ERROR == state){
                 	//if failOnError is activated we stop the loading on the first error!                   
                     if (failOnError){
-                    	 String msg = "Error while loading Resource "+file;
+                    	 String msg = "Error while loading RDFTerm "+file;
                     	if(e != null){
                             throw new IllegalStateException(msg,e);
                         } else {

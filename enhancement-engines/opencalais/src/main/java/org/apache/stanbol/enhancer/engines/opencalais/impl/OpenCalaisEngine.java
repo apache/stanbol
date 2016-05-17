@@ -50,19 +50,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
@@ -178,7 +178,7 @@ public class OpenCalaisEngine
     /**
      * a map for mapping Calais classes to other classes (e.g. from dbpedia)
      */
-    private Map<UriRef,UriRef> calaisTypeMap;
+    private Map<IRI,IRI> calaisTypeMap;
     
     /**
      * the default file containing type mappings. Key and value are separated by the regular expression ' ?= ?'.
@@ -213,11 +213,11 @@ public class OpenCalaisEngine
         this.calaisUrl = calaisUrl;
     }
 
-    public Map<UriRef,UriRef> getCalaisTypeMap() {
+    public Map<IRI,IRI> getCalaisTypeMap() {
       return calaisTypeMap;
     }
 
-    public void setCalaisTypeMap(Map<UriRef,UriRef> calaisTypeMap) {
+    public void setCalaisTypeMap(Map<IRI,IRI> calaisTypeMap) {
       this.calaisTypeMap = calaisTypeMap;
     }
 
@@ -245,7 +245,7 @@ public class OpenCalaisEngine
             continue;
           String[] entry = line.split("\\s*=\\s*");
           if (entry.length == 2) {
-            calaisTypeMap.put(new UriRef(entry[0]), new UriRef(entry[1]));
+            calaisTypeMap.put(new IRI(entry[0]), new IRI(entry[1]));
           }
         }
         reader.close();
@@ -271,7 +271,7 @@ public class OpenCalaisEngine
     }
 
     public void computeEnhancements(ContentItem ci) throws EngineException {
-        Entry<UriRef,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
+        Entry<IRI,Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
         if(contentPart == null){
             throw new IllegalStateException("No ContentPart with an supported Mimetype '"
                     + SUPPORTED_MIMETYPES+"' found for ContentItem "+ci.getUri()
@@ -286,7 +286,7 @@ public class OpenCalaisEngine
             throw new InvalidContentException(this, ci, e);
         }
 
-        MGraph calaisModel = getCalaisAnalysis(text, contentPart.getValue().getMimeType());
+        Graph calaisModel = getCalaisAnalysis(text, contentPart.getValue().getMimeType());
         if (calaisModel != null) {
             //Acquire a write lock on the ContentItem when adding the enhancements
             ci.getLock().writeLock().lock();
@@ -328,11 +328,11 @@ public class OpenCalaisEngine
             language = null;
         }
         //TODO create TextEnhancement (form, start, end, type?) and EntityAnnotation (id, name, type)
-        HashMap<Resource, UriRef> entityAnnotationMap = new HashMap<Resource, UriRef>();
+        HashMap<RDFTerm, IRI> entityAnnotationMap = new HashMap<RDFTerm, IRI>();
         for (CalaisEntityOccurrence occ : occs) {
-            UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(
+            IRI textAnnotation = EnhancementEngineHelper.createTextEnhancement(
                     ci, this);
-            MGraph model = ci.getMetadata();
+            Graph model = ci.getMetadata();
             model.add(new TripleImpl(textAnnotation, DC_TYPE, occ.type));
             // for autotagger use the name instead of the matched term (that might be a pronoun!)
             if (onlyNERMode) {
@@ -360,7 +360,7 @@ public class OpenCalaisEngine
                 entityAnnotationMap.put(occ.id,textAnnotation);
                 }
                 else {
-//                UriRef entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(ci, this);
+//                IRI entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(ci, this);
 //                entityAnnotationMap.put(occ.id, entityAnnotation);
 //                model.add(new TripleImpl(entityAnnotation, DC_RELATION, textAnnotation));
 //                model.add(new TripleImpl(entityAnnotation, ENHANCER_ENTITY_LABEL, occ.name));
@@ -372,15 +372,15 @@ public class OpenCalaisEngine
     }
 
     /**
-     * Retrieves the annotations from OpenCalais as RDF/XML. From that an MGraph is created.
+     * Retrieves the annotations from OpenCalais as RDF/XML. From that an Graph is created.
      *
      * @param text the text to send to OpenCalais
      *
-     * @return an MGraph with all annotations
+     * @return an Graph with all annotations
      *
      * @throws EngineException
      */
-    public MGraph getCalaisAnalysis(String text, String mimeType) throws EngineException {
+    public Graph getCalaisAnalysis(String text, String mimeType) throws EngineException {
         if (mimeType.equals("text/plain")) {
             mimeType = "text/raw";
         }
@@ -395,7 +395,7 @@ public class OpenCalaisEngine
                 ">" +
                 "</c:processingDirectives>" +
                 "</c:params>";
-        MGraph model = null;
+        Graph model = null;
         try {
             StringBuilder postParams = new StringBuilder();
             postParams
@@ -426,18 +426,18 @@ public class OpenCalaisEngine
     }
 
     /**
-     * Parses an InputStream of RDF data and produces an MGraph from them
+     * Parses an InputStream of RDF data and produces an Graph from them
      *
      * @param in The InputStream of RDF data
      * @param format the format of the RDF data
      *
-     * @return the resulting MGraph or null if the RDF serialization format is not supported by the parser
+     * @return the resulting Graph or null if the RDF serialization format is not supported by the parser
      */
-    public MGraph readModel(InputStream in, String format) {
+    public Graph readModel(InputStream in, String format) {
         Parser parser = Parser.getInstance();
         if (parser.getSupportedFormats().contains(format)) {
-            Graph graph = parser.parse(in, format);
-            MGraph model = new SimpleMGraph(graph);
+            ImmutableGraph graph = parser.parse(in, format);
+            Graph model = new SimpleGraph(graph);
             return model;
         } else {
             log.warn("Unsupported RDF format: {}\nSupported RDF formats: {}",
@@ -450,13 +450,13 @@ public class OpenCalaisEngine
      * Extracts the relevant entity information from the Calais RDF data.
      * The entities and the relted information is extracted by a Sparql query.
      *
-     * @param model the MGraph representing the Calais data
+     * @param model the Graph representing the Calais data
      *
      * @return a Collection of entity information
      * @throws EngineException on a {@link ParseException} while processing the
      * Sparql query.
      */
-    public Collection<CalaisEntityOccurrence> queryModel(MGraph model) throws EngineException {
+    public Collection<CalaisEntityOccurrence> queryModel(Graph model) throws EngineException {
         //TODO extract also Geo info (latitude/longitude)?
         String query =
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
@@ -493,7 +493,7 @@ public class OpenCalaisEngine
             while (rs.hasNext()) {
                 SolutionMapping row = rs.next();
                 CalaisEntityOccurrence occ = new CalaisEntityOccurrence();
-                Resource disambiguated = row.get("did");
+                RDFTerm disambiguated = row.get("did");
                 occ.id = (disambiguated == null ? row.get("id") : disambiguated);
                 if (onlyNERMode) {
                     occ.type = row.get("type");
@@ -502,7 +502,7 @@ public class OpenCalaisEngine
                     occ.type = (disambiguated == null ? row.get("type") : row.get("dtype"));
                 }
                 if (calaisTypeMap != null) {
-                    UriRef mappedType = calaisTypeMap.get(occ.type);
+                    IRI mappedType = calaisTypeMap.get(occ.type);
                     if (mappedType != null) {
                         occ.type = mappedType;
                     }
@@ -618,7 +618,7 @@ public class OpenCalaisEngine
         String standAlone = (String)properties.get(CALAIS_NER_ONLY_MODE_KEY);
         setLicenseKey(license);
         setCalaisUrl(url);
-        calaisTypeMap = new HashMap<UriRef,UriRef>();
+        calaisTypeMap = new HashMap<IRI,IRI>();
         loadTypeMap(calaisTypeMapFile);
         onlyNERMode = Boolean.parseBoolean(standAlone);
         //      this.tcManager = TcManager.getInstance();

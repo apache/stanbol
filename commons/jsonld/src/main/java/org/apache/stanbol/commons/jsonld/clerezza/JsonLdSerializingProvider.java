@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.clerezza.rdf.core.serializedform.SerializingProvider;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.felix.scr.annotations.Activate;
@@ -120,7 +120,7 @@ public class JsonLdSerializingProvider implements SerializingProvider {
     private boolean prettyPrint;
     
     @Override
-    public void serialize(OutputStream serializedGraph, TripleCollection tc,  String formatIdentifier) {
+    public void serialize(OutputStream serializedGraph, Graph tc,  String formatIdentifier) {
         ClerezzaRDFParser serializer = new ClerezzaRDFParser();
         try {
             long start = System.currentTimeMillis();

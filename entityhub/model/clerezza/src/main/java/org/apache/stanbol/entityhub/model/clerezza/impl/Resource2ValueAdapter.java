@@ -16,12 +16,10 @@
  */
 package org.apache.stanbol.entityhub.model.clerezza.impl;
 
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.entityhub.servicesapi.util.AdaptingIterator.Adapter;
 import org.apache.stanbol.entityhub.model.clerezza.RdfResourceUtils;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
@@ -37,9 +35,9 @@ import org.slf4j.LoggerFactory;
  * @author Rupert Westenthaler
  * 
  * @param <T>
- *            the type of the Resource that can be converted to values
+ *            the type of the RDFTerm that can be converted to values
  */
-public class Resource2ValueAdapter<T extends Resource> implements Adapter<T,Object> {
+public class Resource2ValueAdapter<T extends RDFTerm> implements Adapter<T,Object> {
 
     private static Logger log = LoggerFactory.getLogger(Resource2ValueAdapter.class);
 
@@ -49,12 +47,10 @@ public class Resource2ValueAdapter<T extends Resource> implements Adapter<T,Obje
 
     @Override
     public final Object adapt(T value, Class<Object> type) {
-        if (value instanceof UriRef) {
+        if (value instanceof IRI) {
             return valueFactory.createReference(value);
-        } else if (value instanceof PlainLiteral) {
-            return valueFactory.createText(value);
-        } else if (value instanceof TypedLiteral) {
-            TypedLiteral literal = (TypedLiteral) value;
+        } else if (value instanceof Literal) {
+            Literal literal = (Literal) value;
             if (literal.getDataType() == null) { // if no dataType is defined
                 // return a Text without a language
                 return valueFactory.createText(literal);
@@ -96,7 +92,7 @@ public class Resource2ValueAdapter<T extends Resource> implements Adapter<T,Obje
                 }
             }
         } else {
-            log.warn("Unsupported Resource Type {} -> return String by using the toString method",
+            log.warn("Unsupported RDFTerm Type {} -> return String by using the toString method",
                 value.getClass());
             return value.toString();
         }

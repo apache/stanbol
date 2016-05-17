@@ -88,15 +88,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
 
 import org.apache.clerezza.jaxrs.utils.form.MultiPartBody;
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.clerezza.rdf.ontologies.OWL;
@@ -109,7 +107,7 @@ import org.apache.stanbol.commons.owl.util.OWLUtils;
 import org.apache.stanbol.commons.owl.util.URIUtils;
 import org.apache.stanbol.commons.web.viewable.Viewable;
 //import org.apache.stanbol.commons.web.base.ContextHelper;
-import org.apache.stanbol.ontologymanager.multiplexer.clerezza.collector.MGraphMultiplexer;
+import org.apache.stanbol.ontologymanager.multiplexer.clerezza.collector.GraphMultiplexer;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryContentException;
 import org.apache.stanbol.ontologymanager.registry.api.RegistryManager;
 import org.apache.stanbol.ontologymanager.registry.api.model.Library;
@@ -161,7 +159,7 @@ public class RootResource extends AbstractOntologyAccessResource {
         if (descriptor == null) {
             if (ontologyProvider == null) throw new IllegalStateException(
                     "Tried to obtain a multiplexer before an ontology provider was ready. This shouldn't happen.");
-            descriptor = new MGraphMultiplexer(ontologyProvider.getMetaGraph(MGraph.class));
+            descriptor = new GraphMultiplexer(ontologyProvider.getMetaGraph(Graph.class));
         }
         return descriptor;
     }
@@ -330,23 +328,23 @@ public class RootResource extends AbstractOntologyAccessResource {
         });
     }
 
-    private MGraph getGraph(String ontologyId, boolean merged, URI requestUri) {
+    private Graph getGraph(String ontologyId, boolean merged, URI requestUri) {
         long before = System.currentTimeMillis();
 
         OWLOntologyID key = OntologyUtils.decode(ontologyId);
 
         log.debug("Will try to retrieve ontology {} from provider.", key);
         /*
-         * Export directly to MGraph since the OWLOntologyWriter uses (de-)serializing converters for the
+         * Export directly to Graph since the OWLOntologyWriter uses (de-)serializing converters for the
          * other formats.
          * 
          * Use oTemp for the "real" graph and o for the graph that will be exported. This is due to the fact
          * that in o we want to change import statements, but we do not want these changes to be stored
          * permanently.
          */
-        MGraph o = null, oTemp = null;
+        Graph o = null, oTemp = null;
         try {
-            oTemp = ontologyProvider.getStoredOntology(key, MGraph.class, merged);
+            oTemp = ontologyProvider.getStoredOntology(key, Graph.class, merged);
         } catch (Exception ex) {
             log.warn("Retrieval of ontology with ID " + key + " failed.", ex);
         }
@@ -368,7 +366,7 @@ public class RootResource extends AbstractOntologyAccessResource {
             if (smallest != null) {
                 log.debug("Selected library for ontology {} is {} .", iri, smallest);
                 try {
-                    oTemp = registryManager.getLibrary(smallest).getOntology(iri, MGraph.class);
+                    oTemp = registryManager.getLibrary(smallest).getOntology(iri, Graph.class);
                 } catch (RegistryContentException e) {
                     log.warn("The content of library " + smallest + " could not be accessed.", e);
                 }
@@ -376,9 +374,9 @@ public class RootResource extends AbstractOntologyAccessResource {
         }
 
         // This is needed because we need to change import statements. No need to use a more efficient but
-        // resource-intensive IndexedMGraph, since both o and oTemp will be GC'ed after serialization.
+        // resource-intensive IndexedGraph, since both o and oTemp will be GC'ed after serialization.
         if (oTemp != null) {
-            o = new SimpleMGraph(oTemp);
+            o = new SimpleGraph(oTemp);
         }
 
         if (o == null) {
@@ -404,11 +402,11 @@ public class RootResource extends AbstractOntologyAccessResource {
         }
         for (Triple t : oldImports) {
             // construct new statement
-            String s = ((UriRef) t.getObject()).getUnicodeString();
+            String s = ((org.apache.clerezza.commons.rdf.IRI) t.getObject()).getUnicodeString();
             if (s.contains("::")) {
                 s = s.substring(s.indexOf("::") + 2, s.length());
             }
-            UriRef target = new UriRef(base + "/" + s);
+            org.apache.clerezza.commons.rdf.IRI target = new org.apache.clerezza.commons.rdf.IRI(base + "/" + s);
             o.add(new TripleImpl(t.getSubject(), OWL.imports, target));
             // remove old statement
             o.remove(t);
@@ -417,13 +415,13 @@ public class RootResource extends AbstractOntologyAccessResource {
         // Versioning.
         OWLOntologyID id = OWLUtils.extractOntologyID(o);
         if (id != null && !id.isAnonymous() && id.getVersionIRI() == null) {
-            UriRef viri = new UriRef(requestUri.toString());
+            org.apache.clerezza.commons.rdf.IRI viri = new org.apache.clerezza.commons.rdf.IRI(requestUri.toString());
             log.debug("Setting version IRI for export : {}", viri);
-            o.add(new TripleImpl(new UriRef(id.getOntologyIRI().toString()), new UriRef(
+            o.add(new TripleImpl(new org.apache.clerezza.commons.rdf.IRI(id.getOntologyIRI().toString()), new org.apache.clerezza.commons.rdf.IRI(
                     OWL2Constants.OWL_VERSION_IRI), viri));
         }
 
-        log.debug("Exported as Clerezza Graph in {} ms. Handing over to writer.", System.currentTimeMillis()
+        log.debug("Exported as Clerezza ImmutableGraph in {} ms. Handing over to writer.", System.currentTimeMillis()
                                                                                   - before);
         return o;
     }
@@ -469,12 +467,12 @@ public class RootResource extends AbstractOntologyAccessResource {
                                 @Context UriInfo uriInfo,
                                 @Context HttpHeaders headers) {
         ResponseBuilder rb;
-        UriRef me = new UriRef(getPublicBaseUri() + "ontonet/" + ontologyId);
-        MGraph mGraph = new SimpleMGraph();
+        org.apache.clerezza.commons.rdf.IRI me = new org.apache.clerezza.commons.rdf.IRI(getPublicBaseUri() + "ontonet/" + ontologyId);
+        Graph mImmutableGraph = new SimpleGraph();
         for (String alias : getAliases(OntologyUtils.decode(ontologyId))) {
-            mGraph.add(new TripleImpl(new UriRef(getPublicBaseUri() + "ontonet/" + alias), OWL.sameAs, me));
+            mImmutableGraph.add(new TripleImpl(new org.apache.clerezza.commons.rdf.IRI(getPublicBaseUri() + "ontonet/" + alias), OWL.sameAs, me));
         }
-        rb = Response.ok(mGraph);
+        rb = Response.ok(mImmutableGraph);
         // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
@@ -482,7 +480,7 @@ public class RootResource extends AbstractOntologyAccessResource {
     @GET
     @Produces({RDF_XML, TURTLE, X_TURTLE, APPLICATION_JSON, RDF_JSON})
     public Response getMetaGraph(@Context HttpHeaders headers) {
-        ResponseBuilder rb = Response.ok(ontologyProvider.getMetaGraph(Graph.class));
+        ResponseBuilder rb = Response.ok(ontologyProvider.getMetaGraph(ImmutableGraph.class));
         // addCORSOrigin(servletContext, rb, headers);
         return rb.build();
     }
@@ -526,7 +524,7 @@ public class RootResource extends AbstractOntologyAccessResource {
         long before = System.currentTimeMillis();
         IRI iri = URIUtils.sanitize(IRI.create(ontologyId));
         log.debug("Will try to retrieve ontology {} from provider.", iri);
-        // TODO be selective: if the ontology is small enough, use OWLOntology otherwise export to Graph.
+        // TODO be selective: if the ontology is small enough, use OWLOntology otherwise export to ImmutableGraph.
         OWLOntology o = null;
         try {
             // XXX Guarantee that there MUST always be an entry for any decoded ontology ID submitted.
@@ -589,7 +587,7 @@ public class RootResource extends AbstractOntologyAccessResource {
         }
 
         o.getOWLOntologyManager().applyChanges(changes);
-        log.debug("Exported as Clerezza Graph in {} ms. Handing over to writer.", System.currentTimeMillis()
+        log.debug("Exported as Clerezza ImmutableGraph in {} ms. Handing over to writer.", System.currentTimeMillis()
                                                                                   - before);
         return o;
     }
@@ -627,7 +625,7 @@ public class RootResource extends AbstractOntologyAccessResource {
         if (ontologyProvider.listOrphans().contains(key)) {
             rb = Response.status(NO_CONTENT);
         } else {
-            TripleCollection o = getGraph(ontologyId, merged, uriInfo.getRequestUri());
+            Graph o = getGraph(ontologyId, merged, uriInfo.getRequestUri());
             rb = o == null ? Response.status(NOT_FOUND) : Response.ok(o);
         }
         // addCORSOrigin(servletContext, rb, headers);

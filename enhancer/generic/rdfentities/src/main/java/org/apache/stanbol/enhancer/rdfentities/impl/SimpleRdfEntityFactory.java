@@ -18,28 +18,28 @@ package org.apache.stanbol.enhancer.rdfentities.impl;
 
 import java.lang.reflect.Proxy;
 
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
 import org.apache.stanbol.enhancer.rdfentities.RdfEntity;
 import org.apache.stanbol.enhancer.rdfentities.RdfEntityFactory;
 
 
 public class SimpleRdfEntityFactory extends RdfEntityFactory {
 
-    private final MGraph graph;
+    private final Graph graph;
     private final LiteralFactory literalFactory;
 
-    public SimpleRdfEntityFactory(MGraph graph) {
+    public SimpleRdfEntityFactory(Graph graph) {
         if (graph == null){
-            throw new IllegalArgumentException("The MGraph parsed as parameter MUST NOT be NULL!");
+            throw new IllegalArgumentException("The Graph parsed as parameter MUST NOT be NULL!");
         }
         this.graph = graph;
         literalFactory = LiteralFactory.getInstance();
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends RdfEntity> T getProxy(NonLiteral rdfNode, Class<T> type,Class<?>...additionalInterfaces) {
+    public <T extends RdfEntity> T getProxy(BlankNodeOrIRI rdfNode, Class<T> type,Class<?>...additionalInterfaces) {
         Class<?>[] interfaces = new Class<?>[additionalInterfaces.length+1];
         interfaces[0] = type;
         System.arraycopy(additionalInterfaces, 0, interfaces, 1, additionalInterfaces.length);
@@ -51,7 +51,7 @@ public class SimpleRdfEntityFactory extends RdfEntityFactory {
         return (T)instance;
     }
 
-    protected MGraph getGraph() {
+    protected Graph getGraph() {
         return graph;
     }
 

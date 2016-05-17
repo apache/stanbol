@@ -33,11 +33,11 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.engines.entitycomention.CoMentionConstants;
 import org.apache.stanbol.enhancer.engines.entitylinking.LabelTokenizer;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.LinkingStateAware;
@@ -64,7 +64,7 @@ public class ContentItemMentionBuilder extends InMemoryEntityIndex implements Li
         super(labelTokenizer,CoMentionConstants.CO_MENTION_LABEL_FIELD, languages);
     }
 
-    public void registerTextAnnotation(UriRef textAnnotation, TripleCollection metadata){
+    public void registerTextAnnotation(IRI textAnnotation, Graph metadata){
         String selectedText = EnhancementEngineHelper.getString(metadata, textAnnotation, ENHANCER_SELECTED_TEXT);
         if(selectedText != null){
             //NOTE: Typically it is not possible to find co-mentions for Entities with a

@@ -77,10 +77,10 @@ public class GeonamesIndexingSource implements EntityDataIterable, ResourceImpor
     
     private ResourceLoader loader = new ResourceLoader(this, false, false);
 
-    protected static class Resource {
+    protected static class RDFTerm {
         protected final String name;
         protected final InputStream is;
-        protected Resource(String name, InputStream is) {
+        protected RDFTerm(String name, InputStream is) {
             this.name = name;
             this.is = is;
         }
@@ -100,7 +100,7 @@ public class GeonamesIndexingSource implements EntityDataIterable, ResourceImpor
         }
         
     }
-    private List<Resource> resourceList = new ArrayList<GeonamesIndexingSource.Resource>();
+    private List<RDFTerm> resourceList = new ArrayList<GeonamesIndexingSource.RDFTerm>();
     private boolean consumed;
     
     @Override
@@ -158,14 +158,14 @@ public class GeonamesIndexingSource implements EntityDataIterable, ResourceImpor
     @Override
     public void close() {
         loader = null;
-        for(Resource resource : resourceList){
+        for(RDFTerm resource : resourceList){
             IOUtils.closeQuietly(resource.is);
         }
     }
 
     @Override
     public ResourceState importResource(InputStream is, String resourceName) throws IOException {
-        resourceList.add(new Resource(resourceName, is));
+        resourceList.add(new RDFTerm(resourceName, is));
         return ResourceState.LOADED;
     }
 
@@ -180,8 +180,8 @@ public class GeonamesIndexingSource implements EntityDataIterable, ResourceImpor
         }
         return new EntityDataIterator() {
             
-            Iterator<Resource> resources = resourceList.iterator();
-            Resource r;
+            Iterator<RDFTerm> resources = resourceList.iterator();
+            RDFTerm r;
             LineIterator it = null;
             private String next;
             private Representation rep;
@@ -196,7 +196,7 @@ public class GeonamesIndexingSource implements EntityDataIterable, ResourceImpor
                     try {
                         it = r.getEntries();
                     } catch (IOException e) {
-                        log.error("Unable to read Resource '"+r.getName()+"' because of "+e.getMessage(),e);
+                        log.error("Unable to read RDFTerm '"+r.getName()+"' because of "+e.getMessage(),e);
                         e.printStackTrace();
                         IOUtils.closeQuietly(r.is);
                         it = null;

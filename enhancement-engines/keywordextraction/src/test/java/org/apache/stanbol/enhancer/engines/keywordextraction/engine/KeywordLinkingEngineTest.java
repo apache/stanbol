@@ -39,14 +39,13 @@ import java.util.Map;
 
 import opennlp.tools.tokenize.SimpleTokenizer;
 
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.TextAnalyzerConfig;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
@@ -168,7 +167,7 @@ public class KeywordLinkingEngineTest {
     }
 
     public static ContentItem getContentItem(final String id, final String text) throws IOException {
-        return ciFactory.createContentItem(new UriRef(id),new StringSource(text));
+        return ciFactory.createContentItem(new IRI(id),new StringSource(text));
     }
     /**
      * This tests the EntityLinker functionality (if the expected Entities
@@ -237,7 +236,7 @@ public class KeywordLinkingEngineTest {
         //compute the enhancements
         engine.computeEnhancements(ci);
         //validate the enhancement results
-        Map<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+        Map<IRI,RDFTerm> expectedValues = new HashMap<IRI,RDFTerm>();
         expectedValues.put(ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(DC_CREATOR,LiteralFactory.getInstance().createTypedLiteral(
             engine.getClass().getName()));
@@ -251,18 +250,18 @@ public class KeywordLinkingEngineTest {
         assertEquals("Five fise:EntityAnnotations are expected by this Test", 5, numEntityAnnotations);
     }
     /**
-     * Similar to {@link EnhancementStructureHelper#validateAllEntityAnnotations(org.apache.clerezza.rdf.core.TripleCollection, Map)}
+     * Similar to {@link EnhancementStructureHelper#validateAllEntityAnnotations(org.apache.clerezza.commons.rdf.Graph, Map)}
      * but in addition checks fise:confidence [0..1] and entityhub:site properties
      * @param ci
      * @param expectedValues
      * @return
      */
-    private static int validateAllEntityAnnotations(ContentItem ci, Map<UriRef,Resource> expectedValues){
+    private static int validateAllEntityAnnotations(ContentItem ci, Map<IRI,RDFTerm> expectedValues){
         Iterator<Triple> entityAnnotationIterator = ci.getMetadata().filter(null,
                 RDF_TYPE, ENHANCER_ENTITYANNOTATION);
         int entityAnnotationCount = 0;
         while (entityAnnotationIterator.hasNext()) {
-            UriRef entityAnnotation = (UriRef) entityAnnotationIterator.next().getSubject();
+            IRI entityAnnotation = (IRI) entityAnnotationIterator.next().getSubject();
             // test if selected Text is added
             validateEntityAnnotation(ci.getMetadata(), entityAnnotation, expectedValues);
             //validate also that the confidence is between [0..1]
@@ -279,12 +278,12 @@ public class KeywordLinkingEngineTest {
 //                    +"',entityAnnotation "+entityAnnotation+")",
 //                    0.0 <= confidence.doubleValue());
             //Test the entityhub:site property (STANBOL-625)
-            UriRef ENTITYHUB_SITE = new UriRef(RdfResourceEnum.site.getUri());
+            IRI ENTITYHUB_SITE = new IRI(RdfResourceEnum.site.getUri());
             Iterator<Triple> entitySiteIterator = ci.getMetadata().filter(entityAnnotation, 
                 ENTITYHUB_SITE, null);
             assertTrue("Expected entityhub:site value is missing (entityAnnotation "
                     +entityAnnotation+")",entitySiteIterator.hasNext());
-            Resource siteResource = entitySiteIterator.next().getObject();
+            RDFTerm siteResource = entitySiteIterator.next().getObject();
             assertTrue("entityhub:site values MUST BE Literals", siteResource instanceof Literal);
             assertEquals("'"+TEST_REFERENCED_SITE_NAME+"' is expected as "
                 + "entityhub:site value", TEST_REFERENCED_SITE_NAME, 

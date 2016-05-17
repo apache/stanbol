@@ -28,9 +28,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.utils.GraphNode;
 import org.apache.stanbol.ontologymanager.multiplexer.clerezza.Constants;
 import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
@@ -40,7 +40,6 @@ import org.apache.stanbol.ontologymanager.sources.owlapi.RootOntologySource;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.slf4j.Logger;
@@ -65,7 +64,7 @@ public class TestStorage {
     @Test
     public void storageOnScopeCreation() throws Exception {
 
-        assertEquals(1, ontologyProvider.getStore().listTripleCollections().size());
+        assertEquals(1, ontologyProvider.getStore().listGraphs().size());
         // This one has an import that we want to hijack locally, so we use the ParentPathInputSource.
         OntologyInputSource<?> ois = new ParentPathInputSource(new File(getClass().getResource(
             "/ontologies/minorcharacters.owl").toURI()));
@@ -74,16 +73,16 @@ public class TestStorage {
 
         Set<Triple> triples = new HashSet<Triple>();
 
-        for (UriRef iri : ontologyProvider.getStore().listTripleCollections()) {
+        for (IRI iri : ontologyProvider.getStore().listGraphs()) {
             log.info("{}", iri.toString());
-            UriRef entity = new UriRef(Constants.PEANUTS_MINOR_BASE + "#" + Constants.truffles);
-            Graph ctx = new GraphNode(entity, ontologyProvider.getStore().getTriples(iri)).getNodeContext();
+            IRI entity = new IRI(Constants.PEANUTS_MINOR_BASE + "#" + Constants.truffles);
+            ImmutableGraph ctx = new GraphNode(entity, ontologyProvider.getStore().getGraph(iri)).getNodeContext();
             Iterator<Triple> it = ctx.iterator();
             while (it.hasNext())
                 triples.add(it.next());
         }
 
-        assertFalse(ontologyProvider.getStore().listTripleCollections().isEmpty());
+        assertFalse(ontologyProvider.getStore().listGraphs().isEmpty());
         assertEquals(3, triples.size());
 
     }
@@ -95,7 +94,7 @@ public class TestStorage {
     @Test
     public void storedOntologyOutlivesScope() throws Exception {
         String ephemeralScopeId = "CaducousScope";
-        OntologyInputSource<OWLOntology> ois = new RootOntologySource(IRI.create(getClass().getResource(
+        OntologyInputSource<OWLOntology> ois = new RootOntologySource(org.semanticweb.owlapi.model.IRI.create(getClass().getResource(
             "/ontologies/nonexistentcharacters.owl")));
         OWLOntologyID ontologyId = ois.getRootOntology().getOntologyID();
         Scope scope = onManager.createOntologyScope(ephemeralScopeId);

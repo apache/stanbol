@@ -30,11 +30,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
 import org.apache.stanbol.enhancer.rdfentities.Rdf;
 import org.apache.stanbol.enhancer.rdfentities.RdfEntity;
 import org.apache.stanbol.enhancer.rdfentities.RdfEntityFactory;
@@ -52,10 +52,10 @@ public class RdfEntityFactoryTest {
 
     @Test
     public void testRdfEntity() throws Exception {
-        MGraph graph = new SimpleMGraph();
+        Graph graph = new SimpleGraph();
         RdfEntityFactory factory = RdfEntityFactory.createInstance(graph);
         String testUri = "urn:RdfEntityFactoryTest:TestEntity";
-        UriRef node = new UriRef(testUri);
+        IRI node = new IRI(testUri);
         RdfEntity rdfEntity = factory.getProxy(node, RdfEntity.class);
         //TODO: Test type statement
         //TODO: test getID Method
@@ -68,10 +68,10 @@ public class RdfEntityFactoryTest {
     }
     @Test
     public void testPrimitiveDataTypes() throws Exception {
-        MGraph graph = new SimpleMGraph();
+        Graph graph = new SimpleGraph();
         RdfEntityFactory factory = RdfEntityFactory.createInstance(graph);
         String testUri = "urn:RdfEntityFactoryTest:TestEntity";
-        UriRef node = new UriRef(testUri);
+        IRI node = new IRI(testUri);
         TestRdfEntity testEntity = factory.getProxy(node, TestRdfEntity.class);
 
         testEntity.setBoolean(true);
@@ -139,10 +139,10 @@ public class RdfEntityFactoryTest {
 
     @Test
     public void testTypeStatements() throws Exception {
-        MGraph graph = new SimpleMGraph();
+        Graph graph = new SimpleGraph();
         RdfEntityFactory factory = RdfEntityFactory.createInstance(graph);
         String testUri = "urn:RdfEntityFactoryTest:TestEntity";
-        UriRef node = new UriRef(testUri);
+        IRI node = new IRI(testUri);
         TestRdfEntity entity = factory.getProxy(node, TestRdfEntity.class, new Class[]{TestRdfEntity2.class});
         // test the if the proxy implements both interfaces
         assertTrue(entity instanceof TestRdfEntity);
@@ -155,12 +155,12 @@ public class RdfEntityFactoryTest {
 
     @Test
     public void testObjectProperties() throws Exception {
-        MGraph graph = new SimpleMGraph();
+        Graph graph = new SimpleGraph();
         RdfEntityFactory factory = RdfEntityFactory.createInstance(graph);
         String testUri = "urn:RdfEntityFactoryTest:TestEntity";
         String testUri2 = "urn:RdfEntityFactoryTest:TestEntity2";
-        UriRef node = new UriRef(testUri);
-        UriRef node2 = new UriRef(testUri2);
+        IRI node = new IRI(testUri);
+        IRI node2 = new IRI(testUri2);
         TestRdfEntity entity = factory.getProxy(node, TestRdfEntity.class);
         TestRdfEntity2 entity2 = factory.getProxy(node2, TestRdfEntity2.class);
 
@@ -172,44 +172,44 @@ public class RdfEntityFactoryTest {
         entity.setURL(testURL);
         assertEquals(testURL, entity.getURL());
 
-        entity.setUriRef(node2);
-        assertEquals(node2, entity.getUriRef());
+        entity.setIRI(node2);
+        assertEquals(node2, entity.getIRI());
 
         entity2.setTestEntity(entity);
         assertEquals(entity, entity2.getTestEntity());
 
         Collection<TestRdfEntity> testEntities = entity2.getTestEntities();
         assertTrue(testEntities.isEmpty()); //check that entity is not in the collection
-        Set<UriRef> testUriRefs = new HashSet<UriRef>();
+        Set<IRI> testIRIs = new HashSet<IRI>();
         int NUM = 10;
         for (int i=0;i<NUM;i++){
-            UriRef testNode = new UriRef(testUri+':'+'_'+i);
-            testUriRefs.add(testNode);
+            IRI testNode = new IRI(testUri+':'+'_'+i);
+            testIRIs.add(testNode);
             testEntities.add(factory.getProxy(testNode, TestRdfEntity.class));
         }
         //now get a new collection and test if the added entities are there
-        Collection<UriRef> resultUriRefs = new ArrayList<UriRef>(); //add to a list to check for duplicates
+        Collection<IRI> resultIRIs = new ArrayList<IRI>(); //add to a list to check for duplicates
         for (TestRdfEntity e : entity2.getTestEntities()){
-            assertTrue(e.getId() instanceof UriRef); //I used UriRefs for the generation ...
-            resultUriRefs.add((UriRef)e.getId());
+            assertTrue(e.getId() instanceof IRI); //I used IRIs for the generation ...
+            resultIRIs.add((IRI)e.getId());
         }
         //now cross check
-        assertTrue(testUriRefs.containsAll(resultUriRefs));
-        assertTrue(resultUriRefs.containsAll(testUriRefs));
+        assertTrue(testIRIs.containsAll(resultIRIs));
+        assertTrue(resultIRIs.containsAll(testIRIs));
         //now one could try to remove some Elements ...
         // ... but things like that are already tested for Integers in testPrimitiveDataTypes
     }
 
     @Test
     public void testInterfaceHierarchies() throws Exception {
-        MGraph graph = new SimpleMGraph();
+        Graph graph = new SimpleGraph();
         RdfEntityFactory factory = RdfEntityFactory.createInstance(graph);
         String testUri = "urn:RdfEntityFactoryTest:SubTestEntity";
         String testUri2 = "urn:RdfEntityFactoryTest:TestEntity2";
         String testUri3 = "urn:RdfEntityFactoryTest:TestEntity";
-        UriRef node = new UriRef(testUri);
-        UriRef node2 = new UriRef(testUri2);
-        UriRef node3 = new UriRef(testUri3);
+        IRI node = new IRI(testUri);
+        IRI node2 = new IRI(testUri2);
+        IRI node3 = new IRI(testUri3);
         SubTestRdfEntity entity = factory.getProxy(node, SubTestRdfEntity.class);
         TestRdfEntity entity2 = factory.getProxy(node2, TestRdfEntity.class, SubTestRdfEntity.class, TestRdfEntity2.class);
         TestRdfEntity entity3 = factory.getProxy(node3, TestRdfEntity.class);
@@ -219,7 +219,7 @@ public class RdfEntityFactoryTest {
         assertTrue(entity instanceof TestRdfEntity);
         assertTrue(entity instanceof RdfEntity);
 
-        // test if the rdf:type triples are present in the MGraph
+        // test if the rdf:type triples are present in the Graph
         Set<String> typeStrings = getRdfTypes(graph, node);
         assertTrue(typeStrings.contains(SubTestRdfEntity.class.getAnnotation(Rdf.class).id()));
         assertTrue(typeStrings.contains(TestRdfEntity.class.getAnnotation(Rdf.class).id()));
@@ -231,7 +231,7 @@ public class RdfEntityFactoryTest {
         assertTrue(entity2 instanceof TestRdfEntity2);
         assertTrue(entity2 instanceof RdfEntity);
 
-        // test if the rdf:type triples are present in the MGraph
+        // test if the rdf:type triples are present in the Graph
         typeStrings = getRdfTypes(graph, node2);
         assertTrue(typeStrings.contains(SubTestRdfEntity.class.getAnnotation(Rdf.class).id()));
         assertTrue(typeStrings.contains(TestRdfEntity.class.getAnnotation(Rdf.class).id()));
@@ -256,13 +256,13 @@ public class RdfEntityFactoryTest {
         assertTrue(!(entity3 instanceof SubTestRdfEntity));
     }
 
-    private static Set<String> getRdfTypes(MGraph graph, UriRef node) {
+    private static Set<String> getRdfTypes(Graph graph, IRI node) {
         Iterator<Triple> typeStatements = graph.filter(node, Properties.RDF_TYPE, null);
         Set<String> typeStrings = new HashSet<String>();
         while(typeStatements.hasNext()){
-            Resource type = typeStatements.next().getObject();
-            assertTrue(type instanceof UriRef);
-            typeStrings.add(((UriRef)type).getUnicodeString());
+            RDFTerm type = typeStatements.next().getObject();
+            assertTrue(type instanceof IRI);
+            typeStrings.add(((IRI)type).getUnicodeString());
         }
         return typeStrings;
     }
@@ -329,10 +329,10 @@ public class RdfEntityFactoryTest {
         @Rdf(id="urn:test:URL")
         void setURL(URL uri);
 
-        @Rdf(id="urn:test:UriRef")
-        UriRef getUriRef();
-        @Rdf(id="urn:test:UriRef")
-        void setUriRef(UriRef uriRef);
+        @Rdf(id="urn:test:IRI")
+        IRI getIRI();
+        @Rdf(id="urn:test:IRI")
+        void setIRI(IRI uriRef);
     }
 
     /**

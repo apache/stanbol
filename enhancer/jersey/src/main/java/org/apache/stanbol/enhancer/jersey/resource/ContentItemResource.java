@@ -67,22 +67,21 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.clerezza.rdf.core.Language;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.commons.lang.StringUtils;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.commons.viewable.Viewable;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.resource.LayoutConfiguration;
@@ -107,13 +106,13 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     // TODO make this configurable trough a property
-    public static final UriRef SUMMARY = new UriRef("http://www.w3.org/2000/01/rdf-schema#comment");
+    public static final IRI SUMMARY = new IRI("http://www.w3.org/2000/01/rdf-schema#comment");
 
     // TODO make this configurable trough a property
-    public static final UriRef THUMBNAIL = new UriRef("http://dbpedia.org/ontology/thumbnail");
-    public static final UriRef DEPICTION = new UriRef("http://xmlns.com/foaf/0.1/depiction");
+    public static final IRI THUMBNAIL = new IRI("http://dbpedia.org/ontology/thumbnail");
+    public static final IRI DEPICTION = new IRI("http://xmlns.com/foaf/0.1/depiction");
 
-    public final Map<UriRef,String> defaultThumbnails = new HashMap<UriRef,String>();
+    public final Map<IRI,String> defaultThumbnails = new HashMap<IRI,String>();
 
     protected ContentItem contentItem;
 
@@ -140,10 +139,10 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
      * {@link Properties#ENHANCER_SELECTED_TEXT}.
      * This map is initialised by {@link #initOccurrences()}.
      */
-    protected Map<UriRef,Map<EntityExtractionSummary,EntityExtractionSummary>> extractionsByTypeMap = 
-        new HashMap<UriRef,Map<EntityExtractionSummary,EntityExtractionSummary>>();
+    protected Map<IRI,Map<EntityExtractionSummary,EntityExtractionSummary>> extractionsByTypeMap = 
+        new HashMap<IRI,Map<EntityExtractionSummary,EntityExtractionSummary>>();
 
-    private MGraph executionMetadata;
+    private Graph executionMetadata;
 
     private ChainExecution chainExecution;
 
@@ -169,7 +168,7 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
         this.enhancementException = enhancementException;
         if (localId != null) {
             URI rawURI = uriInfo.getBaseUriBuilder().path(storePath).path("raw").path(localId).build();
-            Entry<UriRef,Blob> plainTextContentPart = ContentItemHelper.getBlob(contentItem, Collections.singleton("text/plain"));
+            Entry<IRI,Blob> plainTextContentPart = ContentItemHelper.getBlob(contentItem, Collections.singleton("text/plain"));
             if (plainTextContentPart != null) {
                 this.textContent = ContentItemHelper.getText(plainTextContentPart.getValue());
             } 
@@ -191,16 +190,16 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
         }
         //init ExecutionMetadata
         try {
-            executionMetadata = ci.getPart(ExecutionMetadata.CHAIN_EXECUTION, MGraph.class);
+            executionMetadata = ci.getPart(ExecutionMetadata.CHAIN_EXECUTION, Graph.class);
         } catch(NoSuchPartException e){
             executionMetadata = null;
         }
         if(executionMetadata != null){
-            NonLiteral ce = ExecutionMetadataHelper.getChainExecution(executionMetadata, ci.getUri());
+            BlankNodeOrIRI ce = ExecutionMetadataHelper.getChainExecution(executionMetadata, ci.getUri());
             if(ce != null){
                 chainExecution = new ChainExecution(executionMetadata, ce);
                 engineExecutions = new ArrayList<Execution>();
-                for(NonLiteral ex : ExecutionMetadataHelper.getExecutions(executionMetadata, ce)){
+                for(BlankNodeOrIRI ex : ExecutionMetadataHelper.getExecutions(executionMetadata, ce)){
                     engineExecutions.add(new Execution(chainExecution,executionMetadata, ex));
                 }
                 Collections.sort(engineExecutions);
@@ -275,8 +274,8 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
     /**
      * Used to print occurrences with other types than the natively supported
      */
-    public Collection<UriRef> getOtherOccurrencyTypes(){
-        Set<UriRef>  types = new HashSet<UriRef>(extractionsByTypeMap.keySet());
+    public Collection<IRI> getOtherOccurrencyTypes(){
+        Set<IRI>  types = new HashSet<IRI>(extractionsByTypeMap.keySet());
         types.remove(DBPEDIA_PERSON);
         types.remove(DBPEDIA_ORGANISATION);
         types.remove(DBPEDIA_PLACE);
@@ -285,7 +284,7 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
         types.remove(null); //other
         return types;
     }
-    public static String extractLabel(UriRef uri){
+    public static String extractLabel(IRI uri){
         String fullUri = uri.getUnicodeString();
         int index = Math.max(fullUri.lastIndexOf('#'),fullUri.lastIndexOf('/'));
         index = Math.max(index, fullUri.lastIndexOf(':'));
@@ -296,7 +295,7 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
             return uri.getUnicodeString();
         }
     }
-    public Collection<EntityExtractionSummary> getOccurrences(UriRef type){
+    public Collection<EntityExtractionSummary> getOccurrences(IRI type){
         Map<EntityExtractionSummary,EntityExtractionSummary> typeMap = extractionsByTypeMap.get(type);
         Collection<EntityExtractionSummary> typeOccurrences;
         if(typeMap != null){
@@ -340,14 +339,14 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
     }
 
     private void initOccurrences() {
-        MGraph graph = contentItem.getMetadata();
+        Graph graph = contentItem.getMetadata();
         LiteralFactory lf = LiteralFactory.getInstance();
-        Map<UriRef,Collection<NonLiteral>> suggestionMap = new HashMap<UriRef,Collection<NonLiteral>>();
+        Map<IRI,Collection<BlankNodeOrIRI>> suggestionMap = new HashMap<IRI,Collection<BlankNodeOrIRI>>();
         // 1) get Entity Annotations
-        Map<NonLiteral,Map<EAProps,Object>> entitySuggestionMap = new HashMap<NonLiteral,Map<EAProps,Object>>();
+        Map<BlankNodeOrIRI,Map<EAProps,Object>> entitySuggestionMap = new HashMap<BlankNodeOrIRI,Map<EAProps,Object>>();
         Iterator<Triple> entityAnnotations = graph.filter(null, RDF.type, ENHANCER_ENTITYANNOTATION);
         while(entityAnnotations.hasNext()){
-            NonLiteral entityAnnotation = entityAnnotations.next().getSubject();
+            BlankNodeOrIRI entityAnnotation = entityAnnotations.next().getSubject();
             //to avoid multiple lookups (e.g. if one entityAnnotation links to+
             //several TextAnnotations) we cache the data in an intermediate Map
             Map<EAProps,Object> eaData = new EnumMap<EAProps,Object>(EAProps.class);
@@ -356,12 +355,12 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
             eaData.put(EAProps.confidence, EnhancementEngineHelper.get(
                 graph, entityAnnotation, ENHANCER_CONFIDENCE, Double.class, lf));
             entitySuggestionMap.put(entityAnnotation, eaData);
-            Iterator<UriRef> textAnnotations = getReferences(graph, entityAnnotation, DC_RELATION);
+            Iterator<IRI> textAnnotations = getReferences(graph, entityAnnotation, DC_RELATION);
             while(textAnnotations.hasNext()){
-                UriRef textAnnotation = textAnnotations.next();
-                Collection<NonLiteral> suggestions = suggestionMap.get(textAnnotation);
+                IRI textAnnotation = textAnnotations.next();
+                Collection<BlankNodeOrIRI> suggestions = suggestionMap.get(textAnnotation);
                 if(suggestions == null){
-                    suggestions = new ArrayList<NonLiteral>();
+                    suggestions = new ArrayList<BlankNodeOrIRI>();
                     suggestionMap.put(textAnnotation, suggestions);
                 }
                 suggestions.add(entityAnnotation);
@@ -370,7 +369,7 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
         // 2) get the TextAnnotations
         Iterator<Triple> textAnnotations = graph.filter(null, RDF.type, ENHANCER_TEXTANNOTATION);
         while(textAnnotations.hasNext()){
-            NonLiteral textAnnotation = textAnnotations.next().getSubject();
+            BlankNodeOrIRI textAnnotation = textAnnotations.next().getSubject();
             //we need to process those to show multiple mentions
 //            if (graph.filter(textAnnotation, DC_RELATION, null).hasNext()) {
 //                // this is not the most specific occurrence of this name: skip
@@ -388,12 +387,12 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
                 ENHANCER_END,Integer.class,lf);
             Double confidence = EnhancementEngineHelper.get(graph, textAnnotation, 
                 ENHANCER_CONFIDENCE, Double.class, lf);
-            Iterator<UriRef> types = getReferences(graph, textAnnotation, DC_TYPE);
+            Iterator<IRI> types = getReferences(graph, textAnnotation, DC_TYPE);
             if(!types.hasNext()){ //create an iterator over null in case no types are present
-                types = Collections.singleton((UriRef)null).iterator();
+                types = Collections.singleton((IRI)null).iterator();
             }
             while(types.hasNext()){
-                UriRef type = types.next();
+                IRI type = types.next();
                 Map<EntityExtractionSummary,EntityExtractionSummary> occurrenceMap = extractionsByTypeMap.get(type);
                 if(occurrenceMap == null){
                     occurrenceMap = new TreeMap<EntityExtractionSummary,EntityExtractionSummary>();
@@ -405,12 +404,12 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
                         DC_LANGUAGE);
                 }
                 EntityExtractionSummary entity = new EntityExtractionSummary(text, type, start,end,confidence,defaultThumbnails);
-                Collection<NonLiteral> suggestions = suggestionMap.get(textAnnotation);
+                Collection<BlankNodeOrIRI> suggestions = suggestionMap.get(textAnnotation);
                 if(suggestions != null){
-                    for(NonLiteral entityAnnotation : suggestions){
+                    for(BlankNodeOrIRI entityAnnotation : suggestions){
                         Map<EAProps,Object> eaData = entitySuggestionMap.get(entityAnnotation);
                         entity.addSuggestion(
-                            (UriRef)eaData.get(EAProps.entity),
+                            (IRI)eaData.get(EAProps.entity),
                             (String)eaData.get(EAProps.label), 
                             (Double)eaData.get(EAProps.confidence), 
                             graph);
@@ -577,14 +576,14 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
         protected final String name;
 
         
-        protected final UriRef type;
+        protected final IRI type;
 
         protected List<EntitySuggestion> suggestions = new ArrayList<EntitySuggestion>();
-        protected Set<UriRef> suggestionSet = new HashSet<UriRef>();
+        protected Set<IRI> suggestionSet = new HashSet<IRI>();
 
         protected List<Mention> mentions = new ArrayList<Mention>();
 
-        public final Map<UriRef,String> defaultThumbnails;
+        public final Map<IRI,String> defaultThumbnails;
 
 
         private Integer start;
@@ -594,7 +593,7 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
 
         private Double confidence;
 
-        public EntityExtractionSummary(String name, UriRef type, Integer start, Integer end, Double confidence, Map<UriRef,String> defaultThumbnails) {
+        public EntityExtractionSummary(String name, IRI type, Integer start, Integer end, Double confidence, Map<IRI,String> defaultThumbnails) {
             if(name == null){
                 this.name = extractLabel(type);
             } else {
@@ -608,7 +607,7 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
             this.confidence = confidence;
         }
 
-        public void addSuggestion(UriRef uri, String label, Double confidence, TripleCollection properties) {
+        public void addSuggestion(IRI uri, String label, Double confidence, Graph properties) {
             EntitySuggestion suggestion = new EntitySuggestion(uri, type, label, confidence, properties,
                     defaultThumbnails);
             suggestionSet.add(uri);
@@ -748,24 +747,24 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
 
     public static class EntitySuggestion implements Comparable<EntitySuggestion> {
 
-        protected final UriRef uri;
+        protected final IRI uri;
 
-        protected final UriRef type;
+        protected final IRI type;
 
         protected final String label;
 
         protected final Double confidence;
 
-        protected TripleCollection entityProperties;
+        protected Graph entityProperties;
 
-        protected final Map<UriRef,String> defaultThumbnails;
+        protected final Map<IRI,String> defaultThumbnails;
 
-        public EntitySuggestion(UriRef uri,
-                                UriRef type,
+        public EntitySuggestion(IRI uri,
+                                IRI type,
                                 String label,
                                 Double confidence,
-                                TripleCollection entityProperties,
-                                Map<UriRef,String> defaultThumbnails) {
+                                Graph entityProperties,
+                                Map<IRI,String> defaultThumbnails) {
             this.uri = uri;
             if(label == null){
                 this.label = extractLabel(uri);
@@ -799,17 +798,17 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
         public String getThumbnailSrc() {
             Iterator<Triple> thumbnails = entityProperties.filter(uri, THUMBNAIL, null);
             while (thumbnails.hasNext()) {
-                Resource object = thumbnails.next().getObject();
-                if (object instanceof UriRef) {
-                    return ((UriRef) object).getUnicodeString();
+                RDFTerm object = thumbnails.next().getObject();
+                if (object instanceof IRI) {
+                    return ((IRI) object).getUnicodeString();
                 }
             }
             //if no dbpedia ontology thumbnail was found. try the same with foaf:depiction
             thumbnails = entityProperties.filter(uri, DEPICTION, null);
             while (thumbnails.hasNext()) {
-                Resource object = thumbnails.next().getObject();
-                if (object instanceof UriRef) {
-                    return ((UriRef) object).getUnicodeString();
+                RDFTerm object = thumbnails.next().getObject();
+                if (object instanceof IRI) {
+                    return ((IRI) object).getUnicodeString();
                 }
             }
             return getMissingThumbnailSrc();
@@ -826,9 +825,9 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
         public String getSummary() {
             Iterator<Triple> abstracts = entityProperties.filter(uri, SUMMARY, null);
             while (abstracts.hasNext()) {
-                Resource object = abstracts.next().getObject();
-                if (object instanceof PlainLiteral) {
-                    PlainLiteral abstract_ = (PlainLiteral) object;
+                RDFTerm object = abstracts.next().getObject();
+                if (object instanceof Literal) {
+                    Literal abstract_ = (Literal) object;
                     if (new Language("en").equals(abstract_.getLanguage())) {
                         return abstract_.getLexicalForm();
                     }
@@ -869,15 +868,15 @@ public class ContentItemResource extends TemplateLayoutConfiguration {
      * @return an RDF/JSON descriptions of places for the word map widget
      */
     public String getPlacesAsJSON() throws ParseException, UnsupportedEncodingException {
-        MGraph g = new IndexedMGraph();
+        Graph g = new IndexedGraph();
         LiteralFactory lf = LiteralFactory.getInstance();
-        MGraph metadata = contentItem.getMetadata();
+        Graph metadata = contentItem.getMetadata();
         for (EntityExtractionSummary p : getPlaceOccurrences()) {
             EntitySuggestion bestGuess = p.getBestGuess();
             if (bestGuess == null) {
                 continue;
             }
-            UriRef uri = new UriRef(bestGuess.getUri());
+            IRI uri = new IRI(bestGuess.getUri());
             Iterator<Triple> latitudes = metadata.filter(uri, GEO_LAT, null);
             if (latitudes.hasNext()) {
                 g.add(latitudes.next());

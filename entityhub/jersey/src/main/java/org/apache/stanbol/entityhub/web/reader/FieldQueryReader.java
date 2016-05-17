@@ -117,7 +117,7 @@ public class FieldQueryReader implements MessageBodyReader<FieldQuery> {
             // 500 with no comment and HTML content type :(
             // As a workaround one could use a wrapping object as generic type
             // that parses the error and than throw the Exception within the
-            // Resource using this MessageBodyReader
+            // RDFTerm using this MessageBodyReader
             throw new WebApplicationException(
                 Response.status(Status.BAD_REQUEST).
                 entity(message.toString()).

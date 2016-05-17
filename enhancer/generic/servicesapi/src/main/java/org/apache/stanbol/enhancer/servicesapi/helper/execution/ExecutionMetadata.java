@@ -20,9 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper;
 
 public final class ExecutionMetadata {
@@ -31,8 +31,8 @@ public final class ExecutionMetadata {
     private final ChainExecution chainExecution;
     private final Map<String,Execution> engineExecutions;
 
-    public static ExecutionMetadata parseFrom(TripleCollection executionMetadata, UriRef contentItemUri){
-        NonLiteral ce = ExecutionMetadataHelper.getChainExecution(executionMetadata, contentItemUri);
+    public static ExecutionMetadata parseFrom(Graph executionMetadata, IRI contentItemUri){
+        BlankNodeOrIRI ce = ExecutionMetadataHelper.getChainExecution(executionMetadata, contentItemUri);
         ExecutionMetadata em;
         if(ce != null){
             em = new ExecutionMetadata(executionMetadata, contentItemUri,ce);
@@ -42,10 +42,10 @@ public final class ExecutionMetadata {
         return em;
     }
     
-    private ExecutionMetadata(TripleCollection executionMetadata, UriRef contentItemUri, NonLiteral ce){
+    private ExecutionMetadata(Graph executionMetadata, IRI contentItemUri, BlankNodeOrIRI ce){
         chainExecution = new ChainExecution(executionMetadata, ce);
         engineExecutions = new HashMap<String,Execution>();
-        for(NonLiteral ex : ExecutionMetadataHelper.getExecutions(executionMetadata, ce)){
+        for(BlankNodeOrIRI ex : ExecutionMetadataHelper.getExecutions(executionMetadata, ce)){
             Execution execution = new Execution(chainExecution,executionMetadata, ex);
             engineExecutions.put(execution.getExecutionNode().getEngineName(),execution);
         }

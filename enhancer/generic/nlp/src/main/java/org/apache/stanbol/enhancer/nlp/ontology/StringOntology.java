@@ -16,7 +16,7 @@
 */
 package org.apache.stanbol.enhancer.nlp.ontology;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.nlp.utils.NIFHelper;
 
 public enum StringOntology {
@@ -24,7 +24,7 @@ public enum StringOntology {
      * The URI of this String was created with the URI Recipe Context-Hash, see
      * http://aksw.org/Projects/NIF#context-hash-nif-uri-recipe.
      * 
-     * @see NIFHelper#getNifHashURI(UriRef, int, int, String)
+     * @see NIFHelper#getNifHashURI(IRI, int, int, String)
      */
     ContextHashBasedString,
     /**
@@ -33,7 +33,7 @@ public enum StringOntology {
      * be a string, a HTML document, a PDF document, text file or any other arbitrary string. The uri denoting
      * the actual document should be able to reproduce that document, i.e. either the string is directly
      * included via the property sourceString or an url can be given that contains the string via the property
-     * sourceUrl. Depending on the feedback, this might also become the Graph URI or a subclass of
+     * sourceUrl. Depending on the feedback, this might also become the ImmutableGraph URI or a subclass of
      * owl:Ontology
      */
     Document,
@@ -90,17 +90,17 @@ public enum StringOntology {
     sourceString;
     public final static String NAMESPACE = "http://nlp2rdf.lod2.eu/schema/string/";
 
-    UriRef uri;
+    IRI uri;
 
     private StringOntology() {
-        uri = new UriRef(NAMESPACE + name());
+        uri = new IRI(NAMESPACE + name());
     }
 
     public String getLocalName() {
         return name();
     }
 
-    public UriRef getUri() {
+    public IRI getUri() {
         return uri;
     }
 

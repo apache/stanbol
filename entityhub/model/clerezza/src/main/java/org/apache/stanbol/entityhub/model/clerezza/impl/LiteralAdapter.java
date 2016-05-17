@@ -17,12 +17,9 @@
 package org.apache.stanbol.entityhub.model.clerezza.impl;
 
 import org.apache.clerezza.rdf.core.InvalidLiteralTypeException;
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.NoConvertorException;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.impl.SimpleLiteralFactory;
 import org.apache.stanbol.entityhub.servicesapi.util.AdaptingIterator.Adapter;
 import org.apache.stanbol.entityhub.model.clerezza.RdfResourceUtils;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
@@ -37,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * <li> String: Converts all Literal to there lexical form
  * <li> Text: Converts {@link PlainLiteral}s and {@link TypedLiteral}s with a
  * data type constrained in {@link RdfResourceUtils#STRING_DATATYPES} to Text instances
- * <li> Int, Long, UriRef ... : Converts {@link TypedLiteral}s to the according
+ * <li> Int, Long, IRI ... : Converts {@link TypedLiteral}s to the according
  * Java Object by using the Clerezza {@link LiteralFactory} (see {@link SimpleLiteralFactory})
  * </ul>
  *
@@ -66,21 +63,15 @@ public class LiteralAdapter<T extends Literal,A> implements Adapter<T, A> {
 //            return (A) value.getLexicalForm();
 //        } else 
         if(Text.class.isAssignableFrom(type)){
-            if(value instanceof PlainLiteral ||
-                    (value instanceof TypedLiteral &&
-                    RdfResourceUtils.STRING_DATATYPES.contains(((TypedLiteral)value).getDataType()))){
+            if(RdfResourceUtils.STRING_DATATYPES.contains(value.getDataType())){
                             return (A)valueFactory.createText(value);
             } else { //this Literal can not be converted to Text!
-                if(value instanceof TypedLiteral){ //TODO: maybe remove this debugging for performance reasons
-                    log.debug("TypedLiterals of type "+((TypedLiteral)value).getDataType()+" can not be converted to Text");
-                } else {
-                    log.warn("Literal of type"+value.getClass()+" are not supported by this Adapter");
-                }
+                log.warn("Literal of type"+value.getClass()+" are not supported by this Adapter");
                 return null;
             }
-        } else if(TypedLiteral.class.isAssignableFrom(value.getClass())){
+        } else if(Literal.class.isAssignableFrom(value.getClass())){
             try {
-                return lf.createObject(type, (TypedLiteral)value);
+                return lf.createObject(type, value);
             } catch (NoConvertorException e) {
                 //This usually indicates a missing converter ... so log in warning
                 log.warn("unable to convert "+value+" to "+type,e);

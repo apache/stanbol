@@ -45,13 +45,13 @@ import java.text.NumberFormat;
 import java.util.Dictionary;
 import java.util.Map.Entry;
 
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.stanbol.enhancer.engines.dbpspotlight.Constants;
 import org.apache.stanbol.enhancer.engines.dbpspotlight.model.Annotation;
 import org.apache.stanbol.enhancer.engines.dbpspotlight.model.CandidateResource;
@@ -116,7 +116,7 @@ public final class SpotlightEngineUtils {
 	}
 	public static String getPlainContent(ContentItem ci) 
 			throws EngineException {
-		Entry<UriRef, Blob> contentPart = ContentItemHelper.getBlob(ci,
+		Entry<IRI, Blob> contentPart = ContentItemHelper.getBlob(ci,
 				SUPPORTED_MIMTYPES);
 		if (contentPart == null) {
 			throw new IllegalStateException(
@@ -203,11 +203,11 @@ public final class SpotlightEngineUtils {
      * @param lang the language of the content or <code>null</code>
      * @return the URI of the created fise:TextAnnotation
      */
-	public static UriRef createTextEnhancement(SurfaceForm occ,
+	public static IRI createTextEnhancement(SurfaceForm occ,
 			EnhancementEngine engine, ContentItem ci, String content,
 			Language lang) {
-		MGraph model = ci.getMetadata();
-		UriRef textAnnotation = EnhancementEngineHelper
+		Graph model = ci.getMetadata();
+		IRI textAnnotation = EnhancementEngineHelper
 				.createTextEnhancement(ci, engine);
 		model.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT,
 				new PlainLiteralImpl(occ.name, lang)));
@@ -217,7 +217,7 @@ public final class SpotlightEngineUtils {
 				literalFactory.createTypedLiteral(occ.offset
 						+ occ.name.length())));
 		if(occ.type != null && !occ.type.isEmpty()){
-			model.add(new TripleImpl(textAnnotation, DC_TYPE, new UriRef(
+			model.add(new TripleImpl(textAnnotation, DC_TYPE, new IRI(
 					occ.type)));
 		}
 		model.add(new TripleImpl(textAnnotation, ENHANCER_SELECTION_CONTEXT, 
@@ -237,11 +237,11 @@ public final class SpotlightEngineUtils {
 	 * created fise:EntityAnnotation
 	 * @return the URI of the created fise:TextAnnotation
 	 */
-	public static UriRef createEntityAnnotation(CandidateResource resource,
-			EnhancementEngine engine, ContentItem ci, UriRef textAnnotation) {
-		UriRef entityAnnotation = EnhancementEngineHelper
+	public static IRI createEntityAnnotation(CandidateResource resource,
+			EnhancementEngine engine, ContentItem ci, IRI textAnnotation) {
+		IRI entityAnnotation = EnhancementEngineHelper
 				.createEntityEnhancement(ci, engine);
-		MGraph model = ci.getMetadata();
+		Graph model = ci.getMetadata();
 		Literal label = new PlainLiteralImpl(resource.label,
 				new Language("en"));
 		model.add(new TripleImpl(entityAnnotation, DC_RELATION,
@@ -276,9 +276,9 @@ public final class SpotlightEngineUtils {
 	 */
 	public static void createEntityAnnotation(Annotation annotation, 
 			EnhancementEngine engine, ContentItem ci,
-			UriRef textAnnotation, Language language) {
-		MGraph model = ci.getMetadata();
-		UriRef entityAnnotation = EnhancementEngineHelper
+			IRI textAnnotation, Language language) {
+		Graph model = ci.getMetadata();
+		IRI entityAnnotation = EnhancementEngineHelper
 				.createEntityEnhancement(ci, engine);
 		Literal label = new PlainLiteralImpl(annotation.surfaceForm.name,
 				language);
@@ -290,7 +290,7 @@ public final class SpotlightEngineUtils {
 				ENHANCER_ENTITY_REFERENCE, annotation.uri));
 		//set the fise:entity-type
 		for(String type : annotation.getTypeNames()){
-			UriRef annotationType = new UriRef(type);
+			IRI annotationType = new IRI(type);
 			model.add(new TripleImpl(entityAnnotation,
 					ENHANCER_ENTITY_TYPE, annotationType));
 		}

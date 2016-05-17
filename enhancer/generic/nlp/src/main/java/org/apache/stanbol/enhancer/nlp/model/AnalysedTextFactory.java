@@ -18,7 +18,7 @@ package org.apache.stanbol.enhancer.nlp.model;
 
 import java.io.IOException;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.nlp.model.impl.AnalysedTextFactoryImpl;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -40,10 +40,10 @@ public abstract class AnalysedTextFactory {
     /**
      * Creates an {@link AnalysedText} instance for the parsed {@link Blob}
      * and registers itself as 
-     * {@link ContentItem#addPart(org.apache.clerezza.rdf.core.UriRef, Object) 
-     * ContentPart} with the {@link UriRef} {@link AnalysedText#ANALYSED_TEXT_URI}
+     * {@link ContentItem#addPart(org.apache.clerezza.commons.rdf.IRI, Object) 
+     * ContentPart} with the {@link IRI} {@link AnalysedText#ANALYSED_TEXT_URI}
      * to the parsed {@link ContentItem}.<p>
-     * If already a ContentPart with the given UriRef is registered this 
+     * If already a ContentPart with the given IRI is registered this 
      * Method will throw an {@link IllegalStateException}.
      * @param ci the ContentItem to register the created {@link AnalysedText} instance
      * @param blob the analysed {@link Blob}

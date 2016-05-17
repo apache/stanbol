@@ -16,7 +16,7 @@
 */
 package org.apache.stanbol.commons.usermanagement;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 
 public final class Ontology {
 
@@ -28,19 +28,19 @@ public final class Ontology {
    public final static String userManagementBase = "http://stanbol.apache.org/ontologies/usermanagement#";
     
 	
-	public final static UriRef EditableUser = 
-			new UriRef("EditableUser");
+	public final static IRI EditableUser = 
+			new IRI("EditableUser");
 	
-	public final static UriRef Change = 
-			new UriRef(userManagementBase + "Change");
+	public final static IRI Change = 
+			new IRI(userManagementBase + "Change");
 	
-	public final static UriRef predicate = 
-			new UriRef(userManagementBase + "predicate");
+	public final static IRI predicate = 
+			new IRI(userManagementBase + "predicate");
 	
-	public final static UriRef oldValue = 
-			new UriRef(userManagementBase + "oldValue");
+	public final static IRI oldValue = 
+			new IRI(userManagementBase + "oldValue");
 	
-	public final static UriRef newValue = 
-			new UriRef(userManagementBase + "newValue");
+	public final static IRI newValue = 
+			new IRI(userManagementBase + "newValue");
 
 }

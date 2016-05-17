@@ -25,16 +25,16 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.security.PasswordUtil;
-import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
 import org.apache.clerezza.rdf.ontologies.PERMISSION;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.clerezza.platform.config.SystemConfig;
-import org.apache.clerezza.rdf.core.access.LockableMGraph;
 import org.apache.clerezza.rdf.ontologies.PLATFORM;
 
 /**
@@ -50,7 +50,7 @@ public class AuthenticationCheckerImpl implements AuthenticationChecker {
 	private final static Logger logger = LoggerFactory.getLogger(AuthenticationCheckerImpl.class);
 
 	@Reference(target=SystemConfig.SYSTEM_GRAPH_FILTER)
-	private LockableMGraph systemGraph;
+	private Graph systemGraph;
 
 	/**
 	 * Checks if the provided username and password matches a username and
@@ -68,7 +68,7 @@ public class AuthenticationCheckerImpl implements AuthenticationChecker {
 		if (security != null) {
 			AccessController.checkPermission(new CheckAuthenticationPermission());
 		}
-		NonLiteral agent = getAgentFromGraph(userName);
+		BlankNodeOrIRI agent = getAgentFromGraph(userName);
 		String storedPassword = getPasswordOfAgent(agent);
 		if (storedPassword.equals(PasswordUtil.convertPassword(password))) {
 			logger.debug("user {} successfully authenticated", userName);
@@ -79,8 +79,8 @@ public class AuthenticationCheckerImpl implements AuthenticationChecker {
 		}
 	}
 
-	private NonLiteral getAgentFromGraph(String userName) throws NoSuchAgent {
-		NonLiteral agent;
+	private BlankNodeOrIRI getAgentFromGraph(String userName) throws NoSuchAgent {
+		BlankNodeOrIRI agent;
 		Lock l = systemGraph.getLock().readLock();
 		l.lock();
 		try {
@@ -97,7 +97,7 @@ public class AuthenticationCheckerImpl implements AuthenticationChecker {
 		return agent;
 	}
 
-	private String getPasswordOfAgent(NonLiteral agent) {
+	private String getPasswordOfAgent(BlankNodeOrIRI agent) {
 		String storedPassword = "";
 		Lock l = systemGraph.getLock().readLock();
 		l.lock();

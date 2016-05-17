@@ -18,14 +18,14 @@ package org.apache.stanbol.ontologymanager.ontonet.api.io;
 
 import java.io.InputStream;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
 
 public class GraphContentInputSource extends
         org.apache.stanbol.ontologymanager.sources.clerezza.GraphContentInputSource implements
-        OntologyInputSource<TripleCollection> {
+        OntologyInputSource<Graph> {
 
     public GraphContentInputSource(InputStream content) {
         super(content);

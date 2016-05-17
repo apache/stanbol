@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
-import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
@@ -206,7 +206,7 @@ public class TopicEngineTest extends EmbeddedSolrHelper {
         log.info(" --- testImportModelFromSKOS --- ");
         Parser parser = Parser.getInstance();
         parser.bindParsingProvider(new JenaParserProvider());
-        Graph graph = parser.parse(getClass().getResourceAsStream("/sample-scheme.skos.rdf.xml"),
+        ImmutableGraph graph = parser.parse(getClass().getResourceAsStream("/sample-scheme.skos.rdf.xml"),
             SupportedFormat.RDF_XML);
         int imported = classifier.importConceptsFromGraph(graph, OntologicalClasses.SKOS_CONCEPT,
             Properties.SKOS_BROADER);

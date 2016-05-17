@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
@@ -30,7 +30,7 @@ public class DereferenceEngineConfig implements DereferenceConstants {
     private String ldpath;
     private List<String> dereferenced;
     private Set<String> languages;
-    private Set<UriRef> entityReferences;
+    private Set<IRI> entityReferences;
 
     /**
      * Creates a DereferenceEngine configuration based on a Dictionary. Typically
@@ -127,7 +127,7 @@ public class DereferenceEngineConfig implements DereferenceConstants {
      * is present
      * @since 0.12.1 (<a href="https://issues.apache.org/jira/browse/STANBOL-1334">STANBOL-1334</a>)
      */
-    public Set<UriRef> getEntityReferences() {
+    public Set<IRI> getEntityReferences() {
         return entityReferences;
     }
 
@@ -164,17 +164,17 @@ public class DereferenceEngineConfig implements DereferenceConstants {
      * @return
      * @throws ConfigurationException
      */
-    private Set<UriRef> parseEntityReferences() throws ConfigurationException {
-        Set<UriRef> entityRefPropUris;
+    private Set<IRI> parseEntityReferences() throws ConfigurationException {
+        Set<IRI> entityRefPropUris;
         Collection<String> entityProps = EnhancementEngineHelper.getConfigValues(
             config, ENTITY_REFERENCES, String.class);
         if(entityProps == null || entityProps.isEmpty()){
             entityRefPropUris = DEFAULT_ENTITY_REFERENCES;
         } else {
-            entityRefPropUris = new HashSet<UriRef>(entityProps.size());
+            entityRefPropUris = new HashSet<IRI>(entityProps.size());
             for(String prop : entityProps){
                 if(!StringUtils.isBlank(prop)){
-                    entityRefPropUris.add(new UriRef(getConfiguredUri(nsPrefixService, 
+                    entityRefPropUris.add(new IRI(getConfiguredUri(nsPrefixService, 
                         ENTITY_REFERENCES, prop.trim())));
                 }
             }

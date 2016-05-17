@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -49,8 +49,8 @@ public final class EntitySearcherUtils {
      * @return
      */
     public final static FieldQuery createFieldQuery(FieldQueryFactory factory,
-                                        UriRef field,
-                                        Set<UriRef> includeFields,
+                                        IRI field,
+                                        Set<IRI> includeFields,
                                         List<String> search,
                                         String... languages) {
         if(field == null || field.getUnicodeString().isEmpty()){
@@ -67,7 +67,7 @@ public final class EntitySearcherUtils {
             if(!includeFields.contains(field.getUnicodeString())){
                 query.addSelectedField(field.getUnicodeString());
             }
-            for(UriRef select : includeFields){
+            for(IRI select : includeFields){
                 query.addSelectedField(select.getUnicodeString());
             }
         }

@@ -27,20 +27,20 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.BNode;
-import org.apache.clerezza.rdf.core.Language;
+import org.apache.clerezza.commons.rdf.BlankNode;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.clerezza.rdf.core.test.MGraphTest;
+import org.apache.clerezza.rdf.core.test.GraphTest;
 import org.apache.clerezza.rdf.ontologies.FOAF;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.clerezza.rdf.ontologies.RDFS;
@@ -49,13 +49,13 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class IndexedGraphTest  extends MGraphTest {
+public class IndexedGraphTest  extends GraphTest {
 
     protected static final Logger log = LoggerFactory.getLogger(IndexedGraphTest.class);
     
-    private UriRef uriRef1 = new UriRef("http://example.org/foo");
-    private UriRef uriRef2 = new UriRef("http://example.org/bar");
-    private UriRef uriRef3 = new UriRef("http://example.org/test");
+    private IRI uriRef1 = new IRI("http://example.org/foo");
+    private IRI uriRef2 = new IRI("http://example.org/bar");
+    private IRI uriRef3 = new IRI("http://example.org/test");
     private Triple triple1 = new TripleImpl(uriRef1, uriRef2, uriRef3);
     private Triple triple2 = new TripleImpl(uriRef2, uriRef2, uriRef1);
     private Triple triple3 = new TripleImpl(uriRef3, uriRef1, uriRef3);
@@ -63,13 +63,13 @@ public class IndexedGraphTest  extends MGraphTest {
     private Triple triple5 = new TripleImpl(uriRef2, uriRef3, uriRef2);
     
     @Override
-    protected MGraph getEmptyMGraph() {
-        return new IndexedMGraph();
+    protected Graph getEmptyGraph() {
+        return new IndexedGraph();
     }
     @Test
     public void bNodeConsitency() {
-        MGraph mGraph = getEmptyMGraph();
-        final BNode bNode = new BNode() {
+        Graph mGraph = getEmptyGraph();
+        final BlankNode bNode = new BlankNode() {
 
             @Override
             public int hashCode() {
@@ -78,13 +78,13 @@ public class IndexedGraphTest  extends MGraphTest {
 
             @Override
             public boolean equals(Object o) {
-                return o instanceof BNode;
+                return o instanceof BlankNode;
             }
             
         
         };
         
-        final BNode bNodeClone = new BNode() {
+        final BlankNode bNodeClone = new BlankNode() {
 
             @Override
             public int hashCode() {
@@ -93,7 +93,7 @@ public class IndexedGraphTest  extends MGraphTest {
 
             @Override
             public boolean equals(Object o) {
-                return o instanceof BNode; 
+                return o instanceof BlankNode; 
             }
             
         
@@ -101,15 +101,15 @@ public class IndexedGraphTest  extends MGraphTest {
 
         mGraph.add(new TripleImpl(bNode, uriRef1, uriRef2));
         mGraph.add(new TripleImpl(bNodeClone, uriRef2, uriRef3));
-        NonLiteral bNodeBack = mGraph.filter(null, uriRef1, uriRef2).next().getSubject();
+        BlankNodeOrIRI bNodeBack = mGraph.filter(null, uriRef1, uriRef2).next().getSubject();
         Assert.assertEquals("The bnode we get back is not equals to the one we added", bNode, bNodeBack);
-        NonLiteral bNodeBack2 = mGraph.filter(null, uriRef2, uriRef3).next().getSubject();
+        BlankNodeOrIRI bNodeBack2 = mGraph.filter(null, uriRef2, uriRef3).next().getSubject();
         Assert.assertEquals("The returnned bnodes are no longer equals", bNodeBack, bNodeBack2);
         Assert.assertTrue("Not finding a triple when searching with equal bNode", mGraph.filter(bNodeBack, uriRef2, null).hasNext());
     }
     @Test
     public void iteratorRemove() {
-        TripleCollection itc = new IndexedTripleCollection();
+        Graph itc = new IndexedGraph();
         itc.add(triple1);
         itc.add(triple2);
         itc.add(triple3);
@@ -125,13 +125,13 @@ public class IndexedGraphTest  extends MGraphTest {
 
     @Test
     public void removeAll() {
-        TripleCollection itc = new IndexedTripleCollection();
+        Graph itc = new IndexedGraph();
         itc.add(triple1);
         itc.add(triple2);
         itc.add(triple3);
         itc.add(triple4);
         itc.add(triple5);
-        TripleCollection itc2 = new IndexedTripleCollection();
+        Graph itc2 = new IndexedGraph();
         itc2.add(triple1);
         itc2.add(triple3);
         itc2.add(triple5);
@@ -141,7 +141,7 @@ public class IndexedGraphTest  extends MGraphTest {
     
     @Test
     public void filterIteratorRemove() {
-        TripleCollection itc = new IndexedTripleCollection();
+        Graph itc = new IndexedGraph();
         itc.add(triple1);
         itc.add(triple2);
         itc.add(triple3);
@@ -157,7 +157,7 @@ public class IndexedGraphTest  extends MGraphTest {
 
     @Test(expected=ConcurrentModificationException.class)
     public void remove() {
-        TripleCollection itc = new IndexedTripleCollection();
+        Graph itc = new IndexedGraph();
         itc.add(triple1);
         itc.add(triple2);
         itc.add(triple3);
@@ -172,14 +172,14 @@ public class IndexedGraphTest  extends MGraphTest {
     }
     /**
      * Holds the test data to perform 
-     * {@link TripleCollection#filter(NonLiteral, UriRef, Resource)}
-     * tests on {@link TripleCollection} implementations
+     * {@link Graph#filter(BlankNodeOrIRI, IRI, RDFTerm)}
+     * tests on {@link Graph} implementations
      * @author rwesten
      */
     public static final class TestCase {
-        public final List<NonLiteral> subjects;
-        public final List<Resource> objects;
-        public final List<UriRef> predicates;
+        public final List<BlankNodeOrIRI> subjects;
+        public final List<RDFTerm> objects;
+        public final List<IRI> predicates;
 
         /**
          * Create a new Test with a maximum number of subjects, predicates and
@@ -189,10 +189,10 @@ public class IndexedGraphTest  extends MGraphTest {
          * @param pNum the maximum number of predicates
          * @param oNum the maximum number of objects
          */
-        public TestCase(TripleCollection tc,int sNum, int pNum, int oNum){
-            Set<NonLiteral> subjects = new LinkedHashSet<NonLiteral>();
-            Set<Resource> objects = new LinkedHashSet<Resource>();
-            Set<UriRef> predicates = new LinkedHashSet<UriRef>();
+        public TestCase(Graph tc,int sNum, int pNum, int oNum){
+            Set<BlankNodeOrIRI> subjects = new LinkedHashSet<BlankNodeOrIRI>();
+            Set<RDFTerm> objects = new LinkedHashSet<RDFTerm>();
+            Set<IRI> predicates = new LinkedHashSet<IRI>();
             for(Iterator<Triple> it = tc.iterator();it.hasNext();){
                 Triple t = it.next();
                 if(subjects.size() < 100){
@@ -206,11 +206,11 @@ public class IndexedGraphTest  extends MGraphTest {
                 }
             }
             this.subjects = Collections.unmodifiableList(
-                new ArrayList<NonLiteral>(subjects));
+                new ArrayList<BlankNodeOrIRI>(subjects));
             this.predicates = Collections.unmodifiableList(
-                new ArrayList<UriRef>(predicates));
+                new ArrayList<IRI>(predicates));
             this.objects = Collections.unmodifiableList(
-                new ArrayList<Resource>(objects));
+                new ArrayList<RDFTerm>(objects));
         }
     }
     @Test
@@ -224,12 +224,12 @@ public class IndexedGraphTest  extends MGraphTest {
         createGraph(graph, graphsize, seed);
         log.info("Load Time ({} triples)", graph.size());
         long start = System.currentTimeMillis();
-        MGraph sg = new SimpleMGraph(graph);
+        Graph sg = new SimpleGraph(graph);
         log.info("  ... {}: {}",sg.getClass().getSimpleName(), System.currentTimeMillis()-start);
         start = System.currentTimeMillis();
-        MGraph ig = new IndexedMGraph(graph);
+        Graph ig = new IndexedGraph(graph);
         log.info("  ... {}: {}",ig.getClass().getSimpleName(), System.currentTimeMillis()-start);
-        //Simple Graph reference test
+        //Simple ImmutableGraph reference test
         TestCase testCase = new TestCase(sg, 20, 5, 20); //reduced form 100,5,100
         log.info("Filter Performance Test (graph size {} triples, iterations {})",graphsize,iterations);
         log.info(" --- TEST {} with {} triples ---",sg.getClass().getSimpleName(),sg.size());
@@ -244,7 +244,7 @@ public class IndexedGraphTest  extends MGraphTest {
         Assert.assertEquals(sgr, igr); //validate filter implementation
     }
     
-    public List<Long> executeTest(TripleCollection graph, TestCase test, int testCount){
+    public List<Long> executeTest(Graph graph, TestCase test, int testCount){
         List<Long> testResults = new ArrayList<Long>();
         long start;
         long resultCount;
@@ -286,7 +286,7 @@ public class IndexedGraphTest  extends MGraphTest {
         return testResults;
     }
 
-    private long testSPO(TripleCollection graph, TestCase test, int testCount) {
+    private long testSPO(Graph graph, TestCase test, int testCount) {
         Iterator<Triple> it;
         long count = 0;
         int si = -1;
@@ -311,7 +311,7 @@ public class IndexedGraphTest  extends MGraphTest {
         return count;
     }
     
-    private long testSPn(TripleCollection graph, TestCase test, int testCount) {
+    private long testSPn(Graph graph, TestCase test, int testCount) {
         Iterator<Triple> it;
         long count = 0;
         int si = -1;
@@ -331,7 +331,7 @@ public class IndexedGraphTest  extends MGraphTest {
         return count;
     }
     
-    private long testSnO(TripleCollection graph, TestCase test, int testCount) {
+    private long testSnO(Graph graph, TestCase test, int testCount) {
         Iterator<Triple> it;
         long count = 0;
         int si = -1;
@@ -351,7 +351,7 @@ public class IndexedGraphTest  extends MGraphTest {
         return count;
     }
     
-    private long testnPO(TripleCollection graph, TestCase test, int testCount) {
+    private long testnPO(Graph graph, TestCase test, int testCount) {
         Iterator<Triple> it;
         long count = 0;
         int pi = -1;
@@ -370,7 +370,7 @@ public class IndexedGraphTest  extends MGraphTest {
         }
         return count;
     }
-    private long testSnn(TripleCollection graph, TestCase test, int testCount) {
+    private long testSnn(Graph graph, TestCase test, int testCount) {
         Iterator<Triple> it;
         long count = 0;
         int si = 0;
@@ -384,7 +384,7 @@ public class IndexedGraphTest  extends MGraphTest {
         }
         return count;
     }
-    private long testnPn(TripleCollection graph, TestCase test, int testCount) {
+    private long testnPn(Graph graph, TestCase test, int testCount) {
         Iterator<Triple> it;
         long count = 0;
         int pi;
@@ -398,7 +398,7 @@ public class IndexedGraphTest  extends MGraphTest {
         }
         return count;
     }
-    private long testnnO(TripleCollection graph, TestCase test, int testCount) {
+    private long testnnO(Graph graph, TestCase test, int testCount) {
         Iterator<Triple> it;
         long count = 0;
         int oi;
@@ -426,9 +426,9 @@ public class IndexedGraphTest  extends MGraphTest {
         double b = 2.0;//bNode
         double nb = b - (l * 2 / 3); //create new bNode
         double random;
-        NonLiteral subject = null;
-        UriRef predicate = null;
-        List<UriRef> predicateList = new ArrayList<UriRef>();
+        BlankNodeOrIRI subject = null;
+        IRI predicate = null;
+        List<IRI> predicateList = new ArrayList<IRI>();
         predicateList.add(RDF.first);
         predicateList.add(RDF.rest);
         predicateList.add(RDF.type);
@@ -444,14 +444,14 @@ public class IndexedGraphTest  extends MGraphTest {
         String URI_PREFIX = "http://www.test.org/bigGraph/ref";
         Language DE = new Language("de");
         Language EN = new Language("en");
-        Iterator<UriRef> predicates = predicateList.iterator();
-        List<BNode> bNodes = new ArrayList<BNode>();
-        bNodes.add(new BNode());
+        Iterator<IRI> predicates = predicateList.iterator();
+        List<BlankNode> bNodes = new ArrayList<BlankNode>();
+        bNodes.add(new BlankNode());
         for (int count = 0; tc.size() < triples; count++) {
             random = rnd.nextDouble() * 3;
             if (random >= 2.5 || count == 0) {
                 if (random <= 2.75) {
-                    subject = new UriRef(URI_PREFIX + count);
+                    subject = new IRI(URI_PREFIX + count);
                 } else {
                     int rndIndex = (int) ((random - 2.75) * bNodes.size() / (3.0 - 2.75));
                     subject = bNodes.get(rndIndex);
@@ -470,7 +470,7 @@ public class IndexedGraphTest  extends MGraphTest {
                 } else if (random <= d) {
                     tc.add(new TripleImpl(subject, predicate, lf.createTypedLiteral(random)));
                 } else {
-                    PlainLiteral text;
+                    Literal text;
                     if (random <= i) {
                         text = new PlainLiteralImpl("Literal for " + count);
                     } else if (random <= d) {
@@ -481,18 +481,18 @@ public class IndexedGraphTest  extends MGraphTest {
                     tc.add(new TripleImpl(subject, predicate, text));
                 }
             } else if (random <= b) { //bnode
-                BNode bnode;
+                BlankNode bnode;
                 if (random <= nb) {
-                    bnode = new BNode();
+                    bnode = new BlankNode();
                     bNodes.add(bnode);
                 } else { //>nb <b
                     int rndIndex = (int) ((random - nb) * bNodes.size() / (b - nb));
                     bnode = bNodes.get(rndIndex);
                 }
                 tc.add(new TripleImpl(subject, predicate, bnode));
-            } else { //UriRef
+            } else { //IRI
                 tc.add(new TripleImpl(subject, predicate,
-                        new UriRef(URI_PREFIX + count * random)));
+                        new IRI(URI_PREFIX + count * random)));
             }
         }        
     }

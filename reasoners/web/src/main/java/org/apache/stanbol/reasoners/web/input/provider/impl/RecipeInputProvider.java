@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.reasoners.servicesapi.ReasoningServiceInputProvider;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
@@ -95,7 +95,7 @@ public class RecipeInputProvider implements ReasoningServiceInputProvider {
 	                Recipe recipe = null;
 	                synchronized (store) {
 	                    try {
-							recipe = store.getRecipe(new UriRef(recipeId));
+							recipe = store.getRecipe(new IRI(recipeId));
 						} catch (RecipeConstructionException e) {
 							log.error("An error occurred while generating the recipe.", e);
 						}                    
@@ -170,7 +170,7 @@ public class RecipeInputProvider implements ReasoningServiceInputProvider {
 	                Recipe recipe = null;
 	                synchronized (store) {
 	                    try {
-							recipe = store.getRecipe(new UriRef(recipeId));
+							recipe = store.getRecipe(new IRI(recipeId));
 						} catch (RecipeConstructionException e) {
 							log.error("An error occurred while generating the recipe.", e);
 						}                    

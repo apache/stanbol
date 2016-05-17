@@ -16,8 +16,8 @@
 */
 package org.apache.stanbol.enhancer.servicesapi.helper.execution;
 
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper;
 
 /**
@@ -27,12 +27,12 @@ import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper;
  */
 public class ExecutionNode {
     
-    final NonLiteral node;
-    private final TripleCollection ep;
+    final BlankNodeOrIRI node;
+    private final Graph ep;
     private final boolean optional;
     private final String engineName;
     
-    public ExecutionNode(TripleCollection executionPlan, NonLiteral node) {
+    public ExecutionNode(Graph executionPlan, BlankNodeOrIRI node) {
         this.node = node;
         this.ep = executionPlan;
         this.optional = ExecutionPlanHelper.isOptional(ep, node);

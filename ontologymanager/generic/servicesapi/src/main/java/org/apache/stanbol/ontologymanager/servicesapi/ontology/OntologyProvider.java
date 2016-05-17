@@ -20,9 +20,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
 import org.apache.stanbol.ontologymanager.ontonet.api.OntologyNetworkConfiguration;
@@ -144,13 +144,13 @@ public interface OntologyProvider<S> {
 
     /**
      * Returns the graph that stores all the information on stored ontologies. Whether the returned triple
-     * collection is a {@link Graph} or a {@link MGraph} depends on the provider's policy on allowing external
+     * collection is a {@link ImmutableGraph} or a {@link Graph} depends on the provider's policy on allowing external
      * modifications to the meta-level graph or not.
      * 
      * @param returnType
      * @return
      */
-    <O extends TripleCollection> O getMetaGraph(Class<O> returnType);
+    <O extends Graph> O getMetaGraph(Class<O> returnType);
 
     @Deprecated
     OWLOntologyID getOntologyId(String storageKey);

@@ -28,10 +28,10 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.engines.dbpspotlight.Constants;
 import org.apache.stanbol.enhancer.engines.dbpspotlight.TestDefaults;
@@ -76,7 +76,7 @@ public class DBPSpotlightCandidatesEnhancementTest implements TestDefaults {
 	private static ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
 	
 	private ContentItem ci;
-	private static Entry<UriRef, Blob> textContentPart;
+	private static Entry<IRI, Blob> textContentPart;
 
 	@BeforeClass
 	public static void oneTimeSetup() throws Exception {
@@ -126,7 +126,7 @@ public class DBPSpotlightCandidatesEnhancementTest implements TestDefaults {
             RemoteServiceHelper.checkServiceUnavailable(e);
             return;
         }
-        HashMap<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+        HashMap<IRI,RDFTerm> expectedValues = new HashMap<IRI,RDFTerm>();
         expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(
         		dbpslight.getClass().getName()));

@@ -27,7 +27,7 @@ import org.ontoware.rdf2go.model.impl.DiffImpl;
 import org.ontoware.rdf2go.model.impl.URIGenerator;
 import org.ontoware.rdf2go.model.node.BlankNode;
 import org.ontoware.rdf2go.model.node.Node;
-import org.ontoware.rdf2go.model.node.Resource;
+import org.ontoware.rdf2go.model.node.RDFTerm;
 import org.ontoware.rdf2go.model.node.URI;
 
 /**
@@ -45,7 +45,7 @@ public class RDF2GoUtils {
         Model remove = RDF2Go.getModelFactory().createModel();
         remove.open();
         for (Statement stmt : model) {
-            Resource subj = stmt.getSubject();
+            RDFTerm subj = stmt.getSubject();
             URI pred = stmt.getPredicate();
             Node obj = stmt.getObject();
             boolean match = false;

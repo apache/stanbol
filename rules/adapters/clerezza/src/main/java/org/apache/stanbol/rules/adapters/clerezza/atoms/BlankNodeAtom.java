@@ -16,8 +16,8 @@
  */
 package org.apache.stanbol.rules.adapters.clerezza.atoms;
 
-import org.apache.clerezza.rdf.core.BNode;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.BlankNode;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
 import org.apache.clerezza.rdf.core.sparql.query.ResourceOrVariable;
 import org.apache.clerezza.rdf.core.sparql.query.UriRefOrVariable;
@@ -58,9 +58,9 @@ public class BlankNodeAtom extends AbstractAdaptableAtom {
         ClerezzaSparqlObject predicateCSO = (ClerezzaSparqlObject) adapter.adaptTo(argument1UriResource,
             ConstructQuery.class);
 
-        subject = new UriRefOrVariable((UriRef) subjectCSO.getClerezzaObject());
-        predicate = new UriRefOrVariable((UriRef) predicateCSO.getClerezzaObject());
-        object = new ResourceOrVariable(new BNode());
+        subject = new UriRefOrVariable((IRI) subjectCSO.getClerezzaObject());
+        predicate = new UriRefOrVariable((IRI) predicateCSO.getClerezzaObject());
+        object = new ResourceOrVariable(new BlankNode());
 
         return (T) new ClerezzaSparqlObject(new SimpleTriplePattern(subject, predicate, object));
 

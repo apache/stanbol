@@ -19,19 +19,18 @@ package org.apache.stanbol.commons.owl.transformation;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.stanbol.commons.owl.transformation.JenaToClerezzaConverter;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
@@ -52,7 +51,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 public class JenaToClerezzaConverterTest {
 
 	private static Model model;
-	private static MGraph mGraph;
+	private static Graph mGraph;
 	private static String ns = "http://incubator.apache.org/stanbol/owl#";
 	private static String foaf = "http://xmlns.com/foaf/0.1/";
 	
@@ -85,14 +84,14 @@ public class JenaToClerezzaConverterTest {
 		 * 	EnricoDaga isA Person
 		 *  AndreaNuzzolese knows EnricoDaga
 		 */
-		mGraph = new SimpleMGraph();
+		mGraph = new SimpleGraph();
 		
-		UriRef knowsInClerezza = new UriRef(ns+"knows");
-		UriRef rdfType = new UriRef(RDF.getURI()+"type");
-		UriRef foafPersonInClerezza = new UriRef(foaf+"Person");
+		IRI knowsInClerezza = new IRI(ns+"knows");
+		IRI rdfType = new IRI(RDF.getURI()+"type");
+		IRI foafPersonInClerezza = new IRI(foaf+"Person");
 		
-		NonLiteral andreaNuzzoleseInClerezza = new UriRef(ns+"AndreaNuzzolese");		
-		NonLiteral enricoDagaInClerezza = new UriRef(ns+"EnricoDaga");
+		BlankNodeOrIRI andreaNuzzoleseInClerezza = new IRI(ns+"AndreaNuzzolese");		
+		BlankNodeOrIRI enricoDagaInClerezza = new IRI(ns+"EnricoDaga");
 		
 		Triple triple = new TripleImpl(andreaNuzzoleseInClerezza, rdfType, foafPersonInClerezza);
 		mGraph.add(triple);
@@ -105,14 +104,14 @@ public class JenaToClerezzaConverterTest {
 	}
 	
 	@Test
-	public void testMGraphToJenaGraph(){
+	public void testGraphToJenaGraph(){
 		/*
-		 * Convert the MGraph to a Jena Graph.
+		 * Convert the Graph to a Jena ImmutableGraph.
 		 */
-		Graph jGraph = JenaToClerezzaConverter.clerezzaMGraphToJenaGraph(mGraph);
+		com.hp.hpl.jena.graph.Graph jGraph = JenaToClerezzaConverter.clerezzaGraphToJenaGraph(mGraph);
 		
 		/*
-		 * Print all the triples contained in the Jena Graph.
+		 * Print all the triples contained in the Jena ImmutableGraph.
 		 */
 		ExtendedIterator<com.hp.hpl.jena.graph.Triple> tripleIt = jGraph.find(null, null, null);
 		while(tripleIt.hasNext()){
@@ -122,11 +121,11 @@ public class JenaToClerezzaConverterTest {
 	}
 	
 	@Test
-	public void testMGraphToJenaModel(){
+	public void testGraphToJenaModel(){
 		/*
-		 * Convert the MGraph to a Jena Model.
+		 * Convert the Graph to a Jena Model.
 		 */
-		Model model = JenaToClerezzaConverter.clerezzaMGraphToJenaModel(mGraph);
+		Model model = JenaToClerezzaConverter.clerezzaGraphToJenaModel(mGraph);
 		
 		/*
 		 * Print all the triples contained in the Jena Model.
@@ -140,14 +139,14 @@ public class JenaToClerezzaConverterTest {
 	}
 	
 	@Test
-	public void testModelToMGraph(){
+	public void testModelToGraph(){
 		/*
-		 * Convert the Jena Model to a Clerezza MGraph.
+		 * Convert the Jena Model to a Clerezza Graph.
 		 */
-		MGraph mGraph = JenaToClerezzaConverter.jenaModelToClerezzaMGraph(model);
+		Graph mGraph = JenaToClerezzaConverter.jenaModelToClerezzaGraph(model);
 		
 		/*
-		 * Print all the triples contained in the Clerezza MGraph.
+		 * Print all the triples contained in the Clerezza Graph.
 		 */
 		Iterator<Triple> tripleIt = mGraph.iterator();
 		while(tripleIt.hasNext()){

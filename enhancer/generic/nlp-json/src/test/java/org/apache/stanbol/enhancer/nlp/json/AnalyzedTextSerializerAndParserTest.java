@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
@@ -108,7 +108,7 @@ public class AnalyzedTextSerializerAndParserTest {
     
     private static ContentItem ci;
 
-    private static Entry<UriRef,Blob> textBlob;
+    private static Entry<IRI,Blob> textBlob;
     
     @BeforeClass
     public static final void setup() throws IOException {

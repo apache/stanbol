@@ -28,8 +28,8 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.jena.serializer.JenaSerializerProvider;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -95,7 +95,7 @@ public class ZemantaEnhancementEngineTest {
     public static ContentItem wrapAsContentItem(final String text) throws IOException {
     	String id = "urn:org.apache.stanbol.enhancer:test:engines.zemanta:content-item-"
             + EnhancementEngineHelper.randomUUID().toString();
-    	return ciFactory.createContentItem(new UriRef(id), new StringSource(text));
+    	return ciFactory.createContentItem(new IRI(id), new StringSource(text));
     }
 
     @Test
@@ -109,7 +109,7 @@ public class ZemantaEnhancementEngineTest {
         }
         JenaSerializerProvider serializer = new JenaSerializerProvider();
         serializer.serialize(System.out, ci.getMetadata(), TURTLE);
-        Map<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+        Map<IRI,RDFTerm> expectedValues = new HashMap<IRI,RDFTerm>();
         expectedValues.put(Properties.ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(Properties.DC_CREATOR, LiteralFactory.getInstance().createTypedLiteral(
             zemantaEngine.getClass().getName()));

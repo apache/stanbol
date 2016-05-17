@@ -24,8 +24,8 @@ import static org.junit.Assert.assertSame;
 
 import java.io.InputStream;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcProvider;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
@@ -57,7 +57,7 @@ public class TestClerezzaInputSources {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    private OntologyInputSource<TripleCollection> src;
+    private OntologyInputSource<Graph> src;
 
     @Before
     public void bind() throws Exception {
@@ -68,7 +68,7 @@ public class TestClerezzaInputSources {
         assertNotNull(src);
         if (usesTcProvider) assertNotNull(src.getOrigin());
         else assertNull(src.getOrigin());
-        TripleCollection o = src.getRootOntology();
+        Graph o = src.getRootOntology();
         assertNotNull(o);
         log.info("Ontology loaded, is a {}", o.getClass().getCanonicalName());
         assertSame(5, o.size()); // The owl:Ontology declaration and versionInfo also count as triples.
@@ -97,11 +97,11 @@ public class TestClerezzaInputSources {
     public void fromInputStreamInSimpleTcProvider() throws Exception {
         InputStream in = getClass().getResourceAsStream(dummy_RdfXml);
         TcProvider tcp = new SimpleTcProvider();
-        assertSame(0, tcp.listTripleCollections().size());
-        int before = tcp.listTripleCollections().size();
+        assertSame(0, tcp.listGraphs().size());
+        int before = tcp.listGraphs().size();
         src = new GraphContentInputSource(in, tcp);
         checkOntology(true);
-        assertSame(before + 1, tcp.listTripleCollections().size());
+        assertSame(before + 1, tcp.listGraphs().size());
     }
 
     /*
@@ -111,10 +111,10 @@ public class TestClerezzaInputSources {
     @Test
     public void fromInputStreamInTcManager() throws Exception {
         InputStream in = getClass().getResourceAsStream(dummy_RdfXml);
-        int before = tcManager.listTripleCollections().size();
+        int before = tcManager.listGraphs().size();
         src = new GraphContentInputSource(in, tcManager);
         checkOntology(true);
-        assertSame(before + 1, tcManager.listTripleCollections().size());
+        assertSame(before + 1, tcManager.listGraphs().size());
     }
 
     /*
@@ -145,54 +145,54 @@ public class TestClerezzaInputSources {
     // @Test
     // public void testGraphContentSource() throws Exception {
     // // Make sure the tc manager has been reset
-    // assertEquals(1, tcManager.listTripleCollections().size());
+    // assertEquals(1, tcManager.listGraphs().size());
     //
     // OntologyProvider<TcProvider> provider = new ClerezzaOntologyProvider(tcManager,
     // new OfflineConfigurationImpl(new Hashtable<String,Object>()), parser);
-    // int tcs = tcManager.listTripleCollections().size();
+    // int tcs = tcManager.listGraphs().size();
     // InputStream content = TestClerezzaInputSources.class
     // .getResourceAsStream("/ontologies/droppedcharacters.owl");
     // OntologyInputSource<?> src = new GraphContentInputSource(content, SupportedFormat.RDF_XML,
     // ontologyProvider.getStore(), parser);
     //
-    // log.info("After input source creation, TcManager has {} graphs. ", tcManager.listTripleCollections()
+    // log.info("After input source creation, TcManager has {} graphs. ", tcManager.listGraphs()
     // .size());
-    // for (UriRef name : tcManager.listTripleCollections())
+    // for (IRI name : tcManager.listGraphs())
     // log.info("-- {} (a {})", name, tcManager.getTriples(name).getClass().getSimpleName());
-    // assertEquals(tcs + 1, tcManager.listTripleCollections().size());
+    // assertEquals(tcs + 1, tcManager.listGraphs().size());
     // Space spc = new CoreSpaceImpl(TestClerezzaInputSources.class.getSimpleName(),
     // IRI.create("http://stanbol.apache.org/ontologies/"), provider);
     // spc.addOntology(src);
-    // log.info("After addition to space, TcManager has {} graphs. ", tcManager.listTripleCollections()
+    // log.info("After addition to space, TcManager has {} graphs. ", tcManager.listGraphs()
     // .size());
     //
-    // for (UriRef name : tcManager.listTripleCollections())
+    // for (IRI name : tcManager.listGraphs())
     // log.info("-- {} (a {})", name, tcManager.getTriples(name).getClass().getSimpleName());
     // // Adding the ontology from the same storage should not create new graphs
-    // assertEquals(tcs + 1, tcManager.listTripleCollections().size());
+    // assertEquals(tcs + 1, tcManager.listGraphs().size());
     //
     // }
 
     @Test
     public void testGraphSource() throws Exception {
-        UriRef uri = new UriRef(Locations.CHAR_ACTIVE.toString());
+        IRI uri = new IRI(Locations.CHAR_ACTIVE.toString());
         InputStream inputStream = TestClerezzaInputSources.class
                 .getResourceAsStream("/ontologies/characters_all.owl");
-        parser.parse(tcManager.createMGraph(uri), inputStream, SupportedFormat.RDF_XML, uri);
-        uri = new UriRef(Locations.CHAR_MAIN.toString());
+        parser.parse(tcManager.createGraph(uri), inputStream, SupportedFormat.RDF_XML, uri);
+        uri = new IRI(Locations.CHAR_MAIN.toString());
         inputStream = TestClerezzaInputSources.class.getResourceAsStream("/ontologies/maincharacters.owl");
-        parser.parse(tcManager.createMGraph(uri), inputStream, SupportedFormat.RDF_XML, uri);
-        uri = new UriRef(Locations.CHAR_MINOR.toString());
+        parser.parse(tcManager.createGraph(uri), inputStream, SupportedFormat.RDF_XML, uri);
+        uri = new IRI(Locations.CHAR_MINOR.toString());
         inputStream = TestClerezzaInputSources.class.getResourceAsStream("/ontologies/minorcharacters.owl");
-        parser.parse(tcManager.createMGraph(uri), inputStream, SupportedFormat.RDF_XML, uri);
+        parser.parse(tcManager.createGraph(uri), inputStream, SupportedFormat.RDF_XML, uri);
 
-        src = new GraphSource(new UriRef(Locations.CHAR_ACTIVE.toString()));
+        src = new GraphSource(new IRI(Locations.CHAR_ACTIVE.toString()));
         assertNotNull(src);
         assertNotNull(src.getRootOntology());
-        // Set<TripleCollection> imported = gis.getImports(false);
+        // Set<Graph> imported = gis.getImports(false);
         // // Number of stored graphs minus the importing one minus the reserved graph = imported graphs
-        // assertEquals(tcManager.listTripleCollections().size() - 2, imported.size());
-        // for (TripleCollection g : imported)
+        // assertEquals(tcManager.listGraphs().size() - 2, imported.size());
+        // for (Graph g : imported)
         // assertNotNull(g);
     }
 

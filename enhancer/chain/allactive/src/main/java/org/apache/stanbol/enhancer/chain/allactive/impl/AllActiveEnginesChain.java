@@ -25,7 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -62,7 +62,7 @@ public class AllActiveEnginesChain implements ServiceTrackerCustomizer, Chain {
     private String name;
     private final Object lock = new Object();
     private BundleContext context;
-    private Graph executionPlan;
+    private ImmutableGraph executionPlan;
     private Set<String> engineNames;
     private EnginesTracker tracker;
     
@@ -107,7 +107,7 @@ public class AllActiveEnginesChain implements ServiceTrackerCustomizer, Chain {
         return name;
     }
     @Override
-    public Graph getExecutionPlan() throws ChainException {
+    public ImmutableGraph getExecutionPlan() throws ChainException {
         synchronized (lock) {
             if(executionPlan == null){
                 update();

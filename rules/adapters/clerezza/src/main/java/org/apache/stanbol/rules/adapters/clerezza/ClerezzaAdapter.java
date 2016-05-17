@@ -28,7 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
 import org.apache.clerezza.rdf.core.sparql.query.Expression;
 import org.apache.clerezza.rdf.core.sparql.query.TriplePattern;
@@ -308,7 +308,7 @@ public class ClerezzaAdapter extends AbstractRuleAdapter {
         try {
             KB kb = RuleParserImpl.parse("http://sssw.org/2012/rules/", new FileInputStream("/Users/mac/Documents/CNR/SSSW2012/construct/exercise3"));
             System.out.println("Rules: " + kb.getRuleList().size());
-            Recipe recipe = new RecipeImpl(new UriRef("http://sssw.org/2012/rules/"), "Recipe", kb.getRuleList());
+            Recipe recipe = new RecipeImpl(new IRI("http://sssw.org/2012/rules/"), "Recipe", kb.getRuleList());
             
             //List<ConstructQuery> jenaRules = (List<ConstructQuery>) ruleAdapter.adaptTo(recipe, ConstructQuery.class);
             

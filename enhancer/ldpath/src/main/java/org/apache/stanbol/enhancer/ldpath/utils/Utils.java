@@ -21,8 +21,8 @@ import static org.apache.stanbol.enhancer.ldpath.EnhancerLDPath.getConfig;
 import java.io.StringReader;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
 import org.apache.marmotta.ldpath.api.backend.RDFBackend;
 import org.apache.marmotta.ldpath.api.selectors.NodeSelector;
 import org.apache.marmotta.ldpath.parser.LdPathParser;
@@ -35,7 +35,7 @@ public final class Utils {
     
 
 
-    public static RDFBackend<Resource> EMPTY_BACKEND;
+    public static RDFBackend<RDFTerm> EMPTY_BACKEND;
     
     /**
      * Returns an empty {@link RDFBackend} instance intended to be used to create
@@ -53,20 +53,20 @@ public final class Utils {
      * used for the 2nd purpose and does contain no information!
      * <li>
      */
-    public static RDFBackend<Resource> getEmptyBackend(){
+    public static RDFBackend<RDFTerm> getEmptyBackend(){
         if(EMPTY_BACKEND == null){
-            EMPTY_BACKEND = new ClerezzaBackend(new SimpleMGraph());
+            EMPTY_BACKEND = new ClerezzaBackend(new SimpleGraph());
         }
         return EMPTY_BACKEND;
     }
     
 
     
-    public static NodeSelector<Resource> parseSelector(String path) throws ParseException {
+    public static NodeSelector<RDFTerm> parseSelector(String path) throws ParseException {
         return parseSelector(path, null);
     }
-    public static NodeSelector<Resource> parseSelector(String path, Map<String,String> additionalNamespaceMappings) throws ParseException {
-        LdPathParser<Resource> parser = new LdPathParser<Resource>(
+    public static NodeSelector<RDFTerm> parseSelector(String path, Map<String,String> additionalNamespaceMappings) throws ParseException {
+        LdPathParser<RDFTerm> parser = new LdPathParser<RDFTerm>(
                getEmptyBackend(), getConfig(), new StringReader(path));
         return parser.parseSelector(additionalNamespaceMappings);
     }

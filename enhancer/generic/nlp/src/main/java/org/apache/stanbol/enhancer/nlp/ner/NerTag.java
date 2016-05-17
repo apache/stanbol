@@ -16,17 +16,17 @@
 */
 package org.apache.stanbol.enhancer.nlp.ner;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.nlp.model.tag.Tag;
 
 public class NerTag extends Tag<NerTag> {
 
-    private UriRef type;
+    private IRI type;
     
     public NerTag(String tag) {
         super(tag);
     }
-    public NerTag(String tag,UriRef type) {
+    public NerTag(String tag,IRI type) {
         super(tag);
         this.type = type;
     }
@@ -36,7 +36,7 @@ public class NerTag extends Tag<NerTag> {
      * @return the <code>dc:type</code> of the Named Entity
      * as also used by the <code>fise:TextAnnotation</code>
      */
-    public UriRef getType() {
+    public IRI getType() {
         return type;
     }
     

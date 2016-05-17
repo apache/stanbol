@@ -27,9 +27,9 @@ import java.net.URLEncoder;
 import java.util.EnumMap;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
 import org.slf4j.Logger;
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class wraps the Zemanta API into one method.
  * Zemanta is able to return RDF-XML so parsing the response into
- * a Graph object is simple.
+ * a ImmutableGraph object is simple.
  *
  * @author michaelmarth
  * @author westei (Rupert Westenthaler)
@@ -55,9 +55,9 @@ public class ZemantaAPIWrapper {
         apiKey = key;
     }
 
-    public Graph enhance(String textToAnalyze) throws IOException {
+    public ImmutableGraph enhance(String textToAnalyze) throws IOException {
         InputStream is = sendRequest(textToAnalyze);
-        Graph zemantaResponseGraph = parseResponse(is);
+        ImmutableGraph zemantaResponseGraph = parseResponse(is);
         return zemantaResponseGraph;
     }
 
@@ -130,13 +130,13 @@ public class ZemantaAPIWrapper {
         return data;
     }
 
-    private Graph parseResponse(InputStream is) {
+    private ImmutableGraph parseResponse(InputStream is) {
         JenaParserProvider jenaParserProvider = new JenaParserProvider();
         //NOTE(rw): the new third parameter is the base URI used to resolve relative paths
-        MGraph g = new SimpleMGraph();
+        Graph g = new SimpleGraph();
         jenaParserProvider.parse(g,is, SupportedFormat.RDF_XML,null);
         log.debug("graph: " + g.toString());
-        return g.getGraph();
+        return g.getImmutableGraph();
     }
 
 }

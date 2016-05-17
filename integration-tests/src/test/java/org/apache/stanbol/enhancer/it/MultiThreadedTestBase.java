@@ -39,12 +39,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
-import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.core.serializedform.UnsupportedFormatException;
@@ -61,7 +61,7 @@ import org.apache.http.config.SocketConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.namespaceprefix.service.StanbolNamespacePrefixService;
@@ -93,7 +93,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
      */
     public static final String PROPERTY_CHAIN = "stanbol.it.multithreadtest.chain";
     /**
-     * The reference to the test data. Can be a File, a Resource available via the
+     * The reference to the test data. Can be a File, a RDFTerm available via the
      * Classpath or an URL. This also supports compressed files. In case of ZIP
      * only the first entry is processed.
      */
@@ -245,7 +245,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
                 mediaType = null;
             }
         }
-        Assert.assertNotNull("Unable to detect MediaType for Resource '"
+        Assert.assertNotNull("Unable to detect MediaType for RDFTerm '"
             + name+"'. Please use the property '"+PROPERTY_TEST_DATA_TYPE
             + "' to manually parse the MediaType!", mediaType);
         
@@ -271,7 +271,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
      * the Apache Clerezza RDF parsers.
      */
     private Iterator<String> createRdfDataIterator(InputStream is, String mediaType, final String propertyString) {
-        final SimpleMGraph graph = new SimpleMGraph();
+        final SimpleGraph graph = new SimpleGraph();
         try {
             rdfParser.parse(graph, is, mediaType);
         } catch (UnsupportedFormatException e) {
@@ -288,19 +288,19 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
             String next = null;
             private String getNext(){
                 if(it == null){
-                    UriRef property;
+                    IRI property;
                     if("*".equals(propertyString)){
                         property = null; //wildcard
                         log.info("Iterate over values of all Triples");
                     } else {
-                        property = new UriRef(
+                        property = new IRI(
                             NamespaceMappingUtils.getConfiguredUri(nsPrefixService, propertyString));
                         log.info("Iterate over values of property {}", property);
                     }
                     it = graph.filter(null, property, null);
                 }
                 while(it.hasNext()){
-                    Resource value = it.next().getObject();
+                    RDFTerm value = it.next().getObject();
                     if(value instanceof Literal){
                         return ((Literal)value).getLexicalForm();
                     }
@@ -635,7 +635,7 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
             }
         }
 
-        void succeed(Request request, UriRef contentItemUri, TripleCollection results, Long rtt, int size) {
+        void succeed(Request request, IRI contentItemUri, Graph results, Long rtt, int size) {
             ExecutionMetadata em = ExecutionMetadata.parseFrom(results, contentItemUri);
             results.clear(); // we no longer need the results
             if (em != null) {
@@ -751,19 +751,19 @@ public abstract class MultiThreadedTestBase extends EnhancerTestBase {
                 rtt = null;
                 return;
             }
-            IndexedMGraph graph = new IndexedMGraph();
+            IndexedGraph graph = new IndexedGraph();
             try {
                 rdfParser.parse(graph,executor.getStream(), executor.getContentType().getMimeType());
                 Iterator<Triple> ciIt = graph.filter(null, Properties.ENHANCER_EXTRACTED_FROM, null);
                 if(!ciIt.hasNext()){
                     throw new IllegalStateException("Enhancement Results do not caontain a single Enhancement");
                 }
-                Resource contentItemUri = ciIt.next().getObject();
-                if(!(contentItemUri instanceof UriRef)){
-                    throw new IllegalStateException("ContentItem URI is not an UriRef but an instance of "
+                RDFTerm contentItemUri = ciIt.next().getObject();
+                if(!(contentItemUri instanceof IRI)){
+                    throw new IllegalStateException("ContentItem URI is not an IRI but an instance of "
                             + contentItemUri.getClass().getSimpleName());
                 }
-                tracker.succeed(request, (UriRef) contentItemUri, graph, rtt, executor.getContent().length());
+                tracker.succeed(request, (IRI) contentItemUri, graph, rtt, executor.getContent().length());
                 content = null; //do not store content for successful results
             } catch (Exception e) {
                 log.warn("Exception while parsing Enhancement Response",e);

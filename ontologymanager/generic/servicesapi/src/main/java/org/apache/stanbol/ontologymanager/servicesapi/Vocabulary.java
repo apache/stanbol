@@ -16,9 +16,8 @@
  */
 package org.apache.stanbol.ontologymanager.servicesapi;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
@@ -59,7 +58,7 @@ public class Vocabulary {
 
     private static final String _SHORT_ENTRY = "Entry";
 
-    private static final String _SHORT_GRAPH = "Graph";
+    private static final String _SHORT_GRAPH = "ImmutableGraph";
 
     private static final String _SHORT_HAS_APPENDED = "hasAppended";
 
@@ -116,325 +115,325 @@ public class Vocabulary {
     /**
      * The OWL <b>object property</b> <tt>isAppendedTo</tt>.
      */
-    public static final OWLObjectProperty APPENDED_TO = __df.getOWLObjectProperty(IRI
+    public static final OWLObjectProperty APPENDED_TO = __df.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_APPENDED_TO));
 
     /**
-     * The OWL <b>object property</b> <tt>isAppendedTo</tt> (in UriRef form).
+     * The OWL <b>object property</b> <tt>isAppendedTo</tt> (in IRI form).
      */
-    public static final UriRef APPENDED_TO_URIREF = new UriRef(_NS_ONTONET + _SHORT_APPENDED_TO);
+    public static final IRI APPENDED_TO_URIREF = new IRI(_NS_ONTONET + _SHORT_APPENDED_TO);
 
     /**
      * The OWL <b>object property</b> <tt>dependsOn</tt>.
      */
-    public static final OWLObjectProperty DEPENDS_ON = __df.getOWLObjectProperty(IRI
+    public static final OWLObjectProperty DEPENDS_ON = __df.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_DEPENDS_ON));
 
     /**
-     * The OWL <b>object property</b> <tt>dependsOn</tt> (in UriRef form).
+     * The OWL <b>object property</b> <tt>dependsOn</tt> (in IRI form).
      */
-    public static final UriRef DEPENDS_ON_URIREF = new UriRef(_NS_ONTONET + _SHORT_DEPENDS_ON);
+    public static final IRI DEPENDS_ON_URIREF = new IRI(_NS_ONTONET + _SHORT_DEPENDS_ON);
 
     /**
      * The OWL <b>class</b> <tt>Entry</tt>.
      */
-    public static final OWLClass ENTRY = __df.getOWLClass(IRI.create(_NS_ONTONET + _SHORT_ENTRY));
+    public static final OWLClass ENTRY = __df.getOWLClass(org.semanticweb.owlapi.model.IRI.create(_NS_ONTONET + _SHORT_ENTRY));
 
     /**
-     * The OWL <b>class</b> <tt>Entry</tt> (in UriRef form).
+     * The OWL <b>class</b> <tt>Entry</tt> (in IRI form).
      */
-    public static final UriRef ENTRY_URIREF = new UriRef(_NS_ONTONET + _SHORT_ENTRY);
+    public static final IRI ENTRY_URIREF = new IRI(_NS_ONTONET + _SHORT_ENTRY);
 
     /**
-     * The OWL <b>class</b> <tt>Graph</tt>.
+     * The OWL <b>class</b> <tt>ImmutableGraph</tt>.
      */
-    public static final OWLClass GRAPH = __df.getOWLClass(IRI.create(_NS_ONTONET + _SHORT_GRAPH));
+    public static final OWLClass GRAPH = __df.getOWLClass(org.semanticweb.owlapi.model.IRI.create(_NS_ONTONET + _SHORT_GRAPH));
 
     /**
-     * The OWL <b>class</b> <tt>Graph</tt> (in UriRef form).
+     * The OWL <b>class</b> <tt>ImmutableGraph</tt> (in IRI form).
      */
-    public static final UriRef GRAPH_URIREF = new UriRef(_NS_ONTONET + _SHORT_GRAPH);
+    public static final IRI GRAPH_URIREF = new IRI(_NS_ONTONET + _SHORT_GRAPH);
 
     /**
      * The OWL <b>object property</b> <tt>hasAppended</tt>.
      */
-    public static final OWLObjectProperty HAS_APPENDED = __df.getOWLObjectProperty(IRI
+    public static final OWLObjectProperty HAS_APPENDED = __df.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_HAS_APPENDED));
 
     /**
-     * The OWL <b>object property</b> <tt>hasAppended</tt> (in UriRef form).
+     * The OWL <b>object property</b> <tt>hasAppended</tt> (in IRI form).
      */
-    public static final UriRef HAS_APPENDED_URIREF = new UriRef(_NS_ONTONET + _SHORT_HAS_APPENDED);
+    public static final IRI HAS_APPENDED_URIREF = new IRI(_NS_ONTONET + _SHORT_HAS_APPENDED);
 
     /**
      * The OWL <b>object property</b> <tt>hasDependent</tt>.
      */
-    public static final OWLObjectProperty HAS_DEPENDENT = __df.getOWLObjectProperty(IRI
+    public static final OWLObjectProperty HAS_DEPENDENT = __df.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_HAS_DEPENDENT));
 
     /**
-     * The OWL <b>datatype property</b> <tt>hasDependent</tt> (in UriRef form).
+     * The OWL <b>datatype property</b> <tt>hasDependent</tt> (in IRI form).
      */
-    public static final UriRef HAS_DEPENDENT_URIREF = new UriRef(_NS_ONTONET + _SHORT_HAS_DEPENDENT);
+    public static final IRI HAS_DEPENDENT_URIREF = new IRI(_NS_ONTONET + _SHORT_HAS_DEPENDENT);
 
     /**
      * The OWL <b>datatype property</b> <tt>hasOntologyIRI</tt>.
      */
-    public static final OWLDataProperty HAS_ONTOLOGY_IRI = __df.getOWLDataProperty(IRI
+    public static final OWLDataProperty HAS_ONTOLOGY_IRI = __df.getOWLDataProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_HAS_ONTOLOGY_IRI));
 
     /**
-     * The OWL <b>datatype property</b> <tt>hasOntologyIRI</tt> (in UriRef form).
+     * The OWL <b>datatype property</b> <tt>hasOntologyIRI</tt> (in IRI form).
      */
-    public static final UriRef HAS_ONTOLOGY_IRI_URIREF = new UriRef(_NS_ONTONET + _SHORT_HAS_ONTOLOGY_IRI);
+    public static final IRI HAS_ONTOLOGY_IRI_URIREF = new IRI(_NS_ONTONET + _SHORT_HAS_ONTOLOGY_IRI);
 
     /**
      * The OWL <b>object property</b> <tt>isManagedBy</tt>.
      */
-    public static final OWLObjectProperty HAS_SPACE_CORE = __df.getOWLObjectProperty(IRI
+    public static final OWLObjectProperty HAS_SPACE_CORE = __df.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_HAS_SPACE_CORE));
 
     /**
-     * The OWL <b>object property</b> <tt>hasCoreSpace</tt> (in UriRef form).
+     * The OWL <b>object property</b> <tt>hasCoreSpace</tt> (in IRI form).
      */
-    public static final UriRef HAS_SPACE_CORE_URIREF = new UriRef(_NS_ONTONET + _SHORT_HAS_SPACE_CORE);
+    public static final IRI HAS_SPACE_CORE_URIREF = new IRI(_NS_ONTONET + _SHORT_HAS_SPACE_CORE);
 
     /**
      * The OWL <b>object property</b> <tt>isManagedBy</tt>.
      */
-    public static final OWLObjectProperty HAS_SPACE_CUSTOM = __df.getOWLObjectProperty(IRI
+    public static final OWLObjectProperty HAS_SPACE_CUSTOM = __df.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_HAS_SPACE_CUSTOM));
 
     /**
-     * The OWL <b>object property</b> <tt>hasCustomSpace</tt> (in UriRef form).
+     * The OWL <b>object property</b> <tt>hasCustomSpace</tt> (in IRI form).
      */
-    public static final UriRef HAS_SPACE_CUSTOM_URIREF = new UriRef(_NS_ONTONET + _SHORT_HAS_SPACE_CUSTOM);
+    public static final IRI HAS_SPACE_CUSTOM_URIREF = new IRI(_NS_ONTONET + _SHORT_HAS_SPACE_CUSTOM);
 
     /**
-     * The OWL <b>object property</b> <tt>hasStatus</tt> (in UriRef form).
+     * The OWL <b>object property</b> <tt>hasStatus</tt> (in IRI form).
      */
-    public static final OWLObjectProperty HAS_STATUS = __df.getOWLObjectProperty(IRI
+    public static final OWLObjectProperty HAS_STATUS = __df.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_HAS_STATUS));
 
     /**
      * The OWL <b>object property</b> <tt>hasStatus</tt>.
      */
-    public static final UriRef HAS_STATUS_URIREF = new UriRef(_NS_ONTONET + _SHORT_HAS_STATUS);
+    public static final IRI HAS_STATUS_URIREF = new IRI(_NS_ONTONET + _SHORT_HAS_STATUS);
 
     /**
      * The OWL <b>datatype property</b> <tt>hasVersionIRI</tt>.
      */
-    public static final OWLDataProperty HAS_VERSION_IRI = __df.getOWLDataProperty(IRI
+    public static final OWLDataProperty HAS_VERSION_IRI = __df.getOWLDataProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_HAS_VERSION_IRI));
 
     /**
-     * The OWL <b>datatype property</b> <tt>hasVersionIRI</tt> (in UriRef form).
+     * The OWL <b>datatype property</b> <tt>hasVersionIRI</tt> (in IRI form).
      */
-    public static final UriRef HAS_VERSION_IRI_URIREF = new UriRef(_NS_ONTONET + _SHORT_HAS_VERSION_IRI);
+    public static final IRI HAS_VERSION_IRI_URIREF = new IRI(_NS_ONTONET + _SHORT_HAS_VERSION_IRI);
 
     /**
      * The OWL <b>object property</b> <tt>isManagedBy</tt>.
      */
-    public static final OWLObjectProperty IS_MANAGED_BY = __df.getOWLObjectProperty(IRI
+    public static final OWLObjectProperty IS_MANAGED_BY = __df.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_IS_MANAGED_BY));
 
     /**
      * The OWL <b>object property</b> <tt>isManagedByCore</tt>.
      */
-    public static final OWLObjectProperty IS_MANAGED_BY_CORE = __df.getOWLObjectProperty(IRI
+    public static final OWLObjectProperty IS_MANAGED_BY_CORE = __df.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_IS_MANAGED_BY_CORE));
 
     /**
-     * The OWL <b>object property</b> <tt>isManagedByCore</tt> (in UriRef form).
+     * The OWL <b>object property</b> <tt>isManagedByCore</tt> (in IRI form).
      */
-    public static final UriRef IS_MANAGED_BY_CORE_URIREF = new UriRef(_NS_ONTONET + _SHORT_IS_MANAGED_BY_CORE);
+    public static final IRI IS_MANAGED_BY_CORE_URIREF = new IRI(_NS_ONTONET + _SHORT_IS_MANAGED_BY_CORE);
 
     /**
      * The OWL <b>object property</b> <tt>isManagedByCustom</tt>.
      */
-    public static final OWLObjectProperty IS_MANAGED_BY_CUSTOM = __df.getOWLObjectProperty(IRI
+    public static final OWLObjectProperty IS_MANAGED_BY_CUSTOM = __df.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_IS_MANAGED_BY_CUSTOM));
 
     /**
-     * The OWL <b>object property</b> <tt>isManagedByCustom</tt> (in UriRef form).
+     * The OWL <b>object property</b> <tt>isManagedByCustom</tt> (in IRI form).
      */
-    public static final UriRef IS_MANAGED_BY_CUSTOM_URIREF = new UriRef(_NS_ONTONET
+    public static final IRI IS_MANAGED_BY_CUSTOM_URIREF = new IRI(_NS_ONTONET
                                                                         + _SHORT_IS_MANAGED_BY_CUSTOM);
 
     /**
-     * The OWL <b>object property</b> <tt>isManagedBy</tt> (in UriRef form).
+     * The OWL <b>object property</b> <tt>isManagedBy</tt> (in IRI form).
      */
-    public static final UriRef IS_MANAGED_BY_URIREF = new UriRef(_NS_ONTONET + _SHORT_IS_MANAGED_BY);
+    public static final IRI IS_MANAGED_BY_URIREF = new IRI(_NS_ONTONET + _SHORT_IS_MANAGED_BY);
 
     /**
      * The OWL <b>object property</b> <tt>isCoreSpaceOf</tt>.
      */
-    public static final OWLObjectProperty IS_SPACE_CORE_OF = __df.getOWLObjectProperty(IRI
+    public static final OWLObjectProperty IS_SPACE_CORE_OF = __df.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_IS_SPACE_CORE_OF));
 
     /**
-     * The OWL <b>object property</b> <tt>isCoreSpaceOf</tt> (in UriRef form).
+     * The OWL <b>object property</b> <tt>isCoreSpaceOf</tt> (in IRI form).
      */
-    public static final UriRef IS_SPACE_CORE_OF_URIREF = new UriRef(_NS_ONTONET + _SHORT_IS_SPACE_CORE_OF);
+    public static final IRI IS_SPACE_CORE_OF_URIREF = new IRI(_NS_ONTONET + _SHORT_IS_SPACE_CORE_OF);
 
     /**
      * The OWL <b>object property</b> <tt>isCustomSpaceOf</tt>.
      */
-    public static final OWLObjectProperty IS_SPACE_CUSTOM_OF = __df.getOWLObjectProperty(IRI
+    public static final OWLObjectProperty IS_SPACE_CUSTOM_OF = __df.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_IS_SPACE_CUSTOM_OF));
 
     /**
-     * The OWL <b>object property</b> <tt>isCustomSpaceOf</tt> (in UriRef form).
+     * The OWL <b>object property</b> <tt>isCustomSpaceOf</tt> (in IRI form).
      */
-    public static final UriRef IS_SPACE_CUSTOM_OF_URIREF = new UriRef(_NS_ONTONET + _SHORT_IS_SPACE_CUSTOM_OF);
+    public static final IRI IS_SPACE_CUSTOM_OF_URIREF = new IRI(_NS_ONTONET + _SHORT_IS_SPACE_CUSTOM_OF);
 
     /**
      * The OWL <b>object property</b> <tt>manages</tt>.
      */
-    public static final OWLObjectProperty MANAGES = __df.getOWLObjectProperty(IRI.create(_NS_ONTONET
+    public static final OWLObjectProperty MANAGES = __df.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI.create(_NS_ONTONET
                                                                                          + _SHORT_MANAGES));
 
     /**
      * The OWL <b>object property</b> <tt>managesInCore</tt>.
      */
-    public static final OWLObjectProperty MANAGES_IN_CORE = __df.getOWLObjectProperty(IRI
+    public static final OWLObjectProperty MANAGES_IN_CORE = __df.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_MANAGES_IN_CORE));
 
     /**
-     * The OWL <b>object property</b> <tt>managesInCore</tt> (in UriRef form).
+     * The OWL <b>object property</b> <tt>managesInCore</tt> (in IRI form).
      */
-    public static final UriRef MANAGES_IN_CORE_URIREF = new UriRef(_NS_ONTONET + _SHORT_MANAGES_IN_CORE);
+    public static final IRI MANAGES_IN_CORE_URIREF = new IRI(_NS_ONTONET + _SHORT_MANAGES_IN_CORE);
     /**
      * The OWL <b>object property</b> <tt>managesInCustom</tt>.
      */
-    public static final OWLObjectProperty MANAGES_IN_CUSTOM = __df.getOWLObjectProperty(IRI
+    public static final OWLObjectProperty MANAGES_IN_CUSTOM = __df.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_MANAGES_IN_CUSTOM));
 
     /**
-     * The OWL <b>object property</b> <tt>managesInCustom</tt> (in UriRef form).
+     * The OWL <b>object property</b> <tt>managesInCustom</tt> (in IRI form).
      */
-    public static final UriRef MANAGES_IN_CUSTOM_URIREF = new UriRef(_NS_ONTONET + _SHORT_MANAGES_IN_CUSTOM);
+    public static final IRI MANAGES_IN_CUSTOM_URIREF = new IRI(_NS_ONTONET + _SHORT_MANAGES_IN_CUSTOM);
 
     /**
-     * The OWL <b>object property</b> <tt>manages</tt> (in UriRef form).
+     * The OWL <b>object property</b> <tt>manages</tt> (in IRI form).
      */
-    public static final UriRef MANAGES_URIREF = new UriRef(_NS_ONTONET + _SHORT_MANAGES);
+    public static final IRI MANAGES_URIREF = new IRI(_NS_ONTONET + _SHORT_MANAGES);
 
     /**
      * The OWL <b>object property</b> <tt>mapsToGraph</tt>.
      */
-    public static final OWLObjectProperty MAPS_TO_GRAPH = __df.getOWLObjectProperty(IRI
+    public static final OWLObjectProperty MAPS_TO_GRAPH = __df.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_MAPS_TO_GRAPH));
 
     /**
-     * The OWL <b>object property</b> <tt>mapsToGraph</tt> (in UriRef form).
+     * The OWL <b>object property</b> <tt>mapsToGraph</tt> (in IRI form).
      */
-    public static final UriRef MAPS_TO_GRAPH_URIREF = new UriRef(_NS_ONTONET + _SHORT_MAPS_TO_GRAPH);
+    public static final IRI MAPS_TO_GRAPH_URIREF = new IRI(_NS_ONTONET + _SHORT_MAPS_TO_GRAPH);
 
     /**
      * The OWL <b>class</b> <tt>PrimaryEntry</tt>.
      */
-    public static final OWLClass PRIMARY_ENTRY = __df.getOWLClass(IRI.create(_NS_ONTONET
+    public static final OWLClass PRIMARY_ENTRY = __df.getOWLClass(org.semanticweb.owlapi.model.IRI.create(_NS_ONTONET
                                                                              + _SHORT_PRIMARY_ENTRY));
 
     /**
-     * The OWL <b>class</b> <tt>PrimaryEntry</tt> (in UriRef form).
+     * The OWL <b>class</b> <tt>PrimaryEntry</tt> (in IRI form).
      */
-    public static final UriRef PRIMARY_ENTRY_URIREF = new UriRef(_NS_ONTONET + _SHORT_PRIMARY_ENTRY);
+    public static final IRI PRIMARY_ENTRY_URIREF = new IRI(_NS_ONTONET + _SHORT_PRIMARY_ENTRY);
 
     /**
      * The OWL <b>datatype property</b> <tt>retrievedFrom</tt>.
      */
-    public static final OWLDataProperty RETRIEVED_FROM = __df.getOWLDataProperty(IRI
+    public static final OWLDataProperty RETRIEVED_FROM = __df.getOWLDataProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_RETRIEVED_FROM));
 
     /**
-     * The OWL <b>datatype property</b> <tt>retrievedFrom</tt> (in UriRef form).
+     * The OWL <b>datatype property</b> <tt>retrievedFrom</tt> (in IRI form).
      */
-    public static final UriRef RETRIEVED_FROM_URIREF = new UriRef(_NS_ONTONET + _SHORT_RETRIEVED_FROM);
+    public static final IRI RETRIEVED_FROM_URIREF = new IRI(_NS_ONTONET + _SHORT_RETRIEVED_FROM);
 
     /**
      * The OWL <b>class</b> <tt>Scope</tt>.
      */
-    public static final OWLClass SCOPE = __df.getOWLClass(IRI.create(_NS_ONTONET + _SHORT_SCOPE));
+    public static final OWLClass SCOPE = __df.getOWLClass(org.semanticweb.owlapi.model.IRI.create(_NS_ONTONET + _SHORT_SCOPE));
 
     /**
-     * The OWL <b>class</b> <tt>Scope</tt> (in UriRef form).
+     * The OWL <b>class</b> <tt>Scope</tt> (in IRI form).
      */
-    public static final UriRef SCOPE_URIREF = new UriRef(_NS_ONTONET + _SHORT_SCOPE);
+    public static final IRI SCOPE_URIREF = new IRI(_NS_ONTONET + _SHORT_SCOPE);
 
     /**
      * The OWL <b>class</b> <tt>Session</tt>.
      */
-    public static final OWLClass SESSION = __df.getOWLClass(IRI.create(_NS_ONTONET + _SHORT_SESSION));
+    public static final OWLClass SESSION = __df.getOWLClass(org.semanticweb.owlapi.model.IRI.create(_NS_ONTONET + _SHORT_SESSION));
 
     /**
-     * The OWL <b>class</b> <tt>Session</tt> (in UriRef form).
+     * The OWL <b>class</b> <tt>Session</tt> (in IRI form).
      */
-    public static final UriRef SESSION_URIREF = new UriRef(_NS_ONTONET + _SHORT_SESSION);
+    public static final IRI SESSION_URIREF = new IRI(_NS_ONTONET + _SHORT_SESSION);
 
     /**
      * The OWL <b>datatype property</b> <tt>hasSizeInAxioms</tt>.
      */
-    public static final OWLDataProperty SIZE_IN_AXIOMS = __df.getOWLDataProperty(IRI
+    public static final OWLDataProperty SIZE_IN_AXIOMS = __df.getOWLDataProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_SIZE_IN_AXIOMS));
 
     /**
-     * The OWL <b>datatype property</b> <tt>hasSizeInAxioms</tt> (in UriRef form).
+     * The OWL <b>datatype property</b> <tt>hasSizeInAxioms</tt> (in IRI form).
      */
-    public static final UriRef SIZE_IN_AXIOMS_URIREF = new UriRef(_NS_ONTONET + _SHORT_SIZE_IN_AXIOMS);
+    public static final IRI SIZE_IN_AXIOMS_URIREF = new IRI(_NS_ONTONET + _SHORT_SIZE_IN_AXIOMS);
 
     /**
      * The OWL <b>datatype property</b> <tt>hasSizeInTriples</tt>.
      */
-    public static final OWLDataProperty SIZE_IN_TRIPLES = __df.getOWLDataProperty(IRI
+    public static final OWLDataProperty SIZE_IN_TRIPLES = __df.getOWLDataProperty(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_SIZE_IN_TRIPLES));
 
     /**
-     * The OWL <b>datatype property</b> <tt>hasSizeInTriples</tt> (in UriRef form).
+     * The OWL <b>datatype property</b> <tt>hasSizeInTriples</tt> (in IRI form).
      */
-    public static final UriRef SIZE_IN_TRIPLES_URIREF = new UriRef(_NS_ONTONET + _SHORT_SIZE_IN_TRIPLES);
+    public static final IRI SIZE_IN_TRIPLES_URIREF = new IRI(_NS_ONTONET + _SHORT_SIZE_IN_TRIPLES);
 
     /**
      * The OWL <b>class</b> <tt>Space</tt>.
      */
-    public static final OWLClass SPACE = __df.getOWLClass(IRI.create(_NS_ONTONET + _SHORT_SPACE));
+    public static final OWLClass SPACE = __df.getOWLClass(org.semanticweb.owlapi.model.IRI.create(_NS_ONTONET + _SHORT_SPACE));
 
     /**
-     * The OWL <b>class</b> <tt>Space</tt> (in UriRef form).
+     * The OWL <b>class</b> <tt>Space</tt> (in IRI form).
      */
-    public static final UriRef SPACE_URIREF = new UriRef(_NS_ONTONET + _SHORT_SPACE);
+    public static final IRI SPACE_URIREF = new IRI(_NS_ONTONET + _SHORT_SPACE);
 
     /**
      * The OWL <b>class</b> <tt>Status</tt>.
      */
-    public static final OWLClass STATUS = __df.getOWLClass(IRI.create(_NS_ONTONET + _SHORT_STATUS));
+    public static final OWLClass STATUS = __df.getOWLClass(org.semanticweb.owlapi.model.IRI.create(_NS_ONTONET + _SHORT_STATUS));
 
     /**
      * The OWL <b>individual</b> <tt>Status.ACTIVE</tt>.
      */
-    public static final OWLIndividual STATUS_ACTIVE = __df.getOWLNamedIndividual(IRI
+    public static final OWLIndividual STATUS_ACTIVE = __df.getOWLNamedIndividual(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_STATUS_ACTIVE));
 
     /**
-     * The OWL <b>individual</b> <tt>Status.ACTIVE</tt> (in UriRef form).
+     * The OWL <b>individual</b> <tt>Status.ACTIVE</tt> (in IRI form).
      */
-    public static final UriRef STATUS_ACTIVE_URIREF = new UriRef(_NS_ONTONET + _SHORT_STATUS_ACTIVE);
+    public static final IRI STATUS_ACTIVE_URIREF = new IRI(_NS_ONTONET + _SHORT_STATUS_ACTIVE);
 
     /**
      * The OWL <b>individual</b> <tt>Status.INACTIVE</tt>.
      */
-    public static final OWLIndividual STATUS_INACTIVE = __df.getOWLNamedIndividual(IRI
+    public static final OWLIndividual STATUS_INACTIVE = __df.getOWLNamedIndividual(org.semanticweb.owlapi.model.IRI
             .create(_NS_ONTONET + _SHORT_STATUS_INACTIVE));
 
     /**
-     * The OWL <b>individual</b> <tt>Status.INACTIVE</tt> (in UriRef form).
+     * The OWL <b>individual</b> <tt>Status.INACTIVE</tt> (in IRI form).
      */
-    public static final UriRef STATUS_INACTIVE_URIREF = new UriRef(_NS_ONTONET + _SHORT_STATUS_INACTIVE);
+    public static final IRI STATUS_INACTIVE_URIREF = new IRI(_NS_ONTONET + _SHORT_STATUS_INACTIVE);
 
     /**
-     * The OWL <b>class</b> <tt>Status</tt> (in UriRef form).
+     * The OWL <b>class</b> <tt>Status</tt> (in IRI form).
      */
-    public static final UriRef STATUS_URIREF = new UriRef(_NS_ONTONET + _SHORT_STATUS);
+    public static final IRI STATUS_URIREF = new IRI(_NS_ONTONET + _SHORT_STATUS);
 
 }

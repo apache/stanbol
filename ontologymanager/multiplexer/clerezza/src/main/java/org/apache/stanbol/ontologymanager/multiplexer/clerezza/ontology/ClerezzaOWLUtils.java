@@ -16,10 +16,10 @@
  */
 package org.apache.stanbol.ontologymanager.multiplexer.clerezza.ontology;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.slf4j.Logger;
@@ -40,14 +40,14 @@ public final class ClerezzaOWLUtils {
 
     private static Logger log = LoggerFactory.getLogger(ClerezzaOWLUtils.class);
 
-    public static MGraph createOntology(String id, TcManager tcm) {
-        UriRef name = new UriRef(id);
-        MGraph ont = tcm.createMGraph(name);
+    public static Graph createOntology(String id, TcManager tcm) {
+        IRI name = new IRI(id);
+        Graph ont = tcm.createGraph(name);
         ont.add(new TripleImpl(name, RDF.type, OWL.Ontology));
         return ont;
     }
 
-    public static MGraph createOntology(String id) {
+    public static Graph createOntology(String id) {
         return createOntology(id, TcManager.getInstance());
     }
 

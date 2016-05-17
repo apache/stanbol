@@ -16,7 +16,7 @@
 */
 package org.apache.stanbol.enhancer.nlp.morpho;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 /**
  * Enumeration representing the different verbal moods based on the <a* href="http://purl.org/olia/olia.owl">OLIA</a> Ontology
  * 
@@ -71,16 +71,16 @@ public enum VerbMood {
 	IndicativeVerb,
     ;
     static final String OLIA_NAMESPACE = "http://purl.org/olia/olia.owl#";
-    UriRef uri;
+    IRI uri;
     VerbMood() {
         this(null);
     }
 
     VerbMood(String name) {
-        uri = new UriRef(OLIA_NAMESPACE + (name == null ? name() : (name + "Verb Form")));
+        uri = new IRI(OLIA_NAMESPACE + (name == null ? name() : (name + "Verb Form")));
     }
 
-    public UriRef getUri() {
+    public IRI getUri() {
         return uri;
     }
 

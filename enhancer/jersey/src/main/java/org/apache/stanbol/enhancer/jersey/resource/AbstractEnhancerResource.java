@@ -51,9 +51,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.base.resource.LayoutConfiguration;
 import org.apache.stanbol.commons.web.base.resource.TemplateLayoutConfiguration;
@@ -186,13 +186,13 @@ public abstract class AbstractEnhancerResource extends TemplateLayoutConfigurati
         }
         reqProp.put(OMIT_PARSED_CONTENT, omitParsed);
         if(contentParts != null && !contentParts.isEmpty()){
-            Set<UriRef> outputContentParts = new HashSet<UriRef>();
+            Set<IRI> outputContentParts = new HashSet<IRI>();
             for(String contentPartUri : contentParts){
                 if(contentPartUri != null && !contentPartUri.isEmpty()){
                     if("*".equals(contentPartUri)){
                         outputContentParts.add(null); //indicated wildcard
                     } else {
-                        outputContentParts.add(new UriRef(contentPartUri));
+                        outputContentParts.add(new IRI(contentPartUri));
                     }
                 }
             }
@@ -230,11 +230,11 @@ public abstract class AbstractEnhancerResource extends TemplateLayoutConfigurati
         if (jobManager != null) {
             jobManager.enhanceContent(ci, getChain());
         }
-        MGraph graph = ci.getMetadata();
+        Graph graph = ci.getMetadata();
         Boolean includeExecutionMetadata = RequestPropertiesHelper.isIncludeExecutionMetadata(reqProp);
         if (includeExecutionMetadata != null && includeExecutionMetadata.booleanValue()) {
             try {
-                graph.addAll(ci.getPart(ExecutionMetadata.CHAIN_EXECUTION, TripleCollection.class));
+                graph.addAll(ci.getPart(ExecutionMetadata.CHAIN_EXECUTION, Graph.class));
             } catch (NoSuchPartException e) {
                 // no executionMetadata available
             }

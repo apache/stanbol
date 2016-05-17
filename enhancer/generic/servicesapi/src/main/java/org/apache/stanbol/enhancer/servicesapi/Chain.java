@@ -18,7 +18,7 @@ package org.apache.stanbol.enhancer.servicesapi;
 
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
 
 /**
  * An Enhancement Chain represents a configuration that defines what engines 
@@ -45,9 +45,9 @@ public interface Chain {
     String PROPERTY_NAME = "stanbol.enhancer.chain.name";
     /**
      * Getter for the execution plan reflecting the current configuration of this
-     * Chain. The returned {@link Graph} is read only and MUST NOT be changed if 
+     * Chain. The returned {@link ImmutableGraph} is read only and MUST NOT be changed if 
      * the configuration of this Chain changes. This means that the Chain MUST 
-     * create a new Graph instance if the execution plan changes as a result of 
+     * create a new ImmutableGraph instance if the execution plan changes as a result of 
      * a change in the configuration. It MUST NOT change any execution plan 
      * parsed to other components by the getExecutionPlan() method.
      * @return the execution plan as defined by the 
@@ -57,7 +57,7 @@ public interface Chain {
      * the case of the Chain requires runtime information to determine the
      * execution plan.
      */
-    Graph getExecutionPlan() throws ChainException;
+    ImmutableGraph getExecutionPlan() throws ChainException;
     /**
      * Getter for the set of {@link EnhancementEngine}s referenced by there
      * name within the execution plan. This method is intended to be used 

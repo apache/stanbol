@@ -20,8 +20,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.apache.clerezza.commons.rdf.IRI;
 
-import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.enhancer.engines.entitycoreference.datamodel.NounPhrase;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
 import org.osgi.service.cm.ConfigurationException;
@@ -42,12 +42,12 @@ public class CoreferenceFinderConfig {
     /**
      * The Uris for spatial properties for the NER to be inspected when doing the coref spatial match.
      */
-    private Map<UriRef,Set<String>> spatialAttributes;
+    private Map<IRI,Set<String>> spatialAttributes;
     
     /**
      * The Uris for org membership properties for the NER to be inspected when doing the coref match.
      */
-    private Map<UriRef,Set<String>> orgMembershipAttributes;
+    private Map<IRI,Set<String>> orgMembershipAttributes;
 
     /**
      * Entity classes which will not be used for coreference because they are too general.
@@ -62,8 +62,8 @@ public class CoreferenceFinderConfig {
 						           String entityClassesToExclude) throws ConfigurationException {
     	this.maxDistance = maxDistance;
     	
-    	this.spatialAttributes = new HashMap<UriRef,Set<String>>();
-    	this.orgMembershipAttributes = new HashMap<UriRef, Set<String>>();
+    	this.spatialAttributes = new HashMap<IRI,Set<String>>();
+    	this.orgMembershipAttributes = new HashMap<IRI, Set<String>>();
     	
         if (spatialAttrForPerson != null) {
         	Set<String> attributes = new HashSet<String>();
@@ -124,7 +124,7 @@ public class CoreferenceFinderConfig {
      *            of the Entity type for which we want to get the ontology.
      * @return
      */
-    public Set<String> getSpatialAttributes(UriRef uri) {
+    public Set<String> getSpatialAttributes(IRI uri) {
         return this.spatialAttributes.get(uri);
     }
 
@@ -135,7 +135,7 @@ public class CoreferenceFinderConfig {
      *            of the Entity type for which we want to get the ontology.
      * @return
      */
-    public Set<String> getOrgMembershipAttributes(UriRef uri) {
+    public Set<String> getOrgMembershipAttributes(IRI uri) {
         return this.orgMembershipAttributes.get(uri);
     }
     

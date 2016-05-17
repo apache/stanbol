@@ -19,7 +19,7 @@ package org.apache.stanbol.rules.adapters.clerezza.atoms;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
 import org.apache.clerezza.rdf.core.sparql.query.Expression;
 import org.apache.clerezza.rdf.core.sparql.query.FunctionCall;
@@ -65,7 +65,7 @@ public class SubstringAtom extends AbstractAdaptableAtom {
         argumentExpressions.add((Expression) clerezzaStart.getClerezzaObject());
         argumentExpressions.add((Expression) clerezzaLength.getClerezzaObject());
 
-        FunctionCall functionCall = new FunctionCall(new UriRef(
+        FunctionCall functionCall = new FunctionCall(new IRI(
                 "<http://www.w3.org/2005/xpath-functions#substring>"), argumentExpressions);
 
         return (T) new ClerezzaSparqlObject(functionCall);

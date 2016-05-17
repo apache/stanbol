@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.commons.opennlp.OpenNLP;
 import org.apache.stanbol.enhancer.nlp.model.tag.TagSet;
 import org.apache.stanbol.enhancer.nlp.ner.NerTag;
@@ -39,10 +39,10 @@ public class NEREngineConfig {
      * Default mapping for Concept types to dc:type values added for
      * TextAnnotations.
      */
-    public static final Map<String,UriRef> DEFAULT_ENTITY_TYPE_MAPPINGS;
+    public static final Map<String,IRI> DEFAULT_ENTITY_TYPE_MAPPINGS;
     
     static { //the default mappings for the default NER types
-        Map<String,UriRef> mappings = new TreeMap<String,UriRef>();
+        Map<String,IRI> mappings = new TreeMap<String,IRI>();
         mappings.put("person", OntologicalClasses.DBPEDIA_PERSON);
         mappings.put("location", OntologicalClasses.DBPEDIA_PLACE);
         mappings.put("organization", OntologicalClasses.DBPEDIA_ORGANISATION);
@@ -51,7 +51,7 @@ public class NEREngineConfig {
     
     /**
      * Holds the configured {@link NerTag}s - the mappings from the
-     * named entity name to the {@link UriRef} type used for the
+     * named entity name to the {@link IRI} type used for the
      * <code>dc:type</code> value for <code>fise:TextAnnotation</code>s
      */
     private TagSet<NerTag> nerTagSet = new TagSet<NerTag>("NER TagSet");
@@ -70,7 +70,7 @@ public class NEREngineConfig {
     private String defaultLanguage;
     
     public NEREngineConfig(){
-        for(Entry<String,UriRef> mapping : DEFAULT_ENTITY_TYPE_MAPPINGS.entrySet()){
+        for(Entry<String,IRI> mapping : DEFAULT_ENTITY_TYPE_MAPPINGS.entrySet()){
             nerTagSet.addTag(new NerTag(mapping.getKey(), mapping.getValue()));
         }
     }
@@ -171,7 +171,7 @@ public class NEREngineConfig {
      * @throws IllegalArgumentException if the parsed NamedEntity
      * type is <code>null</code> or an empty String.
      */
-    public void setMappedType(String namedEntityType,UriRef dcType){
+    public void setMappedType(String namedEntityType,IRI dcType){
         if(namedEntityType != null && !namedEntityType.isEmpty()){
             nerTagSet.addTag(new NerTag(namedEntityType, dcType));
         } else {

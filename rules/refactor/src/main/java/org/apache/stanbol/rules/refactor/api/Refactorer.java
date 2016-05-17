@@ -16,9 +16,9 @@
  */
 package org.apache.stanbol.rules.refactor.api;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.rules.base.api.NoSuchRecipeException;
 import org.apache.stanbol.rules.base.api.Recipe;
 import org.apache.stanbol.rules.base.api.RuleStore;
@@ -36,10 +36,10 @@ public interface Refactorer {
      * Fetch the mgraph with the selected uri from the storage.
      * 
      * @param uriRef
-     *            {@link UriRef}
-     * @return the {@link MGraph}.
+     *            {@link IRI}
+     * @return the {@link Graph}.
      */
-    MGraph getRefactoredDataSet(UriRef uriRef);
+    Graph getRefactoredDataSet(IRI uriRef);
 
     /**
      * The refactoring is perfomed by the {@code Refactorer} by invoking this method. The {@code datasetID}
@@ -48,13 +48,13 @@ public interface Refactorer {
      * {@link RuleStore},
      * 
      * @param refactoredDataSetID
-     *            {@link UriRef}
+     *            {@link IRI}
      * @param datasetID
-     *            {@link UriRef}
+     *            {@link IRI}
      * @param recipeIRI
-     *            {@link UriRef}
+     *            {@link IRI}
      */
-    void graphRefactoring(UriRef refactoredOntologyID, UriRef datasetID, UriRef recipeID) throws RefactoringException,
+    void graphRefactoring(IRI refactoredOntologyID, IRI datasetID, IRI recipeID) throws RefactoringException,
                                                                                          NoSuchRecipeException;
 
     /**
@@ -63,14 +63,14 @@ public interface Refactorer {
      * graph in order to obtain the refactoring.
      * 
      * @param datasetURI
-     *            {@link UriRef}
+     *            {@link IRI}
      * @param recipe
-     *            {@link UriRef}
-     * @return the refactored {@link MGraph}
+     *            {@link IRI}
+     * @return the refactored {@link Graph}
      * @throws RefactoringException
      * @throws NoSuchRecipeException
      */
-    TripleCollection graphRefactoring(UriRef datasetID, UriRef recipeID) throws RefactoringException,
+    Graph graphRefactoring(IRI datasetID, IRI recipeID) throws RefactoringException,
                                                                         NoSuchRecipeException;
 
     /**
@@ -79,13 +79,13 @@ public interface Refactorer {
      * graph in order to obtain the refactoring.
      * 
      * @param datasetID
-     *            {@link TripleCollection}
+     *            {@link Graph}
      * @param recipe
      *            {@link Recipe}
-     * @return the refactored {@link TripleCollection}
+     * @return the refactored {@link Graph}
      * @throws SemionRefactoringException
      * @throws NoSuchRecipeException
      */
-    TripleCollection graphRefactoring(TripleCollection dataset, Recipe recipe) throws RefactoringException;
+    Graph graphRefactoring(Graph dataset, Recipe recipe) throws RefactoringException;
 
 }

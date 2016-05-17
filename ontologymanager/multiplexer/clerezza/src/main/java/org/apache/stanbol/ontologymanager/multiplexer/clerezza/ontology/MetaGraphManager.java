@@ -22,18 +22,17 @@ import static org.apache.stanbol.ontologymanager.servicesapi.Vocabulary.HAS_VERS
 
 import java.util.Iterator;
 
-import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
+import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.stanbol.ontologymanager.servicesapi.util.OntologyUtils;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,47 +46,47 @@ import org.slf4j.LoggerFactory;
  */
 class MetaGraphManager {
 
-    private MGraph graph;
+    private Graph graph;
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
     private TcManager tcManager;
 
-    public MetaGraphManager(TcManager tcManager, MGraph graph) {
+    public MetaGraphManager(TcManager tcManager, Graph graph) {
         this.tcManager = tcManager;
         this.graph = graph;
     }
 
-    protected UriRef buildResource(final OWLOntologyID publicKey) {
+    protected IRI buildResource(final OWLOntologyID publicKey) {
         if (publicKey == null) throw new IllegalArgumentException(
-                "Cannot build a UriRef resource on a null public key!");
-        // The UriRef is of the form ontologyIRI[:::versionIRI] (TODO use something less conventional?)
+                "Cannot build a IRI resource on a null public key!");
+        // The IRI is of the form ontologyIRI[:::versionIRI] (TODO use something less conventional?)
         // XXX should versionIRI also include the version IRI set by owners? Currently not
 
         // Remember not to sanitize logical identifiers.
-        IRI ontologyIri = publicKey.getOntologyIRI(), versionIri = publicKey.getVersionIRI();
+        org.semanticweb.owlapi.model.IRI ontologyIri = publicKey.getOntologyIRI(), versionIri = publicKey.getVersionIRI();
         if (ontologyIri == null) throw new IllegalArgumentException(
-                "Cannot build a UriRef resource on an anonymous public key!");
+                "Cannot build a IRI resource on an anonymous public key!");
         log.debug("Searching for a meta graph entry for public key:");
         log.debug(" -- {}", publicKey);
-        UriRef match = null;
+        IRI match = null;
         LiteralFactory lf = LiteralFactory.getInstance();
-        TypedLiteral oiri = lf.createTypedLiteral(new UriRef(ontologyIri.toString()));
-        TypedLiteral viri = versionIri == null ? null : lf.createTypedLiteral(new UriRef(versionIri
+        Literal oiri = lf.createTypedLiteral(new IRI(ontologyIri.toString()));
+        Literal viri = versionIri == null ? null : lf.createTypedLiteral(new IRI(versionIri
                 .toString()));
         for (Iterator<Triple> it = graph.filter(null, HAS_ONTOLOGY_IRI_URIREF, oiri); it.hasNext();) {
-            Resource subj = it.next().getSubject();
+            RDFTerm subj = it.next().getSubject();
             log.debug(" -- Ontology IRI match found. Scanning");
-            log.debug(" -- Resource : {}", subj);
-            if (!(subj instanceof UriRef)) {
+            log.debug(" -- RDFTerm : {}", subj);
+            if (!(subj instanceof IRI)) {
                 log.debug(" ---- (uncomparable: skipping...)");
                 continue;
             }
             if (viri != null) {
                 // Must find matching versionIRI
-                if (graph.contains(new TripleImpl((UriRef) subj, HAS_VERSION_IRI_URIREF, viri))) {
+                if (graph.contains(new TripleImpl((IRI) subj, HAS_VERSION_IRI_URIREF, viri))) {
                     log.debug(" ---- Version IRI match!");
-                    match = (UriRef) subj;
+                    match = (IRI) subj;
                     break; // Found
                 } else {
                     log.debug(" ---- Expected version IRI match not found.");
@@ -96,32 +95,32 @@ class MetaGraphManager {
 
             } else {
                 // Must find unversioned resource
-                if (graph.filter((UriRef) subj, HAS_VERSION_IRI_URIREF, null).hasNext()) {
+                if (graph.filter((IRI) subj, HAS_VERSION_IRI_URIREF, null).hasNext()) {
                     log.debug(" ---- Unexpected version IRI found. Skipping.");
                     continue;
                 } else {
                     log.debug(" ---- Unversioned match!");
-                    match = (UriRef) subj;
+                    match = (IRI) subj;
                     break; // Found
                 }
             }
         }
-        log.debug("Matching UriRef in graph : {}", match);
-        if (match == null) return new UriRef(OntologyUtils.encode(publicKey));
+        log.debug("Matching IRI in graph : {}", match);
+        if (match == null) return new IRI(OntologyUtils.encode(publicKey));
         else return match;
 
     }
 
     public boolean exists(final OWLOntologyID publicKey) {
-        UriRef publicKeyUriRef = new UriRef(OntologyUtils.encode(publicKey));
-        if (graph.filter(publicKeyUriRef, RDF.type, ENTRY_URIREF).hasNext()) return true;
-        if (graph.filter(publicKeyUriRef, OWL.sameAs, null).hasNext()) return true;
+        IRI publicKeyIRI = new IRI(OntologyUtils.encode(publicKey));
+        if (graph.filter(publicKeyIRI, RDF.type, ENTRY_URIREF).hasNext()) return true;
+        if (graph.filter(publicKeyIRI, OWL.sameAs, null).hasNext()) return true;
         return false;
     }
 
     public void updateAddAlias(OWLOntologyID subject, OWLOntologyID object) {
         // For now add both owl:sameAs statements
-        UriRef suben = buildResource(subject), oben = buildResource(object);
+        IRI suben = buildResource(subject), oben = buildResource(object);
         synchronized (graph) {
             graph.add(new TripleImpl(suben, OWL.sameAs, oben));
             graph.add(new TripleImpl(oben, OWL.sameAs, suben));
@@ -133,14 +132,14 @@ class MetaGraphManager {
         if (publicKey == null || publicKey.isAnonymous()) throw new IllegalArgumentException(
                 "An anonymous ontology cannot be mapped. A non-anonymous ontology ID must be forged in these cases.");
         Triple tType, tHasOiri = null, tHasViri = null;
-        IRI ontologyIRI = publicKey.getOntologyIRI(), versionIri = publicKey.getVersionIRI();
-        UriRef entry = buildResource(publicKey);
+        org.semanticweb.owlapi.model.IRI ontologyIRI = publicKey.getOntologyIRI(), versionIri = publicKey.getVersionIRI();
+        IRI entry = buildResource(publicKey);
         tType = new TripleImpl(entry, RDF.type, ENTRY_URIREF);
         LiteralFactory lf = LiteralFactory.getInstance();
-        tHasOiri = new TripleImpl(entry, HAS_ONTOLOGY_IRI_URIREF, lf.createTypedLiteral(new UriRef(
+        tHasOiri = new TripleImpl(entry, HAS_ONTOLOGY_IRI_URIREF, lf.createTypedLiteral(new IRI(
                 ontologyIRI.toString())));
         if (versionIri != null) tHasViri = new TripleImpl(entry, HAS_VERSION_IRI_URIREF,
-                lf.createTypedLiteral(new UriRef(versionIri.toString())));
+                lf.createTypedLiteral(new IRI(versionIri.toString())));
         synchronized (graph) {
             graph.add(tType);
             if (tHasViri != null) graph.add(tHasViri);

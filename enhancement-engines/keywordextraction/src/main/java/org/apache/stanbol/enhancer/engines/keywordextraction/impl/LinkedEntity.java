@@ -24,7 +24,7 @@ import java.util.Set;
 
 import opennlp.tools.util.Span;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.commons.opennlp.TextAnalyzer.AnalysedText;
 
 /**
@@ -131,7 +131,7 @@ public class LinkedEntity {
         }
     }
     private final String selectedText;
-    private final Set<UriRef> types;
+    private final Set<IRI> types;
     private final List<Suggestion> suggestions;
     private final Collection<Occurrence> occurrences = new ArrayList<Occurrence>();
     private final Collection<Occurrence> unmodOccurrences = Collections.unmodifiableCollection(occurrences);
@@ -141,7 +141,7 @@ public class LinkedEntity {
      * @param suggestions the entity suggestions
      * @param types the types of the linked entity. 
      */
-    protected LinkedEntity(String selectedText, List<Suggestion> suggestions, Set<UriRef> types) {
+    protected LinkedEntity(String selectedText, List<Suggestion> suggestions, Set<IRI> types) {
         this.suggestions = Collections.unmodifiableList(suggestions);
         this.selectedText = selectedText;
         this.types = Collections.unmodifiableSet(types);
@@ -155,7 +155,7 @@ public class LinkedEntity {
      * @param types the types of the linked entity. 
      */
     protected LinkedEntity(AnalysedText sentence,int startToken,int tokenSpan, 
-                           List<Suggestion> suggestions, Set<UriRef> types) {
+                           List<Suggestion> suggestions, Set<IRI> types) {
         this(sentence.getText().substring(
             sentence.getTokens().get(startToken).getStart(), 
             sentence.getTokens().get(tokenSpan).getEnd()),suggestions,types);
@@ -173,7 +173,7 @@ public class LinkedEntity {
      * Getter for read only list of types
      * @return the types
      */
-    public Set<UriRef> getTypes() {
+    public Set<IRI> getTypes() {
         return types;
     }
     /**

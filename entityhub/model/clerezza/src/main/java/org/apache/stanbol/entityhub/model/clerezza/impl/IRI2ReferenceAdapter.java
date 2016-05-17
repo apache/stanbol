@@ -16,24 +16,24 @@
  */
 package org.apache.stanbol.entityhub.model.clerezza.impl;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.entityhub.servicesapi.util.AdaptingIterator.Adapter;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Reference;
 
 
 /**
- * Adapter that converts Clerezza {@link UriRef} instances to {@link Reference}s.
+ * Adapter that converts Clerezza {@link IRI} instances to {@link Reference}s.
  * The {@link RdfValueFactory} is used to create {@link Reference} instances.
  * @author Rupert Westenthaler
  *
  */
-public class UriRef2ReferenceAdapter implements Adapter<UriRef,Reference> {
+public class IRI2ReferenceAdapter implements Adapter<IRI,Reference> {
 
     private final RdfValueFactory valueFactory = RdfValueFactory.getInstance();
 
     @Override
-    public final Reference adapt(UriRef value, Class<Reference> type) {
+    public final Reference adapt(IRI value, Class<Reference> type) {
         return valueFactory.createReference(value);
     }
 

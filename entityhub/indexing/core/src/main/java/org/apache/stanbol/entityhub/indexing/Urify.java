@@ -175,7 +175,7 @@ public class Urify implements Runnable{
             }
             InputStream is = new FileInputStream(source);
             OutputStream os = new FileOutputStream(target);
-            log.info("Resource: {}",resource);
+            log.info("RDFTerm: {}",resource);
             log.info("Target  : {}",target);
             if ("gz".equalsIgnoreCase(FilenameUtils.getExtension(name))) {
                 is = new GZIPInputStream(is);

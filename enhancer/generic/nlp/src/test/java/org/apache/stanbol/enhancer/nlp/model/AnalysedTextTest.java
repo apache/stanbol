@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.nlp.model.annotation.Annotation;
@@ -171,7 +171,7 @@ public class AnalysedTextTest {
      */
     private static AnalysedText createAnalysedText() throws IOException {
         ci = ciFactory.createContentItem(new StringSource(text));
-        Entry<UriRef,Blob> textBlob = ContentItemHelper.getBlob(ci, Collections.singleton("text/plain"));
+        Entry<IRI,Blob> textBlob = ContentItemHelper.getBlob(ci, Collections.singleton("text/plain"));
         return  atFactory.createAnalysedText(ci, textBlob.getValue());
     }
     

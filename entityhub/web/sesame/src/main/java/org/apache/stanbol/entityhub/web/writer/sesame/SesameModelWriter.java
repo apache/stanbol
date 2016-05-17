@@ -236,7 +236,7 @@ public class SesameModelWriter implements ModelWriter {
         final Model resultGraph;
         Class<?> type = resultList.getType();
         if (String.class.isAssignableFrom(type)) {
-            resultGraph = new LinkedHashModel(); //create a new Graph
+            resultGraph = new LinkedHashModel(); //create a new ImmutableGraph
             for (Object result : resultList) {
                 //add a triple to each reference in the result set
                 resultGraph.add(QUERY_RESULT_LIST, QUERY_RESULT, sesameFactory.createURI(result.toString()));

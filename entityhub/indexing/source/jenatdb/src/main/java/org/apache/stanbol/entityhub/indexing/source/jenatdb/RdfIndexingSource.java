@@ -97,7 +97,7 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
      */
     private static final String PARAM_BNODE_STATE = "bnode";
     /**
-     * If present, this Parameter allows to convert RDF BNodes to dereferable
+     * If present, this Parameter allows to convert RDF BlankNodes to dereferable
      * URIs by using {bnode-prefix}{bnode-id} (see 
      * <a href="https://issues.apache.org/jira/browse/STANBOL-765">STANBOL-765</a>
      * for details)
@@ -141,7 +141,7 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
 
     protected String bnodePrefix; //protected to allow direct access in inner classes
     /**
-     * used for logging a single WARN level entry on the first ignored BNode
+     * used for logging a single WARN level entry on the first ignored BlankNode
      */
     private boolean bnodeIgnored = false;
     private RdfImportFilter importFilter;
@@ -429,7 +429,7 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
         }
         if(found) {
             if(log.isTraceEnabled()){
-                log.info("Resource: \n{}", ModelUtils.getRepresentationInfo(source));
+                log.info("RDFTerm: \n{}", ModelUtils.getRepresentationInfo(source));
             }
             return source;
         } else {
@@ -510,12 +510,12 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
                 logIgnoredBnode(log, source, field, value);
             }
         }  else {
-            log.warn("ignoreing value {} for field {} and Resource {} because it is of an unsupported type!",
+            log.warn("ignoreing value {} for field {} and RDFTerm {} because it is of an unsupported type!",
                     new Object[]{value,field,source.getId()});
         } //end different value node type
     }
     /**
-     * Logs that a BNode was ignored (only the first time). Also debugs the
+     * Logs that a BlankNode was ignored (only the first time). Also debugs the
      * ignored triple.
      * @param log the logger to use
      * @param s subject
@@ -706,7 +706,7 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
                 Node entityNode = binding.get(entityVar);
                 //NOTES:
                 // * for URIs we need to check for empty URIs!
-                // * STANBOL-765: added support for BNodes
+                // * STANBOL-765: added support for BlankNodes
                 if((entityNode.isURI() && !entityNode.toString().isEmpty()) ||
                         entityNode.isBlank() && bnodePrefix != null){
                     if(!entityNode.equals(currentEntity)){
@@ -829,7 +829,7 @@ public class RdfIndexingSource extends AbstractTdbBackend implements EntityDataI
         return nodes;
     }
     /**
-     * Since STANBOL-765 BNodes are converted to URIs if a {@link #bnodePrefix}
+     * Since STANBOL-765 BlankNodes are converted to URIs if a {@link #bnodePrefix}
      * is configured. This also means that one needs to expect calls to the
      * {@link RDFBackend} interface with transformed Nodes. <p>
      * This method ensures that if someone requests an uri {@link Node} for a

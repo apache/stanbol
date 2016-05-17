@@ -31,11 +31,11 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
@@ -496,22 +496,22 @@ public class EntityLinker {
      * @param conceptTypes The list of suggestions
      * @return the types values for the {@link LinkedEntity}
      */
-    private Set<UriRef> getLinkedEntityTypes(Collection<Suggestion> suggestions){
-        Collection<UriRef> conceptTypes = new HashSet<UriRef>();
+    private Set<IRI> getLinkedEntityTypes(Collection<Suggestion> suggestions){
+        Collection<IRI> conceptTypes = new HashSet<IRI>();
         double score = -1; //only consider types of the best ranked Entities
         for(Suggestion suggestion : suggestions){
             double actScore = suggestion.getScore();
             if(actScore < score){
                 break;
             }
-            for(Iterator<UriRef> types = 
+            for(Iterator<IRI> types = 
                 suggestion.getEntity().getReferences(linkerConfig.getTypeField()); 
                 types.hasNext();conceptTypes.add(types.next()));
         }
-        Map<UriRef,UriRef> typeMappings = linkerConfig.getTypeMappings();
-        Set<UriRef> dcTypes = new HashSet<UriRef>();
-        for(UriRef conceptType : conceptTypes){
-            UriRef dcType = typeMappings.get(conceptType);
+        Map<IRI,IRI> typeMappings = linkerConfig.getTypeMappings();
+        Set<IRI> dcTypes = new HashSet<IRI>();
+        for(IRI conceptType : conceptTypes){
+            IRI dcType = typeMappings.get(conceptType);
             if(dcType != null){
                 dcTypes.add(dcType);
             }
@@ -541,13 +541,13 @@ public class EntityLinker {
             return; //Redirects for ResultMatch are already processed ... ignore
         }
         Entity result = suggestion.getResult();
-        Iterator<UriRef> redirects = result.getReferences(linkerConfig.getRedirectField());
+        Iterator<IRI> redirects = result.getReferences(linkerConfig.getRedirectField());
         switch (linkerConfig.getRedirectProcessingMode()) {
             case ADD_VALUES:
-                TripleCollection entityData = result.getData();
-                UriRef entityUri = result.getUri();
+                Graph entityData = result.getData();
+                IRI entityUri = result.getUri();
                 while(redirects.hasNext()){
-                    UriRef redirect = redirects.next();
+                    IRI redirect = redirects.next();
                     if(redirect != null){
                         Entity redirectedEntity = entitySearcher.get(redirect,
                             linkerConfig.getSelectedFields());
@@ -564,7 +564,7 @@ public class EntityLinker {
                 }
             case FOLLOW:
                 while(redirects.hasNext()){
-                    UriRef redirect = redirects.next();
+                    IRI redirect = redirects.next();
                     if(redirect != null){
                         Entity redirectedEntity = entitySearcher.get(redirect,
                             linkerConfig.getSelectedFields());
@@ -734,13 +734,13 @@ public class EntityLinker {
         }
     }
     
-    public boolean filterEntity(Iterator<UriRef> entityTypes){
-        Map<UriRef, Integer> whiteList = linkerConfig.getWhitelistedTypes();
-        Map<UriRef, Integer> blackList = linkerConfig.getBlacklistedTypes();
+    public boolean filterEntity(Iterator<IRI> entityTypes){
+        Map<IRI, Integer> whiteList = linkerConfig.getWhitelistedTypes();
+        Map<IRI, Integer> blackList = linkerConfig.getBlacklistedTypes();
         Integer w = null;
         Integer b = null;
         while(entityTypes.hasNext()){
-            UriRef type = entityTypes.next();
+            IRI type = entityTypes.next();
             Integer act = whiteList.get(type);
             if(act != null){
                 if(w == null || act.compareTo(w) < 0){
@@ -789,22 +789,22 @@ public class EntityLinker {
         String curLang = documentLang; //language of the current sentence
         String defLang = defaultLang; //configured default language 
         String mainLang = documentMainLang;
-        Collection<PlainLiteral> mainLangLabels;
+        Collection<Literal> mainLangLabels;
         if(documentMainLang != null){
             mainLang = documentMainLang;
-            mainLangLabels = new ArrayList<PlainLiteral>();
+            mainLangLabels = new ArrayList<Literal>();
         } else {
             mainLang = documentLang;
             mainLangLabels = Collections.emptyList();
         }
-        Iterator<PlainLiteral> labels = entity.getText(linkerConfig.getNameField());
+        Iterator<Literal> labels = entity.getText(linkerConfig.getNameField());
         Suggestion match = new Suggestion(entity);
-        Collection<PlainLiteral> defaultLabels = new ArrayList<PlainLiteral>();
+        Collection<Literal> defaultLabels = new ArrayList<Literal>();
         boolean matchedLangLabel = false;
         //avoid matching multiple labels with the exact same lexical.
         Set<String> matchedLabels = new HashSet<String>();
         while(labels.hasNext()){
-            PlainLiteral label = labels.next();
+            Literal label = labels.next();
             //numLabels++;
             String lang = label.getLanguage() != null ? label.getLanguage().toString() : null;
             String text = label.getLexicalForm();
@@ -831,7 +831,7 @@ public class EntityLinker {
         }
         //try to match main language labels
         if(!matchedLangLabel || match.getMatch() == MATCH.NONE){
-            for(PlainLiteral mainLangLabel : mainLangLabels){
+            for(Literal mainLangLabel : mainLangLabels){
                 if(!matchedLabels.contains(mainLangLabel.getLexicalForm())){
                     matchLabel(searchTokens, match, mainLangLabel);
                     matchedLabels.add(mainLangLabel.getLexicalForm());
@@ -843,7 +843,7 @@ public class EntityLinker {
         // * no label in the current language or
         // * no MATCH was found in the current language
         if(!matchedLangLabel || match.getMatch() == MATCH.NONE){
-            for(PlainLiteral defaultLangLabel : defaultLabels){
+            for(Literal defaultLangLabel : defaultLabels){
                 if(!matchedLabels.contains(defaultLangLabel.getLexicalForm())){
                     matchLabel(searchTokens, match, defaultLangLabel);
                     matchedLabels.add(defaultLangLabel.getLexicalForm());
@@ -857,7 +857,7 @@ public class EntityLinker {
      * @param suggestion
      * @param label
      */
-    private void matchLabel(List<TokenData> searchTokens, Suggestion suggestion, PlainLiteral label) {
+    private void matchLabel(List<TokenData> searchTokens, Suggestion suggestion, Literal label) {
 //        test.begin();
         String text = label.getLexicalForm();
         String lang = label.getLanguage() == null ? null : label.getLanguage().toString();

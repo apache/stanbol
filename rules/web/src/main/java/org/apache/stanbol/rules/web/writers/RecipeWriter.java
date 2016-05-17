@@ -31,8 +31,8 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.serializedform.Serializer;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.rdfjson.serializer.RdfJsonSerializingProvider;
@@ -53,7 +53,6 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLFunctionalSyntaxOntologyFormat;
 import org.semanticweb.owlapi.io.OWLXMLOntologyFormat;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
@@ -148,14 +147,14 @@ public class RecipeWriter implements MessageBodyWriter<Recipe> {
     
                 RuleList rules = recipe.getRuleList();
     
-                UriRef recipeID = recipe.getRecipeID();
+                IRI recipeID = recipe.getRecipeID();
     
                 String recipeURI = recipeID.toString().replace("<", "").replace(">", "");
-                IRI recipeIRI = IRI.create(recipeURI);
+                org.semanticweb.owlapi.model.IRI recipeIRI = org.semanticweb.owlapi.model.IRI.create(recipeURI);
                 OWLIndividual recipeIndividual = factory.getOWLNamedIndividual(recipeIRI);
     
                 String descriptionURI = Symbols.description.toString().replace("<", "").replace(">", "");
-                IRI descriptionIRI = IRI.create(descriptionURI);
+                org.semanticweb.owlapi.model.IRI descriptionIRI = org.semanticweb.owlapi.model.IRI.create(descriptionURI);
                 OWLDataProperty descriptionProperty = factory.getOWLDataProperty(descriptionIRI);
                 
                 OWLAxiom axiom; 
@@ -169,7 +168,7 @@ public class RecipeWriter implements MessageBodyWriter<Recipe> {
                 
                 if(rules != null){
                     for (Rule rule : rules) {
-                        UriRef ruleID = rule.getRuleID();
+                        IRI ruleID = rule.getRuleID();
                         String ruleName = rule.getRuleName();
                         String ruleDescription = rule.getDescription();
         
@@ -185,12 +184,12 @@ public class RecipeWriter implements MessageBodyWriter<Recipe> {
         
                         String[] ruleParts = ruleContent.split("\\->");
         
-                        IRI ruleIRI = IRI.create(ruleURI);
+                        org.semanticweb.owlapi.model.IRI ruleIRI = org.semanticweb.owlapi.model.IRI.create(ruleURI);
         
-                        IRI ruleNameIRI = IRI.create(ruleNameURI);
-                        IRI ruleBodyIRI = IRI.create(ruleBodyURI);
-                        IRI ruleHeadIRI = IRI.create(ruleHeadURI);
-                        IRI hasRuleIRI = IRI.create(hasRuleURI);
+                        org.semanticweb.owlapi.model.IRI ruleNameIRI = org.semanticweb.owlapi.model.IRI.create(ruleNameURI);
+                        org.semanticweb.owlapi.model.IRI ruleBodyIRI = org.semanticweb.owlapi.model.IRI.create(ruleBodyURI);
+                        org.semanticweb.owlapi.model.IRI ruleHeadIRI = org.semanticweb.owlapi.model.IRI.create(ruleHeadURI);
+                        org.semanticweb.owlapi.model.IRI hasRuleIRI = org.semanticweb.owlapi.model.IRI.create(hasRuleURI);
         
                         OWLIndividual ruleIndividual = factory.getOWLNamedIndividual(ruleIRI);
         
@@ -264,7 +263,7 @@ public class RecipeWriter implements MessageBodyWriter<Recipe> {
                     }
                 } else if (mediaType.toString().equals(KRFormat.RDF_JSON)) {
     
-                    TripleCollection mGraph = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(ontology);
+                    Graph mGraph = OWLAPIToClerezzaConverter.owlOntologyToClerezzaGraph(ontology);
     
                     RdfJsonSerializingProvider provider = new RdfJsonSerializingProvider();
                     provider.serialize(out, mGraph, SupportedFormat.RDF_JSON);

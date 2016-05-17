@@ -48,10 +48,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -177,7 +177,7 @@ public class FstLinkingEngineComponent {
      * The origin information for all Entities provided by the configured SolrCore and
      * FST. Origin information are added to all <code>fise:EntityAnnotation</code>
      * by using the <code>fise:origin</code> property. Configured values can be both
-     * {@link UriRef URI}s or {@link Literal}s. Configured Strings are checked if
+     * {@link IRI URI}s or {@link Literal}s. Configured Strings are checked if
      * they are valid {@link URI}s and  {@link URI#isAbsolute() absolute}. If not
      * a {@link Literal} is parsed.
      */
@@ -240,7 +240,7 @@ public class FstLinkingEngineComponent {
     /**
      * The origin information of Entities.
      */
-    private Resource origin;
+    private RDFTerm origin;
     
     /**
      * used to resolve '{prefix}:{local-name}' used within the engines configuration
@@ -470,13 +470,13 @@ public class FstLinkingEngineComponent {
         
         //(4) parse Origin information
         value = properties.get(ORIGIN);
-        if(value instanceof Resource){
-            origin = (Resource)origin;
+        if(value instanceof RDFTerm){
+            origin = (RDFTerm)origin;
         } else if (value instanceof String){
             try {
                 URI originUri = new URI((String)value);
                 if(originUri.isAbsolute()){
-                    origin = new UriRef((String)value);
+                    origin = new IRI((String)value);
                 } else {
                     origin = new PlainLiteralImpl((String)value);
                 }
@@ -485,7 +485,7 @@ public class FstLinkingEngineComponent {
             }
             log.info(" - origin: {}", origin);
         } else if(value != null){
-            log.warn("Values of the {} property MUST BE of type Resource or String "
+            log.warn("Values of the {} property MUST BE of type RDFTerm or String "
                     + "(parsed: {} (type:{}))", new Object[]{ORIGIN,value,value.getClass()});
         } //else no ORIGIN information provided
         

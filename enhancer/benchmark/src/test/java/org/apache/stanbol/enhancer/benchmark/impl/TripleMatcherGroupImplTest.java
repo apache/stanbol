@@ -20,20 +20,20 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class TripleMatcherGroupImplTest {
-    private MGraph graph;
+    private Graph graph;
     
     @Before
     public void createGraph() {
-        graph = new SimpleMGraph();
+        graph = new SimpleGraph();
         graph.add(TripleUtil.uriTriple("S1", "P1", "01"));
         graph.add(TripleUtil.uriTriple("S1", "P1", "02"));
         graph.add(TripleUtil.uriTriple("S2", "P1", "01"));
@@ -49,14 +49,14 @@ public class TripleMatcherGroupImplTest {
         assertEquals(
                 "Empty matcher group should find nothing",
                 0,
-                group.getMatchingSubjects(graph.getGraph()).size());
+                group.getMatchingSubjects(graph.getImmutableGraph()).size());
         
         // Add two matchers, only S1 and S2 match all of them
         group.addMatcher(new TripleMatcherImpl("P1 URI 01"));
         group.addMatcher(new TripleMatcherImpl("P1 URI 02"));
         
-        final Set<UriRef> actual = group.getMatchingSubjects(graph.getGraph());
-        final Set<UriRef> expected = TripleUtil.uriRefSet("S1", "S2");
+        final Set<IRI> actual = group.getMatchingSubjects(graph.getImmutableGraph());
+        final Set<IRI> expected = TripleUtil.uriRefSet("S1", "S2");
         
         assertEquals("Size of results " + actual + " matches " + expected, expected.size(), actual.size());
         assertTrue("Content of results " + actual + " matches " + expected, expected.containsAll(actual));

@@ -45,7 +45,7 @@ public interface NamedArtifact {
      * objects of different types cannot have the same ID. These aspects should be ensured by registries,
      * indexers etc.<br>
      * <br>
-     * XXX check if a type other than String (e.g. URI, IRI, UriRef) should be used.
+     * XXX check if a type other than String (e.g. URI, IRI, IRI) should be used.
      * 
      * @return an identifier for this resource.
      */

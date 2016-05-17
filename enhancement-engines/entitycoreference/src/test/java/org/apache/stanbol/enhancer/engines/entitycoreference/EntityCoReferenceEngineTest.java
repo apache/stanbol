@@ -11,10 +11,10 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map.Entry;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.nlp.NlpAnnotations;
 import org.apache.stanbol.enhancer.nlp.coref.CorefFeature;
@@ -85,13 +85,13 @@ public class EntityCoReferenceEngineTest {
 	@Test
 	public void testSpatialCoref() throws EngineException, IOException {
 		ContentItem ci = ciFactory.createContentItem(new StringSource(SPATIAL_TEXT));
-		MGraph graph = ci.getMetadata();
-		UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, engine);
+		Graph graph = ci.getMetadata();
+		IRI textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, engine);
 		graph.add(new TripleImpl(textEnhancement, DC_LANGUAGE, new PlainLiteralImpl("en")));
 		graph.add(new TripleImpl(textEnhancement, ENHANCER_CONFIDENCE, new PlainLiteralImpl("100.0")));
 		graph.add(new TripleImpl(textEnhancement, DC_TYPE, DCTERMS_LINGUISTIC_SYSTEM));
 
-		Entry<UriRef, Blob> textBlob = ContentItemHelper.getBlob(ci, Collections.singleton("text/plain"));
+		Entry<IRI, Blob> textBlob = ContentItemHelper.getBlob(ci, Collections.singleton("text/plain"));
 		AnalysedText at = atFactory.createAnalysedText(ci, textBlob.getValue());
 
 		Sentence sentence1 = at.addSentence(0, SPATIAL_SENTENCE_1.indexOf(".") + 1);

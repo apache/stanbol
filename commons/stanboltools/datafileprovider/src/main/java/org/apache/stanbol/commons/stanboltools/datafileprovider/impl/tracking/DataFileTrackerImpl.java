@@ -224,7 +224,7 @@ public final class DataFileTrackerImpl implements DataFileTracker {
                 trackedResources.put(r, trackingState);
             }
             trackingState.addListener(resourceListener);
-            if(!trackedResources.isEmpty()){ //maybe this was the first added Resource
+            if(!trackedResources.isEmpty()){ //maybe this was the first added RDFTerm
                 startTracking(); //so me might want to start tracking
             }
         }

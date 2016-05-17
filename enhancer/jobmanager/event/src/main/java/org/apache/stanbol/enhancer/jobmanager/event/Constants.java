@@ -16,7 +16,7 @@
 */
 package org.apache.stanbol.enhancer.jobmanager.event;
 
-import org.apache.clerezza.rdf.core.NonLiteral;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
 import org.apache.stanbol.enhancer.jobmanager.event.impl.EnhancementJob;
 import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata;
 import org.osgi.service.event.Event;
@@ -41,7 +41,7 @@ public interface Constants {
      */
     String PROPERTY_JOB_MANAGER = "stanbol.enhancer.jobmanager.event.job";
     /**
-     * Property used to provide the {@link NonLiteral} describing the
+     * Property used to provide the {@link BlankNodeOrIRI} describing the
      * {@link ExecutionMetadata#EXECUTION} instance
      */
     String PROPERTY_EXECUTION = "stanbol.enhancer.jobmanager.event.execution";

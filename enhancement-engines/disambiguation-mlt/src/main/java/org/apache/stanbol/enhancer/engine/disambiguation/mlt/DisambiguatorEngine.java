@@ -33,10 +33,10 @@ import java.util.NavigableMap;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -190,7 +190,7 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
     public void computeEnhancements(ContentItem ci) throws EngineException {
 
         String textContent;
-        Entry<UriRef,Blob> textBlob = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
+        Entry<IRI,Blob> textBlob = ContentItemHelper.getBlob(ci, SUPPORTED_MIMETYPES);
         if (textBlob != null) {
             try {
                 textContent = ContentItemHelper.getText(textBlob.getValue());
@@ -202,7 +202,7 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
             textContent = null;
         }
 
-        MGraph graph = ci.getMetadata();
+        Graph graph = ci.getMetadata();
 
         // (1) read the data from the content item
         String contentLangauge;
@@ -346,11 +346,11 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
     // the disambiguation result the ambiguation is kept but the overall
     // fise:confidence values are reduced by #confidenceWeight (ensured to be
     // less than 1)
-    // protected List<Triple> unchangedConfidences(List<UriRef> subsumed,
-    // MGraph graph,
+    // protected List<Triple> unchangedConfidences(List<IRI> subsumed,
+    // Graph graph,
     // List<Triple> loseConfidence) {
     // for (int i = 0; i < subsumed.size(); i++) {
-    // UriRef uri = subsumed.get(i);
+    // IRI uri = subsumed.get(i);
     // Iterator<Triple> confidenceTriple = graph.filter(uri, ENHANCER_CONFIDENCE, null);
     // while (confidenceTriple.hasNext()) {
     // loseConfidence.remove(confidenceTriple.next());
@@ -417,7 +417,7 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
             if (maxScore == null) {
                 maxScore = score;
             }
-            UriRef uri = new UriRef(guess.getId());
+            IRI uri = new IRI(guess.getId());
             Suggestion suggestion = savedEntity.getSuggestion(uri);
             if (suggestion == null) {
                 log.info(" - not found {}", guess.getId());
@@ -460,13 +460,13 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
     // NOTE (rwesten): now done as part of the disambiguateSuggestions(..)
     // method.
     // protected boolean intersectionCheck(List<Suggestion> matches,
-    // List<UriRef> subsumed,
-    // MGraph graph,
+    // List<IRI> subsumed,
+    // Graph graph,
     // String contentLangauge) {
     // for (int i = 0; i < subsumed.size(); i++) {
-    // UriRef uri = subsumed.get(i);
+    // IRI uri = subsumed.get(i);
     //
-    // UriRef uri1 = EnhancementEngineHelper.getReference(graph, uri, new UriRef(NamespaceEnum.fise
+    // IRI uri1 = EnhancementEngineHelper.getReference(graph, uri, new IRI(NamespaceEnum.fise
     // + "entity-reference"));
     //
     // String selectedText = EnhancementEngineHelper.getString(graph, uri, ENHANCER_ENTITY_LABEL);
@@ -576,16 +576,16 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
     // method. Results are stored in the Suggestions (member of SavedEntiy) and
     // than written back to the EnhancementStructure in a separate step
     // protected List<Triple> intersection(List<Suggestion> matches,
-    // List<UriRef> subsumed,
-    // MGraph graph,
+    // List<IRI> subsumed,
+    // Graph graph,
     // List<Triple> gainConfidence,
     // String contentLangauge) {
     //
     // for (int i = 0; i < subsumed.size(); i++) {
     // boolean matchFound = false;
-    // UriRef uri = subsumed.get(i);
+    // IRI uri = subsumed.get(i);
     //
-    // UriRef uri1 = EnhancementEngineHelper.getReference(graph, uri, new UriRef(NamespaceEnum.fise
+    // IRI uri1 = EnhancementEngineHelper.getReference(graph, uri, new IRI(NamespaceEnum.fise
     // + "entity-reference"));
     //
     // for (int j = 0; j < matches.size(); j++) {
@@ -596,8 +596,8 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
     // && suggestName.compareToIgnoreCase(uri1.getUnicodeString()) == 0) {
     // Triple confidenceTriple = new TripleImpl(uri, ENHANCER_CONFIDENCE, LiteralFactory
     // .getInstance().createTypedLiteral(suggestion.getScore()));
-    // Triple contributorTriple = new TripleImpl((UriRef) confidenceTriple.getSubject(),
-    // new UriRef(NamespaceEnum.dc + "contributor"), LiteralFactory.getInstance()
+    // Triple contributorTriple = new TripleImpl((IRI) confidenceTriple.getSubject(),
+    // new IRI(NamespaceEnum.dc + "contributor"), LiteralFactory.getInstance()
     // .createTypedLiteral(this.getClass().getName()));
     // gainConfidence.add(confidenceTriple);
     // gainConfidence.add(contributorTriple);
@@ -608,7 +608,7 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
     // if (!matchFound) {
     // Triple confidenceTriple = new TripleImpl(uri, ENHANCER_CONFIDENCE, LiteralFactory
     // .getInstance().createTypedLiteral(0.0));
-    // Triple contributorTriple = new TripleImpl((UriRef) confidenceTriple.getSubject(), new UriRef(
+    // Triple contributorTriple = new TripleImpl((IRI) confidenceTriple.getSubject(), new IRI(
     // NamespaceEnum.dc + "contributor"), LiteralFactory.getInstance().createTypedLiteral(
     // this.getClass().getName()));
     // gainConfidence.add(confidenceTriple);
@@ -620,7 +620,7 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
     // }
 
     /* Removes the value in lose confidence from the graph */
-    protected void removeOldConfidenceFromGraph(MGraph graph, List<Triple> loseConfidence) {
+    protected void removeOldConfidenceFromGraph(Graph graph, List<Triple> loseConfidence) {
         for (int i = 0; i < loseConfidence.size(); i++) {
             Triple elementToRemove = loseConfidence.get(i);
             graph.remove(elementToRemove);
@@ -635,7 +635,7 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
      * @param disData
      *            the disambiguation data
      */
-    protected void applyDisambiguationResults(MGraph graph, DisambiguationData disData) {
+    protected void applyDisambiguationResults(Graph graph, DisambiguationData disData) {
         for (SavedEntity savedEntity : disData.textAnnotations.values()) {
             for (Suggestion s : savedEntity.getSuggestions()) {
                 if (s.getDisambiguatedConfidence() != null) {
@@ -697,8 +697,8 @@ public class DisambiguatorEngine extends AbstractEnhancementEngine<IOException,R
      * @param textAnnotation
      * @return
      */
-    public static UriRef cloneTextAnnotation(MGraph graph, UriRef entityAnnotation, UriRef textAnnotation) {
-        UriRef copy = new UriRef("urn:enhancement-" + EnhancementEngineHelper.randomUUID());
+    public static IRI cloneTextAnnotation(Graph graph, IRI entityAnnotation, IRI textAnnotation) {
+        IRI copy = new IRI("urn:enhancement-" + EnhancementEngineHelper.randomUUID());
         Iterator<Triple> it = graph.filter(entityAnnotation, null, null);
         // we can not add triples to the graph while iterating. So store them
         // in a list and add later

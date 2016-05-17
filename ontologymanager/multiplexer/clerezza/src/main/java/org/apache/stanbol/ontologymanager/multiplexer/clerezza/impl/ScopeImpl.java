@@ -23,15 +23,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.stanbol.ontologymanager.servicesapi.collector.OntologyCollector;
@@ -44,7 +44,6 @@ import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpaceFactory
 import org.apache.stanbol.ontologymanager.servicesapi.scope.Scope;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
@@ -89,10 +88,10 @@ public class ScopeImpl implements Scope, OntologyCollectorListener {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    protected IRI namespace = null;
+    protected org.semanticweb.owlapi.model.IRI namespace = null;
 
     public ScopeImpl(String id,
-                     IRI namespace,
+                     org.semanticweb.owlapi.model.IRI namespace,
                      OntologySpaceFactory factory,
                      OntologyInputSource<?>... coreOntologies) {
         setID(id);
@@ -158,33 +157,33 @@ if (!this.getCustomSpace().equals(sc.getCustomSpace())) return false;
 
     @SuppressWarnings("unchecked")
     @Override
-    public <O> O export(Class<O> returnType, boolean merge, IRI universalPrefix) {
+    public <O> O export(Class<O> returnType, boolean merge, org.semanticweb.owlapi.model.IRI universalPrefix) {
         if (OWLOntology.class.isAssignableFrom(returnType)) {
             return (O) exportToOWLOntology(merge, universalPrefix);
         }
-        if (TripleCollection.class.isAssignableFrom(returnType)) {
-            TripleCollection root = exportToMGraph(merge, universalPrefix);
+        if (Graph.class.isAssignableFrom(returnType)) {
+            Graph root = exportToGraph(merge, universalPrefix);
             // A Clerezza graph has to be cast properly.
-            if (returnType == Graph.class) root = ((MGraph) root).getGraph();
-            else if (returnType == MGraph.class) {}
+            if (returnType == ImmutableGraph.class) root = ((Graph) root).getImmutableGraph();
+            else if (returnType == Graph.class) {}
             return (O) root;
         }
         throw new UnsupportedOperationException("Cannot export scope " + getID() + " to a " + returnType);
     }
 
     /**
-     * Get a Clerezza {@link MGraph} representation of the scope.
+     * Get a Clerezza {@link Graph} representation of the scope.
      * 
      * @param merge
      *            if true the core and custom spaces will be recursively merged with the scope graph,
      *            otherwise owl:imports statements will be added.
      * @return the RDF representation of the scope as a modifiable graph.
      */
-    protected MGraph exportToMGraph(boolean merge, IRI universalPrefix) {
+    protected Graph exportToGraph(boolean merge, org.semanticweb.owlapi.model.IRI universalPrefix) {
 
         // No need to store, give it a name, or anything.
-        MGraph root = new SimpleMGraph();
-        UriRef iri = new UriRef(universalPrefix + getID());
+        Graph root = new SimpleGraph();
+        IRI iri = new IRI(universalPrefix + getID());
 
         if (root != null) {
             // Set the ontology ID
@@ -192,13 +191,13 @@ if (!this.getCustomSpace().equals(sc.getCustomSpace())) return false;
 
             if (merge) {
 
-                Graph custom, core;
+                ImmutableGraph custom, core;
 
                 // Get the subjects of "bad" triples (those with subjects of type owl:Ontology).
                 Iterator<Triple> it;
-                Set<NonLiteral> ontologies = new HashSet<NonLiteral>();
-                Set<Resource> importTargets = new HashSet<Resource>();
-                custom = this.getCustomSpace().export(Graph.class, merge);
+                Set<BlankNodeOrIRI> ontologies = new HashSet<BlankNodeOrIRI>();
+                Set<RDFTerm> importTargets = new HashSet<RDFTerm>();
+                custom = this.getCustomSpace().export(ImmutableGraph.class, merge);
                 // root.addAll(space);
                 it = custom.filter(null, RDF.type, OWL.Ontology);
                 while (it.hasNext())
@@ -206,7 +205,7 @@ if (!this.getCustomSpace().equals(sc.getCustomSpace())) return false;
                 it = custom.filter(null, OWL.imports, null);
                 while (it.hasNext())
                     importTargets.add(it.next().getObject());
-                core = this.getCoreSpace().export(Graph.class, merge);
+                core = this.getCoreSpace().export(ImmutableGraph.class, merge);
                 // root.addAll(space);
                 it = core.filter(null, RDF.type, OWL.Ontology);
                 while (it.hasNext())
@@ -218,7 +217,7 @@ if (!this.getCustomSpace().equals(sc.getCustomSpace())) return false;
                 // Make sure the scope itself is not in the "bad" subjects.
                 ontologies.remove(iri);
 
-                for (NonLiteral nl : ontologies)
+                for (BlankNodeOrIRI nl : ontologies)
                     log.debug("{} -related triples will not be added to {}", nl, iri);
 
                 // Merge the two spaces, skipping the "bad" triples.
@@ -233,14 +232,14 @@ if (!this.getCustomSpace().equals(sc.getCustomSpace())) return false;
                  * Reinstate import statements, though. If imported ontologies were not merged earlier, we are
                  * not doing it now anyway.
                  */
-                for (Resource target : importTargets)
+                for (RDFTerm target : importTargets)
                     root.add(new TripleImpl(iri, OWL.imports, target));
 
             } else {
-                UriRef physIRI = new UriRef(universalPrefix.toString() + this.getID() + "/"
+                IRI physIRI = new IRI(universalPrefix.toString() + this.getID() + "/"
                                             + SpaceType.CUSTOM.getIRISuffix());
                 root.add(new TripleImpl(iri, OWL.imports, physIRI));
-                physIRI = new UriRef(universalPrefix.toString() + this.getID() + "/"
+                physIRI = new IRI(universalPrefix.toString() + this.getID() + "/"
                                      + SpaceType.CORE.getIRISuffix());
                 root.add(new TripleImpl(iri, OWL.imports, physIRI));
             }
@@ -257,7 +256,7 @@ if (!this.getCustomSpace().equals(sc.getCustomSpace())) return false;
      *            otherwise owl:imports statements will be added.
      * @return the OWL representation of the scope.
      */
-    protected OWLOntology exportToOWLOntology(boolean merge, IRI universalPrefix) {
+    protected OWLOntology exportToOWLOntology(boolean merge, org.semanticweb.owlapi.model.IRI universalPrefix) {
         // if (merge) throw new UnsupportedOperationException(
         // "Ontology merging only implemented for managed ontologies, not for collectors. "
         // + "Please set merge parameter to false.");
@@ -285,25 +284,25 @@ if (!this.getCustomSpace().equals(sc.getCustomSpace())) return false;
                 OWLOntologyMerger merger = new OWLOntologyMerger(provider);
                 try {
                     ont = merger.createMergedOntology(OWLManager.createOWLOntologyManager(),
-                        IRI.create(getDefaultNamespace() + getID()));
+                        org.semanticweb.owlapi.model.IRI.create(getDefaultNamespace() + getID()));
                 } catch (OWLOntologyCreationException e) {
                     log.error("Failed to merge imports for ontology.", e);
                     ont = null;
                 }
             } else {
                 // The root ontology ID is in the form [namespace][scopeId]
-                ont = mgr.createOntology(IRI.create(universalPrefix + getID()));
+                ont = mgr.createOntology(org.semanticweb.owlapi.model.IRI.create(universalPrefix + getID()));
                 List<OWLOntologyChange> additions = new LinkedList<OWLOntologyChange>();
                 // Add the import statement for the custom space, if existing and not empty
                 OntologySpace spc = getCustomSpace();
                 if (spc != null && spc.listManagedOntologies().size() > 0) {
-                    IRI spaceIri = IRI.create(universalPrefix + spc.getID());
+                    org.semanticweb.owlapi.model.IRI spaceIri = org.semanticweb.owlapi.model.IRI.create(universalPrefix + spc.getID());
                     additions.add(new AddImport(ont, df.getOWLImportsDeclaration(spaceIri)));
                 }
                 // Add the import statement for the core space, if existing and not empty
                 spc = getCoreSpace();
                 if (spc != null && spc.listManagedOntologies().size() > 0) {
-                    IRI spaceIri = IRI.create(universalPrefix + spc.getID());
+                    org.semanticweb.owlapi.model.IRI spaceIri = org.semanticweb.owlapi.model.IRI.create(universalPrefix + spc.getID());
                     additions.add(new AddImport(ont, df.getOWLImportsDeclaration(spaceIri)));
                 }
                 mgr.applyChanges(additions);
@@ -341,7 +340,7 @@ if (!this.getCustomSpace().equals(sc.getCustomSpace())) return false;
     }
 
     @Override
-    public IRI getDefaultNamespace() {
+    public org.semanticweb.owlapi.model.IRI getDefaultNamespace() {
         return this.namespace;
     }
 
@@ -351,7 +350,7 @@ if (!this.getCustomSpace().equals(sc.getCustomSpace())) return false;
     }
 
     @Override
-    public IRI getNamespace() {
+    public org.semanticweb.owlapi.model.IRI getNamespace() {
         return getDefaultNamespace();
     }
 
@@ -405,7 +404,7 @@ if (!this.getCustomSpace().equals(sc.getCustomSpace())) return false;
      *            will be logged.
      */
     @Override
-    public void setDefaultNamespace(IRI namespace) {
+    public void setDefaultNamespace(org.semanticweb.owlapi.model.IRI namespace) {
         if (namespace == null) throw new IllegalArgumentException("Namespace cannot be null.");
         if (namespace.toURI().getQuery() != null) throw new IllegalArgumentException(
                 "URI Query is not allowed in OntoNet namespaces.");
@@ -416,7 +415,7 @@ if (!this.getCustomSpace().equals(sc.getCustomSpace())) return false;
         if (!namespace.toString().endsWith("/")) {
             log.warn("Namespace {} does not end with slash character ('/'). It will be added automatically.",
                 namespace);
-            namespace = IRI.create(namespace + "/");
+            namespace = org.semanticweb.owlapi.model.IRI.create(namespace + "/");
         }
         this.namespace = namespace;
     }
@@ -432,7 +431,7 @@ if (!this.getCustomSpace().equals(sc.getCustomSpace())) return false;
     }
 
     @Override
-    public void setNamespace(IRI namespace) {
+    public void setNamespace(org.semanticweb.owlapi.model.IRI namespace) {
         setDefaultNamespace(namespace);
     }
 

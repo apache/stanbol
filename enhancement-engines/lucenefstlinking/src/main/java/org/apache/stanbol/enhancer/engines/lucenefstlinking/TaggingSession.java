@@ -33,10 +33,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
@@ -572,17 +572,17 @@ public class TaggingSession implements Closeable {
                 values.put(FieldType.label, labels);
                 //load the types
                 if(typeField != null){
-                    Set<UriRef> types = new HashSet<UriRef>();
+                    Set<IRI> types = new HashSet<IRI>();
                     for(String type : doc.getValues(typeField)){
-                        types.add(new UriRef(type));
+                        types.add(new IRI(type));
                     }
                     values.put(FieldType.type, types);
                 }
                 //load the redirects
                 if(redirectField != null){
-                    Set<UriRef> redirects = new HashSet<UriRef>();
+                    Set<IRI> redirects = new HashSet<IRI>();
                     for(String redirect : doc.getValues(redirectField)){
-                        redirects.add(new UriRef(redirect));
+                        redirects.add(new IRI(redirect));
                     }
                     values.put(FieldType.redirect, redirects);
                 }

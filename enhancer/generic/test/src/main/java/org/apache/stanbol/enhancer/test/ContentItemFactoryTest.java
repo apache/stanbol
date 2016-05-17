@@ -26,11 +26,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -80,11 +80,11 @@ public abstract class ContentItemFactoryTest {
     /**
      * The {@link ContentItem#getUri() ID} used for testing
      */
-    private static UriRef ID = new UriRef("http://www.example.com/content-items#12345");
+    private static IRI ID = new IRI("http://www.example.com/content-items#12345");
     /**
-     * Graph used to test of parsed metadata are preserved
+     * ImmutableGraph used to test of parsed metadata are preserved
      */
-    private static MGraph METADATA = new SimpleMGraph();
+    private static Graph METADATA = new SimpleGraph();
     static {
         METADATA.add(new TripleImpl(ID, Properties.RDF_TYPE, Enhancer.CONTENT_ITEM));
         METADATA.add(new TripleImpl(ID, Properties.RDFS_LABEL, new PlainLiteralImpl("Test ContentItem")));
@@ -138,11 +138,11 @@ public abstract class ContentItemFactoryTest {
     }
     @Test(expected=IllegalArgumentException.class)
     public void missingCiContentSource4() throws IOException{
-        contentItemFactory.createContentItem(ID,null,new SimpleMGraph());
+        contentItemFactory.createContentItem(ID,null,new SimpleGraph());
     }
     @Test(expected=IllegalArgumentException.class)
     public void missingCiContentSource5() throws IOException{
-        contentItemFactory.createContentItem(PREFIX,null,new SimpleMGraph());
+        contentItemFactory.createContentItem(PREFIX,null,new SimpleGraph());
     }
     /*
      * Set of tests to test that IllegalArgumentExceptions are
@@ -155,7 +155,7 @@ public abstract class ContentItemFactoryTest {
     }
     @Test(expected=IllegalArgumentException.class)
     public void missingCiContentReference2() throws IOException{
-        contentItemFactory.createContentItem(null,new SimpleMGraph());
+        contentItemFactory.createContentItem(null,new SimpleGraph());
     }
     /*
      * Set of tests to test that IllegalArgumentExceptions are
@@ -179,7 +179,7 @@ public abstract class ContentItemFactoryTest {
     }
     @Test(expected=IllegalArgumentException.class)
     public void missingCiPrefix2() throws IOException{
-        contentItemFactory.createContentItem((String)null,TEST_CS,new SimpleMGraph());
+        contentItemFactory.createContentItem((String)null,TEST_CS,new SimpleGraph());
     }
     /**
      * Test that the generated ID starts with the parsed prefix
@@ -192,7 +192,7 @@ public abstract class ContentItemFactoryTest {
         assertTrue("The ID of the created ContentItem MUST start with the parsed prefix", 
             ci.getUri().getUnicodeString().startsWith(PREFIX));
         
-        ci = contentItemFactory.createContentItem(PREFIX, TEST_CS,new SimpleMGraph());
+        ci = contentItemFactory.createContentItem(PREFIX, TEST_CS,new SimpleGraph());
         assertNotNull(ci);
         assertNotNull(ci.getUri());
         assertTrue("The ID of the created ContentItem MUST start with the parsed prefix", 
@@ -209,7 +209,7 @@ public abstract class ContentItemFactoryTest {
         assertTrue("The ID of the created ContentItem MUST be equals to the parsed ID", 
             ci.getUri().equals(ID));
         
-        ci = contentItemFactory.createContentItem(ID, TEST_CS,new SimpleMGraph());
+        ci = contentItemFactory.createContentItem(ID, TEST_CS,new SimpleGraph());
         assertNotNull(ci);
         assertNotNull(ci.getUri());
         assertTrue("The ID of the created ContentItem MUST be equals to the parsed ID", 
@@ -224,10 +224,10 @@ public abstract class ContentItemFactoryTest {
         ContentItem ci = contentItemFactory.createContentItem(TEST_CS);
         assertNotNull(ci);
         assertNotNull(ci.getUri());
-        ci = contentItemFactory.createContentItem((UriRef)null,TEST_CS);
+        ci = contentItemFactory.createContentItem((IRI)null,TEST_CS);
         assertNotNull(ci);
         assertNotNull(ci.getUri());
-        ci = contentItemFactory.createContentItem((UriRef)null,TEST_CS, new SimpleMGraph());
+        ci = contentItemFactory.createContentItem((IRI)null,TEST_CS, new SimpleGraph());
         assertNotNull(ci);
         assertNotNull(ci.getUri());
     }
@@ -242,7 +242,7 @@ public abstract class ContentItemFactoryTest {
         assertNotNull(ci.getUri());
         assertEquals(TEST_CR.getReference(),ci.getUri().getUnicodeString());
         
-        contentItemFactory.createContentItem(TEST_CR, new SimpleMGraph());
+        contentItemFactory.createContentItem(TEST_CR, new SimpleGraph());
         assertNotNull(ci);
         assertNotNull(ci.getUri());
         assertEquals(TEST_CR.getReference(),ci.getUri().getUnicodeString());

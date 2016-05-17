@@ -43,15 +43,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.rdfentities.RdfEntityFactory;
@@ -148,7 +147,7 @@ public class TestEntityLinkingEnhancementEngine {
      */
     private ContentItem initContentItem() throws IOException {
         ContentItem ci = ciFactory.createContentItem(
-            new UriRef("urn:iks-project:enhancer:text:content-item:person"),
+            new IRI("urn:iks-project:enhancer:text:content-item:person"),
             new StringSource(CONTEXT));
         //add three text annotations to be consumed by this test
         getTextAnnotation(ci, PERSON, CONTEXT, DBPEDIA_PERSON);
@@ -159,7 +158,7 @@ public class TestEntityLinkingEnhancementEngine {
         return ci;
     }
 
-    public static void getTextAnnotation(ContentItem ci, String name,String context,UriRef type){
+    public static void getTextAnnotation(ContentItem ci, String name,String context,IRI type){
         String content;
         try {
             content = IOUtils.toString(ci.getStream(),"UTF-8");
@@ -169,8 +168,8 @@ public class TestEntityLinkingEnhancementEngine {
         }
         RdfEntityFactory factory = RdfEntityFactory.createInstance(ci.getMetadata());
         TextAnnotation textAnnotation = factory.getProxy(
-                new UriRef("urn:iks-project:enhancer:test:text-annotation:"+randomUUID()), TextAnnotation.class);
-        textAnnotation.setCreator(new UriRef("urn:iks-project:enhancer:test:dummyEngine"));
+                new IRI("urn:iks-project:enhancer:test:text-annotation:"+randomUUID()), TextAnnotation.class);
+        textAnnotation.setCreator(new IRI("urn:iks-project:enhancer:test:dummyEngine"));
         textAnnotation.setCreated(new Date());
         textAnnotation.setSelectedText(name);
         textAnnotation.setSelectionContext(context);
@@ -229,7 +228,7 @@ public class TestEntityLinkingEnhancementEngine {
     }
 
     private static int validateAllEntityAnnotations(NamedEntityTaggingEngine entityLinkingEngine, ContentItem ci){
-        Map<UriRef,Resource> expectedValues = new HashMap<UriRef,Resource>();
+        Map<IRI,RDFTerm> expectedValues = new HashMap<IRI,RDFTerm>();
         expectedValues.put(ENHANCER_EXTRACTED_FROM, ci.getUri());
         expectedValues.put(DC_CREATOR,LiteralFactory.getInstance().createTypedLiteral(
             entityLinkingEngine.getClass().getName()));
@@ -239,7 +238,7 @@ public class TestEntityLinkingEnhancementEngine {
         expectedValues.put(Properties.ENHANCER_CONFIDENCE, null);
         int entityAnnotationCount = 0;
         while (entityAnnotationIterator.hasNext()) {
-            UriRef entityAnnotation = (UriRef) entityAnnotationIterator.next().getSubject();
+            IRI entityAnnotation = (IRI) entityAnnotationIterator.next().getSubject();
             // test if selected Text is added
             validateEntityAnnotation(ci.getMetadata(), entityAnnotation, expectedValues);
             //fise:confidence now checked by EnhancementStructureHelper (STANBOL-630)
@@ -255,12 +254,12 @@ public class TestEntityLinkingEnhancementEngine {
 //                    +"',entityAnnotation "+entityAnnotation+")",
 //                    0.0 <= confidence.doubleValue());
             //Test the entityhub:site property (STANBOL-625)
-            UriRef ENTITYHUB_SITE = new UriRef(RdfResourceEnum.site.getUri());
+            IRI ENTITYHUB_SITE = new IRI(RdfResourceEnum.site.getUri());
             Iterator<Triple> entitySiteIterator = ci.getMetadata().filter(entityAnnotation, 
                 ENTITYHUB_SITE, null);
             assertTrue("Expected entityhub:site value is missing (entityAnnotation "
                     +entityAnnotation+")",entitySiteIterator.hasNext());
-            Resource siteResource = entitySiteIterator.next().getObject();
+            RDFTerm siteResource = entitySiteIterator.next().getObject();
             assertTrue("entityhub:site values MUST BE Literals", siteResource instanceof Literal);
             assertEquals("'dbpedia' is expected as entityhub:site value", "dbpedia", ((Literal)siteResource).getLexicalForm());
             assertFalse("entityhub:site MUST HAVE only a single value", entitySiteIterator.hasNext());

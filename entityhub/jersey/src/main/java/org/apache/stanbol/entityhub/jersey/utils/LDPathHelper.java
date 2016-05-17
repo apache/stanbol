@@ -36,14 +36,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.marmotta.ldpath.api.backend.RDFBackend;
 import org.apache.marmotta.ldpath.exception.LDPathParseException;
 import org.apache.marmotta.ldpath.model.fields.FieldMapping;
 import org.apache.marmotta.ldpath.model.programs.Program;
 import org.apache.marmotta.ldpath.model.selectors.PropertySelector;
 import org.apache.marmotta.ldpath.model.transformers.DoubleTransformer;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.commons.web.base.resource.BaseStanbolResource;
 import org.apache.stanbol.commons.web.viewable.Viewable;
 import org.apache.stanbol.entityhub.core.model.InMemoryValueFactory;
@@ -90,10 +90,10 @@ public final class LDPathHelper {
      * @return The results stored within an RDF graph
      * @throws LDPathParseException if the parsed LDPath program is invalid
      */
-    private static MGraph executeLDPath(RDFBackend<Object> backend,
+    private static Graph executeLDPath(RDFBackend<Object> backend,
                                  String ldpath,
                                  Set<String> contexts ) throws LDPathParseException {
-        MGraph data = new IndexedMGraph();
+        Graph data = new IndexedGraph();
         RdfValueFactory vf = new RdfValueFactory(data);
         EntityhubLDPath ldPath = new EntityhubLDPath(backend,vf);
         Program<Object> program = ldPath.parseProgram(getReader(ldpath));
@@ -104,10 +104,10 @@ public final class LDPathHelper {
         /*
          * NOTE: We do not need to process the Representations returned by
          * EntityhubLDPath#exdecute, because the RdfValueFactory used uses
-         * the local variable "MGraph data" to backup all created
+         * the local variable "Graph data" to backup all created
          * RdfRepresentation. Because of this all converted data will be
-         * automatically added the MGraph. The only thing we need to do is to
-         * wrap the MGraph in the response.
+         * automatically added the Graph. The only thing we need to do is to
+         * wrap the Graph in the response.
          */
         for(String context : contexts){
             ldPath.execute(vf.createReference(context), program);
@@ -186,7 +186,7 @@ public final class LDPathHelper {
             .entity("The requested content type "+TEXT_HTML+" is not supported.\n")
             .header(HttpHeaders.ACCEPT, acceptedMediaType).build();
         }
-        MGraph data;
+        Graph data;
         try {
             data = executeLDPath(backend, ldpath, contexts);
         } catch (LDPathParseException e) {

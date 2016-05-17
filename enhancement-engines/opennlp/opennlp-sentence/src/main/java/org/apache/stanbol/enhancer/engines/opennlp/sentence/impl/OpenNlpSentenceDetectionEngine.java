@@ -28,7 +28,7 @@ import opennlp.tools.sentdetect.SentenceDetector;
 import opennlp.tools.sentdetect.SentenceDetectorME;
 import opennlp.tools.sentdetect.SentenceModel;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -131,7 +131,7 @@ public class OpenNlpSentenceDetectionEngine extends AbstractEnhancementEngine<Ru
     @Override
     public int canEnhance(ContentItem ci) throws EngineException {
         // check if content is present
-        Map.Entry<UriRef,Blob> entry = NlpEngineHelper.getPlainText(this, ci, false);
+        Map.Entry<IRI,Blob> entry = NlpEngineHelper.getPlainText(this, ci, false);
         if(entry == null || entry.getValue() == null) {
             return CANNOT_ENHANCE;
         }

@@ -35,15 +35,17 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 
-import org.apache.clerezza.rdf.core.Language;
+
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
@@ -115,7 +117,7 @@ public class TextAnnotationsNewModelEngine extends AbstractEnhancementEngine<Run
      */
     @Override
     public void computeEnhancements(ContentItem contentItem) throws EngineException {
-        Entry<UriRef,Blob> textBlob = getBlob(contentItem, supportedMimeTypes);
+        Entry<IRI,Blob> textBlob = getBlob(contentItem, supportedMimeTypes);
         if(textBlob == null){
             return;
         }
@@ -128,13 +130,13 @@ public class TextAnnotationsNewModelEngine extends AbstractEnhancementEngine<Run
             throw new EngineException(this, contentItem, "Unable to read Plain Text Blob", e);
         }
         Set<Triple> addedTriples = new HashSet<Triple>();
-        MGraph metadata = contentItem.getMetadata();
+        Graph metadata = contentItem.getMetadata();
         //extract all the necessary information within a read lock
         contentItem.getLock().readLock().lock();
         try {
             Iterator<Triple> it = metadata.filter(null, RDF_TYPE, ENHANCER_TEXTANNOTATION);
             while(it.hasNext()){
-                NonLiteral ta = it.next().getSubject();
+                BlankNodeOrIRI ta = it.next().getSubject();
                 boolean hasPrefix = metadata.filter(ta, ENHANCER_SELECTION_PREFIX, null).hasNext();
                 boolean hasSuffix = metadata.filter(ta, ENHANCER_SELECTION_SUFFIX, null).hasNext();
                 boolean hasSelected = metadata.filter(ta, ENHANCER_SELECTED_TEXT, null).hasNext();

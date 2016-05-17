@@ -21,12 +21,11 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.clerezza.rdf.core.BNode;
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.BlankNode;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.sparql.ResultSet;
 import org.apache.clerezza.rdf.core.sparql.SolutionMapping;
 import org.apache.clerezza.rdf.core.sparql.query.Variable;
@@ -84,23 +83,19 @@ class ResultSetToXml {
         }
     }
 
-    private Element createValueElement(Resource resource, Document doc) {
+    private Element createValueElement(RDFTerm resource, Document doc) {
         Element value;
-        if (resource instanceof UriRef) {
+        if (resource instanceof IRI) {
             value = doc.createElement("uri");
-            value.appendChild(doc.createTextNode(((UriRef) resource)
+            value.appendChild(doc.createTextNode(((IRI) resource)
                     .getUnicodeString()));
-        } else if (resource instanceof TypedLiteral) {
+        } else if (resource instanceof Literal) {
             value = doc.createElement("literal");
-            value.appendChild(doc.createTextNode(((TypedLiteral) resource)
+            value.appendChild(doc.createTextNode(((Literal)resource)
                     .getLexicalForm()));
-            value.setAttribute("datatype", (((TypedLiteral) resource)
+            value.setAttribute("datatype", (((Literal) resource)
                     .getDataType().getUnicodeString()));
-        } else if (resource instanceof PlainLiteral) {
-            value = doc.createElement("literal");
-            value.appendChild(doc.createTextNode(((PlainLiteral) resource)
-                    .getLexicalForm()));
-            Language lang = ((PlainLiteral) resource).getLanguage();
+            Language lang = ((Literal) resource).getLanguage();
             if (lang != null) {
                 value.setAttribute("xml:lang", (lang.toString()));
             }

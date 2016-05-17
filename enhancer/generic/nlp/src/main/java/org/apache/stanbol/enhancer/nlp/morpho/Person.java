@@ -16,7 +16,7 @@
 */
 package org.apache.stanbol.enhancer.nlp.morpho;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 
 /**
  * Enumeration representing the different persons of words based on the <a*
@@ -44,17 +44,17 @@ public enum Person {
     Third("ThirdPerson");
 
     static final String OLIA_NAMESPACE = "http://purl.org/olia/olia.owl#";
-    UriRef uri;
+    IRI uri;
 
     Person() {
         this(null);
     }
 
     Person(String name) {
-        uri = new UriRef(OLIA_NAMESPACE + (name == null ? name() : name));
+        uri = new IRI(OLIA_NAMESPACE + (name == null ? name() : name));
     }
 
-    public UriRef getUri() {
+    public IRI getUri() {
         return uri;
     }
 

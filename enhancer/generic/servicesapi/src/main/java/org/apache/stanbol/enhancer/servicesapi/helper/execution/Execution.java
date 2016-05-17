@@ -20,9 +20,9 @@ import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHe
 
 import java.util.Date;
 
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.servicesapi.helper.ExecutionMetadataHelper;
 import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata;
 
@@ -33,19 +33,19 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.ExecutionMetadata;
  */
 public class Execution implements Comparable<Execution>{
     
-    protected final NonLiteral node;
+    protected final BlankNodeOrIRI node;
     private final ExecutionNode executionNode;
-    private final UriRef status;
-    protected final TripleCollection graph;
+    private final IRI status;
+    protected final Graph graph;
     private final Date started;
     private final Date completed;
     private final Long duration;
     private final ChainExecution chain;
-    public Execution(ChainExecution parent, TripleCollection graph, NonLiteral node) {
+    public Execution(ChainExecution parent, Graph graph, BlankNodeOrIRI node) {
         this.chain = parent;
         this.graph = graph;
         this.node = node;
-        NonLiteral executionNode = ExecutionMetadataHelper.getExecutionNode(graph, node);
+        BlankNodeOrIRI executionNode = ExecutionMetadataHelper.getExecutionNode(graph, node);
         if(executionNode != null){
             this.executionNode = new ExecutionNode(graph, executionNode);
         } else {
@@ -65,7 +65,7 @@ public class Execution implements Comparable<Execution>{
      * The Status of the execution
      * @return the status
      */
-    public final UriRef getStatus() {
+    public final IRI getStatus() {
         return status;
     }
 

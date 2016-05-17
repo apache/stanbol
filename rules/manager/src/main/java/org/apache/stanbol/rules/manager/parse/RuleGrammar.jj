@@ -30,7 +30,7 @@ import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.rules.base.api.Rule;
 import org.apache.stanbol.rules.base.api.RuleAtom;
 import org.apache.stanbol.rules.base.api.util.AtomList;
@@ -82,7 +82,7 @@ import org.apache.stanbol.rules.manager.atoms.UpperCaseAtom;
 import org.apache.stanbol.rules.manager.atoms.VariableAtom;
 
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.RDFTerm;
 
 /**
 *
@@ -130,7 +130,7 @@ public class RuleParserImpl
 
 
 	private static URI getSWRLArgument(String argument){
-                Resource rdfNode = null;
+                RDFTerm rdfNode = null;
                 String[] argumentComposition = argument.split(":");
                 if(argumentComposition.length == 2){
                         String prefix = argumentComposition[0];
@@ -151,7 +151,7 @@ public class RuleParserImpl
         }
 
         private static URI getSWRLVariable(String argument){
-                Resource variableResource = null;
+                RDFTerm variableResource = null;
                 String variableString = argument.substring(1);
 
 
@@ -288,7 +288,7 @@ void prefix() :
 
                                                      }
                                                  else{
-                                                         rule = new RuleImpl(new UriRef(ruleStorePrefix+nsPrefix), nsPrefix, atoms[0], atoms[1]);
+                                                         rule = new RuleImpl(new IRI(ruleStorePrefix+nsPrefix), nsPrefix, atoms[0], atoms[1]);
                                                          kb.addRule(rule);
                                                 }
 	  									}

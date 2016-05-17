@@ -20,11 +20,11 @@ import java.util.Iterator;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.entityhub.core.query.FieldQueryImpl;
 import org.apache.stanbol.entityhub.model.clerezza.RdfRepresentation;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
@@ -44,10 +44,10 @@ public class RdfResultListTest {
     @Test
     public void testRdfResultSorting(){
         SortedMap<Double,RdfRepresentation> sorted = new TreeMap<Double,RdfRepresentation>();
-        MGraph resultGraph = new IndexedMGraph();
+        Graph resultGraph = new IndexedGraph();
         RdfValueFactory vf = new RdfValueFactory(resultGraph);
-        UriRef resultListNode = new UriRef(RdfResourceEnum.QueryResultSet.getUri());
-        UriRef resultProperty = new UriRef(RdfResourceEnum.queryResult.getUri());
+        IRI resultListNode = new IRI(RdfResourceEnum.QueryResultSet.getUri());
+        IRI resultProperty = new IRI(RdfResourceEnum.queryResult.getUri());
         for(int i=0;i<100;i++){
             Double rank;
             do { //avoid duplicate keys

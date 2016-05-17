@@ -40,11 +40,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -105,7 +105,7 @@ public class GraphChain extends AbstractChain implements Chain {
     protected final Logger log = LoggerFactory.getLogger(GraphChain.class); 
     
     /**
-     * Property used to configure the Graph by using the line based 
+     * Property used to configure the ImmutableGraph by using the line based 
      * representation with the following Syntax:
      * <code><pre>
      *   &lt;engineName&gt;;&lt;parm1&gt;=&lt;value1&gt;,&lt;value2&gt;;&lt;parm2&gt;=&lt;value1&gt;...
@@ -217,10 +217,10 @@ public class GraphChain extends AbstractChain implements Chain {
                 }
             } else {
                 throw new ConfigurationException(PROPERTY_CHAIN_LIST, 
-                    "The list based configuration of a Graph Chain MUST BE " +
+                    "The list based configuration of a ImmutableGraph Chain MUST BE " +
                     "configured as a Array or Collection of Strings (parsed: "+
                     (list != null?list.getClass():"null")+"). NOTE you can also " +
-                    "configure the Graph by pointing to a resource with the graph as" +
+                    "configure the ImmutableGraph by pointing to a resource with the graph as" +
                     "value of the property '"+PROPERTY_GRAPH_RESOURCE+"'.");
             }
             Map<String,Map<String,List<String>>> config;
@@ -258,7 +258,7 @@ public class GraphChain extends AbstractChain implements Chain {
         super.deactivate(ctx);
     }
     @Override
-    public Graph getExecutionPlan() throws ChainException {
+    public ImmutableGraph getExecutionPlan() throws ChainException {
         return internalChain.getExecutionPlan();
     }
 
@@ -294,7 +294,7 @@ public class GraphChain extends AbstractChain implements Chain {
          * The executionPlan is parsed and validated within
          * {@link #updateExecutionPlan()}
          */
-        private Graph executionPlan;
+        private ImmutableGraph executionPlan;
         /**
          * The referenced engine names. Use the {@link #resourceName} to sync 
          * access.<p>
@@ -302,7 +302,7 @@ public class GraphChain extends AbstractChain implements Chain {
          */
         private Set<String> engineNames;
         /**
-         * Parser used to parse the RDF {@link Graph} from the {@link InputStream}
+         * Parser used to parse the RDF {@link ImmutableGraph} from the {@link InputStream}
          * provided to the {@link #available(String, InputStream)} method by the
          * {@link DataFileTracker}.
          */
@@ -365,7 +365,7 @@ public class GraphChain extends AbstractChain implements Chain {
             return false; //keep tracking
         }
         @Override
-        public Graph getExecutionPlan() throws ChainException {
+        public ImmutableGraph getExecutionPlan() throws ChainException {
             synchronized (resourceName) {
                 if(executionPlan == null){
                     updateExecutionPlan();
@@ -426,7 +426,7 @@ public class GraphChain extends AbstractChain implements Chain {
      */
     private final class ListConfigExecutionPlan implements Chain {
 
-        private final Graph executionPlan;
+        private final ImmutableGraph executionPlan;
         private final Set<String> engines;
         
         /**
@@ -445,9 +445,9 @@ public class GraphChain extends AbstractChain implements Chain {
                 		"GraphChain '{}'",getName());
             }
             engines = Collections.unmodifiableSet(new HashSet<String>(config.keySet()));
-            MGraph graph = new SimpleMGraph();
-            NonLiteral epNode = createExecutionPlan(graph, getName(), chainProperties);
-            //caches the String name -> {NonLiteral node, List<Stirng> dependsOn} mappings
+            Graph graph = new SimpleGraph();
+            BlankNodeOrIRI epNode = createExecutionPlan(graph, getName(), chainProperties);
+            //caches the String name -> {BlankNodeOrIRI node, List<Stirng> dependsOn} mappings
             Map<String,Object[]> name2nodes = new HashMap<String,Object[]>();
             //1. write the nodes (without dependencies)
             for(Entry<String,Map<String,List<String>>> node : config.entrySet()){
@@ -470,9 +470,9 @@ public class GraphChain extends AbstractChain implements Chain {
                         Object[] targetInfo = name2nodes.get(target);
                         if(targetInfo != null){
                             graph.add(new TripleImpl(
-                                (NonLiteral)info.getValue()[0], 
+                                (BlankNodeOrIRI)info.getValue()[0], 
                                 ExecutionPlan.DEPENDS_ON, 
-                                (NonLiteral)targetInfo[0]));
+                                (BlankNodeOrIRI)targetInfo[0]));
                             
                         } else { //reference to a undefined engine :(
                             throw new IllegalArgumentException("The Engine '"+
@@ -483,11 +483,11 @@ public class GraphChain extends AbstractChain implements Chain {
                     }
                 } //this node has no dependencies
             }
-            this.executionPlan = graph.getGraph();
+            this.executionPlan = graph.getImmutableGraph();
         }
         
         @Override
-        public Graph getExecutionPlan() throws ChainException {
+        public ImmutableGraph getExecutionPlan() throws ChainException {
             return executionPlan;
         }
 

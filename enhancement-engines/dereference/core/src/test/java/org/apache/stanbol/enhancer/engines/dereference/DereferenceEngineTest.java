@@ -34,15 +34,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 
-import org.apache.clerezza.rdf.core.Language;
+import org.apache.clerezza.commons.rdf.Language;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -71,21 +71,21 @@ public class DereferenceEngineTest {
     /**
      * The metadata used by this test
      */
-    private static TripleCollection testData;
+    private static Graph testData;
     
-    private static TripleCollection testMetadata;
+    private static Graph testMetadata;
     
-    public static final UriRef NAME = new UriRef(NamespaceEnum.rdfs+"label");
-    public static final UriRef TYPE = new UriRef(NamespaceEnum.rdf+"type");
-    public static final UriRef REDIRECT = new UriRef(NamespaceEnum.rdfs+"seeAlso");
+    public static final IRI NAME = new IRI(NamespaceEnum.rdfs+"label");
+    public static final IRI TYPE = new IRI(NamespaceEnum.rdf+"type");
+    public static final IRI REDIRECT = new IRI(NamespaceEnum.rdfs+"seeAlso");
     
-    public static final UriRef OTHER_ENTITY_REFERENCE = new UriRef(
+    public static final IRI OTHER_ENTITY_REFERENCE = new IRI(
         "http://www.example.org/stanbol/enhancer/dereference/test#other-entity-reference");
 
     private static final ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
     
     private static final LiteralFactory lf = LiteralFactory.getInstance();
-    private static final UriRef SKOS_NOTATION = new UriRef(NamespaceEnum.skos+"notation");
+    private static final IRI SKOS_NOTATION = new IRI(NamespaceEnum.skos+"notation");
     private static final Language LANG_EN = new Language("en");
     private static final Language LANG_DE = new Language("de");
 
@@ -97,14 +97,14 @@ public class DereferenceEngineTest {
     
     @BeforeClass
     public static void setUpServices() throws IOException {
-        testData = new IndexedMGraph();
+        testData = new IndexedGraph();
         long seed = System.currentTimeMillis();
         log.info("Test seed "+ seed);
         Random random = new Random(seed);
         int numEntities = 0;
         for(int i = 0; i < NUM_ENTITIES ; i++){
             if(random.nextFloat() <= PERCENTAGE_PRESENT){ //do not create all entities
-                UriRef uri = new UriRef("urn:test:entity"+i);
+                IRI uri = new IRI("urn:test:entity"+i);
                 testData.add(new TripleImpl(uri, RDF_TYPE, SKOS_CONCEPT));
                 testData.add(new TripleImpl(uri, RDFS_LABEL, 
                     new PlainLiteralImpl("entity "+i, LANG_EN)));
@@ -116,20 +116,20 @@ public class DereferenceEngineTest {
             }
         }
         log.info(" ... created {} Entities",numEntities);
-        testMetadata = new IndexedMGraph();
+        testMetadata = new IndexedGraph();
         int numLinks = 0;
         int numOtherLinks = 0;
         for(int i = 0; i < NUM_ENTITIES ; i++){
             float r = random.nextFloat();
             if(r < PERCENTAGE_LINKED){
-                UriRef enhancementUri = new UriRef("urn:test:enhancement"+i);
-                UriRef entityUri = new UriRef("urn:test:entity"+i);
+                IRI enhancementUri = new IRI("urn:test:enhancement"+i);
+                IRI entityUri = new IRI("urn:test:entity"+i);
                 //we do not need any other triple for testing in the contentItem
                 testMetadata.add(new TripleImpl(enhancementUri, ENHANCER_ENTITY_REFERENCE, entityUri));
                 numLinks++;
             } else if((r-PERCENTAGE_LINKED) < PERCENTAGE_LINKED_OTHER){
-                UriRef enhancementUri = new UriRef("urn:test:enhancement"+i);
-                UriRef entityUri = new UriRef("urn:test:entity"+i);
+                IRI enhancementUri = new IRI("urn:test:enhancement"+i);
+                IRI entityUri = new IRI("urn:test:entity"+i);
                 //we do not need any other triple for testing in the contentItem
                 testMetadata.add(new TripleImpl(enhancementUri, OTHER_ENTITY_REFERENCE, entityUri));
                 numOtherLinks++;
@@ -141,7 +141,7 @@ public class DereferenceEngineTest {
     }
 
     public static ContentItem getContentItem(final String id) throws IOException {
-        ContentItem ci = ciFactory.createContentItem(new UriRef(id), new StringSource("Not used"));
+        ContentItem ci = ciFactory.createContentItem(new IRI(id), new StringSource("Not used"));
         ci.getMetadata().addAll(testMetadata);
         return ci;
     }
@@ -239,19 +239,19 @@ public class DereferenceEngineTest {
         validateDereferencedEntities(ci.getMetadata(), OTHER_ENTITY_REFERENCE, ENHANCER_ENTITY_REFERENCE);
     }
     
-    private void validateDereferencedEntities(TripleCollection metadata, UriRef...entityReferenceFields) {
-        MGraph expected = new IndexedMGraph();
-        for(UriRef entityReferenceField : entityReferenceFields){
+    private void validateDereferencedEntities(Graph metadata, IRI...entityReferenceFields) {
+        Graph expected = new IndexedGraph();
+        for(IRI entityReferenceField : entityReferenceFields){
             Iterator<Triple> referenced = metadata.filter(null, entityReferenceField, null);
             while(referenced.hasNext()){
-                UriRef entity = (UriRef)referenced.next().getObject();
+                IRI entity = (IRI)referenced.next().getObject();
                 Iterator<Triple> entityTriples = testData.filter(entity, null, null);
                 while(entityTriples.hasNext()){
                     expected.add(entityTriples.next());
                 }
             }
         }
-        MGraph notExpected = new IndexedMGraph(testData);
+        Graph notExpected = new IndexedGraph(testData);
         notExpected.removeAll(expected);
         Assert.assertTrue(metadata.containsAll(expected));
         Assert.assertTrue(Collections.disjoint(metadata, notExpected));
@@ -276,7 +276,7 @@ public class DereferenceEngineTest {
         }
 
         @Override
-        public boolean dereference(UriRef entity, MGraph graph, Lock writeLock, DereferenceContext context) throws DereferenceException {
+        public boolean dereference(IRI entity, Graph graph, Lock writeLock, DereferenceContext context) throws DereferenceException {
             Iterator<Triple> entityTriples = testData.filter(entity, null, null);
             if(entityTriples.hasNext()){
                 writeLock.lock();

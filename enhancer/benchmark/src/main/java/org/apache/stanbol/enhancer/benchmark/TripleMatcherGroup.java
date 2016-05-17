@@ -19,8 +19,8 @@ package org.apache.stanbol.enhancer.benchmark;
 import java.util.Collection;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.IRI;
 
 /** A group of TripleMatcher, used to check that 
  *  enhancements match all the TripleMatcher in 
@@ -36,10 +36,10 @@ public interface TripleMatcherGroup {
      */
     boolean isExpectGroup();
     
-    /** Return the set of UriRef that match all
-     *  TripleMatcher in this group for supplied Graph
+    /** Return the set of IRI that match all
+     *  TripleMatcher in this group for supplied ImmutableGraph
      */
-    Set<UriRef> getMatchingSubjects(Graph g);
+    Set<IRI> getMatchingSubjects(ImmutableGraph g);
     
     /** @return our TripleMatcher */
     Collection<TripleMatcher> getMatchers();

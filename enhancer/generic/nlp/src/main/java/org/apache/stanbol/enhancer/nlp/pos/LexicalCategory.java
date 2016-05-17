@@ -16,7 +16,7 @@
 */
 package org.apache.stanbol.enhancer.nlp.pos;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 
 /**
  * Lexical categories used by the Stanbol Enhancer NLP module. Defined based on the top level
@@ -112,13 +112,13 @@ public enum LexicalCategory {
     ;
     static final String OLIA_NAMESPACE = "http://purl.org/olia/olia.owl#";
 
-    UriRef uri;
+    IRI uri;
 
     LexicalCategory() {
-        this.uri = new UriRef(OLIA_NAMESPACE + name());
+        this.uri = new IRI(OLIA_NAMESPACE + name());
     }
 
-    public UriRef getUri() {
+    public IRI getUri() {
         return uri;
     }
 

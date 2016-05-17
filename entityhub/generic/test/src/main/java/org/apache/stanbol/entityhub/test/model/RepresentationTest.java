@@ -1040,9 +1040,9 @@ public abstract class RepresentationTest {
         Representation rep = initNaturalLanguageTest(field);
         Set<String> textSet = new HashSet<String>(NL_TEST_all);
         rep.removeAllNaturalText(field, "de", "de-AT");
-        for (Iterator<Text> texts = rep.getText(field); texts.hasNext(); textSet.remove(texts.next()
-                .getText()))
-            ;
+        for (Iterator<Text> texts = rep.getText(field); 
+                texts.hasNext(); 
+                textSet.remove(texts.next().getText()));
         assertTrue(textSet.size() == 2);
         assertTrue(textSet.remove(NL_TEST_de));
         assertTrue(textSet.remove(NL_TEST_de_AT));

@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.stanbol.enhancer.nlp.morpho.Tense;
 
 import com.ibm.icu.impl.Punycode;
@@ -1995,7 +1995,7 @@ public enum Pos {
 
     private final Set<LexicalCategory> categories;
     private final Collection<Pos> parents;
-    private final UriRef uri;
+    private final IRI uri;
 
     Pos(LexicalCategory category) {
         this(null, category, (LexicalCategory) null);
@@ -2006,7 +2006,7 @@ public enum Pos {
     }
 
     Pos(String name, LexicalCategory category, LexicalCategory additional) {
-        this.uri = new UriRef(OLIA_NAMESPACE + (name == null ? name() : name));
+        this.uri = new IRI(OLIA_NAMESPACE + (name == null ? name() : name));
         categories = EnumSet.of(category);
         if (additional != null) {
             categories.add(additional);
@@ -2027,7 +2027,7 @@ public enum Pos {
     }
 
     Pos(String name, LexicalCategory category, Pos... parent) {
-        this.uri = new UriRef(OLIA_NAMESPACE + (name == null ? name() : name));
+        this.uri = new IRI(OLIA_NAMESPACE + (name == null ? name() : name));
         this.parents = parent == null || parent.length < 1 ? Collections.EMPTY_SET : Arrays.asList(parent);
         categories = category == null ? EnumSet.noneOf(LexicalCategory.class) : EnumSet.of(category);
         Set<Pos> toProcess = new HashSet<Pos>(parents);
@@ -2052,7 +2052,7 @@ public enum Pos {
         return parents;
     }
 
-    public UriRef getUri() {
+    public IRI getUri() {
         return uri;
     }
 

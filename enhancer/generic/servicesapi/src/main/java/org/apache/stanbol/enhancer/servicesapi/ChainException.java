@@ -20,8 +20,8 @@ package org.apache.stanbol.enhancer.servicesapi;
 //import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.getEngine;
 //import static org.apache.stanbol.enhancer.servicesapi.helper.ExecutionPlanHelper.isOptional;
 //
-//import org.apache.clerezza.rdf.core.Graph;
-//import org.apache.clerezza.rdf.core.NonLiteral;
+//import org.apache.clerezza.commons.rdf.ImmutableGraph;
+//import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
 
 /**
  * BaseException thrown by {@link Chain} implementations or
@@ -49,7 +49,7 @@ public class ChainException extends EnhancementException {
 //     * @param message
 //     * @param cause
 //     */
-//    public ChainException(Graph executionPlan, NonLiteral node, String message, Throwable cause){
+//    public ChainException(ImmutableGraph executionPlan, BlankNodeOrIRI node, String message, Throwable cause){
 //        super(String.format("Unable to execute node {} (engine: {} | optional : {}" +
 //        		" | dependsOn : {}) because of: {}",
 //            node,getEngine(executionPlan, node),

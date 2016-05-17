@@ -20,18 +20,17 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.ontologies.OWL;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.stanbol.ontologymanager.servicesapi.ontology.OntologyProvider;
 import org.apache.stanbol.ontologymanager.servicesapi.scope.OntologySpace;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddImport;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 
@@ -49,7 +48,7 @@ public class CustomSpaceImpl extends AbstractOntologySpaceImpl {
         return (scopeID != null ? scopeID : "") + "/" + SUFFIX;
     }
 
-    public CustomSpaceImpl(String scopeID, IRI namespace, OntologyProvider<?> ontologyProvider) {
+    public CustomSpaceImpl(String scopeID, org.semanticweb.owlapi.model.IRI namespace, OntologyProvider<?> ontologyProvider) {
         super(buildId(scopeID), namespace, SpaceType.CUSTOM, ontologyProvider);
     }
 
@@ -68,13 +67,13 @@ public class CustomSpaceImpl extends AbstractOntologySpaceImpl {
     }
 
     @Override
-    protected MGraph getOntologyAsMGraph(OWLOntologyID ontologyId, boolean merge, IRI universalPrefix) {
-        MGraph o = super.getOntologyAsMGraph(ontologyId, merge, universalPrefix);
+    protected Graph getOntologyAsGraph(OWLOntologyID ontologyId, boolean merge, org.semanticweb.owlapi.model.IRI universalPrefix) {
+        Graph o = super.getOntologyAsGraph(ontologyId, merge, universalPrefix);
         switch (getConnectivityPolicy()) {
             case LOOSE:
                 break;
             case TIGHT:
-                Set<NonLiteral> onts = new HashSet<NonLiteral>(); // Expected to be a singleton
+                Set<BlankNodeOrIRI> onts = new HashSet<BlankNodeOrIRI>(); // Expected to be a singleton
                 synchronized (o) {
                     Iterator<Triple> it = o.filter(null, RDF.type, OWL.Ontology);
                     while (it.hasNext())
@@ -83,8 +82,8 @@ public class CustomSpaceImpl extends AbstractOntologySpaceImpl {
                 String s = getID();
                 s = s.substring(0, s.indexOf(SUFFIX)); // strip "custom"
                 s += SpaceType.CORE.getIRISuffix(); // concatenate "core"
-                UriRef target = new UriRef(universalPrefix + s);
-                for (NonLiteral subject : onts)
+                IRI target = new IRI(universalPrefix + s);
+                for (BlankNodeOrIRI subject : onts)
                     o.add(new TripleImpl(subject, OWL.imports, target));
                 break;
             default:
@@ -97,7 +96,7 @@ public class CustomSpaceImpl extends AbstractOntologySpaceImpl {
     @Override
     protected OWLOntology getOntologyAsOWLOntology(OWLOntologyID ontologyId,
                                                    boolean merge,
-                                                   IRI universalPrefix) {
+                                                   org.semanticweb.owlapi.model.IRI universalPrefix) {
         OWLOntology o = super.getOntologyAsOWLOntology(ontologyId, merge, universalPrefix);
         switch (getConnectivityPolicy()) {
             case LOOSE:
@@ -106,7 +105,7 @@ public class CustomSpaceImpl extends AbstractOntologySpaceImpl {
                 String s = getID();
                 s = s.substring(0, s.indexOf(SUFFIX)); // strip "custom"
                 s += SpaceType.CORE.getIRISuffix(); // concatenate "core"
-                IRI target = IRI.create(universalPrefix + s);
+                org.semanticweb.owlapi.model.IRI target = org.semanticweb.owlapi.model.IRI.create(universalPrefix + s);
                 o.getOWLOntologyManager().applyChange(
                     new AddImport(o, OWLManager.getOWLDataFactory().getOWLImportsDeclaration(target)));
                 break;

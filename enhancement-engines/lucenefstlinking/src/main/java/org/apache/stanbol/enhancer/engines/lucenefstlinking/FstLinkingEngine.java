@@ -39,14 +39,14 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.clerezza.rdf.core.Language;
-import org.apache.clerezza.rdf.core.Literal;
+import org.apache.clerezza.commons.rdf.Language;
+import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.commons.io.input.CharSequenceReader;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.TokenStream;
@@ -89,9 +89,9 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
     private static final Map<String,Object> SERVICE_PROPERTIES = Collections.unmodifiableMap(Collections
             .singletonMap(ServiceProperties.ENHANCEMENT_ENGINE_ORDERING, (Object) ENGINE_ORDERING));
 
-    private static final UriRef ENHANCER_ENTITY_RANKING = new UriRef(NamespaceEnum.fise + "entity-ranking");
+    private static final IRI ENHANCER_ENTITY_RANKING = new IRI(NamespaceEnum.fise + "entity-ranking");
 
-    public static final UriRef FISE_ORIGIN = new UriRef(NamespaceEnum.fise + "origin");
+    public static final IRI FISE_ORIGIN = new IRI(NamespaceEnum.fise + "origin");
 
     private final LiteralFactory literalFactory = LiteralFactory.getInstance();
     
@@ -419,7 +419,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
      * @param neTypes the types of the named entity
      * @return
      */
-    private boolean filterByNamedEntityType(Iterator<UriRef> eTypes, Set<String> neTypes) {
+    private boolean filterByNamedEntityType(Iterator<IRI> eTypes, Set<String> neTypes) {
         //first collect the allowed entity types
         Set<String> entityTypes = new HashSet<String>();
         for(String neType : neTypes){
@@ -440,7 +440,7 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
         }
         //second check the actual entity types against the allowed
         while(eTypes.hasNext()){
-            UriRef typeUri = eTypes.next();
+            IRI typeUri = eTypes.next();
             if(typeUri != null && entityTypes.contains(typeUri.getUnicodeString())){
                 return false; //we found an match .. do not filter
             }
@@ -454,13 +454,13 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
      * @param entityTypes
      * @return
      */
-    private boolean filterEntityByType(Iterator<UriRef> entityTypes){
-        Map<UriRef, Integer> whiteList = elConfig.getWhitelistedTypes();
-        Map<UriRef, Integer> blackList = elConfig.getBlacklistedTypes();
+    private boolean filterEntityByType(Iterator<IRI> entityTypes){
+        Map<IRI, Integer> whiteList = elConfig.getWhitelistedTypes();
+        Map<IRI, Integer> blackList = elConfig.getBlacklistedTypes();
         Integer w = null;
         Integer b = null;
         while(entityTypes.hasNext()){
-            UriRef type = entityTypes.next();
+            IRI type = entityTypes.next();
             Integer act = whiteList.get(type);
             if(act != null){
                 if(w == null || act.compareTo(w) < 0){
@@ -670,20 +670,20 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
             languageObject = new Language(language);
         }
         
-        MGraph metadata = ci.getMetadata();
+        Graph metadata = ci.getMetadata();
         for(Tag tag : tags){
-            Collection<UriRef> textAnnotations = new ArrayList<UriRef>(tags.size());
+            Collection<IRI> textAnnotations = new ArrayList<IRI>(tags.size());
             //first create the TextAnnotations for the Occurrences
             Literal startLiteral = literalFactory.createTypedLiteral(tag.getStart());
             Literal endLiteral = literalFactory.createTypedLiteral(tag.getEnd());
             //search for existing text annotation
             Iterator<Triple> it = metadata.filter(null, ENHANCER_START, startLiteral);
-            UriRef textAnnotation = null;
+            IRI textAnnotation = null;
             while(it.hasNext()){
                 Triple t = it.next();
                 if(metadata.filter(t.getSubject(), ENHANCER_END, endLiteral).hasNext() &&
                         metadata.filter(t.getSubject(), RDF_TYPE, ENHANCER_TEXTANNOTATION).hasNext()){
-                    textAnnotation = (UriRef)t.getSubject();
+                    textAnnotation = (IRI)t.getSubject();
                     break;
                 }
             }
@@ -710,20 +710,20 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                     new PlainLiteralImpl(this.getClass().getName())));
             }
             //add dc:types (even to existing)
-            for(UriRef dcType : getDcTypes(tag.getSuggestions())){
+            for(IRI dcType : getDcTypes(tag.getSuggestions())){
                 metadata.add(new TripleImpl(
                     textAnnotation, Properties.DC_TYPE, dcType));
             }
             textAnnotations.add(textAnnotation);
             //now the EntityAnnotations for the Suggestions
             for(Match match : tag.getSuggestions()){
-                UriRef entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(ci, this);
+                IRI entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(ci, this);
                 //should we use the label used for the match, or search the
                 //representation for the best label ... currently its the matched one
                 metadata.add(new TripleImpl(entityAnnotation, Properties.ENHANCER_ENTITY_LABEL, match.getMatchLabel()));
                 metadata.add(new TripleImpl(entityAnnotation,ENHANCER_ENTITY_REFERENCE, 
-                    new UriRef(match.getUri())));
-                for(UriRef type : match.getTypes()){
+                    new IRI(match.getUri())));
+                for(IRI type : match.getTypes()){
                     metadata.add(new TripleImpl(entityAnnotation, 
                         Properties.ENHANCER_ENTITY_TYPE, type));
                 }
@@ -736,8 +736,8 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                     metadata.add(new TripleImpl(entityAnnotation, FISE_ORIGIN, indexConfig.getOrigin()));
                 }
                 //TODO: add origin information of the EntiySearcher
-//                for(Entry<UriRef,Collection<Resource>> originInfo : entitySearcher.getOriginInformation().entrySet()){
-//                    for(Resource value : originInfo.getValue()){
+//                for(Entry<IRI,Collection<RDFTerm>> originInfo : entitySearcher.getOriginInformation().entrySet()){
+//                    for(RDFTerm value : originInfo.getValue()){
 //                        metadata.add(new TripleImpl(entityAnnotation, 
 //                            originInfo.getKey(),value));
 //                    }
@@ -773,11 +773,11 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
      * @param conceptTypes The list of suggestions
      * @return the types values for the {@link LinkedEntity}
      */
-    private Set<UriRef> getDcTypes(List<Match> matches){
+    private Set<IRI> getDcTypes(List<Match> matches){
         if(matches == null || matches.isEmpty()){
             return Collections.emptySet();
         }
-        Collection<UriRef> conceptTypes = new HashSet<UriRef>();
+        Collection<IRI> conceptTypes = new HashSet<IRI>();
         double score = -1; //only consider types of the best ranked Entities
         for(Match match : matches){
             double actScore = match.getScore();
@@ -785,13 +785,13 @@ public class FstLinkingEngine implements EnhancementEngine, ServiceProperties {
                 break;
             }
             score = actScore;
-            for(Iterator<UriRef> types = match.getTypes().iterator(); 
+            for(Iterator<IRI> types = match.getTypes().iterator(); 
                 types.hasNext(); conceptTypes.add(types.next()));
         }
-        Map<UriRef,UriRef> typeMappings = elConfig.getTypeMappings();
-        Set<UriRef> dcTypes = new HashSet<UriRef>();
-        for(UriRef conceptType : conceptTypes){
-            UriRef dcType = typeMappings.get(conceptType);
+        Map<IRI,IRI> typeMappings = elConfig.getTypeMappings();
+        Set<IRI> dcTypes = new HashSet<IRI>();
+        for(IRI conceptType : conceptTypes){
+            IRI dcType = typeMappings.get(conceptType);
             if(dcType != null){
                 dcTypes.add(dcType);
             }

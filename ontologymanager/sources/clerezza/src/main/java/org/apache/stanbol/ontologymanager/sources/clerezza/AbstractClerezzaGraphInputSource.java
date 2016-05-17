@@ -16,7 +16,7 @@
  */
 package org.apache.stanbol.ontologymanager.sources.clerezza;
 
-import org.apache.clerezza.rdf.core.TripleCollection;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.stanbol.ontologymanager.servicesapi.io.AbstractGenericInputSource;
 import org.apache.stanbol.ontologymanager.servicesapi.io.OntologyInputSource;
@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Default implementation of an {@link OntologyInputSource} that returns {@link TripleCollection} objects as
+ * Default implementation of an {@link OntologyInputSource} that returns {@link Graph} objects as
  * ontologies.
  * 
  * Subclasses must implement the {@link #getImports(boolean)} method, as the availability of imported
@@ -34,12 +34,12 @@ import org.slf4j.LoggerFactory;
  * @author alexdma
  * 
  */
-public abstract class AbstractClerezzaGraphInputSource extends AbstractGenericInputSource<TripleCollection> {
+public abstract class AbstractClerezzaGraphInputSource extends AbstractGenericInputSource<Graph> {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
     @Override
-    protected void bindRootOntology(TripleCollection ontology) {
+    protected void bindRootOntology(Graph ontology) {
         super.bindRootOntology(ontology);
     }
 

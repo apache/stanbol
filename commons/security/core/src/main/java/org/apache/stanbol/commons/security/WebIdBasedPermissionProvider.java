@@ -18,7 +18,7 @@
 package org.apache.stanbol.commons.security;
 
 import java.util.Collection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 
 /**
  * Services implementing this interface provide additional permissions
@@ -37,5 +37,5 @@ public interface WebIdBasedPermissionProvider {
 	 * @param webId the uri identifying the user (aka Web-Id)
 	 * @return the string descriptions of the permissions
 	 */
-	Collection<String> getPermissions(UriRef webId);
+	Collection<String> getPermissions(IRI webId);
 }

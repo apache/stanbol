@@ -29,15 +29,13 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.PlainLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.clerezza.rdf.jena.parser.JenaParserProvider;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
@@ -57,7 +55,7 @@ import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 
-import org.apache.clerezza.rdf.core.Resource;
+import org.apache.clerezza.commons.rdf.RDFTerm;
 
 public class TextAnnotationNewModelEngineTest {
     
@@ -66,8 +64,8 @@ public class TextAnnotationNewModelEngineTest {
     private static final String TEST_ENHANCEMENTS = "enhancement-results.rdf";
     
     private static final JenaParserProvider rdfParser = new JenaParserProvider();
-    private static MGraph origEnhancements;
-    private static UriRef ciUri;
+    private static Graph origEnhancements;
+    private static IRI ciUri;
     
     private ContentItem contentItem;
     
@@ -80,15 +78,15 @@ public class TextAnnotationNewModelEngineTest {
     public static void init() throws IOException, ConfigurationException {
         InputStream in = TextAnnotationNewModelEngineTest.class.getClassLoader().getResourceAsStream(TEST_ENHANCEMENTS);
         Assert.assertNotNull("Unable to load reaource '"+TEST_ENHANCEMENTS+"' via Classpath",in);
-        origEnhancements = new IndexedMGraph();
+        origEnhancements = new IndexedGraph();
         rdfParser.parse(origEnhancements, in, SupportedFormat.RDF_XML, null);
         Assert.assertFalse(origEnhancements.isEmpty());
         //parse the ID of the ContentItem form the enhancements
         Iterator<Triple> it = origEnhancements.filter(null, Properties.ENHANCER_EXTRACTED_FROM, null);
         Assert.assertTrue(it.hasNext());
-        Resource id = it.next().getObject();
-        Assert.assertTrue(id instanceof UriRef);
-        ciUri = (UriRef)id;
+        RDFTerm id = it.next().getObject();
+        Assert.assertTrue(id instanceof IRI);
+        ciUri = (IRI)id;
         //validate that the enhancements in the file are valid
         //NOTE: the input data are no longer fully valid to test some features of this engine
         //      because of that this initial test is deactivated
@@ -108,7 +106,7 @@ public class TextAnnotationNewModelEngineTest {
     @Before
     public void initTest() throws IOException {
         contentItem = ciFactory.createContentItem(ciUri, 
-            new StringSource(SINGLE_SENTENCE), new IndexedMGraph(origEnhancements));
+            new StringSource(SINGLE_SENTENCE), new IndexedGraph(origEnhancements));
     }
     
     @Test
@@ -116,15 +114,15 @@ public class TextAnnotationNewModelEngineTest {
         Assert.assertEquals(EnhancementEngine.ENHANCE_ASYNC, engine.canEnhance(contentItem));
         engine.computeEnhancements(contentItem);
         //validate
-        MGraph g = contentItem.getMetadata();
+        Graph g = contentItem.getMetadata();
         Iterator<Triple> it = g.filter(null, RDF_TYPE, ENHANCER_TEXTANNOTATION);
         Assert.assertTrue(it.hasNext());
         while(it.hasNext()){
-            NonLiteral ta = it.next().getSubject();
-            Assert.assertTrue(ta instanceof UriRef);
-            Map<UriRef,Resource> expected = new HashMap<UriRef,Resource>();
+            BlankNodeOrIRI ta = it.next().getSubject();
+            Assert.assertTrue(ta instanceof IRI);
+            Map<IRI,RDFTerm> expected = new HashMap<IRI,RDFTerm>();
             expected.put(Properties.ENHANCER_EXTRACTED_FROM, contentItem.getUri());
-            EnhancementStructureHelper.validateTextAnnotation(g, (UriRef)ta, SINGLE_SENTENCE, expected,true);
+            EnhancementStructureHelper.validateTextAnnotation(g, (IRI)ta, SINGLE_SENTENCE, expected,true);
         }
         
     }

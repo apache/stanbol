@@ -18,7 +18,7 @@ package org.apache.stanbol.enhancer.benchmark;
 
 import java.util.List;
 
-import org.apache.clerezza.rdf.core.Graph;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
 import org.apache.stanbol.enhancer.servicesapi.Chain;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementException;
@@ -40,8 +40,8 @@ public interface Benchmark extends List<TripleMatcherGroup >{
     List<BenchmarkResult> execute(EnhancementJobManager jobManager, 
                                   ContentItemFactory ciFactory) throws EnhancementException;
     
-    /** Return the enhanced Graph of our input text */
-    Graph getGraph(EnhancementJobManager jobManager, 
+    /** Return the enhanced ImmutableGraph of our input text */
+    ImmutableGraph getGraph(EnhancementJobManager jobManager, 
                    ContentItemFactory ciFactory) throws EnhancementException;
 
     /**

@@ -3,7 +3,7 @@
 #set( $symbol_escape = '\' )
 package ${package};
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 
 
 /**
@@ -17,26 +17,26 @@ public class Ontology {
      * of the resource of which the IRI is specified in the "iri" query parameter.
      * 
      */
-    public static final UriRef ResourceResolver = new UriRef("http://example.org/service-description${symbol_pound}ResourceResolver");
+    public static final IRI ResourceResolver = new IRI("http://example.org/service-description${symbol_pound}ResourceResolver");
     
     /**
      * Point to the resource resolved by the subject.
      */
-    public static final UriRef describes = new UriRef("http://example.org/service-description${symbol_pound}describes");
+    public static final IRI describes = new IRI("http://example.org/service-description${symbol_pound}describes");
     
     /**
      * The description of a Request in the log.
      */
-    public static final UriRef LoggedRequest = new UriRef("http://example.org/service-description${symbol_pound}LoggedRequest");
+    public static final IRI LoggedRequest = new IRI("http://example.org/service-description${symbol_pound}LoggedRequest");
     
     /**
      * The User Agent performing the requested described by the subject.
      */
-    public static final UriRef userAgent = new UriRef("http://example.org/service-description${symbol_pound}userAgent");
+    public static final IRI userAgent = new IRI("http://example.org/service-description${symbol_pound}userAgent");
     
     /**
      * The Entity of which a description was requested in the request
      * described by the subject.
      */
-    public static final UriRef requestedEntity = new UriRef("http://example.org/service-description${symbol_pound}requestedEntity");
+    public static final IRI requestedEntity = new IRI("http://example.org/service-description${symbol_pound}requestedEntity");
 }

@@ -22,11 +22,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.junit.Assert;
@@ -39,9 +39,9 @@ public class ResourceAdapterTest {
      */
     @Test
     public void testDouble(){
-        MGraph graph = new IndexedMGraph();
-        UriRef id = new UriRef("http://www.example.org/test");
-        UriRef doubleTestField = new UriRef("http://www.example.org/field/double");
+        Graph graph = new IndexedGraph();
+        IRI id = new IRI("http://www.example.org/test");
+        IRI doubleTestField = new IRI("http://www.example.org/field/double");
         LiteralFactory lf = LiteralFactory.getInstance();
         graph.add(new TripleImpl(id, doubleTestField, lf.createTypedLiteral(Double.NaN)));
         graph.add(new TripleImpl(id, doubleTestField, lf.createTypedLiteral(Double.POSITIVE_INFINITY)));
@@ -62,9 +62,9 @@ public class ResourceAdapterTest {
     
     @Test
     public void testFloat(){
-        MGraph graph = new IndexedMGraph();
-        UriRef id = new UriRef("http://www.example.org/test");
-        UriRef doubleTestField = new UriRef("http://www.example.org/field/double");
+        Graph graph = new IndexedGraph();
+        IRI id = new IRI("http://www.example.org/test");
+        IRI doubleTestField = new IRI("http://www.example.org/field/double");
         LiteralFactory lf = LiteralFactory.getInstance();
         graph.add(new TripleImpl(id, doubleTestField, lf.createTypedLiteral(Float.NaN)));
         graph.add(new TripleImpl(id, doubleTestField, lf.createTypedLiteral(Float.POSITIVE_INFINITY)));
@@ -85,9 +85,9 @@ public class ResourceAdapterTest {
 // TODO: how to create NAN, POSITIVE_INFINITY, NEGATIVE_INVINITY instances for BigDecimal
 //    @Test
 //    public void testBigDecimal(){
-//        MGraph graph = new IndexedMGraph();
-//        UriRef id = new UriRef("http://www.example.org/test");
-//        UriRef doubleTestField = new UriRef("http://www.example.org/field/double");
+//        Graph graph = new IndexedGraph();
+//        IRI id = new IRI("http://www.example.org/test");
+//        IRI doubleTestField = new IRI("http://www.example.org/field/double");
 //        LiteralFactory lf = LiteralFactory.getInstance();
 //        graph.add(new TripleImpl(id, doubleTestField, lf.createTypedLiteral(BigDecimal.valueOf(Double.NaN))));
 //        graph.add(new TripleImpl(id, doubleTestField, lf.createTypedLiteral(BigDecimal.valueOf(Double.POSITIVE_INFINITY))));

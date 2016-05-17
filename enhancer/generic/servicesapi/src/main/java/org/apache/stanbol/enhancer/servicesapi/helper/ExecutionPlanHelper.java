@@ -41,21 +41,20 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.BNode;
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.commons.rdf.BlankNode;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.clerezza.rdf.core.NoConvertorException;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
-import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
+import org.apache.clerezza.rdf.core.LiteralFactory;
+import org.apache.stanbol.commons.indexedgraph.IndexedGraph;
 import org.apache.stanbol.enhancer.servicesapi.ChainException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngineManager;
@@ -75,28 +74,28 @@ public final class ExecutionPlanHelper {
     private ExecutionPlanHelper(){/* Do not allow instances of utility classes*/}
 
     /**
-     * Writes all triples for an ep:ExecutionNode to the parsed {@link MGraph}.
-     * An {@link BNode} is use for representing the execution node resource.
+     * Writes all triples for an ep:ExecutionNode to the parsed {@link Graph}.
+     * An {@link BlankNode} is use for representing the execution node resource.
      * @param graph the graph to write the triples. MUST NOT be empty
-     * @param epNode the NonLiteral representing the ep:ExecutionPlan
+     * @param epNode the BlankNodeOrIRI representing the ep:ExecutionPlan
      * @param engineName the name of the engine. MUST NOT be <code>null</code> nor empty
      * @param optional if the execution of this node is optional or required
      * @param dependsOn other nodes that MUST BE executed before this one. Parse 
      * <code>null</code> or an empty set if none.
      * @return the resource representing the added ep:ExecutionNode.
-     * @deprecated use {@link #writeExecutionNode(MGraph, NonLiteral, String, boolean, Set, Map)}
+     * @deprecated use {@link #writeExecutionNode(Graph, BlankNodeOrIRI, String, boolean, Set, Map)}
      * with <code>null</code> as last parameter
      */
     @Deprecated
-    public static NonLiteral writeExecutionNode(MGraph graph,NonLiteral epNode, 
-            String engineName, boolean optional, Set<NonLiteral> dependsOn){
+    public static BlankNodeOrIRI writeExecutionNode(Graph graph,BlankNodeOrIRI epNode, 
+            String engineName, boolean optional, Set<BlankNodeOrIRI> dependsOn){
         return writeExecutionNode(graph,epNode,engineName,optional,dependsOn, null);
     }
     /**
-     * Writes all triples for an ep:ExecutionNode to the parsed {@link MGraph}.
-     * An {@link BNode} is use for representing the execution node resource.
+     * Writes all triples for an ep:ExecutionNode to the parsed {@link Graph}.
+     * An {@link BlankNode} is use for representing the execution node resource.
      * @param graph the graph to write the triples. MUST NOT be empty
-     * @param epNode the NonLiteral representing the ep:ExecutionPlan
+     * @param epNode the BlankNodeOrIRI representing the ep:ExecutionPlan
      * @param engineName the name of the engine. MUST NOT be <code>null</code> nor empty
      * @param optional if the execution of this node is optional or required
      * @param dependsOn other nodes that MUST BE executed before this one. Parse 
@@ -106,11 +105,11 @@ public final class ExecutionPlanHelper {
      * @return the resource representing the added ep:ExecutionNode.
      * @since 0.12.1
      */
-    public static NonLiteral writeExecutionNode(MGraph graph,NonLiteral epNode, 
-            String engineName, boolean optional, Set<NonLiteral> dependsOn, 
+    public static BlankNodeOrIRI writeExecutionNode(Graph graph,BlankNodeOrIRI epNode, 
+            String engineName, boolean optional, Set<BlankNodeOrIRI> dependsOn, 
             Map<String,Object> enhProps){
         if(graph == null){
-            throw new IllegalArgumentException("The parsed MGraph MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed Graph MUST NOT be NULL!");
         }
         if(engineName == null || engineName.isEmpty()){
             throw new IllegalArgumentException("The parsed Engine name MUST NOT be NULL nor empty!");
@@ -118,12 +117,12 @@ public final class ExecutionPlanHelper {
         if(epNode == null){
             throw new IllegalArgumentException("The ep:ExecutionPlan instance MUST NOT be NULL!");
         }
-        NonLiteral node = new BNode();
+        BlankNodeOrIRI node = new BlankNode();
         graph.add(new TripleImpl(epNode, HAS_EXECUTION_NODE, node));
         graph.add(new TripleImpl(node, RDF_TYPE, EXECUTION_NODE));
         graph.add(new TripleImpl(node,ENGINE,new PlainLiteralImpl(engineName)));
         if(dependsOn != null){
-            for(NonLiteral dependend : dependsOn){
+            for(BlankNodeOrIRI dependend : dependsOn){
                 if(dependend != null){
                     graph.add(new TripleImpl(node, DEPENDS_ON, dependend));
                 }
@@ -134,20 +133,20 @@ public final class ExecutionPlanHelper {
         return node;
     }
     /**
-     * Creates an ExecutionPlan for the parsed chainName in the parsed Graph
+     * Creates an ExecutionPlan for the parsed chainName in the parsed ImmutableGraph
      * @param graph the graph
      * @param chainName the chain name
      * @return the node representing the ex:ExecutionPlan
-     * @deprecated use {@link #createExecutionPlan(MGraph, String, Map)} with
+     * @deprecated use {@link #createExecutionPlan(Graph, String, Map)} with
      * parsing <code>null</code> as last parameter
      */
     @Deprecated
-    public static NonLiteral createExecutionPlan(MGraph graph,String chainName){
+    public static BlankNodeOrIRI createExecutionPlan(Graph graph,String chainName){
         return createExecutionPlan(graph, chainName, null);
     }
     
     /**
-     * Creates an ExecutionPlan for the parsed chainName in the parsed Graph
+     * Creates an ExecutionPlan for the parsed chainName in the parsed ImmutableGraph
      * @param graph the graph
      * @param chainName the chain name
      * @param enhProps the map with the enhancement properties defined for the
@@ -155,14 +154,14 @@ public final class ExecutionPlanHelper {
      * @return the node representing the ex:ExecutionPlan
      * @since 0.12.1
      */
-    public static NonLiteral createExecutionPlan(MGraph graph,String chainName, Map<String,Object> enhProps){
+    public static BlankNodeOrIRI createExecutionPlan(Graph graph,String chainName, Map<String,Object> enhProps){
         if(graph == null){
-            throw new IllegalArgumentException("The parsed MGraph MUST NOT be NULL!");
+            throw new IllegalArgumentException("The parsed Graph MUST NOT be NULL!");
         }
         if(chainName == null || chainName.isEmpty()){
             throw new IllegalArgumentException("The parsed Chain name MUST NOT be NULL nor empty!");
         }
-        NonLiteral node = new BNode();
+        BlankNodeOrIRI node = new BlankNode();
         graph.add(new TripleImpl(node, RDF_TYPE, EXECUTION_PLAN));
         graph.add(new TripleImpl(node, CHAIN,new PlainLiteralImpl(chainName)));
         writeEnhancementProperties(graph, node, null, enhProps);
@@ -170,7 +169,7 @@ public final class ExecutionPlanHelper {
     }
     
     /**
-     * Evaluates the parsed {@link Graph execution plan} and the set of already executed
+     * Evaluates the parsed {@link ImmutableGraph execution plan} and the set of already executed
      * {@link ExecutionPlan#EXECUTION_NODE ep:ExecutionNode}s to find the next
      * nodes that can be executed. 
      * @param executionPlan the execution plan
@@ -179,10 +178,10 @@ public final class ExecutionPlanHelper {
      * @return the set of nodes that can be executed next or an empty set if
      * there are no more nodes to execute.
      */
-    public static Set<NonLiteral>getExecutable(TripleCollection executionPlan, Set<NonLiteral> executed){
-        Set<NonLiteral> executeable = new HashSet<NonLiteral>();
+    public static Set<BlankNodeOrIRI>getExecutable(Graph executionPlan, Set<BlankNodeOrIRI> executed){
+        Set<BlankNodeOrIRI> executeable = new HashSet<BlankNodeOrIRI>();
         for(Iterator<Triple> nodes = executionPlan.filter(null, RDF_TYPE, EXECUTION_NODE);nodes.hasNext();){
-            NonLiteral node = nodes.next().getSubject();
+            BlankNodeOrIRI node = nodes.next().getSubject();
             if(!executed.contains(node)){
                 Iterator<Triple> dependsIt = executionPlan.filter(node, DEPENDS_ON, null);
                 boolean dependendExecuted = true;
@@ -213,7 +212,7 @@ public final class ExecutionPlanHelper {
      * with <code>null</code> as last argument instead
      */
     @Deprecated
-    public static Graph calculateExecutionPlan(String chainName, List<EnhancementEngine> availableEngines, 
+    public static ImmutableGraph calculateExecutionPlan(String chainName, List<EnhancementEngine> availableEngines, 
             Set<String> optional, Set<String> missing) {
         return calculateExecutionPlan(chainName, availableEngines, optional, missing, null);
     }
@@ -240,7 +239,7 @@ public final class ExecutionPlanHelper {
      * @return the execution plan
      * @since 0.12.1
      */
-    public static Graph calculateExecutionPlan(String chainName, List<EnhancementEngine> availableEngines, 
+    public static ImmutableGraph calculateExecutionPlan(String chainName, List<EnhancementEngine> availableEngines, 
             Set<String> optional, Set<String> missing, Map<String,Map<String,Object>> enhProps) {
         if(chainName == null || chainName.isEmpty()){
             throw new IllegalArgumentException("The parsed ChainName MUST NOT be empty!");
@@ -248,15 +247,15 @@ public final class ExecutionPlanHelper {
         Collections.sort(availableEngines,EXECUTION_ORDER_COMPARATOR);
         //now we have all required and possible also optional engines
         //  -> build the execution plan
-        MGraph ep = new IndexedMGraph();
-        NonLiteral epNode = createExecutionPlan(ep, chainName,
+        Graph ep = new IndexedGraph();
+        BlankNodeOrIRI epNode = createExecutionPlan(ep, chainName,
             enhProps != null ? enhProps.get(null) : null);
         Integer prevOrder = null;
-        Set<NonLiteral> prev = null;
-        Set<NonLiteral> current = new HashSet<NonLiteral>();
+        Set<BlankNodeOrIRI> prev = null;
+        Set<BlankNodeOrIRI> current = new HashSet<BlankNodeOrIRI>();
         for(String name : missing){
             boolean optionalMissing = optional.contains(name);
-            NonLiteral node = writeExecutionNode(ep, epNode, name, optionalMissing, null,
+            BlankNodeOrIRI node = writeExecutionNode(ep, epNode, name, optionalMissing, null,
                 enhProps == null ? null : enhProps.get(name));
             if(!optionalMissing){
                 current.add(node);
@@ -267,11 +266,11 @@ public final class ExecutionPlanHelper {
             Integer order = getEngineOrder(engine);
             if(prevOrder == null || !prevOrder.equals(order)){
                 prev = current;
-                current = new HashSet<NonLiteral>();
+                current = new HashSet<BlankNodeOrIRI>();
                 prevOrder = order;
             }
             try {
-                NonLiteral executionNode = writeExecutionNode(ep, epNode, name, 
+                BlankNodeOrIRI executionNode = writeExecutionNode(ep, epNode, name, 
                     optional.contains(name), prev, 
                     enhProps == null ? null : enhProps.get(name));
                 current.add(executionNode);
@@ -282,7 +281,7 @@ public final class ExecutionPlanHelper {
                 throw e; //rethrow it
             }
         }
-        return ep.getGraph();
+        return ep.getImmutableGraph();
     }
     /**
      * Writes the enhancementProperties for an engine/chain to the parsed 
@@ -296,7 +295,7 @@ public final class ExecutionPlanHelper {
      * if none
      * @since 0.12.1
      */
-    private static void writeEnhancementProperties(MGraph ep, NonLiteral node, String engineName,
+    private static void writeEnhancementProperties(Graph ep, BlankNodeOrIRI node, String engineName,
             Map<String,Object> enhProps) {
         if(enhProps == null){ //no enhancement properties for this engine
             return;
@@ -308,7 +307,7 @@ public final class ExecutionPlanHelper {
                         engineName == null ? "" : engineName});
             } else {
                 writeEnhancementProperty(ep, node,
-                    new UriRef(NamespaceEnum.ehp + enhprop.getKey()),
+                    new IRI(NamespaceEnum.ehp + enhprop.getKey()),
                     enhprop.getValue());
             }
         }
@@ -325,8 +324,8 @@ public final class ExecutionPlanHelper {
      * @throws NullPointerException if any of the parsed parameter is <code>null</code>
      */
     @SuppressWarnings("unchecked")
-    private static void writeEnhancementProperty(MGraph ep, NonLiteral epNode, 
-            UriRef property, Object value) {
+    private static void writeEnhancementProperty(Graph ep, BlankNodeOrIRI epNode, 
+            IRI property, Object value) {
         Collection<Object> values;
         if(value instanceof Collection<?>){
             values = (Collection<Object>)value;
@@ -366,19 +365,19 @@ public final class ExecutionPlanHelper {
      * to an other execution node in the parsed graph
      * <ul><p>
      * This method does not modify the parsed graph. Therefore it is save
-     * to parse a {@link Graph} object.<p>
+     * to parse a {@link ImmutableGraph} object.<p>
      * TODO: There is no check for cycles implemented yet.
      * @param the graph to check
      * @return the engine names referenced by the validated execution plan-
      * @throws ChainException
      */
-    public static Set<String> validateExecutionPlan(TripleCollection executionPlan) throws ChainException {
+    public static Set<String> validateExecutionPlan(Graph executionPlan) throws ChainException {
         Iterator<Triple> executionNodeIt = executionPlan.filter(null, RDF_TYPE, EXECUTION_NODE);
         Set<String> engineNames = new HashSet<String>();
-        Map<NonLiteral, Collection<NonLiteral>> nodeDependencies = new HashMap<NonLiteral,Collection<NonLiteral>>();
+        Map<BlankNodeOrIRI, Collection<BlankNodeOrIRI>> nodeDependencies = new HashMap<BlankNodeOrIRI,Collection<BlankNodeOrIRI>>();
         //1. check the ExecutionNodes
         while(executionNodeIt.hasNext()){
-            NonLiteral node = executionNodeIt.next().getSubject();
+            BlankNodeOrIRI node = executionNodeIt.next().getSubject();
             Iterator<String> engines = EnhancementEngineHelper.getStrings(executionPlan, node,ENGINE);
             if(!engines.hasNext()){
                 throw new ChainException("Execution Node "+node+" does not define " +
@@ -394,11 +393,11 @@ public final class ExecutionPlanHelper {
                         "an empty String as engine name (property "+ENGINE+")!");
             }
             engineNames.add(engine);
-            Collection<NonLiteral> dependsOn = new HashSet<NonLiteral>();
+            Collection<BlankNodeOrIRI> dependsOn = new HashSet<BlankNodeOrIRI>();
             for(Iterator<Triple> t = executionPlan.filter(node, DEPENDS_ON, null);t.hasNext();){
-                Resource o = t.next().getObject();
-                if(o instanceof NonLiteral){
-                    dependsOn.add((NonLiteral)o);
+                RDFTerm o = t.next().getObject();
+                if(o instanceof BlankNodeOrIRI){
+                    dependsOn.add((BlankNodeOrIRI)o);
                 } else {
                     throw new ChainException("Execution Node "+node+" defines the literal '" +
                         o+"' as value for the "+DEPENDS_ON +" property. However this" +
@@ -408,9 +407,9 @@ public final class ExecutionPlanHelper {
             nodeDependencies.put(node, dependsOn);
         }
         //2. now check the dependency graph
-        for(Entry<NonLiteral,Collection<NonLiteral>> entry : nodeDependencies.entrySet()){
+        for(Entry<BlankNodeOrIRI,Collection<BlankNodeOrIRI>> entry : nodeDependencies.entrySet()){
             if(entry.getValue() != null){
-                for(NonLiteral dependent : entry.getValue()){
+                for(BlankNodeOrIRI dependent : entry.getValue()){
                     if(!nodeDependencies.containsKey(dependent)){
                         throw new ChainException("Execution Node "+entry.getKey()+
                             " defines a dependency to an non existent ex:ExectutionNode "+
@@ -423,20 +422,20 @@ public final class ExecutionPlanHelper {
         return engineNames;
     }
     
-    public static Set<NonLiteral> getDependend(TripleCollection executionPlan, NonLiteral executionNode){
-        Set<NonLiteral> dependend = new HashSet<NonLiteral>();
+    public static Set<BlankNodeOrIRI> getDependend(Graph executionPlan, BlankNodeOrIRI executionNode){
+        Set<BlankNodeOrIRI> dependend = new HashSet<BlankNodeOrIRI>();
         addDependend(dependend, executionPlan, executionNode);
         return dependend;
     }
-    public static void addDependend(Collection<NonLiteral> collection, TripleCollection executionPlan, NonLiteral executionNode){
+    public static void addDependend(Collection<BlankNodeOrIRI> collection, Graph executionPlan, BlankNodeOrIRI executionNode){
         for(Iterator<Triple> it = executionPlan.filter(executionNode, DEPENDS_ON, null);
-                it.hasNext();collection.add((NonLiteral)it.next().getObject()));
+                it.hasNext();collection.add((BlankNodeOrIRI)it.next().getObject()));
     }
-    public static boolean isOptional(TripleCollection executionPlan, NonLiteral executionNode) {
+    public static boolean isOptional(Graph executionPlan, BlankNodeOrIRI executionNode) {
         Boolean optional = get(executionPlan,executionNode,OPTIONAL,Boolean.class,lf);
         return optional == null ? false : optional.booleanValue();
     }
-    public static String getEngine(TripleCollection executionPlan, NonLiteral executionNode) {
+    public static String getEngine(Graph executionPlan, BlankNodeOrIRI executionNode) {
         return getString(executionPlan, executionNode, ENGINE);
     }
 
@@ -447,13 +446,13 @@ public final class ExecutionPlanHelper {
      * @param ep the execution plan
      * @return
      */
-    public static List<EnhancementEngine> getActiveEngines(EnhancementEngineManager engineManager, TripleCollection ep) {
+    public static List<EnhancementEngine> getActiveEngines(EnhancementEngineManager engineManager, Graph ep) {
         List<EnhancementEngine> engines = new ArrayList<EnhancementEngine>();
-        Set<NonLiteral> visited = new HashSet<NonLiteral>();
-        Set<NonLiteral> executeable;
+        Set<BlankNodeOrIRI> visited = new HashSet<BlankNodeOrIRI>();
+        Set<BlankNodeOrIRI> executeable;
         do {
             executeable = getExecutable(ep, visited);
-            for(NonLiteral node : executeable){
+            for(BlankNodeOrIRI node : executeable){
                 String engineName = getString(ep, node, ENGINE);
                 EnhancementEngine engine = engineManager.getEngine(engineName);
                 if(engine != null){
@@ -474,7 +473,7 @@ public final class ExecutionPlanHelper {
      * @param chainName the chain name
      * @return the node or <code>null</code> if not found
      */
-    public static NonLiteral getExecutionPlan(TripleCollection graph, String chainName){
+    public static BlankNodeOrIRI getExecutionPlan(Graph graph, String chainName){
         if(graph == null){
             throw new IllegalArgumentException("The parsed graph MUST NOT be NULL!");
         }
@@ -494,23 +493,23 @@ public final class ExecutionPlanHelper {
      * @param ep the execution plan graph
      * @param executionPlanNode the execution plan node
      */
-    public static Set<NonLiteral> getExecutionNodes(TripleCollection ep, final NonLiteral executionPlanNode) {
+    public static Set<BlankNodeOrIRI> getExecutionNodes(Graph ep, final BlankNodeOrIRI executionPlanNode) {
         if(ep == null){
             throw new IllegalArgumentException("The parsed graph with the Executionplan MUST NOT be NULL!");
         }
         if(executionPlanNode == null){
             throw new IllegalArgumentException("The parsed execution plan node MUST NOT be NULL!");
         }
-        Set<NonLiteral> executionNodes = new HashSet<NonLiteral>();
+        Set<BlankNodeOrIRI> executionNodes = new HashSet<BlankNodeOrIRI>();
         Iterator<Triple> it = ep.filter(executionPlanNode, HAS_EXECUTION_NODE, null);
         while(it.hasNext()){
             Triple t = it.next();
-            Resource node = t.getObject();
-            if(node instanceof NonLiteral){
-                executionNodes.add((NonLiteral)node);
+            RDFTerm node = t.getObject();
+            if(node instanceof BlankNodeOrIRI){
+                executionNodes.add((BlankNodeOrIRI)node);
             } else {
                 throw new IllegalStateException("The value of the "+HAS_EXECUTION_NODE
-                    + " property MUST BE a NonLiteral (triple: "+t+")!");
+                    + " property MUST BE a BlankNodeOrIRI (triple: "+t+")!");
             }
         }
         return executionNodes;

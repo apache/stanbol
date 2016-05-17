@@ -20,18 +20,17 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.SimpleMGraph;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.simple.SimpleGraph;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.stanbol.commons.owl.transformation.OWLAPIToClerezzaConverter;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -56,7 +55,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 public class OWLAPIToClerezzaConverterTest {
 
     private static OWLOntology ontology;
-    private static MGraph mGraph;
+    private static Graph mGraph;
     private static String ns = "http://incubator.apache.org/stanbol/owl#";
     private static String foaf = "http://xmlns.com/foaf/0.1/";
 
@@ -73,17 +72,17 @@ public class OWLAPIToClerezzaConverterTest {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLDataFactory factory = manager.getOWLDataFactory();
         try {
-            ontology = manager.createOntology(IRI.create(ns + "testOntology"));
+            ontology = manager.createOntology(org.semanticweb.owlapi.model.IRI.create(ns + "testOntology"));
         } catch (OWLOntologyCreationException e) {
             log.error(e.getMessage());
         }
 
         if (ontology != null) {
-            OWLClass personClass = factory.getOWLClass(IRI.create(foaf + "Person"));
-            OWLNamedIndividual andreaNuzzoleseOWL = factory.getOWLNamedIndividual(IRI
+            OWLClass personClass = factory.getOWLClass(org.semanticweb.owlapi.model.IRI.create(foaf + "Person"));
+            OWLNamedIndividual andreaNuzzoleseOWL = factory.getOWLNamedIndividual(org.semanticweb.owlapi.model.IRI
                     .create(ns + "AndreaNuzzolese"));
-            OWLNamedIndividual enricoDagaOWL = factory.getOWLNamedIndividual(IRI.create(ns + "EnricoDaga"));
-            OWLObjectProperty knowsOWL = factory.getOWLObjectProperty(IRI.create(foaf + "knows"));
+            OWLNamedIndividual enricoDagaOWL = factory.getOWLNamedIndividual(org.semanticweb.owlapi.model.IRI.create(ns + "EnricoDaga"));
+            OWLObjectProperty knowsOWL = factory.getOWLObjectProperty(org.semanticweb.owlapi.model.IRI.create(foaf + "knows"));
 
             OWLAxiom axiom = factory.getOWLClassAssertionAxiom(personClass, andreaNuzzoleseOWL);
             manager.addAxiom(ontology, axiom);
@@ -99,14 +98,14 @@ public class OWLAPIToClerezzaConverterTest {
          * Set-up the Clerezza model for the test. As before simply add the triples: AndreaNuzzolese isA
          * Person EnricoDaga isA Person AndreaNuzzolese knows EnricoDaga
          */
-        mGraph = new SimpleMGraph();
+        mGraph = new SimpleGraph();
 
-        UriRef knowsInClerezza = new UriRef(ns + "knows");
-        UriRef rdfType = new UriRef(RDF.getURI() + "type");
-        UriRef foafPersonInClerezza = new UriRef(foaf + "Person");
+        IRI knowsInClerezza = new IRI(ns + "knows");
+        IRI rdfType = new IRI(RDF.getURI() + "type");
+        IRI foafPersonInClerezza = new IRI(foaf + "Person");
 
-        NonLiteral andreaNuzzoleseInClerezza = new UriRef(ns + "AndreaNuzzolese");
-        NonLiteral enricoDagaInClerezza = new UriRef(ns + "EnricoDaga");
+        BlankNodeOrIRI andreaNuzzoleseInClerezza = new IRI(ns + "AndreaNuzzolese");
+        BlankNodeOrIRI enricoDagaInClerezza = new IRI(ns + "EnricoDaga");
 
         Triple triple = new TripleImpl(andreaNuzzoleseInClerezza, rdfType, foafPersonInClerezza);
         mGraph.add(triple);
@@ -117,9 +116,9 @@ public class OWLAPIToClerezzaConverterTest {
     }
 
     @Test
-    public void testMGraphToOWLOntology() {
+    public void testGraphToOWLOntology() {
         /*
-         * Transform the Clerezza MGraph to an OWLOntology.
+         * Transform the Clerezza Graph to an OWLOntology.
          */
         OWLOntology ontology = OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(mGraph);
 
@@ -139,15 +138,15 @@ public class OWLAPIToClerezzaConverterTest {
     }
 
     @Test
-    public void testOWLOntologyToMGraph() {
+    public void testOWLOntologyToGraph() {
 
         /*
-         * Transform the OWLOntology into a Clerezza MGraph.
+         * Transform the OWLOntology into a Clerezza Graph.
          */
-        TripleCollection mGraph = OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(ontology);
+        Graph mGraph = OWLAPIToClerezzaConverter.owlOntologyToClerezzaGraph(ontology);
 
         /*
-         * Print all the triples contained in the Clerezza MGraph.
+         * Print all the triples contained in the Clerezza Graph.
          */
         Iterator<Triple> tripleIt = mGraph.iterator();
         while (tripleIt.hasNext()) {

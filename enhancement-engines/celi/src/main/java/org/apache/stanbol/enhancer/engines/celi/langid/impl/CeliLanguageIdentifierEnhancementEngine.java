@@ -34,10 +34,10 @@ import java.util.Set;
 import javax.xml.soap.SOAPException;
 
 import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -158,7 +158,7 @@ public class CeliLanguageIdentifierEnhancementEngine extends AbstractEnhancement
 	
 	@Override
 	public void computeEnhancements(ContentItem ci) throws EngineException {
-		Entry<UriRef, Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMTYPES);
+		Entry<IRI, Blob> contentPart = ContentItemHelper.getBlob(ci, SUPPORTED_MIMTYPES);
 		if (contentPart == null) {
 			throw new IllegalStateException("No ContentPart with Mimetype '" + TEXT_PLAIN_MIMETYPE + "' found for ContentItem " + ci.getUri() + ": This is also checked in the canEnhance method! -> This "
 					+ "indicated an Bug in the implementation of the " + "EnhancementJobManager!");
@@ -183,12 +183,12 @@ public class CeliLanguageIdentifierEnhancementEngine extends AbstractEnhancement
 			else 
 				lista = this.client.guessQueryLanguage(text);
 			
-			MGraph g = ci.getMetadata();
+			Graph g = ci.getMetadata();
 			//in ENHANCE_ASYNC we need to use read/write locks on the ContentItem
 			ci.getLock().writeLock().lock();
 			try {
     			GuessedLanguage gl = lista.get(0);
-    			UriRef textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
+    			IRI textEnhancement = EnhancementEngineHelper.createTextEnhancement(ci, this);
     		    g.add(new TripleImpl(textEnhancement, DC_LANGUAGE, new PlainLiteralImpl(gl.getLang())));
     			g.add(new TripleImpl(textEnhancement, ENHANCER_CONFIDENCE, literalFactory.createTypedLiteral(gl.getConfidence())));
 				g.add(new TripleImpl(textEnhancement, DC_TYPE, DCTERMS_LINGUISTIC_SYSTEM));

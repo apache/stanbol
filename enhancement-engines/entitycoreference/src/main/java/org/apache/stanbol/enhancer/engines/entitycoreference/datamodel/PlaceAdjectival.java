@@ -16,7 +16,8 @@
  */
 package org.apache.stanbol.enhancer.engines.entitycoreference.datamodel;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
+
 
 /**
  * Represents a place adjectival inside a {@link Span}.
@@ -36,18 +37,18 @@ public class PlaceAdjectival {
     private int endIdx;
 
     /**
-     * The {@link UriRef} in the {@link SiteManager} or {@link Entityhub} that this place adjectival points
+     * The {@link IRI} in the {@link SiteManager} or {@link Entityhub} that this place adjectival points
      * to.
      */
-    private UriRef placeUri;
+    private IRI placeUri;
 
-    public PlaceAdjectival(int startIdx, int endIdx, UriRef placeUri) {
+    public PlaceAdjectival(int startIdx, int endIdx, IRI placeUri) {
         this.startIdx = startIdx;
         this.endIdx = endIdx;
         this.placeUri = placeUri;
     }
 
-    public UriRef getPlaceUri() {
+    public IRI getPlaceUri() {
         return placeUri;
     }
 

@@ -30,9 +30,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.apache.clerezza.rdf.core.Literal;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -125,10 +125,10 @@ public class IndexConfiguration {
     /**
      * The origin is added to <code>fise:TextAnnotation</code> created for
      * linked Entities. It is intended to be used for providing a reference to
-     * dataset of the Entity. Both {@link UriRef URI}s and {@link Literal}s can
+     * dataset of the Entity. Both {@link IRI URI}s and {@link Literal}s can
      * be used here
      */
-    private Resource origin;
+    private RDFTerm origin;
 
     /**
      * If alternate tokens (<code>posInc == 0</code>) can be skipped or if such
@@ -421,7 +421,7 @@ public class IndexConfiguration {
         this.fstDirectory = fstDirectory;
     }
 
-    public void setOrigin(Resource origin) {
+    public void setOrigin(RDFTerm origin) {
         this.origin = origin;
     }
     /**
@@ -434,7 +434,7 @@ public class IndexConfiguration {
      * 
      * @return the origin or <code>null</code> if none is configured
      */
-    public Resource getOrigin() {
+    public RDFTerm getOrigin() {
         return origin;
     }
     

@@ -25,9 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.impl.utils.PlainLiteralImpl;
 import org.apache.stanbol.enhancer.engines.entitylinking.Entity;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcher;
 import org.apache.stanbol.enhancer.engines.entitylinking.EntitySearcherException;
@@ -43,7 +43,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public final class EntityhubSearcher extends TrackingEntitySearcher<Entityhub> implements EntitySearcher {
     
     private final Integer limit;
-    private Map<UriRef,Collection<Resource>> originInfo;
+    private Map<IRI,Collection<RDFTerm>> originInfo;
 
     public EntityhubSearcher(BundleContext context, Integer limit) {
         this(context,limit,null);
@@ -52,13 +52,13 @@ public final class EntityhubSearcher extends TrackingEntitySearcher<Entityhub> i
         super(context,Entityhub.class,null,customizer);
         this.limit = limit != null && limit > 0 ? limit : null;
         this.originInfo = Collections.singletonMap(
-            new UriRef(RdfResourceEnum.site.getUri()), 
-            (Collection<Resource>)Collections.singleton(
-                (Resource)new PlainLiteralImpl("entityhub")));
+            new IRI(RdfResourceEnum.site.getUri()), 
+            (Collection<RDFTerm>)Collections.singleton(
+                (RDFTerm)new PlainLiteralImpl("entityhub")));
     }
     
     @Override
-    public Entity get(UriRef id,Set<UriRef> fields, String...languages) throws EntitySearcherException {
+    public Entity get(IRI id,Set<IRI> fields, String...languages) throws EntitySearcherException {
         if(id == null || id.getUnicodeString().isEmpty()){
             return null;
         }
@@ -89,8 +89,8 @@ public final class EntityhubSearcher extends TrackingEntitySearcher<Entityhub> i
     }
 
     @Override
-    public Collection<? extends Entity> lookup(UriRef field,
-                                           Set<UriRef> includeFields,
+    public Collection<? extends Entity> lookup(IRI field,
+                                           Set<IRI> includeFields,
                                            List<String> search,
                                            String[] languages,
                                            Integer limit, Integer offset) throws EntitySearcherException {
@@ -138,7 +138,7 @@ public final class EntityhubSearcher extends TrackingEntitySearcher<Entityhub> i
     }
 
     @Override
-    public Map<UriRef,Collection<Resource>> getOriginInformation() {
+    public Map<IRI,Collection<RDFTerm>> getOriginInformation() {
         return originInfo;
     }
     

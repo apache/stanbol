@@ -19,7 +19,7 @@ package org.apache.stanbol.rules.adapters.clerezza.atoms;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
 import org.apache.clerezza.rdf.core.sparql.query.Expression;
 import org.apache.clerezza.rdf.core.sparql.query.FunctionCall;
@@ -59,7 +59,7 @@ public class ConcatAtom extends AbstractAdaptableAtom {
         argumentExpressions.add((Expression) argument1.getClerezzaObject());
         argumentExpressions.add((Expression) argument2.getClerezzaObject());
 
-        FunctionCall functionCall = new FunctionCall(new UriRef(
+        FunctionCall functionCall = new FunctionCall(new IRI(
                 "<http://www.w3.org/2005/xpath-functions#concat>"), argumentExpressions);
 
         return (T) new ClerezzaSparqlObject(functionCall);

@@ -34,14 +34,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.clerezza.rdf.core.NoConvertorException;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Resource;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.TypedLiteral;
-import org.apache.clerezza.rdf.core.UriRef;
-import org.apache.clerezza.rdf.core.impl.TripleImpl;
+import org.apache.clerezza.commons.rdf.BlankNodeOrIRI;
+import org.apache.clerezza.commons.rdf.RDFTerm;
+import org.apache.clerezza.commons.rdf.Triple;
+import org.apache.clerezza.commons.rdf.IRI;
+import org.apache.clerezza.commons.rdf.Literal;
+import org.apache.clerezza.commons.rdf.impl.utils.TripleImpl;
+import org.apache.clerezza.rdf.core.LiteralFactory;
 import org.apache.stanbol.enhancer.rdfentities.Rdf;
 import org.apache.stanbol.enhancer.rdfentities.RdfEntity;
 import org.apache.stanbol.enhancer.servicesapi.rdf.Properties;
@@ -89,14 +89,14 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
 
     protected SimpleRdfEntityFactory factory;
     protected LiteralFactory literalFactory;
-    protected NonLiteral rdfNode;
+    protected BlankNodeOrIRI rdfNode;
     private final Set<Class<?>> interfaces;
-    public RdfProxyInvocationHandler(SimpleRdfEntityFactory factory, NonLiteral rdfNode, Class<?>[] parsedInterfaces, LiteralFactory literalFactory){
+    public RdfProxyInvocationHandler(SimpleRdfEntityFactory factory, BlankNodeOrIRI rdfNode, Class<?>[] parsedInterfaces, LiteralFactory literalFactory){
         this.rdfNode = rdfNode;
         this.factory = factory;
         this.literalFactory = literalFactory;
-        //TODO If slow implement this by directly using the MGraph Interface!
-        Collection<UriRef> nodeTypes = getValues(Properties.RDF_TYPE, UriRef.class);
+        //TODO If slow implement this by directly using the Graph Interface!
+        Collection<IRI> nodeTypes = getValues(Properties.RDF_TYPE, IRI.class);
         Set<Class<?>> interfaceSet = new HashSet<Class<?>>();
         for (Class<?> clazz : parsedInterfaces){
             if(!clazz.isInterface()){
@@ -110,7 +110,7 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
             Rdf classAnnotation = clazz.getAnnotation(Rdf.class);
             if(classAnnotation == null){
             } else { //check of the type statement is present
-                UriRef typeRef = new UriRef(classAnnotation.id());
+                IRI typeRef = new IRI(classAnnotation.id());
                 if(!nodeTypes.contains(typeRef)){
                     //TODO: Question: How to get the dependencies for logging working with maven :(
                     //log.debug("add type "+typeRef+" for interface "+clazz+" to node "+rdfNode);
@@ -161,9 +161,9 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
         if(rdf == null){
             throw new IllegalStateException("Invoked Method does not have an Rdf annotation!");
         }
-        UriRef property;
+        IRI property;
         if(rdf.id().startsWith("http://") || rdf.id().startsWith("urn:")){
-            property = new UriRef(rdf.id());
+            property = new IRI(rdf.id());
         } else {
             throw new IllegalStateException("The id=\""+rdf.id()+"\"provided by the rdf annotation is not an valid URI");
         }
@@ -248,81 +248,81 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T getValue(UriRef property, Class<T> type){
+    private <T> T getValue(IRI property, Class<T> type){
         Iterator<Triple> results = factory.getGraph().filter(rdfNode, property, null);
         if (results.hasNext()){
-            Resource result = results.next().getObject();
-            if (result instanceof NonLiteral){
+            RDFTerm result = results.next().getObject();
+            if (result instanceof BlankNodeOrIRI){
                 if (RdfEntity.class.isAssignableFrom(type)){
-                    return (T)factory.getProxy((NonLiteral)result, (Class<? extends RdfEntity>)type);
-                } else { //check result for UriRef and types UriRef, URI or URL
-                    if(result instanceof UriRef){
-                        if (UriRef.class.isAssignableFrom(type)){
+                    return (T)factory.getProxy((BlankNodeOrIRI)result, (Class<? extends RdfEntity>)type);
+                } else { //check result for IRI and types IRI, URI or URL
+                    if(result instanceof IRI){
+                        if (IRI.class.isAssignableFrom(type)){
                             return (T)result;
                         } else if (URI.class.isAssignableFrom(type)){
                             try {
-                                return (T)new URI(((UriRef)result).getUnicodeString());
+                                return (T)new URI(((IRI)result).getUnicodeString());
                             } catch (URISyntaxException e) {
                                 throw new IllegalStateException("Unable to parse "+URI.class
-                                        +" for "+UriRef.class+" value="+((UriRef)result).getUnicodeString());
+                                        +" for "+IRI.class+" value="+((IRI)result).getUnicodeString());
                             }
                         } else if (URL.class.isAssignableFrom(type)){
                             try {
-                                return (T)new URL(((UriRef)result).getUnicodeString());
+                                return (T)new URL(((IRI)result).getUnicodeString());
                             } catch (MalformedURLException e) {
                                 throw new IllegalStateException("Unable to parse "+URL.class
-                                        +" for "+UriRef.class+" value="+((UriRef)result).getUnicodeString());
+                                        +" for "+IRI.class+" value="+((IRI)result).getUnicodeString());
                             }
                         } else {
                             throw new IllegalArgumentException("Parsed Type "+type
                                     +" is not compatible for result type "+result.getClass()
                                     +" (value "+result+") of node "+rdfNode+" and property "+property
-                                    +"! (Subclass of RdfEntity, UriRef, URI or URL is expected for NonLiteral Values)");
+                                    +"! (Subclass of RdfEntity, IRI, URI or URL is expected for BlankNodeOrIRI Values)");
                         }
                     } else {
                         throw new IllegalArgumentException("Parsed Type "+type
                                 +" is not compatible for result type "+result.getClass()
                                 +" (value "+result+") of node "+rdfNode+" and property "+property
-                                +"! (Subclass of RdfEntity expected as type for NonLiteral values that are no instanceof UriRef)");
+                                +"! (Subclass of RdfEntity expected as type for BlankNodeOrIRI values that are no instanceof IRI)");
                     }
                 }
             } else {
-                return literalFactory.createObject(type,(TypedLiteral) result);
+                return literalFactory.createObject(type,(Literal) result);
             }
         } else {
             return null;
         }
     }
-    private <T> Collection<T> getValues(UriRef property, Class<T> type){
+    private <T> Collection<T> getValues(IRI property, Class<T> type){
         return new RdfProxyPropertyCollection<T>(property, type);
     }
-    private void setValue(UriRef property, Object value){
+    private void setValue(IRI property, Object value){
         removeValues(property);
         addValue(property, value);
     }
-    private void setValues(UriRef property, Collection<?> values){
+    private void setValues(IRI property, Collection<?> values){
         removeValues(property);
         for(Object value : values){
             addValue(property, value);
         }
     }
-    protected Resource getRdfResource(Object value) throws NoConvertorException{
-        if(value instanceof Resource){
-            //if the parsed object is already a Resource
-            return (Resource) value; //return it
+    protected RDFTerm getRdfResource(Object value) throws NoConvertorException{
+        if(value instanceof RDFTerm){
+            //if the parsed object is already a RDFTerm
+            return (RDFTerm) value; //return it
         } else if(value instanceof RdfEntity){ //check for other proxies
             return ((RdfEntity)value).getId();
         } else if(value instanceof URI){ //or URI links
-            return new UriRef(value.toString());
+            return new IRI(value.toString());
         } else if(value instanceof URL){ //or URL links
-            return new UriRef(value.toString());
+            return new IRI(value.toString());
         } else { //nothing of that
             //try to make an Literal (Clarezza internal Adapters)
             return literalFactory.createTypedLiteral(value);
         }
     }
-    private boolean addValue(UriRef property, Object value){
-        Resource rdfValue;
+    private boolean addValue(IRI property, Object value){
+        RDFTerm rdfValue;
         try {
             rdfValue = getRdfResource(value);
             return factory.getGraph().add(new TripleImpl(rdfNode, property, rdfValue));
@@ -331,8 +331,8 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
                     +" to an RDF Node. Only "+RdfEntity.class+" and RDF Literal Types are supported");
         }
     }
-    private boolean removeValue(UriRef property, Object value){
-        Resource rdfValue;
+    private boolean removeValue(IRI property, Object value){
+        RDFTerm rdfValue;
         try {
             rdfValue = getRdfResource(value);
             return factory.getGraph().remove(new TripleImpl(rdfNode, property, rdfValue));
@@ -341,7 +341,7 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
                     +" to an RDF Node. Only "+RdfEntity.class+" and RDF Literal Types are supported");
         }
     }
-    private void removeValues(UriRef proptery){
+    private void removeValues(IRI proptery){
         Iterator<Triple> toRemove = factory.getGraph().filter(rdfNode, proptery, null);
         while(toRemove.hasNext()){
             factory.getGraph().remove(toRemove.next());
@@ -349,9 +349,9 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
     }
 
     /**
-     * We need this class to apply changes in the collection to the MGraph.
+     * We need this class to apply changes in the collection to the Graph.
      * This collection implementation is a stateless wrapper over the
-     * triples selected by the subject,property pair over the MGraph!<br>
+     * triples selected by the subject,property pair over the Graph!<br>
      * Default implementation of {@link AbstractCollection} are very poor
      * performance. Because of that this class overrides some methods
      * already implemented by its abstract super class.
@@ -361,21 +361,21 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
      */
     private final class RdfProxyPropertyCollection<T> extends AbstractCollection<T> {
 
-        //private final NonLiteral resource;
-        private final UriRef property;
+        //private final BlankNodeOrIRI resource;
+        private final IRI property;
         private final Class<T> genericType;
         private final boolean entity;
         private final boolean uri;
         private final boolean url;
         private final boolean uriRef;
 
-        private RdfProxyPropertyCollection(UriRef property,Class<T> genericType) {
+        private RdfProxyPropertyCollection(IRI property,Class<T> genericType) {
             this.property = property;
             this.genericType = genericType;
             entity = RdfEntity.class.isAssignableFrom(genericType);
             uri = URI.class.isAssignableFrom(genericType);
             url = URL.class.isAssignableFrom(genericType);
-            uriRef = UriRef.class.isAssignableFrom(genericType);
+            uriRef = IRI.class.isAssignableFrom(genericType);
         }
 
         @Override
@@ -390,26 +390,26 @@ public class RdfProxyInvocationHandler implements InvocationHandler {
                 @SuppressWarnings("unchecked")
                 @Override
                 public T next() {
-                    Resource value = results.next().getObject();
+                    RDFTerm value = results.next().getObject();
                     if (entity){
                         //type checks are done within the constructor
-                        return (T) factory.getProxy((NonLiteral)value, (Class<? extends RdfEntity>)genericType);
+                        return (T) factory.getProxy((BlankNodeOrIRI)value, (Class<? extends RdfEntity>)genericType);
                     } else if(uri){
                         try {
-                            return (T)new URI(((UriRef)value).getUnicodeString());
+                            return (T)new URI(((IRI)value).getUnicodeString());
                         } catch (URISyntaxException e) {
-                            throw new IllegalStateException("Unable to parse "+URI.class+" for "+UriRef.class+" value="+((UriRef)value).getUnicodeString());
+                            throw new IllegalStateException("Unable to parse "+URI.class+" for "+IRI.class+" value="+((IRI)value).getUnicodeString());
                         }
                     } else if(url){
                         try {
-                            return (T)new URL(((UriRef)value).getUnicodeString());
+                            return (T)new URL(((IRI)value).getUnicodeString());
                         } catch (MalformedURLException e) {
-                            throw new IllegalStateException("Unable to parse "+URL.class+" for "+UriRef.class+" value="+((UriRef)value).getUnicodeString());
+                            throw new IllegalStateException("Unable to parse "+URL.class+" for "+IRI.class+" value="+((IRI)value).getUnicodeString());
                         }
                     } else if(uriRef){
                         return (T)value;
                     } else {
-                        return literalFactory.createObject(genericType, (TypedLiteral)value);
+                        return literalFactory.createObject(genericType, (Literal)value);
                     }
                 }
 

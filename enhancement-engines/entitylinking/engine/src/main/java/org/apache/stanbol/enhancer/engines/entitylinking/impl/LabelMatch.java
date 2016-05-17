@@ -17,8 +17,8 @@
 package org.apache.stanbol.enhancer.engines.entitylinking.impl;
 
 import java.util.Comparator;
+import org.apache.clerezza.commons.rdf.Literal;
 
-import org.apache.clerezza.rdf.core.PlainLiteral;
 import org.apache.stanbol.enhancer.engines.entitylinking.impl.Suggestion.MATCH;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ public class LabelMatch {
     private int start = 0;
     private int span = 0;
     private int processableMatchCount = 0;
-    private PlainLiteral label;
+    private Literal label;
     private int labelTokenCount = 0;
     private double score;
     /**
@@ -56,11 +56,11 @@ public class LabelMatch {
      * @param start
      * @param span
      */
-    protected LabelMatch(int start, int span, PlainLiteral label){
+    protected LabelMatch(int start, int span, Literal label){
         this(start,span,span,span,1f,label,span,span);
     }
     
-    protected LabelMatch(int start, int span,int processableMatchCount, int matchCount, float tokenMatchScore,PlainLiteral label,int labelTokenCount, int coveredLabelTokenCount){
+    protected LabelMatch(int start, int span,int processableMatchCount, int matchCount, float tokenMatchScore,Literal label,int labelTokenCount, int coveredLabelTokenCount){
         if(start < 0){
             throw new IllegalArgumentException("parsed start position MUST BE >= 0!");
         }
@@ -136,7 +136,7 @@ public class LabelMatch {
      * based match for the given search tokens.
      * @return the label
      */
-    public PlainLiteral getMatchedLabel() {
+    public Literal getMatchedLabel() {
         return label;
     }
     /**

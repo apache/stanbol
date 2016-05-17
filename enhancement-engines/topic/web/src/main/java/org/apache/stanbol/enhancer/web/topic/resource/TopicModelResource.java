@@ -38,8 +38,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.clerezza.rdf.core.Graph;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.ImmutableGraph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
@@ -241,15 +241,15 @@ public final class TopicModelResource extends BaseStanbolResource {
         @Consumes(MediaType.WILDCARD)
         public Response importConceptsFromRDF(@QueryParam(value = "concept_class") String conceptClassUri,
                 @QueryParam(value = "broader_property") String broaderPropertyUri,
-                Graph graph,
+                ImmutableGraph graph,
                 @Context HttpHeaders headers) throws ClassifierException {
-            UriRef conceptClass = OntologicalClasses.SKOS_CONCEPT;
-            UriRef broaderProperty = Properties.SKOS_BROADER;
+            IRI conceptClass = OntologicalClasses.SKOS_CONCEPT;
+            IRI broaderProperty = Properties.SKOS_BROADER;
             if (conceptClassUri != null && !conceptClassUri.isEmpty()) {
-                conceptClass = new UriRef(conceptClassUri);
+                conceptClass = new IRI(conceptClassUri);
             }
             if (broaderPropertyUri != null && !broaderPropertyUri.isEmpty()) {
-                broaderProperty = new UriRef(broaderPropertyUri);
+                broaderProperty = new IRI(broaderPropertyUri);
             }
             int imported = classifier.importConceptsFromGraph(graph, conceptClass, broaderProperty);
             ResponseBuilder rb;

@@ -54,8 +54,8 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 //import javax.ws.rs.core.Response.Status;
 
 import org.apache.clerezza.jaxrs.utils.form.MultiPartBody;
-import org.apache.clerezza.rdf.core.TripleCollection;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.commons.rdf.Graph;
+import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -231,8 +231,8 @@ public class RefactorResource extends BaseStanbolResource {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLOntology inputOntology = manager.loadOntologyFromOntologyDocument(input);
 
-        TripleCollection tripleCollection = refactorer.graphRefactoring(
-            OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(inputOntology), actualRecipe);
+        Graph tripleCollection = refactorer.graphRefactoring(
+            OWLAPIToClerezzaConverter.owlOntologyToClerezzaGraph(inputOntology), actualRecipe);
         // Refactor
         return OWLAPIToClerezzaConverter.clerezzaGraphToOWLOntology(tripleCollection);
     }
@@ -291,14 +291,14 @@ public class RefactorResource extends BaseStanbolResource {
 				log.info("The recipe ID is a URI without scheme. The ID is set to " + recipe);
 			}
         	
-        	UriRef recipeID = new UriRef(recipe);
+        	IRI recipeID = new IRI(recipe);
         	
             rcp = ruleStore.getRecipe(recipeID);
 
             OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
             OWLOntology inputOntology = manager.loadOntologyFromOntologyDocument(input);
-            TripleCollection tripleCollection = refactorer.graphRefactoring(
-                OWLAPIToClerezzaConverter.owlOntologyToClerezzaMGraph(inputOntology), rcp);
+            Graph tripleCollection = refactorer.graphRefactoring(
+                OWLAPIToClerezzaConverter.owlOntologyToClerezzaGraph(inputOntology), rcp);
             OWLOntology outputOntology = OWLAPIToClerezzaConverter
                     .clerezzaGraphToOWLOntology(tripleCollection);
             rb = Response.ok(outputOntology);
@@ -334,9 +334,9 @@ public class RefactorResource extends BaseStanbolResource {
         log.info("recipe: {}", recipe);
         log.info("input-graph: {}", inputGraph);
         log.info("output-graph: {}", outputGraph);
-        UriRef recipeID = new UriRef(recipe);
-        UriRef inputGraphID = new UriRef(inputGraph);
-        UriRef outputGraphID = new UriRef(outputGraph);
+        IRI recipeID = new IRI(recipe);
+        IRI inputGraphID = new IRI(inputGraph);
+        IRI outputGraphID = new IRI(outputGraph);
 
         // Refactorer semionRefactorer = semionManager.getRegisteredRefactorer();
 
