@@ -135,11 +135,11 @@ public class GenericEnhancerUiResource extends AbstractEnhancerResource {
             //     content parameter
             throw new WebApplicationException( 
                 Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
-                .entity("Parsing Content as 'application/x-www-form-urlencoded' is not supported!"
-                    + "Please directly POST the content and set the 'Content-Type' "
-                    + "header to the media type of the parsed content. 'application/"
-                    + "octet-stream' SHOULD BE used if the media type of the parsed "
-                    + "content is not known.\n")
+                .entity("Parsing Content as 'application/x-www-form-urlencoded' is not officially supported!"
+                    + "Please directly POST the content or if you do want to use the unsupported API,"
+                    + "use the following keys:\n"
+                    + "content => The text to enhance\n"
+                    + "format => Equivalent to the Accept Header\n")
                 .build());
         }
         ContentItem ci = ciFactory.createContentItem(new StringSource(content));
