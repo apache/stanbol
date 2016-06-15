@@ -192,7 +192,16 @@
     <dependency>
       <groupId>org.apache.clerezza.provisioning</groupId>
       <artifactId>rdf</artifactId>
-      <version>0.1</version>
+      <version>1.0.0</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Clerezza Jena TDB storage (used by Ontonet) -->
+    <dependency>
+      <groupId>org.apache.clerezza.provisioning</groupId>
+      <artifactId>rdf.tdb</artifactId>
+      <version>1.0.0</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
