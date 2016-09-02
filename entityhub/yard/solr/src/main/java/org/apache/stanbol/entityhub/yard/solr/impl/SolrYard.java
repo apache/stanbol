@@ -686,6 +686,10 @@ public class SolrYard extends AbstractYard implements Yard {
                 added.add(representation);
             }
         }
+        if(inputDocs.isEmpty()){ //empty data sent ... nothing to do
+            log.debug("strore called with empty collection of Representations");
+            return representations;
+        }
         long created = System.currentTimeMillis();
         if(closed){
             log.warn("The SolrYard '{}' was already closed!",config.getName());
