@@ -60,12 +60,12 @@
     <downloadWarning>No downloads for this artifact.</downloadWarning>
     <!-- define the path to the OpenNLP model downloads -->
     <opennlp.model.path>org/apache/stanbol/data/opennlp</opennlp.model.path>
-    <opennlp.model.home>http://www.salzburgresearch.at/~rwesten/stanbol/opennlp</opennlp.model.home>
+    <opennlp.model.home>https://github.com/stanbol-community/stanbol-data/raw/master/opennlp/models-1.5</opennlp.model.home>
     <!-- define the path to the sentiment dictionary downloads -->
     <sentiment.model.path>org/apache/stanbol/data/sentiment/sentiwordnet</sentiment.model.path>
-    <sentiment.model.home>http://www.salzburgresearch.at/~rwesten/stanbol/sentimentdata/</sentiment.model.home>
+    <sentiment.model.home>https://raw.githubusercontent.com/stanbol-community/stanbol-data/master/sentiment-data</sentiment.model.home>
     <!-- define the path to the dbpedia default data index -->
-    <dbpedia.default.index.url>http://www.salzburgresearch.at/~rwesten/stanbol/dbpedia_26k.solrindex.bz2</dbpedia.default.index.url>
+    <dbpedia.default.index.url>https://github.com/stanbol-community/stanbol-data/raw/master/stanbol-indices/dbpedia_26k.solrindex.bz2</dbpedia.default.index.url>
     <!-- this is the name of the old index. Used to ensure deletion  -->
     <dbpedia.default.index.old>dbpedia_43k.solrindex.zip</dbpedia.default.index.old>
     <dbpedia.default.path>org/apache/stanbol/data/site/dbpedia/default</dbpedia.default.path>
