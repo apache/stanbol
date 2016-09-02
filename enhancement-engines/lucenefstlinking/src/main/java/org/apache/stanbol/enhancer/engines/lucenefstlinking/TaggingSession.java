@@ -158,12 +158,6 @@ public class TaggingSession implements Closeable {
         solrDocfields.add(idField);
 
         //obtain the language specific fields for the session
-        if(langCorpusInfo == null && defaultCorpusInfo == null){
-            //this should not happen, because the canEnhance method of the 
-            //engine should  already reject such calls
-            throw new IllegalStateException("No FST Corpus configured for language '"
-                +language+"' and also no default FST Corpus is present.!");
-        }
         if(langCorpusInfo != null){
             this.langCorpus = new Corpus(langCorpusInfo,
                 obtainFstCorpus(indexVersion,langCorpusInfo));
@@ -656,6 +650,14 @@ public class TaggingSession implements Closeable {
 
     public boolean isSkipAltTokens() {
         return config.isSkipAltTokens();
+    }
+    /**
+     * If this session has a FST corpus for tagging
+     * @return <code>true</code> if a language and/or a default corpus is available.
+     * <code>false</code> if both are <code>null</code>
+     */
+    public boolean hasCorpus() {
+        return langCorpus != null || defaultCorpus != null;
     }
     
 }
