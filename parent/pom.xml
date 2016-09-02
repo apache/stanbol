@@ -625,18 +625,37 @@
         <artifactId>org.apache.felix.webconsole</artifactId>
         <version>4.2.8</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza.provisioning</groupId>
+        <artifactId>rdf</artifactId>
+        <version>1.1.1</version>
+        <type>partialbundlelist</type>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza.provisioning</groupId>
+        <artifactId>rdf.tdb</artifactId>
+        <version>1.1.1</version>
+        <type>partialbundlelist</type>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.clerezza.provisioning</groupId>
+        <artifactId>shell</artifactId>
+        <version>0.1</version>
+        <type>partialbundlelist</type>
+      </dependency>
+
 
 
       <!-- Apache Clerezza and runtime dependencies -->
       <dependency>
         <groupId>org.apache.clerezza.ext</groupId>
         <artifactId>com.ibm.icu</artifactId>
-        <version>0.5-incubating</version>
+        <version>0.6</version>
       </dependency>
       <dependency>
         <groupId>org.wymiwyg</groupId>
         <artifactId>wymiwyg-commons-core</artifactId>
-        <version>0.7.6</version>
+        <version>0.8</version>
       </dependency>
       <dependency>
         <groupId>org.apache.clerezza</groupId>

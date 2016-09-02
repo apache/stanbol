@@ -22,7 +22,6 @@ import java.util.List;
 
 import org.apache.clerezza.commons.rdf.ImmutableGraph;
 import org.apache.clerezza.commons.rdf.Graph;
-import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
@@ -75,9 +74,6 @@ public class RefactorerImpl implements Refactorer {
     protected TcManager tcManager;
 
     @Reference
-    protected WeightedTcProvider weightedTcProvider;
-
-    @Reference
     protected RuleAdapterManager ruleAdapterManager;
 
     /**
@@ -97,7 +93,6 @@ public class RefactorerImpl implements Refactorer {
     /**
      * Basic constructor to be used if outside of an OSGi environment. Invokes default constructor.
      * 
-     * @param weightedTcProvider
      * @param serializer
      * @param tcManager
      * @param semionManager
@@ -105,13 +100,11 @@ public class RefactorerImpl implements Refactorer {
      * @param kReSReasoner
      * @param configuration
      */
-    public RefactorerImpl(WeightedTcProvider weightedTcProvider,
-                          TcManager tcManager,
+    public RefactorerImpl(TcManager tcManager,
                           RuleStore ruleStore,
                           RuleAdapterManager ruleAdapterManager,
                           Dictionary<String,Object> configuration) {
         this();
-        this.weightedTcProvider = weightedTcProvider;
         this.tcManager = tcManager;
         this.ruleStore = ruleStore;
         this.ruleAdapterManager = ruleAdapterManager;
@@ -148,7 +141,6 @@ public class RefactorerImpl implements Refactorer {
     protected void deactivate(ComponentContext context) {
         log.info("in " + getClass() + " deactivate with context " + context);
 
-        this.weightedTcProvider = null;
         this.tcManager = null;
         this.ruleStore = null;
     }
@@ -156,7 +148,7 @@ public class RefactorerImpl implements Refactorer {
     @Override
     public Graph getRefactoredDataSet(IRI uriRef) {
 
-        return weightedTcProvider.getGraph(uriRef);
+        return tcManager.getGraph(uriRef);
     }
 
     /**
@@ -168,7 +160,7 @@ public class RefactorerImpl implements Refactorer {
      */
     private ImmutableGraph sparqlConstruct(ConstructQuery constructQuery, IRI datasetID) {
 
-        Graph graph = weightedTcProvider.getGraph(datasetID);
+        Graph graph = tcManager.getGraph(datasetID);
         return sparqlConstruct(constructQuery, graph);
 
     }

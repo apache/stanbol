@@ -191,7 +191,6 @@
     <dependency>
       <groupId>org.apache.clerezza.provisioning</groupId>
       <artifactId>rdf</artifactId>
-      <version>1.0.0</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -200,7 +199,6 @@
     <dependency>
       <groupId>org.apache.clerezza.provisioning</groupId>
       <artifactId>rdf.tdb</artifactId>
-      <version>1.0.0</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -227,7 +225,6 @@
     <!-- <dependency>
       <groupId>org.apache.clerezza.provisioning</groupId>
       <artifactId>shell</artifactId>
-      <version>0.1</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency> -->

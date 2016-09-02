@@ -21,17 +21,12 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 
-import junit.framework.Assert;
 
 import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcManager;
-import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
 import org.apache.clerezza.rdf.core.sparql.ParseException;
-import org.apache.clerezza.rdf.core.sparql.QueryEngine;
 import org.apache.clerezza.rdf.core.sparql.QueryParser;
 import org.apache.clerezza.rdf.core.sparql.query.ConstructQuery;
-import org.apache.clerezza.rdf.jena.sparql.JenaSparqlEngine;
-import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 import org.apache.stanbol.rules.adapters.clerezza.ClerezzaAdapter;
 import org.apache.stanbol.rules.adapters.impl.RuleAdaptersFactoryImpl;
 import org.apache.stanbol.rules.base.api.Recipe;
@@ -47,6 +42,7 @@ import org.apache.stanbol.rules.manager.RecipeImpl;
 import org.apache.stanbol.rules.manager.parse.RuleParserImpl;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -71,17 +67,7 @@ public class ClerezzaAdpterTest {
     @BeforeClass
     public static void setUpClass() {
         
-        class SpecialTcManager extends TcManager {
-            public SpecialTcManager(QueryEngine qe, WeightedTcProvider wtcp) {
-                super();
-                bindQueryEngine(qe);
-                bindWeightedTcProvider(wtcp);
-            }
-        }
-        
-        QueryEngine qe = new JenaSparqlEngine();
-        WeightedTcProvider wtcp = new SimpleTcProvider();
-        TcManager tcm = new SpecialTcManager(qe, wtcp);
+        TcManager tcm = TcManager.getInstance();//new SpecialTcManager(qe, wtcp);
 
         Dictionary<String,Object> configuration = new Hashtable<String,Object>();
         RuleAdaptersFactory ruleAdaptersFactory = new RuleAdaptersFactoryImpl();

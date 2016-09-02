@@ -230,6 +230,7 @@ public class SuggestionFunction extends SelectorFunction<RDFTerm> {
                 }
             } catch (RuntimeException e) {
                 log.warn("Unable to parse parameter 'limit' form the {}nd argument '{}'",index, value);
+                log.warn("Stacktrace:", e);
             }
         }
         return limit;

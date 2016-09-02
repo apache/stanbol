@@ -23,15 +23,11 @@ import java.io.InputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import junit.framework.Assert;
 
-import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.clerezza.commons.rdf.Graph;
 import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.access.TcManager;
 import org.apache.clerezza.rdf.core.access.WeightedTcProvider;
-import org.apache.clerezza.rdf.core.sparql.QueryEngine;
-import org.apache.clerezza.rdf.jena.sparql.JenaSparqlEngine;
 import org.apache.clerezza.rdf.simple.storage.SimpleTcProvider;
 import org.apache.stanbol.commons.owl.transformation.JenaToClerezzaConverter;
 import org.apache.stanbol.rules.adapters.clerezza.ClerezzaAdapter;
@@ -52,6 +48,7 @@ import org.apache.stanbol.rules.refactor.api.RefactoringException;
 import org.apache.stanbol.rules.refactor.impl.RefactorerImpl;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -77,17 +74,7 @@ public class RefactoringTest {
 
         // recipeIRI = IRI.create("http://kres.iks-project.eu/ontology/meta/rmi_config.owl#MyTestRecipe");
 
-        class SpecialTcManager extends TcManager {
-            public SpecialTcManager(QueryEngine qe, WeightedTcProvider wtcp) {
-                super();
-                bindQueryEngine(qe);
-                bindWeightedTcProvider(wtcp);
-            }
-        }
-
-        QueryEngine qe = new JenaSparqlEngine();
-        WeightedTcProvider wtcp = new SimpleTcProvider();
-        tcm = new SpecialTcManager(qe, wtcp);
+        tcm = TcManager.getInstance();
 
         Dictionary<String,Object> configuration = new Hashtable<String,Object>();
         store = new ClerezzaRuleStore(configuration, tcm);
@@ -104,7 +91,7 @@ public class RefactoringTest {
 
         Dictionary<String,Object> configuration4 = new Hashtable<String,Object>();
 
-        refactorer = new RefactorerImpl(wtcp, tcm, store, ruleAdapterManager, configuration4);
+        refactorer = new RefactorerImpl(tcm, store, ruleAdapterManager, configuration4);
     }
 
     @AfterClass

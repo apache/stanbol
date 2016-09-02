@@ -20,8 +20,11 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -60,6 +63,11 @@ import org.slf4j.LoggerFactory;
 public class ClerezzaBackend extends AbstractBackend<RDFTerm> implements RDFBackend<RDFTerm> {
 
     private static final Logger logger = LoggerFactory.getLogger(ClerezzaBackend.class);
+
+    private static final Collection<IRI> STRING_DATATYPES = Collections.unmodifiableCollection(new HashSet<IRI>(Arrays.asList(
+            new IRI("http://www.w3.org/2001/XMLSchema#string"),
+            new IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"),
+            null)));
 
     /**
      * Enumeration containing supported XSD dataTypes including <ul>
@@ -187,7 +195,7 @@ public class ClerezzaBackend extends AbstractBackend<RDFTerm> implements RDFBack
 
     @Override
     public Double doubleValue(RDFTerm resource) {
-        if (resource instanceof Literal) {
+        if (isDataTypeLiteral(resource)) {
             return LiteralFactory.getInstance().createObject(Double.class, (Literal) resource);
         } else {
             return super.doubleValue(resource);
@@ -275,7 +283,7 @@ public class ClerezzaBackend extends AbstractBackend<RDFTerm> implements RDFBack
 
     @Override
     public Long longValue(RDFTerm resource) {
-        if (resource instanceof Literal) {
+        if (isDataTypeLiteral(resource)) {
             return lf.createObject(Long.class, (Literal) resource);
         } else {
             return super.longValue(resource);
@@ -295,7 +303,7 @@ public class ClerezzaBackend extends AbstractBackend<RDFTerm> implements RDFBack
 
     @Override
     public Boolean booleanValue(RDFTerm resource) {
-        if (resource instanceof Literal) {
+        if (isDataTypeLiteral(resource)) {
             return lf.createObject(Boolean.class, (Literal) resource);
         } else {
             return super.booleanValue(resource);
@@ -304,7 +312,7 @@ public class ClerezzaBackend extends AbstractBackend<RDFTerm> implements RDFBack
 
     @Override
     public Date dateTimeValue(RDFTerm resource) {
-        if (resource instanceof Literal) {
+        if (isDataTypeLiteral(resource)) {
             return lf.createObject(Date.class, (Literal) resource);
         } else {
             return super.dateTimeValue(resource);
@@ -313,7 +321,7 @@ public class ClerezzaBackend extends AbstractBackend<RDFTerm> implements RDFBack
 
     @Override
     public Date dateValue(RDFTerm resource) {
-        if (resource instanceof Literal) {
+        if (isDataTypeLiteral(resource)) {
             return lf.createObject(Date.class, (Literal) resource);
         } else {
             return super.dateValue(resource);
@@ -322,7 +330,7 @@ public class ClerezzaBackend extends AbstractBackend<RDFTerm> implements RDFBack
 
     @Override
     public Date timeValue(RDFTerm resource) {
-        if (resource instanceof Literal) {
+        if (isDataTypeLiteral(resource)) {
             return lf.createObject(Date.class, (Literal) resource);
         } else {
             return super.timeValue(resource);
@@ -331,7 +339,7 @@ public class ClerezzaBackend extends AbstractBackend<RDFTerm> implements RDFBack
 
     @Override
     public Float floatValue(RDFTerm resource) {
-        if (resource instanceof Literal) {
+        if (isDataTypeLiteral(resource)) {
             return lf.createObject(Float.class, (Literal) resource);
         } else {
             return super.floatValue(resource);
@@ -340,7 +348,7 @@ public class ClerezzaBackend extends AbstractBackend<RDFTerm> implements RDFBack
 
     @Override
     public Integer intValue(RDFTerm resource) {
-        if (resource instanceof Literal) {
+        if (isDataTypeLiteral(resource)) {
             return lf.createObject(Integer.class, (Literal) resource);
         } else {
             return super.intValue(resource);
@@ -349,13 +357,18 @@ public class ClerezzaBackend extends AbstractBackend<RDFTerm> implements RDFBack
 
     @Override
     public BigInteger integerValue(RDFTerm resource) {
-        if (resource instanceof Literal) {
+        if (isDataTypeLiteral(resource)) {
             return lf.createObject(BigInteger.class, (Literal) resource);
         } else {
             return super.integerValue(resource);
         }
     }
 
+    private boolean isDataTypeLiteral(RDFTerm resource){
+        return resource instanceof Literal &&
+                !STRING_DATATYPES.contains(((Literal)resource).getDataType());
+    }
+    
     @Override
     public BigDecimal decimalValue(RDFTerm resource) {
         //currently there is no converter for BigDecimal in clerezza
