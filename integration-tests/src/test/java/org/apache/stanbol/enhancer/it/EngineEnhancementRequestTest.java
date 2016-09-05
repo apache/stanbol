@@ -48,7 +48,7 @@ public class EngineEnhancementRequestTest extends EnhancerTestBase {
         .assertContentRegexp( //we need not test the extraction results here
             //only that the Enhancer REST API works also with engines!
             "<http://purl.org/dc/terms/format> \"image/jpeg\"",
-            "<http://www.w3.org/ns/ma-ont#hasKeyword> \"serbor\" .",
+            "<http://www.w3.org/ns/ma-ont#hasKeyword> \"serbor\"",
             "<http://www.semanticdesktop.org/ontologies/2007/05/10/nexif#isoSpeedRatings> \"400\""
         );
     }
