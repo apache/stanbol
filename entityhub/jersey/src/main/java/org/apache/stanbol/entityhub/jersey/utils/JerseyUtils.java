@@ -21,6 +21,7 @@ import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N3;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.N_TRIPLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_JSON;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.RDF_XML;
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TEXT_RDF_NT;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TURTLE;
 import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.X_TURTLE;
 
@@ -47,6 +48,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 
+import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
 import org.apache.commons.io.IOUtils;
 import org.apache.stanbol.commons.web.base.utils.MediaTypeUtil;
 import org.apache.stanbol.entityhub.core.query.DefaultQueryFactory;
@@ -75,7 +77,7 @@ public final class JerseyUtils {
      */
     public static final Set<String> REPRESENTATION_SUPPORTED_MEDIA_TYPES = 
         Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-            APPLICATION_JSON,RDF_XML,N3,TURTLE,X_TURTLE,RDF_JSON,N_TRIPLE, 
+            APPLICATION_JSON,RDF_XML,N3,TURTLE,X_TURTLE,RDF_JSON,N_TRIPLE, TEXT_RDF_NT,
             MediaTypeUtil.JSON_LD)));
     /**
      * Unmodifiable Set with the Media Types supported for {@link Entity}

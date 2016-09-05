@@ -1,5 +1,7 @@
 package org.apache.stanbol.entityhub.web.writer.clerezza;
 
+import static org.apache.clerezza.rdf.core.serializedform.SupportedFormat.TEXT_RDF_NT;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
@@ -76,10 +78,14 @@ public class ClerezzaModelWriter implements ModelWriter {
     
     public static final MediaType N_TRIPLE_TYPE = MediaType.valueOf(SupportedFormat.N_TRIPLE);
     /**
+     * Support for the deprecated <code>text/rdf+nt</code> media type
+     */
+    public static final MediaType TEXT_RDF_NT = MediaType.valueOf(SupportedFormat.TEXT_RDF_NT);
+    /**
      * Read-only list of the supported RDF formats
      */
     public static final List<MediaType> SUPPORTED_RDF_TYPES = Collections.unmodifiableList(
-        Arrays.asList(TURTLE_TYPE, JSONLD_TYPE, N3_TYPE, N_TRIPLE_TYPE, RDF_JSON_TYPE, RDF_XML_TYPE, X_TURTLE_TYPE));
+        Arrays.asList(TURTLE_TYPE, JSONLD_TYPE, N3_TYPE, N_TRIPLE_TYPE, RDF_JSON_TYPE, RDF_XML_TYPE, X_TURTLE_TYPE, TEXT_RDF_NT));
 
     //some Concepts and Relations we use to represent Entities
     private final static IRI FOAF_DOCUMENT = new IRI(NamespaceEnum.foaf+"Document");
