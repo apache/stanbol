@@ -167,10 +167,10 @@
 
                 <!-- unstable and not release relevant stuff -->
                 <exclude>PLAYGROUND.txt</exclude>
-                <exclude>conventions/**</exclude>
-                <exclude>contrib/**</exclude>
-                <exclude>demos/**</exclude>
+                <exclude>conventions/*.*</exclude>
+		<exclude>demos/**</exclude>
                 <exclude>enhancer/data/text-examples/**</exclude>
+
               </excludes>
             </configuration>
           </plugin>

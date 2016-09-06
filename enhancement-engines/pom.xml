@@ -193,6 +193,7 @@
                 <exclude>**/test/**/*.rules</exclude>
                 <exclude>**/test/**/*.odt</exclude>
                 <exclude>**/test/**/*.json</exclude>
+                <exclude>entitycoreference/src/main/resources/data/place_adjectivals/en</exclude>
               </excludes>
             </configuration>
           </plugin>

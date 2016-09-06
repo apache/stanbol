@@ -81,6 +81,15 @@
             <target>1.7</target>
           </configuration>
         </plugin>
+        <plugin>
+          <groupId>org.apache.rat</groupId>
+          <artifactId>apache-rat-plugin</artifactId>
+          <configuration>
+           <excludes>
+            <exclude>src/main/resources/data/place_adjectivals/en</exclude>
+          </excludes>
+         </configuration>
+       </plugin>
     </plugins>
   </build>
 

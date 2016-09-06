@@ -70,19 +70,19 @@ import org.slf4j.LoggerFactory;
  * If the Bundle header notes<br>
  * <pre><code>
  *     {@value BundleInstallerConstants#BUNDLE_INSTALLER_HEADER}=resources
- * </pre></code><br>
+ * </code></pre><br>
  * and the bundle contains the resources: <br>
  * <pre><code>
  *     resources/bundles/10/myBundle.jar
  *     resources/config/myComponent.cfg
  *     resoruces/data/myIndex.solrondex.zip
- * </pre></code><br>
+ * </code></pre><br>
  * then the following resources will be installed:
  * <pre><code>
  *     {@value BundleInstallerConstants#PROVIDER_SCHEME}:bundles/10/myBundle.jar
  *     {@value BundleInstallerConstants#PROVIDER_SCHEME}:config/myComponent.cfg
  *     {@value BundleInstallerConstants#PROVIDER_SCHEME}:data/myIndex.solrondex.zip
- * </pre></code>
+ * </code></pre>
  * <p>
  * This means that {@link ResourceTransformer}s can both use the original name
  * of the resource and the path relative to the install folder.

@@ -38,8 +38,6 @@ import org.slf4j.LoggerFactory;
  * method uses the Bundle classpath to search for resource.<p>
  * Note that this provider searches only the resources within this bundle. The
  * bundle classpath is NOT used!<p>
- * Users should use the {@link #close()} method to remove listeners and free up
- * resources.
  * @author Rupert Westenthaler
  *
  */
@@ -57,7 +55,7 @@ public class BundleDataFileProvider implements DataFileProvider {
     /**
      * Creates a {@link DataFileProvider} that uses the {@link Bundle} to lookup
      * data files in the directories specified by the parsed relatives path.
-     * @param bundleContext the bundle context used to initialise this DataFileProvider
+     * @param bundle the bundle context used to initialise this DataFileProvider
      * @param searchPaths the relative paths to the directories used to search
      * for requested data files. The parsed paths are searches in the provided
      * order. Parsed paths are normalised by adding missing {@link File#separator}

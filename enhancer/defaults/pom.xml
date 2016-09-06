@@ -63,7 +63,7 @@
         <configuration>
           <excludes>
             <!-- AL20 licensed files. See src/main/resources/README -->
-            <exclude>src/main/resources/config/org.apache.stanbol.enhancer.engines.opennlp.impl.NamedEntityExtractionEnhancementEngine-default.config</exclude>
+            <exclude>**/*.config</exclude>
           </excludes>
         </configuration>
       </plugin>

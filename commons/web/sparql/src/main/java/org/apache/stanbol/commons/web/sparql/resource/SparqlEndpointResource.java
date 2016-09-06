@@ -56,14 +56,12 @@ import org.osgi.framework.ServiceReference;
  * {@link Graph} s registered to OSGi environment. To be able to execute SPARQL queries on triple
  * collections, they should be registered to the OSGi environment with the following parameters:
  * 
- * <p>
  * <ul>
  * <li>graph.uri <b>(required)</b> : The URI of the graph. This is the same as used with the TcManager</li>
  * <li>service.ranking: If this parameter is not specified, "0" will be used as default value.</li>
  * <li>graph.name: The name of the graph. Human readable name intended to be used in the UI</li>
  * <li>graph.description: human readable description providing additional information about the RDF graph</li>
  * </ul>
- * </p>
  * 
  * <p>
  * If a uri is not specified, the graph having highest service.ranking value will be chosen.
@@ -111,7 +109,10 @@ public class SparqlEndpointResource extends BaseStanbolResource {
      *            the URI of the graph on which the SPARQL query will be executed.
      * @param sparqlQuery
      *            SPARQL query to be executed
-     * @return
+     * @param headers
+     *            HTTP request Headers
+     * @throws InvalidSyntaxException Invalid SPARQL Syntax Exception
+     * @return Http Response 
      */
     @GET
     @Consumes(APPLICATION_FORM_URLENCODED)
@@ -150,6 +151,15 @@ public class SparqlEndpointResource extends BaseStanbolResource {
     /**
      * HTTP GET service to execute SPARQL queries on {@link Graph}s registered to OSGi environment.
      * For details, see {@link #sparql(String, String, HttpHeaders)}
+     *
+     * @param graphUri
+     *            the URI of the graph on which the SPARQL query will be executed.
+     * @param sparqlQuery
+     *            SPARQL query to be executed
+     * @param headers
+     *            HTTP request Headers
+     * @throws InvalidSyntaxException Invalid SPARQL Syntax Exception
+     * @return Http Response 
      */
     @POST
     @Consumes(APPLICATION_FORM_URLENCODED)

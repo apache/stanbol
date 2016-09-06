@@ -35,7 +35,7 @@ import com.thetransactioncompany.cors.CORSConfigurationException;
 import com.thetransactioncompany.cors.CORSFilter;
 
 /**
- * Wraps a {@link CorsFilter} in order to provide CORS support.
+ * Wraps a {@link CORSFilter} in order to provide CORS support.
  * @author Cristian Petroaca
  *
  */

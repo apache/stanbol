@@ -83,6 +83,8 @@
             <exclude>src/test/resources/testConfigs/simple/indexing/resources/testEntityScore.txt</exclude>
             <exclude>src/test/resources/indexerTests/dataIterating/indexing/config/indexerTestMappings.txt</exclude>
             <exclude>src/test/resources/indexerTests/idIterating/indexing/config/indexerTestMappings.txt</exclude>
+            <exclude>src/test/resources/testOsgiConfiguration/bundlebuild/indexing/resources/testEntityScore.txt</exclude>
+            <exclude>**/*.config</exclude>
           </excludes>
         </configuration>
       </plugin>          

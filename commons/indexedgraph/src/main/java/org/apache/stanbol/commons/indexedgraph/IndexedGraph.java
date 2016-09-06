@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * Indexes are maintained in {@link TreeSet}s with according {@link Comparator}
  * instances ({@link #spoComparator}, {@link #posComparator} ,
  * {@link #ospComparator}). {@link RDFTerm}s are compared first using the
- * {@link RDFTerm#hashCode()} and only if this matches by using
+ * {@link RDFTerm}#hashCode() and only if this matches by using
  * {@link RDFTerm}{@link #toString()}
  * .<p>
  * The {@link #filter(BlankNodeOrIRI, IRI, RDFTerm)} implementation is based on
@@ -152,7 +152,7 @@ public class IndexedGraph extends AbstractGraph implements Graph {
      * Creates a {@link IndexedGraph} using the passed iterator, the iterator is
      * consumed before the constructor returns
      *
-     * @param iterator
+     * @param iterator Triple Iterator
      */
     public IndexedGraph(Iterator<Triple> iterator) {
         super();
@@ -166,7 +166,7 @@ public class IndexedGraph extends AbstractGraph implements Graph {
      * Creates a {@link IndexedGraph} for the specified collection of triples,
      * subsequent modification of baseSet do not affect the created instance.
      *
-     * @param iterable over triples
+     * @param baseCollection collection of triples
      */
     public IndexedGraph(Collection<Triple> baseCollection) {
         super();
@@ -382,9 +382,9 @@ public class IndexedGraph extends AbstractGraph implements Graph {
      * <li> Literals
      * <ol>
      * <li> sort by the {@link Literal#getLexicalForm() lixical form}
-     * <li> sort by {@link PlainLiteral#getLanguage() language}
+     * <li> sort by {@link Literal#getLanguage() language}
      * (<code>null</code> value first)
-     * <li> sort by {@link TypedLiteral#getDataType() type} (<code>null</code>
+     * <li> sort by {@link Literal#getDataType() type} (<code>null</code>
      * value fist
      * </ol>
      * <li> BlankNode
@@ -402,8 +402,8 @@ public class IndexedGraph extends AbstractGraph implements Graph {
      * <li> parsed {@link IRI} and {@link BlankNode} and {@link Literal} MUST
      * NOT extend/implement any of the other classes/interfaces. This means that
      * an {@link IRI} MUST NOT implement {@link BlankNode} nor {@link Literal}
-     * <li> parsed {@link Literal}s MAY implement {@link PlainLiteral} AND
-     * {@link TypedLiteral}. This allows wrappers over frameworks that do not
+     * <li> parsed {@link Literal}s MAY implement PlainLiteral AND
+     * TypedLiteral. This allows wrappers over frameworks that do not
      * distinguish between those two literal types to be used with the
      * {@link IndexedGraph}.
      * </ul>
@@ -412,7 +412,7 @@ public class IndexedGraph extends AbstractGraph implements Graph {
      * @param b the second resource to compare
      * @param confictsMap the map used to resolve BlankNodes with hasCode
      * conflicts
-     * @return
+     * @return 
      */
     protected static int compare(RDFTerm a, RDFTerm b, Map<Integer, List<RDFTerm>> confictsMap) {
         //Handle special cases for MAX and MIN values

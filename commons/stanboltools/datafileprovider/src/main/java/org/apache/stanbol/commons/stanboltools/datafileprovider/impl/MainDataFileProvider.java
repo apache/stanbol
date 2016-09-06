@@ -147,7 +147,6 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
         return (ResultType)o;
     }
 
-    /** @inheritDoc */
     @Override
     public Iterator<DataFileProviderEvent> iterator() {
         // Iterate on a copy of our list to avoid concurrency issues
@@ -158,19 +157,16 @@ public class MainDataFileProvider implements DataFileProvider, DataFileProviderL
         return copy.iterator();
     }
 
-    /** @inheritDoc */
     @Override
     public int maxEventsCount() {
         return maxEvents;
     }
 
-    /** @inheritDoc */
     @Override
     public int size() {
         return events.size();
     }
 
-    /** @inheritDoc */
     @SuppressWarnings("unchecked")
     @Override
     public InputStream getInputStream(String bundleSymbolicName,

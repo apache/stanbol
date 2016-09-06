@@ -90,7 +90,7 @@
             <!-- AL20 licensed files -->
             <exclude>src/test/resources/merkel_nlp.json</exclude>
             <exclude>src/test/resources/merkel.txt</exclude>
-
+            <exclude>**/*.config</exclude>
             <exclude>src/license/THIRD-PARTY.properties</exclude>
           </excludes>
         </configuration>

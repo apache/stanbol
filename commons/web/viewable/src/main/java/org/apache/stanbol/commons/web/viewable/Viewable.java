@@ -37,7 +37,7 @@ public class Viewable {
      * This uses the class name of Pojo to prefix the template
      * 
      * @param templatePath the templatePath
-     * @param graphNode the graphNode with the actual content
+     * @param pojo the graphNode with the actual content
      */
     public Viewable(final String templatePath, final Object pojo) {
         this(templatePath, pojo, null);
@@ -46,6 +46,10 @@ public class Viewable {
     /**
      * With this version of the constructor the templatePath is prefixed with
      * the slash-separated class name of clazz.
+     *
+     * @param templatePath the templatePath
+     * @param pojo the graphNode with the actual content
+     * @param clazz class which package name will be used as prefix 
      * 
      */
     public Viewable(final String templatePath, final Object pojo, final Class<?> clazz) {
