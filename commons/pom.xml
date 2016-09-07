@@ -63,13 +63,13 @@
     <module>web/base</module>
     <module>web/base.jersey</module>
     <module>web/home</module>
-    <module>web/viewable</module>
-    <module>web/rdfviewable-writer</module>
-    <module>web/viewable-writer</module>
     <module>web/resources</module>
     <module>web/sparql</module>
     <module>freemarker</module>
     <module>ldpathtemplate</module>
+    <module>web/viewable</module>
+    <module>web/rdfviewable-writer</module>
+    <module>web/viewable-writer</module>
     <module>httpqueryheaders</module> <!-- allows CORS with MS Internet Explorer -->
 	<module>cors</module>
 	
