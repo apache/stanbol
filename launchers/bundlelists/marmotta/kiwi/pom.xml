@@ -38,10 +38,6 @@
     other means.
   </description>
 
-  <scm>
-    <url>http://www.redlink.at/</url>
-  </scm>
-
   <build>
     <plugins>
       <plugin>
