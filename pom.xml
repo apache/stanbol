@@ -46,10 +46,10 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/
+         scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/
+         scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/
     </developerConnection>
     <url>http://stanbol.apache.org/</url>
   </scm>
@@ -216,5 +216,4 @@
       </build>
     </profile>
   </profiles>
-
 </project>
