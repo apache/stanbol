@@ -21,13 +21,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>7-SNAPSHOT</version>
+    <version>6-SNAPSHOT</version>
     <relativePath>../../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.namespaceprefix.service</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Namespace Prefix Service</name>

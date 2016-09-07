@@ -16,13 +16,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.enhancer.engine.topic</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Enhancement Engine : Topic Classification</name>
@@ -66,7 +66,7 @@
               org.apache.stanbol.enhancer.topic.api.*; provide:=true; version="[0.10.1,1.1)",
               *
             </Import-Package>
-            <Export-Package />
+            <Export-Package></Export-Package>
             <Private-Package>
               org.apache.stanbol.enhancer.topic,
               org.apache.stanbol.enhancer.engine.topic,
@@ -279,12 +279,12 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <!-- anyway transitive dependency of managed
       <dependency>
@@ -295,14 +295,14 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
 
       <!-- API dependency -->
       <dependency>
           <groupId>org.apache.stanbol</groupId>
           <artifactId>org.apache.stanbol.enhancer.engine.topic.api</artifactId>
-          <version>1.0.1-SNAPSHOT</version>
+          <version>1.0.0-SNAPSHOT</version>
       </dependency>
   </dependencies>
 

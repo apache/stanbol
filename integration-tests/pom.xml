@@ -15,19 +15,20 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>7-SNAPSHOT</version>
+    <version>6-SNAPSHOT</version>
     <relativePath>../parent/pom.xml</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.integration-tests</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Apache Stanbol Integration Tests</name>
@@ -44,10 +45,10 @@
 
   <properties>
     <!-- Set this to run the server on a specific port -->
-    <http.port />
+    <http.port></http.port>
 
     <!-- Set this to run tests against an existing server instance -->
-    <test.server.url />
+    <test.server.url></test.server.url>
 
     <!-- Options for the VM that executes our runnable jar -->
     <jar.executor.vm.options>-Xmx1g -XX:MaxPermSize=256m -Dorg.apache.stanbol.offline.mode=true</jar.executor.vm.options>
@@ -130,33 +131,33 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.full</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.test</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <!-- Used to access constants such as Ontology URIs -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
 
     <!-- namespace prefixes mappings -->
@@ -164,17 +165,17 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.namespaceprefix.service</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency> <!-- provides the default Stanbol mappings -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.stanbol</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency> <!-- provides the prefix.cc mappings -->
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.namespaceprefix.provider.prefixcc</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
