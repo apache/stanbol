@@ -21,25 +21,25 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>6</version>
+    <version>7-SNAPSHOT</version>
     <relativePath>../../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.web.sparql</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Web SPARQL</name>
   <description>SPARQL HTTP endpoint for Stanbol</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/commons/web/sparql
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/web/sparql
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/commons/web/sparql
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/web/sparql
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>

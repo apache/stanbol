@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-entityhub</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
 
@@ -46,12 +46,12 @@
   
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/entityhub/query/sesame
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/query/sesame
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/entityhub/query/sesame
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/query/sesame
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0</url>
+    <url>http://stanbol.apache.org</url>
   </scm>
 
   <build>

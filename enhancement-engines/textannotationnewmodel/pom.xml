@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancement-engines</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 	<packaging>bundle</packaging>
@@ -35,12 +35,12 @@
   </description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/enhancement-engines/textannotationnewmodel
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/textannotationnewmodel/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/enhancement-engines/textannotationnewmodel
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/textannotationnewmodel/
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
 
