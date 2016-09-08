@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.data.parent</artifactId>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.2.0</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
-  <version>1.2.0-SNAPSHOT</version>
+  <version>1.2.0</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Data: DBpedia.org</name>
@@ -50,9 +50,9 @@
   </licenses>  
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/data/sites/dbpedia</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/data/sites/dbpedia</developerConnection>
-    <url>http://stanbol.apache.org/</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/data/sites/dbpedia</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/data/sites/dbpedia</developerConnection>
+    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0</url>
   </scm>
 
   <properties>
@@ -120,7 +120,7 @@
               -->
               <target>
                 <property name="target.directory" value="${project.basedir}/downloads/resources/${dbpedia.default.index.path}" />
-                <property name="index.name.old" value="${dbpedia.default.index.old}"/>
+                <property name="index.name.old" value="${dbpedia.default.index.old}" />
                 <property name="index.url" value="${dbpedia.default.index.url}" />
                                 
                 <echo message="copy Solr Index " />
