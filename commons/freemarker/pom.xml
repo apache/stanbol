@@ -21,13 +21,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>6-SNAPSHOT</version>
+    <version>6</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.freemarker</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Freemarker Utilities</name>
@@ -35,12 +35,12 @@
 from the bundles. More Freemarker utilities may be added here in future.</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/freemarker
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/commons/freemarker
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/freemarker
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/commons/freemarker
     </developerConnection>
-    <url>http://stanbol.apache.org/</url>
+    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/stanbol.apache.org</url>
   </scm>
   <properties>
       <freemarker-version>2.3.20</freemarker-version>
