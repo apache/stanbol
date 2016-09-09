@@ -30,12 +30,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/enhancer/generic/servicesapi
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/generic/servicesapi/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/enhancer/generic/servicesapi
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/generic/servicesapi/
     </developerConnection>
-    <url>http://stanbol.apache.org/branches/apache-stanbol-1.0.0-branch</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>

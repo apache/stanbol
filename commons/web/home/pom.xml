@@ -34,12 +34,12 @@
   <description>Home page and common stylesheets for documenting HTTP endpoints.</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/commons/web/home
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/web/home
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/commons/web/home
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/web/home
     </developerConnection>
-    <url>http://stanbol.apache.org/branches/apache-stanbol-1.0.0-branch</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>

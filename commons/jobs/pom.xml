@@ -32,12 +32,12 @@
   <name>Apache Stanbol Commons Jobs Reactor</name>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/commons/jobs
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/jobs
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/commons/jobs
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/jobs
     </developerConnection>
-    <url>http://stanbol.apache.org/branches/apache-stanbol-1.0.0-branch/stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <modules>

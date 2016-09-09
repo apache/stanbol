@@ -43,12 +43,12 @@
     
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/commons/web/resources
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/web/resources
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/commons/web/resources
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/web/resources
     </developerConnection>
-    <url>http://stanbol.apache.org/branches/apache-stanbol-1.0.0-branch</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>

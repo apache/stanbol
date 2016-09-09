@@ -44,12 +44,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/enhancement-engines/lucenefstlinking
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/lucenefstlinking/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/enhancement-engines/lucenefstlinking
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/lucenefstlinking/
     </developerConnection>
-    <url>http://stanbol.apache.org/branches/apache-stanbol-1.0.0-branch/stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>

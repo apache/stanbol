@@ -40,12 +40,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/commons/jsonld
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/jsonld/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/commons/jsonld
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/jsonld/
     </developerConnection>
-    <url>http://stanbol.apache.org/branches/apache-stanbol-1.0.0-branch/stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>
