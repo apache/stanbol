@@ -36,12 +36,12 @@
     </description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/stanboltools/namespaceprefixservice
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/commons/stanboltools/namespaceprefixservice
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/stanboltools/namespaceprefixservice
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/commons/stanboltools/namespaceprefixservice
     </developerConnection>
-    <url>http://stanbol.apache.org/</url>
+    <url>http://stanbol.apache.org/branches/release-1.0.0-branch</url>
   </scm>
 
   <build>

@@ -42,12 +42,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/data/sites/dbpediacached
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/data/sites/dbpediacached
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/data/sites/dbpediacached
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/data/sites/dbpediacached
     </developerConnection>
-    <url>http://stanbol.apache.org/</url>
+    <url>http://stanbol.apache.org/branches/release-1.0.0-branch</url>
   </scm>
 
   <build>
