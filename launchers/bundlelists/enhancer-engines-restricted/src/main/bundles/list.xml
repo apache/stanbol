@@ -24,22 +24,22 @@
         <bundle> <!-- http://www.opencalais.com/ -->
             <groupId>org.apache.stanbol</groupId>
             <artifactId>org.apache.stanbol.enhancer.engines.opencalais</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.0-SNAPSHOT</version>
         </bundle>
         <bundle> <!-- http://www.zemanta.com/ -->
             <groupId>org.apache.stanbol</groupId>
             <artifactId>org.apache.stanbol.enhancer.engines.zemanta</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.0-SNAPSHOT</version>
         </bundle>
         <bundle> <!-- http://www.geonames.org/ -->
             <groupId>org.apache.stanbol</groupId>
             <artifactId>org.apache.stanbol.enhancer.engines.geonames</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.0-SNAPSHOT</version>
         </bundle>
         <bundle> <!-- http://linguagrid.org/ -->
             <groupId>org.apache.stanbol</groupId>
             <artifactId>org.apache.stanbol.enhancer.engines.celi</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.0-SNAPSHOT</version>
         </bundle>
     </startLevel>
 
