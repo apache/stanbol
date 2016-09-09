@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-entityhub-indexing</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <relativePath>../..</relativePath>
   </parent>
 
@@ -49,12 +49,12 @@
     
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/entityhub/indexing/source/jenatdb
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/entityhub/indexing/source/jenatdb
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/entityhub/indexing/source/jenatdb
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/entityhub/indexing/source/jenatdb
     </developerConnection>
-    <url>http://stanbol.apache.org/branches/apache-stanbol-1.0.0-branch</url>
+    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0//stanbol.apache.org/branches/apache-stanbol-1.0.0-branch</url>
   </scm>
   
   <build>
@@ -93,18 +93,18 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.namespaceprefix.service</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.indexing.core</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.ldpath</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
     
     <dependency>

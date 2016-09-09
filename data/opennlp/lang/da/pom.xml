@@ -21,13 +21,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.data.parent</artifactId>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.2.0</version>
     <relativePath>../../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.data.opennlp.lang.da</artifactId>
-  <version>1.2.0-SNAPSHOT</version>
+  <version>1.2.0</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Data: OpenNLP Models for Danish</name>
@@ -38,12 +38,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/data/opennlp/lang/da
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/data/opennlp/lang/da
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/data/opennlp/lang/da
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/data/opennlp/lang/da
     </developerConnection>
-    <url>http://stanbol.apache.org/branches/apache-stanbol-1.0.0-branch</url>
+    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0//stanbol.apache.org/branches/apache-stanbol-1.0.0-branch</url>
   </scm>
 
   <properties>

@@ -20,13 +20,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>6-SNAPSHOT</version>
+    <version>6</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.rules.web</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Rules Web</name>
@@ -34,12 +34,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/rules/web
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/rules/web
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/rules/web
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/rules/web
     </developerConnection>
-    <url>http://stanbol.apache.org/branches/apache-stanbol-1.0.0-branch/stanbol.apache.org</url>
+    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/apache-stanbol-1.0.0-branch/stanbol.apache.org</url>
   </scm>
 
   <build>
@@ -95,32 +95,32 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
-    <version>1.0.0-SNAPSHOT</version>      
+    <version>1.0.0</version>      
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.manager</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.refactor</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.rules.base</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.owl</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
 
     <dependency>

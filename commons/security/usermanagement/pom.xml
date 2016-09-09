@@ -21,13 +21,13 @@
     <parent>
         <groupId>org.apache.stanbol</groupId>
         <artifactId>stanbol-parent</artifactId>
-        <version>6-SNAPSHOT</version>
+        <version>6</version>
         <relativePath>../../../parent</relativePath>
     </parent>
 
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.commons.security.usermanagement</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>bundle</packaging>
 
     <name>Apache Stanbol Commons User Management</name>
@@ -45,12 +45,12 @@
 
     <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/commons/security/usermanagement
+            scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/commons/security/usermanagement
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/commons/security/usermanagement
+            scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/commons/security/usermanagement
         </developerConnection>
-        <url>http://stanbol.apache.org/branches/apache-stanbol-1.0.0-branch</url>
+        <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/stanbol.apache.org/branches/apache-stanbol-1.0.0-branch</url>
     </scm>
 
     <build>
@@ -102,12 +102,12 @@
         <dependency>
             <groupId>org.apache.stanbol</groupId>
             <artifactId>org.apache.stanbol.commons.web.base</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.stanbol</groupId>
             <artifactId>org.apache.stanbol.commons.ldpathtemplate</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
     
         <dependency>
@@ -137,7 +137,7 @@
         <dependency>
             <groupId>org.apache.stanbol</groupId>
             <artifactId>org.apache.stanbol.commons.web.viewable</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency> 
 
         <!-- OSGi tax -->
@@ -154,12 +154,12 @@
         <dependency>
             <groupId>org.apache.stanbol</groupId>
             <artifactId>org.apache.stanbol.commons.security.core</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.stanbol</groupId>
             <artifactId>org.apache.stanbol.commons.testing.stanbol</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0</version>
             <scope>test</scope>
             <type>jar</type>
         </dependency>

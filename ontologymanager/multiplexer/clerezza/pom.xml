@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-ontologymanager</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <relativePath>../..</relativePath>
   </parent>
 
@@ -88,29 +88,29 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.stanboltools.offline</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
 
     <!-- Stanbol deps -->
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.ontologymanager.core</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.ontologymanager.servicesapi</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.ontologymanager.sources.clerezza</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.ontologymanager.sources.owlapi</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
     
     <!-- for testing -->

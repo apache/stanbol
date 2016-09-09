@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>6-SNAPSHOT</version>
+    <version>6</version>
     <relativePath>../../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.solr.install</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Commons Solr Installer</name>
@@ -48,12 +48,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/commons/solr/install
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/commons/solr/install
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/commons/solr/install
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/commons/solr/install
     </developerConnection>
-    <url>http://stanbol.apache.org/branches/apache-stanbol-1.0.0-branch</url>
+    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/stanbol.apache.org/branches/apache-stanbol-1.0.0-branch</url>
   </scm>
 
   <build>
@@ -90,7 +90,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.commons.solr.managed</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
     <!-- for the Solr Index Installer -->
     <dependency>
