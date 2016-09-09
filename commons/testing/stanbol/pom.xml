@@ -36,12 +36,12 @@
   </description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/commons/testing/stanbol
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/testing/stanbol
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/commons/testing/stanbol
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/testing/stanbol
     </developerConnection>
-    <url>http://stanbol.apache.org/branches/release-1.0.0-branch</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <dependencies>
