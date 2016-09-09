@@ -50,7 +50,7 @@
   <developerConnection>
     scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/commons/security/authentication.basic
   </developerConnection>
-  <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/stanbol.apache.org/branches/apache-stanbol-1.0.0-branch</url>
+  <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/stanbol.apache.org/branches/release-1.0.0-branch</url>
   </scm>
 
   <build>

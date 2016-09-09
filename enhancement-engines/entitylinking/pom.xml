@@ -44,7 +44,7 @@
     <developerConnection>
       scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/STANBOL-913/entitylinking
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/apache-stanbol-1.0.0-branch/stanbol.apache.org</url>
+    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/release-1.0.0-branch/stanbol.apache.org</url>
   </scm>
 
   <modules>
