@@ -45,12 +45,12 @@
     
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/entityhub/indexing/genericrdf
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/indexing/genericrdf
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/entityhub/indexing/genericrdf
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/indexing/genericrdf
     </developerConnection>
-    <url>http://stanbol.apache.org/branches/release-1.0.0-branch</url>
+    <url>http://stanbol.apache.org</url>
   </scm>
 
   <build>

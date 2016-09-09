@@ -40,12 +40,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/enhancement-engines/topic/engine
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/topic/engine/
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/enhancement-engines/topic/engine
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/topic/engine/
     </developerConnection>
-    <url>http://stanbol.apache.org/branches/release-1.0.0-branch</url>
+    <url>http://stanbol.apache.org/</url>
   </scm>
 
   <build>
