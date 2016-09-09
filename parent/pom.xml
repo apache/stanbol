@@ -22,14 +22,14 @@
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
-    <version>13</version>
+    <version>18</version>
     <relativePath />
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-parent</artifactId>
   <packaging>pom</packaging>
-  <version>7-SNAPSHOT</version>
+  <version>6-SNAPSHOT</version>
 
   <name>Apache Stanbol Parent</name>
   <description>Parent POM for the Apache Stanbol project</description>
@@ -45,9 +45,9 @@
   </licenses>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/parent</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/parent</developerConnection>
-    <url>http://stanbol.apache.org/</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/parent</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/parent</developerConnection>
+    <url>http://stanbol.apache.org/branches/release-1.0.0-branch/stanbol.apache.org</url>
   </scm>
 
   <issueManagement>

@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>7-SNAPSHOT</version>
+    <version>6-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.commons.launchpad</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Apache Stanbol Commons Launchpad</name>
@@ -41,12 +41,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/launchpad/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/commons/launchpad
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/launchpad/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/commons/launchpad
     </developerConnection>
-    <url>http://stanbol.apache.org/</url>
+    <url>http://stanbol.apache.org/branches/release-1.0.0-branch/stanbol.apache.org</url>
   </scm>
 
   <build>

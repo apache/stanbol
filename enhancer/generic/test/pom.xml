@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancer</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
 
@@ -37,12 +37,12 @@
 
     <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancer/generic/test/
+            scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/enhancer/generic/test
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancer/generic/test/
+            scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/enhancer/generic/test
         </developerConnection>
-        <url>http://stanbol.apache.org/</url>
+        <url>http://stanbol.apache.org/branches/release-1.0.0-branch</url>
     </scm>
 
   <build>
@@ -72,7 +72,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.enhancer.servicesapi</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
