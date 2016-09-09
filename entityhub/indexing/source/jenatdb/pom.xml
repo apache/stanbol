@@ -49,12 +49,12 @@
     
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/indexing/source/jenatdb
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/entityhub/indexing/source/jenatdb
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/indexing/source/jenatdb
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/entityhub/indexing/source/jenatdb
     </developerConnection>
-    <url>http://stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/branches/release-1.0.0-branch</url>
   </scm>
   
   <build>

@@ -34,12 +34,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/sentiment-summarization/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/enhancement-engines/sentiment-summarization
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/sentiment-summarization/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/enhancement-engines/sentiment-summarization
     </developerConnection>
-    <url>http://stanbol.apache.org/</url>
+    <url>http://stanbol.apache.org/branches/release-1.0.0-branch/stanbol.apache.org</url>
   </scm>
 
   <build>
