@@ -42,7 +42,7 @@
         <developerConnection>
             scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/enhancer/generic/test
         </developerConnection>
-        <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0</url>
+        <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/stanbol.apache.org/branches/apache-stanbol-1.0.0-branch</url>
     </scm>
 
   <build>

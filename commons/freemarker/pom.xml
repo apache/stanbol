@@ -40,7 +40,7 @@ from the bundles. More Freemarker utilities may be added here in future.</descri
     <developerConnection>
       scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/commons/freemarker
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/stanbol.apache.org</url>
+    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/apache-stanbol-1.0.0-branch/stanbol.apache.org</url>
   </scm>
   <properties>
       <freemarker-version>2.3.20</freemarker-version>

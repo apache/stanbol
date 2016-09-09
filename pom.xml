@@ -50,7 +50,7 @@
     <developerConnection>
       scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0</url>
+    <url>http://stanbol.apache.org/tags/apache-stanbol-1.0.0</url>
   </scm>
 
   <build>
