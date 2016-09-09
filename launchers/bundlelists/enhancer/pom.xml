@@ -16,12 +16,12 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-bundlelists</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <relativePath>..</relativePath>
   </parent>
 
   <artifactId>org.apache.stanbol.launchers.bundlelists.enhancer</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>partialbundlelist</packaging>
 
   <name>Apache Stanbol Bundlelist for Enhancer</name>
