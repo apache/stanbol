@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-enhancer</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -32,12 +32,12 @@
   <description>This provides the default configuration for the Enhancer. This bundle can be removed by users that want/need to provide their own configuration conflicting with the defaults.</description>
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/enhancer/defaults
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/enhancer/defaults
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/enhancer/defaults
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/enhancer/defaults
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0//stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/branches/release-1.0.0-branch//stanbol.apache.org</url>
   </scm>
 
   <build>

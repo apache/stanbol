@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>6</version>
+    <version>7-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
   
   <groupId>org.apache.stanbol</groupId>
   <artifactId>apache-stanbol-ontologymanager</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Apache Stanbol Ontology Manager</name>
@@ -48,12 +48,12 @@
   
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/ontologymanager
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/ontologymanager
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/ontologymanager
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/ontologymanager
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/branches/release-1.0.0-branch/stanbol.apache.org</url>
   </scm>  
 
   <modules>

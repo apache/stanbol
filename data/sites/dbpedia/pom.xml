@@ -22,13 +22,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.data.parent</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
-  <version>1.2.0</version>
+  <version>1.2.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Data: DBpedia.org</name>
@@ -50,9 +50,9 @@
   </licenses>  
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/data/sites/dbpedia</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/data/sites/dbpedia</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/stanbol.apache.org/branches/release-1.0.0-branch</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/data/sites/dbpedia</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/data/sites/dbpedia</developerConnection>
+    <url>http://stanbol.apache.org/branches/release-1.0.0-branch</url>
   </scm>
 
   <properties>

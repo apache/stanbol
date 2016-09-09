@@ -29,7 +29,7 @@
   <groupId>org.apache.stanbol</groupId>
   <artifactId>stanbol-parent</artifactId>
   <packaging>pom</packaging>
-  <version>6</version>
+  <version>7-SNAPSHOT</version>
 
   <name>Apache Stanbol Parent</name>
   <description>Parent POM for the Apache Stanbol project</description>
@@ -45,9 +45,9 @@
   </licenses>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/parent</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/parent</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/stanbol.apache.org</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/parent</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/parent</developerConnection>
+    <url>http://stanbol.apache.org/branches/release-1.0.0-branch/stanbol.apache.org</url>
   </scm>
 
   <issueManagement>
@@ -1817,7 +1817,7 @@
               <dependency>
                 <groupId>org.apache.stanbol</groupId>
                 <artifactId>source-assembly</artifactId>
-                <version>1.0.1</version>
+                <version>1.0.2-SNAPSHOT</version>
               </dependency>
             </dependencies>
           </plugin>

@@ -16,13 +16,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>org.apache.stanbol.data.parent</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1-SNAPSHOT</version>
     <relativePath>../parent/pom.xml</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.data.defaultconfig</artifactId>
-  <version>1.2.0</version>
+  <version>1.2.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Stanbol Data Default Configuration</name>
@@ -30,12 +30,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/data/defaultconfig
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/data/defaultconfig
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/data/defaultconfig
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/data/defaultconfig
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0//stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/branches/release-1.0.0-branch//stanbol.apache.org</url>
   </scm>
 
   <build>

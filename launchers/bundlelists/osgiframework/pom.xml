@@ -20,13 +20,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-bundlelists</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.launchers.bundlelists.osgiframework</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>partialbundlelist</packaging>
 
   <name>Apache Stanbol Bundlelist for the OSGi Framework</name>
@@ -34,12 +34,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/launchers/bundlelists/osgiframework
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/launchers/bundlelists/osgiframework
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/launchers/bundlelists/osgiframework
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/release-1.0.0-branch/launchers/bundlelists/osgiframework
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/stanbol.apache.org/branches/release-1.0.0-branch</url>
+    <url>http://stanbol.apache.org/branches/release-1.0.0-branch</url>
   </scm>
 
   <build>

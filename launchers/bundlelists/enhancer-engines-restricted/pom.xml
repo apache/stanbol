@@ -16,12 +16,12 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-bundlelists</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
   <artifactId>org.apache.stanbol.launchers.bundlelists.enhancer-engines-restricted</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>partialbundlelist</packaging>
 
   <name>Apache Stanbol Bundlelist for Restricted Enhancement Engines</name>
