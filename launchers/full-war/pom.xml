@@ -20,13 +20,13 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>stanbol-parent</artifactId>
-    <version>6</version>
+    <version>7-SNAPSHOT</version>
     <relativePath>../../parent</relativePath>
   </parent>
 
   <groupId>org.apache.stanbol</groupId>
   <artifactId>org.apache.stanbol.launchers.full-war</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <name>Apache Stanbol Launchers Full Launcher as WAR</name>
@@ -34,12 +34,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/launchers/full
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/launchers/full
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/launchers/full
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/launchers/full
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/stanbol/tags/apache-stanbol-1.0.0/apache-stanbol-1.0.0-branch/stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/branches/apache-stanbol-1.0.0-branch/stanbol.apache.org</url>
   </scm>
 
   <properties>
@@ -129,7 +129,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.osgiframework</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -154,7 +154,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.stanbolcommons</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -163,7 +163,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.security</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -181,7 +181,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.defaultdata</artifactId>
-      <version>1.1.0</version>
+      <version>1.1.1-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -189,7 +189,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.opennlp</artifactId>
-      <version>1.1.0</version>
+      <version>1.1.1-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -198,7 +198,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.enhancer</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -206,7 +206,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.enhancer-engines-restricted</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -215,21 +215,21 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.entityhub.core</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.entityhub.clerezza</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.entityhub.sesame</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -237,7 +237,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.marmotta.kiwi</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -246,7 +246,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.ontologymanager</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -255,7 +255,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.rules</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -264,7 +264,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.reasoners</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -274,7 +274,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.languageextras.smartcn</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
@@ -282,7 +282,7 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.launchers.bundlelists.languageextras.kuromoji</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
