@@ -45,12 +45,12 @@
 
   <scm>
   <connection>
-    scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/commons/security/authentication.basic
+    scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/commons/security/authentication.basic
   </connection>
   <developerConnection>
-    scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/commons/security/authentication.basic
+    scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/commons/security/authentication.basic
   </developerConnection>
-  <url>http://stanbol.apache.org/</url>
+  <url>http://stanbol.apache.org/branches/apache-stanbol-1.0.0-branch</url>
   </scm>
 
   <build>

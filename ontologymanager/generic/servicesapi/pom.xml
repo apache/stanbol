@@ -15,8 +15,7 @@
     implied. See the License for the specific language governing 
     permissions and limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -51,7 +50,7 @@
             <!--
             <Bundle-ClassPath>.,OSGI-INF</Bundle-ClassPath>
             -->
-            <Bundle-Activator/>
+            <Bundle-Activator />
             <Export-Package>
               org.apache.stanbol.ontologymanager.ontonet.api.*;version=${project.version}, <!-- DEPRECATED -->
               org.apache.stanbol.ontologymanager.servicesapi.*;version=${project.version}
@@ -61,7 +60,7 @@
               org.slf4j.*,
               *
             </Import-Package>
-            <Private-Package/>
+            <Private-Package />
             <_nouses>true</_nouses>
           </instructions>
         </configuration>

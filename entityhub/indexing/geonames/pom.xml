@@ -46,12 +46,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/indexing/geonames
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/entityhub/indexing/geonames
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/indexing/geonames
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/entityhub/indexing/geonames
     </developerConnection>
-    <url>http://stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/branches/apache-stanbol-1.0.0-branch</url>
   </scm>
 
   <build>
@@ -86,7 +86,7 @@
               </includes>
             </artifactSet>
             <transformers>
-              <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+              <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
             </transformers>
           </configuration>
         <executions>

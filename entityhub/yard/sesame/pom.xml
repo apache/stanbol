@@ -46,12 +46,12 @@
   
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/entityhub/yard/sesame
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/entityhub/yard/sesame
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/entityhub/yard/sesame
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/entityhub/yard/sesame
     </developerConnection>
-    <url>http://stanbol.apache.org</url>
+    <url>http://stanbol.apache.org/branches/apache-stanbol-1.0.0-branch</url>
   </scm>
 
   <build>

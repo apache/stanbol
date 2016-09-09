@@ -43,12 +43,12 @@
 
   <scm>
     <connection>
-      scm:svn:http://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entitytagging/
+      scm:svn:http://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/enhancement-engines/entitytagging
     </connection>
     <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/stanbol/trunk/enhancement-engines/entitytagging/
+      scm:svn:https://svn.apache.org/repos/asf/stanbol/branches/apache-stanbol-1.0.0-branch/enhancement-engines/entitytagging
     </developerConnection>
-    <url>http://stanbol.apache.org/</url>
+    <url>http://stanbol.apache.org/branches/apache-stanbol-1.0.0-branch/stanbol.apache.org</url>
   </scm>
 
   <build>
@@ -153,7 +153,7 @@
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
       <version>1.0.0-SNAPSHOT</version>
       <scope>test</scope>
-    </dependency  -->
+    </dependency -->
      <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
