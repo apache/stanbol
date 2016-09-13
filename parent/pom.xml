@@ -1832,6 +1832,22 @@
               </execution>
             </executions>
           </plugin>
+          <plugin>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>2.10.3</version>
+            <executions>
+             <execution>
+               <id>attach-javadocs</id>
+               <goals>
+                 <goal>jar</goal>
+                </goals>
+                <configuration>
+                <!-- Deactivate DocLint errors with Java 8 (see http://openjdk.java.net/jeps/172 )-->
+                 <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
+              </execution>
+            </executions>
+           </plugin>
         </plugins>
       </build>
     </profile>
