@@ -131,7 +131,6 @@ public final class StandaloneManagedSolrServer implements ManagedSolrServer {
     }
     /**
      * Shutdowns the default server
-     * @return
      */
     public static void shutdownManagedServer() {
         shutdownManagedServer(DEFAULT_SERVER_NAME);

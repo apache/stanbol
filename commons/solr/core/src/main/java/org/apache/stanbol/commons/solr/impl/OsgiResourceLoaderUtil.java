@@ -55,6 +55,7 @@ public final class OsgiResourceLoaderUtil {
     /**
      * Finds classes by using {@link RegisteredSolrAnalyzerFactory} with a 
      * filter over {@link SolrConstants#PROPERTY_ANALYZER_FACTORY_NAME}.
+     * @param <T> This is the type parameter
      * @param bc the {@link BundleContext} used for the search
      * @param cname the cname as parsed to {@link SolrResourceLoader#findClass(String, Class, String...)}
      * @param expectedType the expected type as parsed to {@link SolrResourceLoader#findClass(String, Class, String...)}

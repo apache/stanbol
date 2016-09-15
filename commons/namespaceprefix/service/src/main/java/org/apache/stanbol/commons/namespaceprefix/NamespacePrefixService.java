@@ -37,7 +37,7 @@ public interface NamespacePrefixService extends NamespacePrefixProvider {
      * than the previous mapped namespace is returned. Parsed prefixes
      * are validated using {@link NamespaceMappingUtils#checkPrefix(String)}
      * and namespaces using {@link NamespaceMappingUtils#checkNamespace(String)}
-     * @param prefix the prefix. Checked against the {@link #PREFIX_VALIDATION_PATTERN}
+     * @param prefix the prefix
      * @param namespace the namespace. Parsed namespaces MUST end with '/' or '#'
      * or ':' if starting with 'urn:'. Additional validations are optional
      * @return the previous mapped namespace or <code>null</code> if none
@@ -52,13 +52,13 @@ public interface NamespacePrefixService extends NamespacePrefixProvider {
      * URI is parsed the parsed value is returned unchanged. If the parsed
      * prefix is not known, than <code>null</code> is returned.<p>
      * The detection if a '{prefix}:{localname}' was parsed uses the following rules:<ul>
-     * <li> shortname.indexOf(':') > 0 || shortname.charAt(0) != '/'
-     * <li> {prefix} != 'urn'
-     * <li> {localname}.charAt(0) != '/'
-     * <ul>
+     * <li> shortname.indexOf(':') gt 0 || shortname.charAt(0) != '/' </li>
+     * <li> {prefix} != 'urn' </li>
+     * <li> {localname}.charAt(0) != '/' </li>
+     * </ul>
      * In case a '{prefix}:{localname}' was detected the parsed value is processed
      * otherwise the parsed value is returned.
-     * @param shortName or an URI
+     * @param shortNameOrUri Short Name or an URI
      * @return in case an URI was parsed than the parsed value. Otherwise the
      * full URI for the shortName or <code>null</code> if the used {prefix} is
      * not defined.

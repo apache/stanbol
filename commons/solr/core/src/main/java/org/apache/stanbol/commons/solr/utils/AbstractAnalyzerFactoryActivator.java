@@ -116,7 +116,8 @@ public abstract class AbstractAnalyzerFactoryActivator implements BundleActivato
      * {@link ClassLoader}. Note that only factories noted in <code>META-INF/serivces</code>
      * files embedded within the current module will be found and registered.
      * This means that this code needs typically be used in the Bundle Activator for 
-     * all modules providing Solr analyzer factories.     
+     * all modules providing Solr analyzer factories.
+     * @param <S> the type class     
      * @param bc The BundleContext used to register the services
      * @param classloader the classloader of the current modlue
      * @param type the type of the Factories to register

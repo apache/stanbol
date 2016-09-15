@@ -518,15 +518,14 @@ public class ManagedSolrServerImpl implements ManagedSolrServer {
      * the index data from the local file system if deleteFiles is enabled.
      * Updates to the state of the index are stored within the parsed
      * {@link IndexMetadata}.<p>
-     * If the index is {@link ManagedIndexState#ACTIVE}, than the {@link SolrCore}
-     * is first {@link #deactivateCore(String, SolrServerAdapter) deactivated}. 
+     * If the index is active, than the {@link SolrCore}
+     * is first deactivated. 
      * @param metadata the metadata for the core. This instance is modified
      * but not saved to {@link #managedCores} within this method. 
      * So depending if callers want to remove or only uninitialise this core
      * the might want to store the updated version of this instance after this
      * method completes!
      * @param deleteFiles if the files on the local fileSystem should be deleted
-     * @return the parsed and modified instance of the {@link IndexMetadata}
      */
     protected final void uninitialiseCore(IndexMetadata metadata,boolean deleteFiles) {
         SolrServerAdapter server = this.server;

@@ -84,8 +84,7 @@ public class RegisteredSolrServerTracker extends ServiceTracker {
      * {@link SolrCore} or {@link CoreContainer} referenced by the parsed 
      * {@link IndexReference}. Service Objects parsed to the 
      * {@link ServiceTrackerCustomizer#modifiedService(ServiceReference, Object)}
-     * and {@link ServiceTrackerCustomizer#remove(ServiceReference)} will be
-     * of type {@link EmbeddedSolrServer}.
+     * will be of type {@link EmbeddedSolrServer}.
      * @throws InvalidSyntaxException if the {@link Filter} could not be
      * created for the parsed {@link IndexReference}.
      * @throws IllegalArgumentException if the parsed {@link IndexReference} is 

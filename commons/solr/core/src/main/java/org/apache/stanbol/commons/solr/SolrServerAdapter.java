@@ -205,8 +205,9 @@ public class SolrServerAdapter {
      * Creates and Initialise a Solr {@link CoreContainer} based on the provided
      * {@link SolrServerProperties} and registers it and all its configured 
      * {@link SolrCore}s as OSGI services by using the provided {@link BundleContext}.
-     * @throws SAXException On any error while parsing the solr.xml file used to 
      * initialise the {@link CoreContainer}
+     * @param context Bundle Context
+     * @param parsedServerProperties Solr Core properties
      * @throws SolrException if the Solr {@link CoreContainer} could not be 
      * created.
      * @throws IllegalArgumentException if any of the parsed parameters is
@@ -322,8 +323,6 @@ public class SolrServerAdapter {
     /**
      * Reloads a SolrCore e.g. to apply a change in its configuration
      * @param name the name of the Core to reload
-     * @return The ServiceReference to the SolrCore.
-     * @throws SolrException if the Core could not be reloaded
      */
     public void reloadCore(String name) {
         //try to reload
@@ -490,6 +489,7 @@ public class SolrServerAdapter {
      * <code>null</code> is parsed the {@link SolrCore} will be looked up by
      * using the {@link #server}. This is mainly to do not increase the
      * {@link SolrCore#getOpenCount()}.
+     * @return the registered service
      */
     protected ServiceReference registerCoreService(String name,SolrCore core) {
         //STANBOL-1235: we want to unregister the old before registering the new
@@ -578,7 +578,7 @@ public class SolrServerAdapter {
     }
     /**
      * The Name of the registered {@link CoreContainer}
-     * @return
+     * @return server name
      */
     public String getServerName(){
         Object value = serverRegistration.getReference().getProperty(PROPERTY_SERVER_NAME);
@@ -586,7 +586,7 @@ public class SolrServerAdapter {
     }
     /**
      * The Directory of the registered {@link CoreContainer}
-     * @return
+     * @return Server Directory name
      */
     public String getServerDir(){
         Object value = serverRegistration.getReference().getProperty(PROPERTY_SERVER_DIR);
@@ -1004,7 +1004,7 @@ public class SolrServerAdapter {
          * Setter for the file name of the "solr.xml". If <code>null</code> or
          * an empty string is parsed the value will be reset to the default
          * {@link SolrConstants#SOLR_XML_NAME}
-         * @param solrXmlName
+         * @param solrXmlName Solr Config File Name
          */
         public void setSorlXml(String solrXmlName){
             if(solrXmlName == null || solrXmlName.isEmpty()){

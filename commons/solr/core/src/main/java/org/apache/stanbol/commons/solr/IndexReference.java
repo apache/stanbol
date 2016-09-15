@@ -143,8 +143,8 @@ public class IndexReference {
     }
     /**
      * Checks if the referenced index could be on the parsed server
-     * @param serverName
-     * @return
+     * @param serverName Server Name to be checked
+     * @return True if the serverName is consistent with the parsed server 
      */
     public boolean checkServer(String serverName) {
         return server == null || server.equals(serverName);
@@ -174,6 +174,7 @@ public class IndexReference {
      * server is defined. This will track all {@link CoreContainer} instances.
      * Note that the {@link CoreContainer} with the highest 
      * {@link Constants#SERVICE_RANKING} is expected to be the default server
+     * @return Filter string
      */
     public String getServerFilter(){
         StringBuilder filterString;

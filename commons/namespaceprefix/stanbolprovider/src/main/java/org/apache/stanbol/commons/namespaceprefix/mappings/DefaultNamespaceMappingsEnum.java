@@ -222,7 +222,7 @@ public enum DefaultNamespaceMappingsEnum{
     key("http://rdf.freebase.com/key/"),
     /**
      * The EnhancementProperties namespace as introduced by <a 
-     * href="https://issues.apache.org/jira/browse/STANBOL-488">STANBOL-488</<>
+     * href="https://issues.apache.org/jira/browse/STANBOL-488">STANBOL-488</a>
      */
     ehp("http://stanbol.apache.org/ontology/enhancementproperties#"),
     /*

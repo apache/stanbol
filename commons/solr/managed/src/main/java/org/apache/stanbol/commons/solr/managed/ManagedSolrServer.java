@@ -35,11 +35,6 @@ import org.xml.sax.SAXException;
  * Service that provides an managed Solr server ({@link CoreContainer}). 
  * This interface allows to register activate, deactivate and remove indexes 
  * ({@link SolrCore}s)
- * <p> TODO: Update Javadoc to new Interface!
- * Note that is only refers to the Files and not the Solr server (or EmbeddedSolrServer). Users need to use
- * the {@link SolrServerProvider#getSolrServer(SolrServerTypeEnum, String, String...)} to get an {@link SolrServer} instance
- * based on the directory provided by this Interface.
- * <p>
  * The {@link #MANAGED_SOLR_DIR_PROPERTY} property can be used to define the location of the internally
  * managed index. Implementations need to load this property by the {@link ComponentContext} if running within
  * an OSGI container or otherwise use the system properties. In cases a relative path is configured the
@@ -61,7 +56,7 @@ public interface ManagedSolrServer {
 
     /**
      * The name of this server
-     * @return
+     * @return The name of the Server
      */
     public String getServerName();
     /**
@@ -89,8 +84,8 @@ public interface ManagedSolrServer {
     /**
      * Checks if a solrIndex with the parsed name is managed or not. Note that
      * an Index might be managed, but not yet be initialised. To check if an
-     * index is managed and can be used use {@link #getIndexState(String)
-     * @param index the name of the Solr index to check
+     * index is managed and can be used use {@link #getIndexState(String)}
+     * @param indexName the name of the Solr index to check
      * @return <code>true</code> only if a Solr index with the parsed name is
      * already present within the manages Solr directory.
      * @throws IllegalStateException In case the managed Solr directory can not
@@ -118,8 +113,7 @@ public interface ManagedSolrServer {
      * the actual data is already available.
      * <p>
      * 
-     * @param index
-     *            the name of the index
+     * @param indexName the name of the index
      * @return the state of the index or <code>null</code> if not {@link #isManagedIndex(String)}
      * @throws IllegalArgumentException if the parsed name is <code>null</code> or empty
      */
@@ -127,7 +121,7 @@ public interface ManagedSolrServer {
 
     /**
      * Getter for all indexes in a specific state
-     * 
+     * @param state {@link ManagedIndexState} Filter 
      * @return A collection with the {@link IndexMetadata} of all managed
      * indexes in that state. An empty collection in case no index is in the
      * parsed state
@@ -138,15 +132,10 @@ public interface ManagedSolrServer {
     /**
      * Getter for the directory of the parsed index. Implementations need to ensure that returned directories
      * are valid Solr indices (or Solr Cores)
-     * <p>
-     * Directories returned by this method are typically used as second parameter of
-     * {@link SolrServerProvider#getSolrServer(SolrServerTypeEnum, String, String...)} to create an {@link SolrServer}
-     * instance.
-     * <p>
      * If the requested Index is currently initialising, than this method MUST
      * wait until the initialisation is finished before returning. 
      * 
-     * @param name
+     * @param indexName 
      *            the name of the requested solr index. 
      * @return the directory (instanceDir) of the index or <code>null</code> a
      *         SolrIndex with that name is not managed.
@@ -158,7 +147,7 @@ public interface ManagedSolrServer {
     /**
      * Creates a new Solr Index based on the data in the provided {@link ArchiveInputStream}
      * 
-     * @param name
+     * @param indexName
      *            the name of the index to create
      * @param ais
      *            the stream providing the data for the new index
@@ -176,21 +165,21 @@ public interface ManagedSolrServer {
     /**
      * Creates a new {@link SolrCore} based on looking up the Index data via the {@link DataFileProvider} service
      * 
-     * @param coreName
+     * @param indexName
      *            The name of the solrIndex to create
      * @param indexPath
      *            the name of the dataFile looked up via the {@link DataFileProvider}
      * @param properties
      *            Additional properties describing the index
      * @return the directory (instanceDir) of the index or null if the index data could not be found
-     * @throws IllegalArgumentException
-     * @throws IOException
+     * @throws IllegalArgumentException Invalid Index Name
+     * @throws IOException Data File Not Found
      */
     IndexMetadata createSolrIndex(String indexName, String indexPath, Properties properties) throws IOException;
     /**
      * Creates/Updates the core with the parsed name to the data parsed within the
      * {@link ArchiveInputStream}.
-     * @param name The name for the Index to create/update
+     * @param indexName The name for the Index to create/update
      * @param ais The {@link ArchiveInputStream} used to read the data for the 
      *             Index to create/update
      * @return The metadata for the created index
@@ -206,9 +195,9 @@ public interface ManagedSolrServer {
      * Updates the data of the core with the parsed name with the data provided
      * by the resource with the parsed name. The resource is loaded by using the
      * {@link DataFileProvider} infrastructure
-     * @param name
-     * @param resourceName
-     * @param properties
+     * @param indexName the name of the index to be updated 
+     * @param resourceName Resource Data name
+     * @param properties Additional Properties describing the index
      * @throws IOException
      */
     IndexMetadata updateIndex(String indexName,String resourceName,Properties properties) throws IOException;
@@ -218,7 +207,8 @@ public interface ManagedSolrServer {
     /**
      * Removes the index with the parsed name and optionally also deletes the
      * data on the file system.
-     * @param name
+     * @param indexName
+     * @param deleteFiles boolean indicating if the physical files must be deleted
      */
     void removeIndex(String indexName, boolean deleteFiles);
     

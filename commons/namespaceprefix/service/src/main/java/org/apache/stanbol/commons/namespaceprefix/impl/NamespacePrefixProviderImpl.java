@@ -57,7 +57,7 @@ public class NamespacePrefixProviderImpl implements NamespacePrefixProvider {
     }
     /**
      * Read the mappings form the parsed map
-     * @param mappings
+     * @param mappings Mappings
      */
     public NamespacePrefixProviderImpl(Map<String,String> mappings){
         for(Entry<String,String> mapping : mappings.entrySet()){

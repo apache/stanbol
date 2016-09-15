@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * <li> To register server our own datafile you might want to consider to extend
  * this implementation by calling the protected constructor with two parameters.
  * and parsing the path to your data files as second parameter. Do not forget to
- * register your DataFileProvider with the {@link ServiceLoader} utility.
+ * register your DataFileProvider with the {@link ServiceLoader} utility.</ul>
  * @author Rupert Westenthaler
  *
  */
@@ -66,6 +66,7 @@ public class ClassPathDataFileProvider implements DataFileProvider {
      * Creates a DataFileProvider that loads SolrIndexConfigurations via the
      * classpath relative to {@value #INDEX_BASE_PATH}.
      * @param bundleSymbolicName the symbolic name of the bundle to accept
+     * @param path classpath
      * requests from or <code>null</code> to accept any request.
      */
     protected ClassPathDataFileProvider(String bundleSymbolicName,String path) {

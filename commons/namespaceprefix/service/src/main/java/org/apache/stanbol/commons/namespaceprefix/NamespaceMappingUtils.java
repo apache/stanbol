@@ -98,7 +98,7 @@ public final class NamespaceMappingUtils {
         }
     }
     /**
-     * Uses the {@link NamespacePrefixService#PREFIX_VALIDATION_PATTERN} to check
+     * Uses the NamespacePrefixService#PREFIX_VALIDATION_PATTERN to check
      * if the parsed prefix is valid
      * @param prefix the prefix to check
      * @return <code>true</code> if valid. Othervise <code>false</code>
@@ -136,17 +136,17 @@ public final class NamespaceMappingUtils {
      * use <code>ReferenceCardinality.OPTIONAL_UNARY</code> to inject the service.
      * <p>
      * Here is an example
-     * <code><pre>
-     *     @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
+     * <code>
+     *     Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
      *     protected NamespacePrefixService nps;
-     * </pre></code>
+     * </code>
      * @param nps the {@link NamespacePrefixService} or <code>null</code> if not
      * available
      * @param property the configuration property (used for creating {@link ConfigurationException}s)
      * @param value configured value. Might be both a '{prefix}:{localname}' or the full URI.
      * @return the full URI
      * @throws ConfigurationException if the conversion was not possible because
-     * the {@link #nsPrefixService} is <code>null</code> or the prefix is 
+     * the prefix is <code>null</code> or the prefix is 
      * unknown to the service
      */
     public static String getConfiguredUri(NamespacePrefixService nps, String property, String value) throws ConfigurationException{
@@ -178,7 +178,7 @@ public final class NamespaceMappingUtils {
      * @param value configured value. Might be both a '{prefix}:{localname}' or the full URI.
      * @return the full URI
      * @throws IllegalArgumentException if the conversion was not possible because
-     * the {@link #nsPrefixService} is <code>null</code> or the prefix is 
+     * the prefix is <code>null</code> or the prefix is 
      * unknown to the service
      */
     public static String getConfiguredUri(NamespacePrefixService nps, String value) throws IllegalArgumentException {

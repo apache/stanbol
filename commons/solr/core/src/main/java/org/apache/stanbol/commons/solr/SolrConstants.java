@@ -59,7 +59,7 @@ public final class SolrConstants {
     public static final String PROPERTY_SERVER_DIR = PROPERTY_SOLR_SERVER+".dir";
     /**
      * the name of the solr.xml file defining the configuration for the Solr
-     * Server. If not defined {@link #SOLR_XML_NAME} is used as default<p>
+     * Server. If not defined {@link #SOLR_XML_NAME} is used as default
      */
     public static final String PROPERTY_SOLR_XML_NAME = PROPERTY_SOLR_SERVER+".solrXml";
     /**
