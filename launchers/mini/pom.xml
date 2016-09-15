@@ -159,6 +159,17 @@
           </target>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+        <!--
+          Launcher bundles should never be deployed, e.g. as SNAPSHOTS, by default
+          unless explicitly specified in a POM because of known license issues.
+        -->
+          <skip>true</skip>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
