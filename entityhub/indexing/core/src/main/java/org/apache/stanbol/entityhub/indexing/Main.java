@@ -102,8 +102,8 @@ public final class Main {
     private static void printHelp() {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp(
-            "java -Xmx{size} -jar org.apache.stanbol.indexing.core-*" +
-            "-jar-with-dependencies.jar [options] init|index [configDir]",
+            "java -Xmx{size} -jar org.apache.stanbol.entityhub.indexing.genericrdf-*" +
+            ".jar [options] init|index [configDir]",
             "Indexing Commandline Utility: \n"+
             "  size:        Heap requirements depend on the dataset and the\n"+
             "               configuration. 1024m should be a reasonable default.\n" +
