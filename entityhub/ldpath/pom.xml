@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.apache.stanbol</groupId>
     <artifactId>apache-stanbol-entityhub</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -90,12 +90,12 @@
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
       <!-- NOTE: 0.11.0 would be fine, but 1.0.0-SNAPSHOT is required for unit tests -->
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.core</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.1-SNAPSHOT</version>
     </dependency>
 
     <!-- LD Path -->
@@ -140,13 +140,13 @@
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.entityhub.yard.solr</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.1-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.stanbol</groupId>
       <artifactId>org.apache.stanbol.data.sites.dbpedia</artifactId>
-      <version>1.2.0-SNAPSHOT</version>
+      <version>1.2.1-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
 

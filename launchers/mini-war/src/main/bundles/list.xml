@@ -25,38 +25,17 @@
           (internal and external)
        ********************************************************************* -->
 
-  <!-- Stanbol Commons -->
-  <startLevel level="27">
-    <!-- The common web interface -->
-    <bundle>
-      <groupId>org.apache.stanbol</groupId>
-      <artifactId>org.apache.stanbol.commons.web.sparql</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
-    </bundle>
-  </startLevel>
 
   <!-- *********************************************************************
           start level 20 TO 24 reserved for Stanbol Framework
           (Enhancer, Entityhub, Contenthub, Factstore ... incl. Web Fragments)
        ********************************************************************* -->
 
-  <!-- KReS 
-  <startLevel level="32">
-  </startLevel> -->
-  
   <!-- *********************************************************************
           start level 25 TO 29 reserved for Stanbol plug-ins
           (currently the Enhancement Engines)
        ********************************************************************* -->
   
-  <startLevel level="36">
-    <!-- The Content-Editable based UI for Enhancing Text written on a Webpage -->
-    <!-- bundle>
-        <groupId>org.apache.stanbol</groupId>
-        <artifactId>org.apache.stanbol.demos.enhancer.vie</artifactId>
-        <version>0.10.0-SNAPSHOT</version>
-    </bundle -->
-  </startLevel>
 
   <!-- *********************************************************************
           start level >= 30 are unused
