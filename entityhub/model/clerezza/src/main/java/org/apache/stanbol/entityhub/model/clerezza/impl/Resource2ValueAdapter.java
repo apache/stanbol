@@ -20,13 +20,18 @@ import org.apache.clerezza.commons.rdf.Literal;
 import org.apache.clerezza.commons.rdf.RDFTerm;
 import org.apache.clerezza.commons.rdf.IRI;
 import org.apache.clerezza.rdf.core.LiteralFactory;
+import org.apache.stanbol.entityhub.servicesapi.defaults.NamespaceEnum;
 import org.apache.stanbol.entityhub.servicesapi.util.AdaptingIterator.Adapter;
 import org.apache.stanbol.entityhub.model.clerezza.RdfResourceUtils;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.model.clerezza.RdfResourceUtils.XsdDataTypeEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.lang.model.element.Name;
+
 
 /**
  * Converts the Resources (used to store field values in the Clerezza triple store) back to values as defined
@@ -53,9 +58,18 @@ public class Resource2ValueAdapter<T extends RDFTerm> implements Adapter<T,Objec
             Literal literal = (Literal) value;
             if (literal.getDataType() == null) { // if no dataType is defined
                 // return a Text without a language
-                return valueFactory.createText(literal);
+                if (literal.getLanguage() != null){
+                    return valueFactory.createText(literal.getLexicalForm(), literal.getLanguage().toString());
+                } else {
+                    return valueFactory.createText(literal);
+                }
             } else {
                 XsdDataTypeEnum mapping = RdfResourceUtils.XSD_DATATYPE_VALUE_MAPPING.get(literal.getDataType());
+                if (mapping == null &&
+                        literal.getDataType().getUnicodeString().equals(NamespaceEnum.rdf+"langString") &&
+                        literal.getLanguage() != null){
+                    return valueFactory.createText(literal.getLexicalForm(), literal.getLanguage().toString());
+                }
                 if (mapping != null) {
                     if (mapping.getMappedClass() != null) {
                         try {
