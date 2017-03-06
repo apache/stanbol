@@ -67,7 +67,9 @@ public class Resource2ValueAdapter<T extends RDFTerm> implements Adapter<T,Objec
                 XsdDataTypeEnum mapping = RdfResourceUtils.XSD_DATATYPE_VALUE_MAPPING.get(literal.getDataType());
                 if (mapping == null &&
                         literal.getDataType().getUnicodeString().equals(NamespaceEnum.rdf+"langString") &&
-                        literal.getLanguage() != null){
+                        literal.getLanguage() != null &&
+                        literal.getLexicalForm() != null &&
+                        !literal.getLexicalForm().isEmpty()){
                     return valueFactory.createText(literal.getLexicalForm(), literal.getLanguage().toString());
                 }
                 if (mapping != null) {
