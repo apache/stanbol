@@ -217,7 +217,7 @@ public abstract class AbstractBackend implements RDFBackend<Object> {
                     throw new IllegalStateException(e.getMessage(),e);
                 }
                 if(r != null){
-                    toLRU(r);
+                    addToLRU(r);
                 }
             }
             if(r != null){
@@ -384,7 +384,7 @@ public abstract class AbstractBackend implements RDFBackend<Object> {
      * Adds an retrieved Representation to the LRU cache
      * @param r
      */
-    private void toLRU(Representation r){
+    private void addToLRU(Representation r){
         lru.put(r.getId(), r);
     }
     /**
