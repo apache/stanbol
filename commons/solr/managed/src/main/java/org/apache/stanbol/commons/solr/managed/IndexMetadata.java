@@ -161,7 +161,7 @@ public final class IndexMetadata extends Properties {
         StringBuilder value = new StringBuilder();
         boolean first = true;
         for(String archive:archives){
-            if(archive != null && archive != null){
+            if(archive != null){
                 if(!first){
                     value.append(',');
                 } else {
