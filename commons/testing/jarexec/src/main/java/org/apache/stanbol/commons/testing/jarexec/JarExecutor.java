@@ -72,13 +72,9 @@ public final class JarExecutor {
         return serverPort;
     }
 
-    public static JarExecutor getInstance(Properties config) throws ExecutorException {
+    public synchronized static JarExecutor getInstance(Properties config) throws ExecutorException {
         if (instance == null) {
-            synchronized (JarExecutor.class) {
-                if (instance == null) {
-                    instance = new JarExecutor(config);
-                }
-            }
+            instance = new JarExecutor(config);
         }
         return instance;
     }
