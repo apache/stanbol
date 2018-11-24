@@ -206,10 +206,19 @@ public class LuceneLabelTokenizer implements LabelTokenizer {
                     tokens.add(label.substring(offset.startOffset(), offset.endOffset()));
                 }
                 tokenizer.end();
-                tokenizer.close();
             } catch (IOException e) {
                 log.error("IOException while reading from a StringReader :(",e);
                 return null;
+            } finally {
+                try {
+                    if (tokenizer == null) {
+                        return null;
+                    }
+                    tokenizer.close();
+                } catch (IOException e) {
+                    log.error("IOException while closing a StringReader :(",e);
+                    return null;
+                }
             }
             return tokens.toArray(new String[tokens.size()]);
         } else {
