@@ -174,7 +174,7 @@ public final class IndexMetadata extends Properties {
     }
     public boolean isSynchronized(){
         String value = getProperty(SYNCHRONIZED);
-        return value == null ? false : Boolean.parseBoolean(value);
+        return Boolean.parseBoolean(value);
     }
     public void setSynchronized(boolean state){
         setProperty(SYNCHRONIZED, Boolean.toString(state));
