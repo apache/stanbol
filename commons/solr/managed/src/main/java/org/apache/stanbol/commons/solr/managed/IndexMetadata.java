@@ -161,7 +161,7 @@ public final class IndexMetadata extends Properties {
         StringBuilder value = new StringBuilder();
         boolean first = true;
         for(String archive:archives){
-            if(archive != null && archive != null){
+            if(archive != null){
                 if(!first){
                     value.append(',');
                 } else {
@@ -174,7 +174,7 @@ public final class IndexMetadata extends Properties {
     }
     public boolean isSynchronized(){
         String value = getProperty(SYNCHRONIZED);
-        return value == null ? false : Boolean.parseBoolean(value);
+        return Boolean.parseBoolean(value);
     }
     public void setSynchronized(boolean state){
         setProperty(SYNCHRONIZED, Boolean.toString(state));
