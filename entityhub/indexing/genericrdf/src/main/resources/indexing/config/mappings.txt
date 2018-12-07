@@ -151,11 +151,6 @@ skos:broaderTransitive > skos:broader
 # mailing lists and chat channels.
 sioc:*
 
-# --- biographical information (bio)
-# A vocabulary for describing biographical information about people, both living
-# and dead. (see http://vocab.org/bio/0.1/)
-bio:*
-
 # --- Rich Site Summary (rss) ---
 rss:*
 
