@@ -25,7 +25,7 @@ import opennlp.tools.util.StringUtil;
 
 /**
  * Performs tokenization using the character class whitespace. Will create
- * seperate tokens for punctation at the end of words. 
+ * separate tokens for punctation at the end of words. 
  * Intended to be used to extract alphanumeric
  * keywords from texts
  * 
