@@ -16,6 +16,7 @@
  */
 package org.apache.stanbol.rules.manager;
 
+import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -87,15 +88,16 @@ public class KB {
 
     public void write(FileWriter fileWriter) throws IOException {
         boolean write = true;
+        BufferedWriter bw = new BufferedWriter(fileWriter);
         for (Rule rule : ruleList) {
             if (write) {
-                fileWriter.write(rule.toString());
+                bw.write(rule.toString());
                 write = false;
             } else {
-                fileWriter.write(" . " + System.getProperty("line.separator") + rule.toString());
+                bw.write(" . " + System.getProperty("line.separator") + rule.toString());
             }
         }
-        fileWriter.close();
+        bw.close();
     }
 
 }
