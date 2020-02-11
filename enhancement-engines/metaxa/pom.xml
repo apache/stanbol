@@ -226,7 +226,7 @@
       </snapshots>
       <id>aduna-opensource.releases</id>
       <name>Aduna Open Source - Maven releases</name>
-      <url>http://repo.aduna-software.org/maven2/releases</url>
+      <url>https://repo.aduna-software.org/maven2/releases</url>
     </repository>
     <repository>
       <releases>
@@ -238,7 +238,7 @@
       </snapshots>
       <id>aperture-repo</id>
       <name>Aperture Dependencies Repo</name>
-      <url>http://aperture.sourceforge.net/maven/</url>
+      <url>https://aperture.sourceforge.net/maven/</url>
     </repository>
     <repository>
       <releases>
@@ -250,7 +250,7 @@
       </snapshots>
       <id>dfki-lt-repo</id>
       <name>DFKI LT Repository</name>
-      <url>http://www.dfki.de/~kasper/IKS/maven</url>
+      <url>https://www.dfki.de/~kasper/IKS/maven</url>
     </repository>
   </repositories>
 
