@@ -180,7 +180,7 @@
     <dependency> <!-- avoids ClassNotFoundException: com.adobe.xmp.XMPException not found -->
       <groupId>com.adobe.xmp</groupId>
       <artifactId>xmpcore</artifactId>
-      <version>5.1.2</version>
+      <version>5.1.3</version>
     </dependency> 
   </dependencies>
 
